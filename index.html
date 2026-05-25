@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Miss Behavin' — Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--white:#fafafa;--gray-light:#f2f0ed;--gray-mid:#d4d0ca;--gray-text:#7a7670;--accent:#c9a96e;--green:#2ecc71;--yellow:#f39c12;--red:#e74c3c;--success-bg:#e8f5ee;--success-fg:#1a7a4a;--error-bg:#fdecea;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:80px;}
+
+/* GATE */
+#gate{position:fixed;inset:0;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;padding:40px 32px;transition:opacity .4s;}
+#gate.hidden{opacity:0;pointer-events:none;}
+.gate-logo{font-family:'Playfair Display',serif;font-size:28px;color:var(--white);letter-spacing:.04em;margin-bottom:4px;text-align:center;}
+.gate-sub{font-size:11px;color:var(--gray-text);letter-spacing:.15em;text-transform:uppercase;margin-bottom:40px;}
+.gate-input{width:100%;background:transparent;border:none;border-bottom:1px solid #444;color:var(--white);font-family:'DM Sans',sans-serif;font-size:22px;padding:12px 0;text-align:center;outline:none;letter-spacing:.3em;margin-bottom:28px;}
+.gate-input::placeholder{color:#444;font-size:14px;letter-spacing:.1em;}
+.gate-btn{width:100%;background:var(--white);color:var(--black);border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:16px;cursor:pointer;}
+.gate-error{color:#e74c3c;font-size:12px;margin-top:14px;text-align:center;}
+
+/* HEADER */
+.app-header{padding:24px 24px 14px;border-bottom:1px solid var(--black);position:relative;}
+.store-name{font-family:'Playfair Display',serif;font-size:22px;letter-spacing:.02em;}
+.header-meta{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.header-sub{font-size:11px;color:var(--gray-text);letter-spacing:.1em;text-transform:uppercase;}
+.header-user{font-size:11px;color:var(--gray-text);letter-spacing:.06em;}
+.header-user span{font-weight:600;color:var(--black);}
+.header-logout{background:none;border:none;font-size:11px;color:var(--gray-text);cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;letter-spacing:.06em;padding:0;}
+
+/* TABS */
+.tab-bar{display:flex;border-bottom:1px solid var(--black);}
+.tab-btn{flex:1;padding:11px 6px;background:none;border:none;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--gray-text);transition:all .15s;}
+.tab-btn.active{color:var(--black);border-bottom-color:var(--black);}
+
+/* SECTIONS */
+.section{padding:18px 24px;border-bottom:1px solid var(--gray-mid);}
+.section-title{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);margin-bottom:12px;}
+
+/* BUTTONS */
+.btn{width:100%;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:14px;cursor:pointer;-webkit-appearance:none;display:block;text-align:center;text-decoration:none;transition:opacity .15s;margin-top:10px;}
+.btn:active{opacity:.7;}
+.btn[disabled]{opacity:.35;cursor:not-allowed;}
+.btn-black{background:var(--black);color:var(--white);margin-top:0;}
+.btn-outline{background:transparent;color:var(--black);border:1px solid var(--black);}
+.btn-danger{background:var(--red);color:var(--white);}
+.btn-accent{background:var(--accent);color:var(--white);}
+
+/* FIELDS */
+.field{margin-bottom:16px;}
+.field-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-text);margin-bottom:5px;display:block;}
+.field-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:7px 0;outline:none;color:var(--black);transition:border-color .2s;}
+.field-input:focus{border-bottom-color:var(--black);}
+.field-hint{font-size:11px;color:var(--gray-text);margin-top:3px;line-height:1.4;}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-mid);}
+.toggle-row:last-of-type{border-bottom:none;}
+.toggle-label{font-size:13px;font-weight:500;}
+.toggle-sub{font-size:11px;color:var(--gray-text);margin-top:2px;}
+.toggle-wrap{position:relative;width:44px;height:26px;flex-shrink:0;}
+.toggle-wrap input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--gray-mid);border-radius:26px;cursor:pointer;transition:background .2s;}
+.toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s;}
+.toggle-wrap input:checked+.toggle-slider{background:var(--black);}
+.toggle-wrap input:checked+.toggle-slider:before{transform:translateX(18px);}
+
+/* UPLOAD */
+#upload-area{border:1px dashed var(--gray-mid);padding:24px 16px;text-align:center;cursor:pointer;margin-bottom:12px;transition:border-color .2s;}
+#upload-area:active{border-color:var(--black);}
+.upload-icon{font-size:26px;margin-bottom:5px;}
+.upload-text{font-size:13px;color:var(--gray-text);}
+.upload-hint{font-size:11px;color:var(--gray-mid);margin-top:2px;}
+#preview-img{width:100%;max-height:160px;object-fit:contain;display:none;margin-bottom:12px;border:1px solid var(--gray-mid);}
+
+/* STATUS */
+.status{font-size:12px;text-align:center;padding:10px;margin-top:8px;display:none;letter-spacing:.03em;}
+.status.loading{color:var(--gray-text);background:var(--gray-light);}
+.status.success{color:var(--success-fg);background:var(--success-bg);}
+.status.error{color:var(--red);background:var(--error-bg);}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--gray-mid);border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AUTOSAVE */
+.autosave-bar{padding:6px 24px;font-size:11px;color:var(--gray-text);background:var(--gray-light);border-bottom:1px solid var(--gray-mid);display:flex;justify-content:space-between;align-items:center;min-height:30px;}
+.autosave-dot{width:7px;height:7px;border-radius:50%;background:var(--gray-mid);display:inline-block;margin-right:5px;transition:background .3s;}
+.autosave-dot.saved{background:var(--green);}
+.autosave-dot.saving{background:var(--yellow);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* LIVE BAR */
+#live-bar{background:var(--black);color:var(--white);padding:12px 24px;display:none;}
+.live-row{display:flex;justify-content:space-between;align-items:center;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-right:5px;animation:pulse 2s infinite;}
+.live-text{font-size:11px;letter-spacing:.06em;}
+.unpublish-btn{background:none;border:1px solid #555;color:#aaa;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.share-box{background:rgba(255,255,255,.07);padding:12px;margin-top:10px;}
+.share-url{font-size:11px;color:#aaa;word-break:break-all;margin-bottom:8px;}
+.share-actions{display:flex;gap:6px;}
+.share-btn{flex:1;padding:9px 4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:center;text-decoration:none;display:block;-webkit-appearance:none;}
+.share-btn-copy{background:var(--white);color:var(--black);}
+.share-btn-other{background:transparent;color:#aaa;border:1px solid #444;}
+
+/* STORAGE */
+.storage-warning{background:var(--error-bg);color:var(--red);font-size:12px;padding:10px 24px;border-left:3px solid var(--red);display:none;}
+.storage-vendor{margin-bottom:12px;}
+.storage-vendor-name{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:4px;}
+.storage-bar-bg{height:5px;background:var(--gray-light);border-radius:3px;overflow:hidden;}
+.storage-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+.storage-bar-fill.green{background:var(--green);}
+.storage-bar-fill.yellow{background:var(--yellow);}
+.storage-bar-fill.red{background:var(--red);}
+.storage-pct{font-size:10px;color:var(--gray-text);}
+
+/* ARCHIVE */
+.vendor-tab-bar{display:flex;overflow-x:auto;border-bottom:1px solid var(--gray-mid);padding:0 24px;}
+.vendor-tab{flex-shrink:0;padding:9px 12px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--gray-text);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.vendor-tab.active{color:var(--black);border-bottom-color:var(--black);}
+.archive-list{padding:0 24px;}
+.archive-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-mid);cursor:pointer;}
+.archive-item:last-child{border-bottom:none;}
+.archive-item-info{flex:1;}
+.archive-file-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+.archive-meta{font-size:11px;color:var(--gray-text);}
+.archive-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.status-pill{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;}
+.status-pill.draft{background:var(--gray-light);color:var(--gray-text);}
+.status-pill.live{background:#e8f5ee;color:var(--success-fg);}
+.status-pill.priced{background:#e8f0ff;color:#5b21b6;}
+.delete-btn{background:none;border:none;font-size:15px;cursor:pointer;color:var(--gray-text);padding:3px 5px;}
+.archive-empty{padding:28px 0;text-align:center;font-size:13px;color:var(--gray-text);}
+
+/* PRICING CARDS — shared by Kel and preview */
+.p-card{border:1px solid var(--gray-mid);margin-bottom:10px;background:var(--white);}
+.p-card-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
+.p-code-wrap{flex-shrink:0;min-width:60px;}
+.p-code{font-size:11px;font-weight:600;}
+.p-type{font-size:10px;color:var(--gray-text);}
+.p-name-input{flex:1;border:none;border-bottom:1px dashed var(--gray-mid);font-family:'Playfair Display',serif;font-style:italic;font-size:14px;padding:3px 0 4px;background:transparent;outline:none;color:var(--black);min-width:0;}
+.p-name-input:focus{border-bottom-color:var(--black);}
+.p-name-input[readonly]{border-bottom-color:transparent;cursor:default;}
+.p-card-body{padding:10px 12px;}
+
+/* Cost row (Kel only) */
+.p-cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0eeeb;}
+.p-cost-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
+.p-cost-val{font-size:14px;font-weight:600;color:var(--gray-text);}
+
+/* Markup row */
+.p-markup-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.p-markup-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);width:56px;flex-shrink:0;}
+.p-markup-input{flex:1;border:none;border-bottom:2px solid var(--black);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;padding:3px 0;outline:none;background:transparent;-webkit-appearance:none;min-width:0;}
+.p-markup-input::placeholder{color:var(--gray-mid);font-weight:400;font-size:13px;}
+.mtype-btn{background:var(--gray-light);border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:4px 8px;cursor:pointer;color:var(--gray-text);transition:all .15s;-webkit-appearance:none;flex-shrink:0;}
+.mtype-btn.active{background:var(--black);color:var(--white);border-color:var(--black);}
+
+/* Retail row */
+.p-retail-row{display:flex;align-items:center;gap:8px;}
+.p-retail-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);width:56px;flex-shrink:0;}
+.p-retail-input{flex:1;border:none;border-bottom:2px solid var(--accent);font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;padding:3px 0;outline:none;background:transparent;color:var(--black);-webkit-appearance:none;min-width:0;}
+.p-retail-input::placeholder{color:var(--gray-mid);font-weight:400;font-size:14px;}
+
+/* Colors */
+.p-colors{margin-top:8px;padding-top:7px;border-top:1px solid #f0eeeb;}
+.p-color-row{display:flex;justify-content:space-between;font-size:11px;color:var(--gray-text);padding:2px 0;}
+
+/* STAFF CARD — retail only */
+.s-card{border:1px solid var(--gray-mid);margin-bottom:10px;display:flex;align-items:center;padding:12px 16px;gap:12px;}
+.s-code{font-size:10px;color:var(--gray-text);font-weight:600;flex-shrink:0;width:68px;}
+.s-name{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;flex:1;}
+.s-retail{font-size:18px;font-weight:700;flex-shrink:0;}
+
+/* INVOICE META */
+.inv-meta{padding:14px 24px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
+.inv-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:2px;}
+.inv-details{font-size:11px;color:var(--gray-text);letter-spacing:.05em;}
+
+/* GLOBAL FILL */
+.global-fill{padding:14px 24px;border-bottom:1px solid var(--gray-mid);}
+.global-fill p{font-size:12px;font-weight:500;margin-bottom:8px;}
+.global-row{display:flex;gap:8px;align-items:center;}
+.global-input{flex:1;border:none;border-bottom:2px solid var(--black);font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;padding:4px 0;outline:none;background:transparent;}
+.global-apply{background:var(--black);color:var(--white);border:none;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;flex-shrink:0;-webkit-appearance:none;}
+.global-note{font-size:11px;color:var(--gray-text);margin-top:6px;font-style:italic;}
+
+/* SEND / PUBLISH SECTION */
+.action-section{padding:20px 24px;border-top:2px solid var(--black);}
+.action-title{font-family:'Playfair Display',serif;font-size:16px;margin-bottom:4px;}
+.action-note{font-size:12px;color:var(--gray-text);margin-bottom:16px;}
+
+/* EMPTY / LOADING */
+.center-state{text-align:center;padding:64px 32px;}
+.center-icon{font-size:34px;margin-bottom:12px;}
+.center-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:7px;}
+.center-sub{font-size:13px;color:var(--gray-text);line-height:1.6;}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:none;align-items:flex-end;justify-content:center;}
+#modal-overlay.open{display:flex;}
+.modal-box{background:var(--white);width:100%;max-width:480px;padding:24px 24px 40px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:7px;}
+.modal-body{font-size:13px;color:var(--gray-text);margin-bottom:20px;line-height:1.6;}
+.modal-actions{display:flex;gap:8px;}
+.modal-actions .btn{margin-top:0;}
+
+.app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
+.page-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--gray-light);border:1px solid var(--gray-mid);margin-bottom:6px;}
+.page-item-info{font-size:12px;}
+.page-item-status{font-size:11px;font-weight:600;letter-spacing:.06em;}
+.page-item-status.extracting{color:var(--yellow);}
+.page-item-status.done{color:var(--success-fg);}
+.page-item-status.error{color:var(--red);}
+.page-remove-btn{background:none;border:none;font-size:14px;cursor:pointer;color:var(--gray-text);padding:2px 6px;flex-shrink:0;}
+.pages-summary{font-size:12px;font-weight:600;color:var(--success-fg);padding:8px 0;text-align:center;display:none;}
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-logo">Miss Behavin'</div>
+  <div class="gate-sub">Enter Access Code</div>
+  <input type="password" class="gate-input" id="gate-input" placeholder="••••" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')checkPwd()"/>
+  <button class="gate-btn" onclick="checkPwd()">Enter</button>
+  <div class="gate-error" id="gate-error"></div>
+</div>
+
+<!-- KEL VIEW (owner) -->
+<div id="kel-view" style="display:none;">
+  <div class="app-header">
+    <div class="store-name">Miss Behavin'</div>
+    <div class="header-meta">
+      <div class="header-sub">Owner Dashboard</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="header-user">Logged in as <span>Kel</span></div>
+        <button class="header-logout" onclick="logout()">Log out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="kelTab('invoice')">Invoice</button>
+    <button class="tab-btn" onclick="kelTab('archive')">Archive</button>
+    <button class="tab-btn" onclick="kelTab('settings')">Settings</button>
+  </div>
+
+  <!-- INVOICE TAB -->
+  <div id="ktab-invoice">
+    <div class="storage-warning" id="storage-warning"></div>
+
+    <div id="live-bar">
+      <div class="live-row">
+        <div class="live-text"><span class="live-dot"></span><span id="live-text">Published to Staff</span></div>
+        <button class="unpublish-btn" onclick="unpublish()">Unpublish</button>
+      </div>
+      <div class="share-box">
+        <div class="share-url" id="share-url-text"></div>
+        <div class="share-actions">
+          <button class="share-btn share-btn-copy" onclick="copyLink()">Copy Link</button>
+          <a class="share-btn share-btn-other" id="share-sms-btn" href="#">Text Staff</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Upload Invoice</div>
+      <div id="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Tap to select invoice photos</div>
+        <div class="upload-hint">Select one or multiple pages at once</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFiles(event)"/>
+      <div id="pages-summary" style="display:none;padding:10px 0;font-size:13px;font-weight:600;text-align:center;color:var(--success-fg);"></div>
+      <button class="btn btn-black" id="extract-btn" onclick="extractAllPages()" disabled>Extract All with Claude</button>
+      <div class="status" id="extract-status"></div>
+    </div>
+
+    <div id="pricing-section" style="display:none;">
+      <div class="autosave-bar">
+        <div><span class="autosave-dot" id="autosave-dot"></span><span id="autosave-text">Not saved</span></div>
+        <button onclick="saveCurrentInvoice()" style="background:none;border:none;font-size:11px;color:var(--black);cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">Save now</button>
+      </div>
+
+      <div class="inv-meta">
+        <div class="inv-title" id="kel-inv-title">Invoice</div>
+        <div class="inv-details" id="kel-inv-details"></div>
+      </div>
+
+      <div class="global-fill">
+        <p>Apply markup to all styles at once:</p>
+        <div class="global-row">
+          <input type="text" inputmode="decimal" class="global-input" id="global-price" placeholder="e.g. 50% or $20"/>
+          <button class="global-apply" onclick="applyGlobal()">Apply All</button>
+        </div>
+        <div class="global-note">Or set each style individually below.</div>
+      </div>
+
+      <div style="padding:0 24px;" id="kel-cards"></div>
+
+      <div class="action-section">
+        <div class="action-title">Publish to Staff</div>
+        <div class="action-note">Staff will see style names and retail prices only — no wholesale costs.</div>
+        <button class="btn btn-black" onclick="publishToStaff()">Publish to Staff</button>
+        <div class="status" id="publish-status"></div>
+      </div>
+    </div>
+
+    <div id="kel-empty" class="center-state" style="display:none;">
+      <div class="center-icon">📋</div>
+      <div class="center-title">No active invoice</div>
+      <div class="center-sub">Upload a vendor invoice above<br>to get started.</div>
+    </div>
+  </div>
+
+  <!-- ARCHIVE TAB -->
+  <div id="ktab-archive" style="display:none;">
+    <div class="vendor-tab-bar" id="vendor-tab-bar"></div>
+    <div class="archive-list" id="archive-list"></div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div id="ktab-settings" style="display:none;">
+    <div class="section">
+      <div class="section-title">API &amp; Storage</div>
+      <div class="field"><label class="field-label">Anthropic API Key</label><input type="password" class="field-input" id="api-key-input" placeholder="sk-ant-..." autocomplete="off"/></div>
+      <div class="field"><label class="field-label">JSONBin Master Key</label><input type="password" class="field-input" id="bin-key-input" placeholder="$2a$10$..." autocomplete="off"/></div>
+      <div class="field"><label class="field-label">Registry Bin ID</label><input type="text" class="field-input" id="registry-bin-input" autocomplete="off"/><div class="field-hint">Create with: {"vendors":{}}</div></div>
+      <div class="field"><label class="field-label">Active Bin ID</label><input type="text" class="field-input" id="active-bin-input" autocomplete="off"/><div class="field-hint">Create with: {"published":false,"invoice":null} — set to Public</div></div>
+      <button class="btn btn-black" onclick="saveSettings()" style="margin-top:8px;">Save Settings</button>
+      <div class="status" id="settings-status"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Staff Notifications</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Text Staff</div><div class="toggle-sub" id="staff-phone-display">Not set</div></div>
+        <label class="toggle-wrap"><input type="checkbox" id="notif-sms" onchange="toggleSmsField()"/><span class="toggle-slider"></span></label>
+      </div>
+      <div id="staff-phone-field" style="display:none;padding:7px 0 10px;">
+        <input type="tel" class="field-input" id="staff-phone-input" placeholder="8051234567"/>
+      </div>
+      <button class="btn btn-outline" onclick="saveNotifSettings()" style="margin-top:8px;">Save</button>
+      <div class="status" id="notif-status"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Storage Usage</div>
+      <div id="storage-meters"><div style="font-size:13px;color:var(--gray-text);">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STAFF VIEW -->
+<div id="staff-view" style="display:none;">
+  <div class="app-header">
+    <div class="store-name">Miss Behavin'</div>
+    <div class="header-meta">
+      <div class="header-sub">Staff Pricing</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="header-user">Logged in as <span>Staff</span></div>
+        <button class="header-logout" onclick="logout()">Log out</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="staff-loading" class="center-state">
+    <div class="center-icon">⏳</div>
+    <div class="center-title">Loading...</div>
+  </div>
+
+  <div id="staff-empty" class="center-state" style="display:none;">
+    <div class="center-icon">🌸</div>
+    <div class="center-title">Nothing published yet</div>
+    <div class="center-sub">Check back soon —<br>Kel will publish pricing shortly.</div>
+  </div>
+
+  <div id="staff-content" style="display:none;">
+    <div class="inv-meta">
+      <div class="inv-title" id="staff-inv-title">Invoice</div>
+      <div class="inv-details" id="staff-inv-details"></div>
+    </div>
+    <div style="padding:0 24px;margin-top:12px;" id="staff-cards"></div>
+  </div>
+</div>
+
+<div class="app-footer">Miss Behavin' · 322 Paseo Nuevo · Santa Barbara, CA</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" style="margin-top:0;" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger" style="margin-top:0;display:none;" id="modal-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════
+var PWD = 'aaaa';
+var PUBLIC_ACTIVE_BIN = '6a1282d76877513b27c2bcb2';
+var currentInvoice = null;
+var autosaveTimer = null;
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function() {
+  loadSettingsToUI();
+  loadNotifToUI();
+  // Check if already logged in
+  var role = localStorage.getItem('mb_role');
+  if (role === 'kel') { showKel(); }
+  else if (role === 'staff') { showStaff(); }
+  // else gate stays
+});
+
+// ═══════════════════════════════════════
+// GATE
+// ═══════════════════════════════════════
+function checkPwd() {
+  var val = document.getElementById('gate-input').value;
+  var errEl = document.getElementById('gate-error');
+  // Show debug info so we can see exactly what was typed
+  errEl.textContent = 'Typed: [' + val + '] (' + val.length + ' chars)';
+  if (val === PWD) {
+    localStorage.setItem('mb_role', 'kel');
+    document.getElementById('gate').classList.add('hidden');
+    setTimeout(function(){ document.getElementById('gate').style.display='none'; }, 400);
+    showKel();
+  } else {
+    setTimeout(function(){
+      errEl.textContent = 'Incorrect. Try again.';
+    }, 3000);
+    document.getElementById('gate-input').value = '';
+  }
+}
+function logout() {
+  localStorage.removeItem('mb_role');
+  document.getElementById('kel-view').style.display = 'none';
+  document.getElementById('staff-view').style.display = 'none';
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('gate').classList.remove('hidden');
+  document.getElementById('gate-input').value = '';
+  document.getElementById('gate-error').textContent = '';
+}
+
+// ═══════════════════════════════════════
+// KEL VIEW
+// ═══════════════════════════════════════
+function showKel() {
+  document.getElementById('staff-view').style.display = 'none';
+  document.getElementById('kel-view').style.display = 'block';
+  kelTab('invoice');
+  checkLiveStatus();
+  checkStorage();
+  // Try loading current active invoice
+  loadActiveInvoiceForKel();
+}
+
+function kelTab(name) {
+  ['invoice','archive','settings'].forEach(function(t) {
+    document.getElementById('ktab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b,i) {
+    b.classList.toggle('active', ['invoice','archive','settings'][i]===name);
+  });
+  if (name==='archive') loadArchive();
+  if (name==='settings') { loadSettingsToUI(); checkStorage(); }
+}
+
+function loadActiveInvoiceForKel() {
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  binGet(actBin, function(d) {
+    var rec = d && d.record;
+    if (rec && rec.invoice) {
+      currentInvoice = rec.invoice;
+      renderKelCards(currentInvoice);
+    } else {
+      document.getElementById('kel-empty').style.display = 'block';
+    }
+  });
+}
+
+function renderKelCards(inv) {
+  document.getElementById('kel-empty').style.display = 'none';
+  document.getElementById('pricing-section').style.display = 'block';
+  document.getElementById('kel-inv-title').textContent = (inv.vendor||'Invoice') + ' — #' + (inv.invoice_number||'');
+  document.getElementById('kel-inv-details').textContent = (inv.invoice_date||'') + ' · ' + (inv.styles||[]).length + ' styles';
+
+  var container = document.getElementById('kel-cards');
+  container.innerHTML = '';
+
+  // Group by type
+  var groups = {};
+  (inv.styles||[]).forEach(function(s) {
+    var t = s.type||'Other'; if(!groups[t]) groups[t]=[];groups[t].push(s);
+  });
+
+  Object.keys(groups).forEach(function(type) {
+    var h = document.createElement('div');
+    h.style.cssText = 'font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);padding:16px 0 8px;border-bottom:1px solid var(--black);margin-bottom:10px;';
+    h.textContent = type + 's';
+    container.appendChild(h);
+
+    groups[type].forEach(function(style) {
+      var card = buildKelCard(style);
+      container.appendChild(card);
+    });
+  });
+
+  setAutosave('saved');
+}
+
+function buildKelCard(style) {
+  var cost = Number(style.cost||0).toFixed(2);
+  var markup = style._markup || '';
+  var markupMode = style._markupMode || 'pct';
+  var retail = style._retail || '';
+  var colorRows = (style.colors||[]).map(function(c) {
+    var sz = Object.entries(c.sizes||{}).map(function(kv){return kv[0]+':'+kv[1];}).join(' ');
+    return '<div class="p-color-row"><span>'+esc(c.color)+'</span><span>'+sz+'</span></div>';
+  }).join('');
+
+  var card = document.createElement('div');
+  card.className = 'p-card';
+  card.dataset.code = style.code;
+  card.dataset.cost = cost;
+  card.innerHTML =
+    '<div class="p-card-header">'+
+      '<div class="p-code-wrap"><div class="p-code">'+esc(style.code)+'</div><div class="p-type">'+esc(style.type)+'</div></div>'+
+      '<input class="p-name-input" type="text" value="'+esc(style.name||'')+'" placeholder="Style name"/>'+
+    '</div>'+
+    '<div class="p-card-body">'+
+      '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">$'+cost+'</span></div>'+
+      '<div class="p-markup-row">'+
+        '<span class="p-markup-label">Markup</span>'+
+        '<input class="p-markup-input" type="text" inputmode="decimal" placeholder="0" value="'+esc(markup)+'"/>'+
+        '<button class="mtype-btn'+(markupMode==='pct'?' active':'')+'" data-mode="pct">%</button>'+
+        '<button class="mtype-btn'+(markupMode==='dollar'?' active':'')+'" data-mode="dollar">$</button>'+
+      '</div>'+
+      '<div class="p-retail-row">'+
+        '<span class="p-retail-label">Retail</span>'+
+        '<input class="p-retail-input" type="text" inputmode="decimal" placeholder="$0.00" value="'+esc(retail)+'"/>'+
+      '</div>'+
+      (colorRows?'<div class="p-colors">'+colorRows+'</div>':'')+
+    '</div>';
+
+  // Wire events
+  var nameInput = card.querySelector('.p-name-input');
+  var markupInput = card.querySelector('.p-markup-input');
+  var retailInput = card.querySelector('.p-retail-input');
+  var mtypeBtns = card.querySelectorAll('.mtype-btn');
+
+  nameInput.addEventListener('input', function() { scheduleAutosave(); });
+
+  mtypeBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      mtypeBtns.forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      retailInput.dataset.manual = '';
+      recalcRetail(card);
+      scheduleAutosave();
+    });
+  });
+
+  markupInput.addEventListener('input', function() {
+    recalcRetail(card);
+    scheduleAutosave();
+  });
+
+  retailInput.addEventListener('input', function() {
+    retailInput.dataset.manual = retailInput.value ? 'true' : '';
+    scheduleAutosave();
+  });
+
+  return card;
+}
+
+function recalcRetail(card) {
+  var cost = parseFloat(card.dataset.cost)||0;
+  var mi = card.querySelector('.p-markup-input');
+  var ri = card.querySelector('.p-retail-input');
+  var ab = card.querySelector('.mtype-btn.active');
+  var mode = ab ? ab.dataset.mode : 'pct';
+  var val = parseFloat(mi.value)||0;
+  if (val===0 || ri.dataset.manual==='true') return;
+  var retail = mode==='pct' ? cost*(1+val/100) : cost+val;
+  retail = Math.ceil(retail*2)/2;
+  ri.value = '$'+retail.toFixed(2);
+}
+
+function applyGlobal() {
+  var raw = document.getElementById('global-price').value.trim();
+  var num = parseFloat(raw.replace(/[^0-9.]/g,''));
+  var isPct = raw.indexOf('%')>=0;
+  document.querySelectorAll('.p-card').forEach(function(card) {
+    if (!num) return;
+    var mi = card.querySelector('.p-markup-input');
+    var ri = card.querySelector('.p-retail-input');
+    if (isPct) {
+      var pb = card.querySelector('[data-mode="pct"]');
+      card.querySelectorAll('.mtype-btn').forEach(function(b){b.classList.remove('active');});
+      pb.classList.add('active');
+      mi.value = num;
+      ri.dataset.manual = '';
+      recalcRetail(card);
+    } else {
+      ri.value = raw.indexOf('$')>=0 ? raw : '$'+num.toFixed(2);
+      ri.dataset.manual = 'true';
+    }
+  });
+  scheduleAutosave();
+}
+
+// ═══════════════════════════════════════
+// AUTOSAVE
+// ═══════════════════════════════════════
+function setAutosave(state) {
+  var dot = document.getElementById('autosave-dot');
+  var txt = document.getElementById('autosave-text');
+  if (!dot) return;
+  if (state==='saved') { dot.className='autosave-dot saved'; txt.textContent='All changes saved'; }
+  else if (state==='saving') { dot.className='autosave-dot saving'; txt.textContent='Saving...'; }
+  else { dot.className='autosave-dot'; txt.textContent='Unsaved changes'; }
+}
+
+function scheduleAutosave() {
+  setAutosave('unsaved');
+  if (autosaveTimer) clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(saveCurrentInvoice, 1500);
+}
+
+function collectCurrentInvoice() {
+  if (!currentInvoice) return null;
+  var inv = JSON.parse(JSON.stringify(currentInvoice));
+  document.querySelectorAll('.p-card').forEach(function(card) {
+    var code = card.dataset.code;
+    var style = inv.styles.find(function(s){return s.code===code;});
+    if (!style) return;
+    style.name = (card.querySelector('.p-name-input')||{}).value || style.name;
+    style._markup = (card.querySelector('.p-markup-input')||{}).value || '';
+    var ab = card.querySelector('.mtype-btn.active');
+    style._markupMode = ab ? ab.dataset.mode : 'pct';
+    style._retail = (card.querySelector('.p-retail-input')||{}).value || '';
+    // If retail empty but markup set, calc now
+    if (!style._retail && style._markup) {
+      var cost = parseFloat(card.dataset.cost)||0;
+      var mval = parseFloat(style._markup)||0;
+      if (mval>0&&cost>0) {
+        var r = style._markupMode==='pct' ? cost*(1+mval/100) : cost+mval;
+        r = Math.ceil(r*2)/2;
+        style._retail = '$'+r.toFixed(2);
+      }
+    }
+  });
+  return inv;
+}
+
+function saveCurrentInvoice() {
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  var inv = collectCurrentInvoice();
+  if (!inv) return;
+  currentInvoice = inv;
+  setAutosave('saving');
+  var published = document.getElementById('live-bar').style.display !== 'none';
+  binPut(actBin, {published: published, invoice: inv}, function() {
+    setAutosave('saved');
+    if (published) archiveInvoice(inv, function(){});
+  });
+}
+
+// ═══════════════════════════════════════
+// PUBLISH TO STAFF
+// ═══════════════════════════════════════
+function publishToStaff() {
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  var regBin = ls('mb_registry_bin');
+  if (!actBin) { showStatus('publish-status','error','Set up Active Bin in Settings.'); return; }
+  showStatus('publish-status','loading','<span class="spinner"></span>Publishing...');
+
+  var inv = collectCurrentInvoice();
+  if (!inv) { showStatus('publish-status','error','No invoice to publish.'); return; }
+  currentInvoice = inv;
+
+  binPut(actBin, {published:true, invoice:inv}, function(res) {
+    if (!res) { showStatus('publish-status','error','Failed. Check your bin settings.'); return; }
+    if (regBin) { archiveInvoice(inv, function(){}); }
+    showStatus('publish-status','success','✓ Published! Staff can now see this invoice.');
+    showLiveBar(inv);
+    checkStorage();
+  });
+}
+
+function unpublish() {
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  var inv = collectCurrentInvoice();
+  binPut(actBin, {published:false, invoice:inv}, function() {
+    document.getElementById('live-bar').style.display = 'none';
+  });
+}
+
+function showLiveBar(inv) {
+  var url = window.location.href.split('?')[0].split('#')[0];
+  var phone = ls('mb_staff_phone');
+  var doSms = ls('mb_notif_sms')==='true';
+  var msg = 'New pricing sheet ready: '+(inv.vendor||'')+' #'+(inv.invoice_number||'')+'. Open: '+url;
+  document.getElementById('share-url-text').textContent = url;
+  var smsBtn = document.getElementById('share-sms-btn');
+  smsBtn.href = (doSms&&phone) ? 'sms:'+phone+'&body='+encodeURIComponent(msg) : '#';
+  smsBtn.style.opacity = (doSms&&phone) ? '1' : '0.4';
+  document.getElementById('live-bar').style.display = 'block';
+  document.getElementById('live-text').textContent = 'Published: '+(inv.vendor||'')+' #'+(inv.invoice_number||'');
+}
+
+function checkLiveStatus() {
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  binGet(actBin, function(d) {
+    var rec = d && d.record;
+    if (rec && rec.published && rec.invoice) { showLiveBar(rec.invoice); }
+    else { document.getElementById('live-bar').style.display='none'; }
+  });
+}
+
+function copyLink() {
+  var url = window.location.href.split('?')[0].split('#')[0];
+  var btn = document.querySelector('.share-btn-copy');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function(){ btn.textContent='Copied!'; setTimeout(function(){btn.textContent='Copy Link';},2000); });
+  } else {
+    var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy Link';},2000);
+  }
+}
+
+// ═══════════════════════════════════════
+// STAFF VIEW
+// ═══════════════════════════════════════
+function showStaff() {
+  document.getElementById('kel-view').style.display = 'none';
+  document.getElementById('staff-view').style.display = 'block';
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  fetch('https://api.jsonbin.io/v3/b/'+actBin+'/latest')
+  .then(function(r){return r.json();})
+  .then(function(d) {
+    document.getElementById('staff-loading').style.display = 'none';
+    var rec = d && d.record;
+    if (rec && rec.published && rec.invoice) { renderStaffView(rec.invoice); }
+    else { document.getElementById('staff-empty').style.display='block'; }
+  })
+  .catch(function() {
+    document.getElementById('staff-loading').style.display='none';
+    document.getElementById('staff-empty').style.display='block';
+  });
+}
+
+function renderStaffView(inv) {
+  document.getElementById('staff-empty').style.display = 'none';
+  document.getElementById('staff-content').style.display = 'block';
+  document.getElementById('staff-inv-title').textContent = (inv.vendor||'Invoice')+' — #'+(inv.invoice_number||'');
+  document.getElementById('staff-inv-details').textContent = (inv.invoice_date||'')+' · '+(inv.styles||[]).length+' styles';
+
+  var container = document.getElementById('staff-cards');
+  container.innerHTML = '';
+
+  // Group by type
+  var groups = {};
+  (inv.styles||[]).forEach(function(s){var t=s.type||'Other';if(!groups[t])groups[t]=[];groups[t].push(s);});
+
+  Object.keys(groups).forEach(function(type) {
+    var h = document.createElement('div');
+    h.style.cssText = 'font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);padding:14px 0 8px;border-bottom:1px solid var(--black);margin-bottom:8px;';
+    h.textContent = type+'s';
+    container.appendChild(h);
+
+    groups[type].forEach(function(style) {
+      var retail = style._retail || '—';
+      var card = document.createElement('div');
+      card.className = 's-card';
+      card.innerHTML =
+        '<div class="s-code">'+esc(style.code)+'</div>'+
+        '<div class="s-name">'+esc(style.name||style.code)+'</div>'+
+        '<div class="s-retail">'+esc(retail)+'</div>';
+      container.appendChild(card);
+    });
+  });
+}
+
+// ═══════════════════════════════════════
+// UPLOAD + EXTRACTION
+// ═══════════════════════════════════════
+var selectedFiles = [];
+var allExtractedStyles = [];
+
+function handleFiles(e) {
+  var raw = Array.from(e.target.files);
+  document.getElementById('file-input').value = '';
+  if (raw.length === 0) return;
+  // Remove duplicates by name
+  var seen = {};
+  selectedFiles = raw.filter(function(f){
+    if (seen[f.name]) return false;
+    seen[f.name] = true; return true;
+  });
+  var dupes = raw.length - selectedFiles.length;
+  if (dupes > 0) {
+    showStatus('extract-status','error', dupes+' duplicate page'+(dupes>1?'s were':' was')+' removed automatically.');
+    setTimeout(function(){ document.getElementById('extract-status').style.display='none'; }, 3000);
+  }
+
+  var summary = document.getElementById('pages-summary');
+  summary.style.display = 'block';
+  summary.textContent = selectedFiles.length + ' page' + (selectedFiles.length > 1 ? 's' : '') + ' selected: ' + selectedFiles.map(function(f){return f.name;}).join(', ');
+
+  document.getElementById('extract-btn').disabled = false;
+  document.getElementById('extract-btn').textContent = 'Extract All ' + selectedFiles.length + ' Page' + (selectedFiles.length>1?'s':'') + ' with Claude';
+
+  // Show first image preview
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('upload-area').querySelector('.upload-text').textContent = selectedFiles.length + ' page' + (selectedFiles.length>1?'s':'')+' ready';
+    document.getElementById('upload-area').querySelector('.upload-hint').textContent = 'Tap to change selection';
+  };
+  reader.readAsDataURL(selectedFiles[0]);
+}
+
+function extractAllPages() {
+  if (selectedFiles.length === 0) return;
+  var apiKey = ls('mb_api_key');
+  if (!apiKey) { showStatus('extract-status','error','Save your API key in Settings first.'); return; }
+
+  allExtractedStyles = [];
+  document.getElementById('extract-btn').disabled = true;
+  showStatus('extract-status','loading','<span class="spinner"></span>Processing page 1 of ' + selectedFiles.length + '...');
+
+  // Process pages sequentially
+  processPage(0, {});
+}
+
+function compressImage(file, cb) {
+  try {
+    var reader = new FileReader();
+    reader.onerror = function() { cb(null, null, 'FileReader error'); };
+    reader.onload = function(e) {
+      try {
+        var img = new Image();
+        img.onerror = function() { cb(null, null, 'Image load error'); };
+        img.onload = function() {
+          try {
+            var MAX=1200, w=img.width, h=img.height;
+            if(w>MAX||h>MAX){
+              if(w>h){h=Math.round(h*MAX/w);w=MAX;}
+              else{w=Math.round(w*MAX/h);h=MAX;}
+            }
+            var canvas=document.createElement('canvas');
+            canvas.width=w; canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            var dataUrl=canvas.toDataURL('image/jpeg',0.75);
+            cb(dataUrl.split(',')[1],'image/jpeg',null);
+          } catch(err){ cb(null,null,'Canvas error: '+err.message); }
+        };
+        img.src = e.target.result;
+      } catch(err){ cb(null,null,'Image error: '+err.message); }
+    };
+    reader.readAsDataURL(file);
+  } catch(err){ cb(null,null,'Read error: '+err.message); }
+}
+
+function processPage(idx, invoiceMeta) {
+  if (idx >= selectedFiles.length) {
+    // All done — show pricing
+    if (allExtractedStyles.length === 0) {
+      showStatus('extract-status','error','No styles found. Try clearer photos.');
+      document.getElementById('extract-btn').disabled = false;
+      return;
+    }
+    currentInvoice = Object.assign({}, invoiceMeta, {styles: allExtractedStyles});
+    renderKelCards(currentInvoice);
+    showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' page' + (selectedFiles.length>1?'s':'') + '.');
+    document.getElementById('extract-btn').disabled = false;
+    document.getElementById('pricing-section').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+
+  showStatus('extract-status','loading','<span class="spinner"></span>Reading page ' + (idx+1) + ' of ' + selectedFiles.length + '...');
+
+  compressImage(selectedFiles[idx], function(b64, mime, compErr) {
+    if (compErr || !b64) {
+      showStatus('extract-status','error','Image read error: '+(compErr||'unknown')+'. Try a clearer photo.');
+      document.getElementById('extract-btn').disabled = false;
+      return;
+    }
+    var apiKey = ls('mb_api_key');
+    showStatus('extract-status','loading','<span class="spinner"></span>Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...');
+    var fetchPromise = fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:2000,
+        system:'You are a retail buying assistant for Miss Behavin\', a women\'s boutique in Santa Barbara CA. Analyze this vendor invoice page and extract every style. For each style generate a fun flirty 2-4 word name for a coastal California women\'s boutique. Examples: Sun-Kissed, Pillow Talk, Golden Hour, Cherry Whisper, Night Fever. Return ONLY valid JSON no markdown: {"vendor":"string","invoice_number":"string","invoice_date":"string","styles":[{"code":"string","type":"Dress|Top|Bottom|Jumpsuit|Other","name":"string","cost":0.00,"colors":[{"color":"string","sizes":{"XS":0,"S":0,"M":0,"L":0},"total":0}],"notes":null}]}',
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:mime,data:b64}},
+          {type:'text',text:'Extract all styles from this invoice page and return JSON only.'}
+        ]}]
+      })
+    })
+    .then(function(r){
+      showStatus('extract-status','loading','<span class="spinner"></span>Got response from Claude, parsing page '+(idx+1)+'...');
+      return r.json();
+    });
+    var timeoutPromise = new Promise(function(_,reject){
+      setTimeout(function(){ reject(new Error('timeout')); }, 40000);
+    });
+    Promise.race([fetchPromise, timeoutPromise])
+    .then(function(data) {
+      if (data.error) throw new Error('API: '+data.error.message+' (type: '+data.error.type+')');
+      if (!data.content || !data.content[0]) throw new Error('Empty response from Claude');
+      var txt = data.content[0].text.trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+      var extracted = JSON.parse(txt);
+      // Save invoice meta from first page
+      if (idx === 0) {
+        invoiceMeta.vendor = extracted.vendor;
+        invoiceMeta.invoice_number = extracted.invoice_number;
+        invoiceMeta.invoice_date = extracted.invoice_date;
+      }
+      // Merge styles — deduplicate by code
+      (extracted.styles||[]).forEach(function(newStyle) {
+        var existing = allExtractedStyles.findIndex(function(s){return s.code===newStyle.code;});
+        if (existing >= 0) {
+          (newStyle.colors||[]).forEach(function(nc){
+            var ec = allExtractedStyles[existing].colors.findIndex(function(c){return c.color===nc.color;});
+            if(ec>=0){
+              Object.keys(nc.sizes||{}).forEach(function(sz){
+                allExtractedStyles[existing].colors[ec].sizes[sz]=(allExtractedStyles[existing].colors[ec].sizes[sz]||0)+(nc.sizes[sz]||0);
+                allExtractedStyles[existing].colors[ec].total=(allExtractedStyles[existing].colors[ec].total||0)+(nc.sizes[sz]||0);
+              });
+            } else {
+              allExtractedStyles[existing].colors.push(nc);
+            }
+          });
+        } else {
+          allExtractedStyles.push(newStyle);
+        }
+      });
+      processPage(idx + 1, invoiceMeta);
+    })
+    .catch(function(err) {
+      var msg = err.message==='timeout' ? 'Page '+(idx+1)+' timed out — skipping.' : 'Error on page '+(idx+1)+': '+err.message;
+      showStatus('extract-status','loading','<span class="spinner"></span>'+msg+' Trying next page...');
+      // Skip failed page and continue
+      setTimeout(function(){ processPage(idx+1, invoiceMeta); }, 1500);
+    });
+  });
+}
+
+// ═══════════════════════════════════════
+// JSONBIN
+// ═══════════════════════════════════════
+function binGet(binId,cb){
+  var headers={};var k=ls('mb_bin_key');if(k)headers['X-Master-Key']=k;
+  fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{headers:headers})
+  .then(function(r){return r.json();}).then(cb).catch(function(){cb(null);});
+}
+function binPut(binId,data,cb){
+  var k=ls('mb_bin_key');
+  fetch('https://api.jsonbin.io/v3/b/'+binId,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':k},body:JSON.stringify(data)})
+  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(){if(cb)cb(null);});
+}
+function binCreate(name,data,cb){
+  var k=ls('mb_bin_key');
+  fetch('https://api.jsonbin.io/v3/b',{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':k,'X-Bin-Name':name,'X-Bin-Private':'true'},body:JSON.stringify(data)})
+  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(){if(cb)cb(null);});
+}
+
+// ═══════════════════════════════════════
+// ARCHIVE
+// ═══════════════════════════════════════
+function archiveInvoice(inv,cb){
+  var regBin=ls('mb_registry_bin');if(!regBin){if(cb)cb();return;}
+  var vendor=inv.vendor||'Unknown Vendor';
+  var fileName=vendor+' · #'+inv.invoice_number+' · '+formatDate(inv.invoice_date)+' · '+inv.styles.length+' styles';
+  var total=inv.styles.reduce(function(sum,s){return sum+(s.cost||0)*(s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0);},0);
+  var trimmed={
+    id:inv.invoice_number+'-'+(inv._savedAt||Date.now()),
+    fileName:fileName,invoice_number:inv.invoice_number,invoice_date:inv.invoice_date,
+    vendor:vendor,style_count:inv.styles.length,wholesale_total:total,
+    status:'live',created_at:new Date().toISOString(),
+    styles:inv.styles.map(function(s){return{code:s.code,name:s.name,cost:s.cost,type:s.type,_retail:s._retail,_markup:s._markup,_markupMode:s._markupMode};})
+  };
+  binGet(regBin,function(regData){
+    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
+    if(!reg.vendors)reg.vendors={};
+    if(reg.vendors[vendor]){
+      binGet(reg.vendors[vendor],function(vData){
+        var vRec=(vData&&vData.record)?vData.record:{vendor:vendor,invoices:[]};
+        if(!vRec.invoices)vRec.invoices=[];
+        // Update existing or add new
+        var existing=vRec.invoices.findIndex(function(i){return i.invoice_number===inv.invoice_number;});
+        if(existing>=0){vRec.invoices[existing]=trimmed;}
+        else{vRec.invoices.forEach(function(i){if(i.status==='live')i.status='draft';});vRec.invoices.unshift(trimmed);}
+        binPut(reg.vendors[vendor],vRec,function(){if(cb)cb();});
+      });
+    }else{
+      binCreate('MB-'+vendor,{vendor:vendor,invoices:[trimmed]},function(newBin){
+        if(!newBin||!newBin.metadata){if(cb)cb();return;}
+        reg.vendors[vendor]=newBin.metadata.id;
+        binPut(regBin,reg,function(){if(cb)cb();});
+      });
+    }
+  });
+}
+
+function formatDate(d){return d?d.replace(/\//g,'-'):'';}
+
+function loadArchive(){
+  var regBin=ls('mb_registry_bin');
+  if(!regBin){document.getElementById('archive-list').innerHTML='<div class="archive-empty">Set up Registry Bin in Settings first.</div>';return;}
+  binGet(regBin,function(regData){
+    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
+    var vendors=Object.keys(reg.vendors||{});
+    var tabBar=document.getElementById('vendor-tab-bar');
+    var list=document.getElementById('archive-list');
+    if(vendors.length===0){tabBar.innerHTML='';list.innerHTML='<div class="archive-empty">No invoices archived yet.</div>';return;}
+    tabBar.innerHTML='';
+    vendors.forEach(function(v,i){
+      var btn=document.createElement('button');btn.className='vendor-tab'+(i===0?' active':'');btn.textContent=v;
+      btn.onclick=function(){document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');loadVendorInvoices(v,reg.vendors[v]);};
+      tabBar.appendChild(btn);
+    });
+    loadVendorInvoices(vendors[0],reg.vendors[vendors[0]]);
+  });
+}
+
+function loadVendorInvoices(vendor,binId){
+  var list=document.getElementById('archive-list');
+  list.innerHTML='<div class="archive-empty">Loading...</div>';
+  binGet(binId,function(vData){
+    var vRec=(vData&&vData.record)?vData.record:{invoices:[]};
+    var invoices=vRec.invoices||[];
+    if(invoices.length===0){list.innerHTML='<div class="archive-empty">No invoices for '+esc(vendor)+' yet.</div>';return;}
+    list.innerHTML='';
+    invoices.forEach(function(inv){
+      var item=document.createElement('div');item.className='archive-item';
+      var sLabel=inv.status==='live'?'Live':inv.status==='priced'?'Priced':'Draft';
+      item.innerHTML='<div class="archive-item-info"><div class="archive-file-name">'+esc(inv.fileName||inv.invoice_number)+'</div><div class="archive-meta">'+esc(inv.invoice_date||'')+' · '+inv.style_count+' styles · $'+Number(inv.wholesale_total||0).toFixed(2)+' wholesale</div></div><div class="archive-right"><span class="status-pill '+(inv.status||'draft')+'">'+sLabel+'</span><button class="delete-btn">🗑</button></div>';
+      item.querySelector('.archive-item-info').addEventListener('click',function(){loadArchivedInvoice(inv);});
+      item.querySelector('.delete-btn').addEventListener('click',function(e){
+        e.stopPropagation();
+        if(inv.status==='live'){showModal('Cannot Delete','This invoice is currently published. Unpublish it first.',null,false);return;}
+        showModal('Delete Invoice','Delete "'+inv.fileName+'"? This cannot be undone.',function(){deleteInvoice(inv.id,binId,vRec);},true);
+      });
+      list.appendChild(item);
+    });
+  });
+}
+
+function loadArchivedInvoice(inv){
+  selectedFiles = []; allExtractedStyles = [];
+  document.getElementById('pages-summary').style.display='none';
+  document.getElementById('extract-btn').disabled = true;
+  document.getElementById('extract-btn').textContent = 'Extract All with Claude';
+  document.getElementById('upload-area').querySelector('.upload-text').textContent = 'Tap to select invoice photos';
+  document.getElementById('upload-area').querySelector('.upload-hint').textContent = 'Select one or multiple pages at once';
+  currentInvoice={vendor:inv.vendor,invoice_number:inv.invoice_number,invoice_date:inv.invoice_date,styles:(inv.styles||[]).map(function(s){return Object.assign({colors:[]},s);})};
+  kelTab('invoice');
+  renderKelCards(currentInvoice);
+  showStatus('extract-status','success','✓ Loaded: '+esc(inv.fileName));
+}
+
+function deleteInvoice(invId,binId,vRec){
+  vRec.invoices=(vRec.invoices||[]).filter(function(i){return i.id!==invId;});
+  binPut(binId,vRec,function(){closeModal();loadArchive();checkStorage();});
+}
+
+// ═══════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════
+function checkStorage(){
+  var regBin=ls('mb_registry_bin');if(!regBin)return;
+  binGet(regBin,function(regData){
+    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
+    var vendors=Object.keys(reg.vendors||{});
+    var metersEl=document.getElementById('storage-meters');
+    if(!metersEl)return;
+    if(vendors.length===0){metersEl.innerHTML='<div style="font-size:13px;color:var(--gray-text);">No vendors yet.</div>';return;}
+    metersEl.innerHTML='';
+    var warnList=[];
+    vendors.forEach(function(vendor){
+      binGet(reg.vendors[vendor],function(vData){
+        var bytes=new Blob([JSON.stringify((vData&&vData.record)||{})]).size;
+        var kb=(bytes/1024).toFixed(1);var pct=Math.min(Math.round(bytes/10240*100),100);
+        var cc=pct<60?'green':pct<85?'yellow':'red';
+        if(pct>=85)warnList.push(vendor);
+        var div=document.createElement('div');div.className='storage-vendor';
+        div.innerHTML='<div class="storage-vendor-name"><span>'+esc(vendor)+'</span><span class="storage-pct">'+kb+'KB / 10KB ('+pct+'%)</span></div><div class="storage-bar-bg"><div class="storage-bar-fill '+cc+'" style="width:'+pct+'%"></div></div>';
+        metersEl.appendChild(div);
+        if(warnList.length>0){var b=document.getElementById('storage-warning');if(b){b.style.display='block';b.textContent='⚠️ Storage almost full: '+warnList.join(', ')+'. Delete old invoices or upgrade JSONBin.';}}
+      });
+    });
+  });
+}
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+function ls(k){return localStorage.getItem(k)||'';}
+function lsSet(k,v){localStorage.setItem(k,v);}
+
+function loadSettingsToUI(){
+  var pairs=[['api-key-input','mb_api_key'],['bin-key-input','mb_bin_key'],['registry-bin-input','mb_registry_bin'],['active-bin-input','mb_active_bin']];
+  pairs.forEach(function(p){var el=document.getElementById(p[0]);if(el)el.value=ls(p[1]);});
+}
+function saveSettings(){
+  var a=document.getElementById('api-key-input').value.trim();
+  var b=document.getElementById('bin-key-input').value.trim();
+  var r=document.getElementById('registry-bin-input').value.trim();
+  var x=document.getElementById('active-bin-input').value.trim();
+  if(!a||!b||!r||!x){showStatus('settings-status','error','Please fill in all four fields.');return;}
+  lsSet('mb_api_key',a);lsSet('mb_bin_key',b);lsSet('mb_registry_bin',r);lsSet('mb_active_bin',x);
+  showStatus('settings-status','success','✓ Settings saved.');
+}
+function loadNotifToUI(){
+  var phone=ls('mb_staff_phone');var doS=ls('mb_notif_sms')==='true';
+  var ns=document.getElementById('notif-sms');if(!ns)return;
+  ns.checked=doS;
+  document.getElementById('staff-phone-display').textContent=phone||'Not set';
+  if(document.getElementById('staff-phone-input'))document.getElementById('staff-phone-input').value=phone;
+  document.getElementById('staff-phone-field').style.display=doS?'block':'none';
+}
+function toggleSmsField(){
+  document.getElementById('staff-phone-field').style.display=document.getElementById('notif-sms').checked?'block':'none';
+}
+function saveNotifSettings(){
+  var doS=document.getElementById('notif-sms').checked;
+  var phone=document.getElementById('staff-phone-input').value.replace(/\D/g,'');
+  lsSet('mb_notif_sms',doS);
+  if(phone){lsSet('mb_staff_phone',phone);document.getElementById('staff-phone-display').textContent=phone;}
+  showStatus('notif-status','success','✓ Saved.');
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+function showModal(title,body,onConfirm,showConfirm){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-body').textContent=body;
+  var btn=document.getElementById('modal-confirm-btn');
+  btn.style.display=showConfirm?'block':'none';
+  if(onConfirm)btn.onclick=onConfirm;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function showStatus(id,type,msg){var el=document.getElementById(id);if(!el)return;el.style.display='block';el.className='status '+type;el.innerHTML=msg;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
