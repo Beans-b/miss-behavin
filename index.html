@@ -205,6 +205,113 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .modal-actions .btn{margin-top:0;}
 
 .app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
+
+/* PRINT STYLES */
+@media print {
+  body * { visibility: hidden; }
+  #print-area, #print-area * { visibility: visible; }
+  #print-area {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%;
+  }
+  .no-print { display: none !important; }
+}
+
+/* LABEL GRID */
+.label-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 2in);
+  gap: 0.15in;
+  padding: 16px 24px;
+  justify-content: start;
+}
+.hang-tag {
+  width: 2in;
+  min-height: 3in;
+  border: 1px solid var(--black);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--white);
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.hang-tag-store {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gray-text);
+  border-bottom: 1px solid var(--gray-mid);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.hang-tag-name {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--black);
+  margin-bottom: 4px;
+  flex: 1;
+}
+.hang-tag-code {
+  font-size: 8px;
+  color: var(--gray-text);
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.hang-tag-price {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--black);
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--black);
+  padding-top: 8px;
+}
+.hang-tag-colors {
+  font-size: 8px;
+  color: var(--gray-text);
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+}
+.hang-tag-color-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 0;
+}
+
+/* Print button in staff view */
+.print-bar {
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--gray-mid);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.print-bar-label {
+  font-size: 12px;
+  color: var(--gray-text);
+  letter-spacing: 0.04em;
+}
+.print-btn {
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+.print-btn:active { opacity: 0.7; }
 .page-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--gray-light);border:1px solid var(--gray-mid);margin-bottom:6px;}
 .page-item-info{font-size:12px;}
 .page-item-status{font-size:11px;font-weight:600;letter-spacing:.06em;}
@@ -378,7 +485,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div class="inv-title" id="staff-inv-title">Invoice</div>
       <div class="inv-details" id="staff-inv-details"></div>
     </div>
+    <div class="print-bar no-print">
+      <span class="print-bar-label">Ready to print hang tags?</span>
+      <button class="print-btn" onclick="printLabels()">🖨 Print Labels</button>
+    </div>
     <div style="padding:0 24px;margin-top:12px;" id="staff-cards"></div>
+    <div id="print-area" style="display:none;">
+      <div class="label-grid" id="label-grid"></div>
+    </div>
   </div>
 </div>
 
@@ -921,7 +1035,7 @@ function processPage(idx, invoiceMeta) {
     .then(function(data) {
       if (data.error) throw new Error('API: '+data.error.message+' (type: '+data.error.type+')');
       if (!data.content || !data.content[0]) throw new Error('Empty response from Claude');
-      var txt = data.content[0].text.trim().replace(/^```json\s*/i,'').replace(/```$/,'').trim();
+      var txt = data.content[0].text.trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
       var extracted = JSON.parse(txt);
       // Save invoice meta from first page
       if (idx === 0) {
@@ -1016,7 +1130,7 @@ function archiveInvoice(inv,cb){
   });
 }
 
-function formatDate(d){return d?d.replace(/\//g,'-'):'';}
+function formatDate(d){return d?d.split('/').join('-'):'';}
 
 function loadArchive(){
   var regBin=ls('mb_registry_bin');
@@ -1156,6 +1270,85 @@ function showModal(title,body,onConfirm,showConfirm){
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+// ═══════════════════════════════════════
+// PRINT LABELS
+// ═══════════════════════════════════════
+function printLabels() {
+  var grid = document.getElementById('label-grid');
+  var printArea = document.getElementById('print-area');
+  if (!grid || !printArea) return;
+
+  grid.innerHTML = '';
+
+  // Build labels from staff cards
+  var cards = document.querySelectorAll('#staff-cards .s-card');
+  if (cards.length === 0) {
+    alert('No styles to print. Make sure an invoice is published.');
+    return;
+  }
+
+  // Get full invoice data from active bin for colors/sizes
+  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
+  fetch('https://api.jsonbin.io/v3/b/' + actBin + '/latest')
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    var rec = d && d.record;
+    var styles = (rec && rec.invoice && rec.invoice.styles) || [];
+
+    styles.forEach(function(style) {
+      var retail = style._retail || '—';
+      var colorRows = (style.colors || []).map(function(c) {
+        var sizes = Object.entries(c.sizes || {})
+          .filter(function(kv){ return kv[1] > 0; })
+          .map(function(kv){ return kv[0]+':'+kv[1]; })
+          .join(' ');
+        return '<div class="hang-tag-color-row"><span>'+esc(c.color)+'</span><span>'+sizes+'</span></div>';
+      }).join('');
+
+      var tag = document.createElement('div');
+      tag.className = 'hang-tag';
+      tag.innerHTML =
+        '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
+        '<div class="hang-tag-name">' + esc(style.name || style.code) + '</div>' +
+        '<div class="hang-tag-code">' + esc(style.code) + '</div>' +
+        '<div class="hang-tag-price">' + esc(retail) + '</div>' +
+        '<div class="hang-tag-colors">' + colorRows + '</div>';
+      grid.appendChild(tag);
+    });
+
+    // Show print area and trigger print
+    printArea.style.display = 'block';
+    setTimeout(function() {
+      window.print();
+      setTimeout(function() {
+        printArea.style.display = 'none';
+      }, 1000);
+    }, 300);
+  })
+  .catch(function() {
+    // Fallback: print from visible staff cards
+    cards.forEach(function(card) {
+      var name = (card.querySelector('.s-name') || {}).textContent || '';
+      var code = (card.querySelector('.s-code') || {}).textContent || '';
+      var retail = (card.querySelector('.s-retail') || {}).textContent || '—';
+      var tag = document.createElement('div');
+      tag.className = 'hang-tag';
+      tag.innerHTML =
+        '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
+        '<div class="hang-tag-name">' + esc(name) + '</div>' +
+        '<div class="hang-tag-code">' + esc(code) + '</div>' +
+        '<div class="hang-tag-price">' + esc(retail) + '</div>' +
+        '<div class="hang-tag-colors"></div>';
+      grid.appendChild(tag);
+    });
+    printArea.style.display = 'block';
+    setTimeout(function() {
+      window.print();
+      setTimeout(function() { printArea.style.display = 'none'; }, 1000);
+    }, 300);
+  });
+}
 
 // ═══════════════════════════════════════
 // UTILITIES
