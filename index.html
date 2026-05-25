@@ -400,7 +400,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 // ═══════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════
-var PWD = 'aaaa';
+var PWD_KEL = 'aaaa';
+var PWD_STAFF = 'bbbb';
 var PUBLIC_ACTIVE_BIN = '6a1282d76877513b27c2bcb2';
 var currentInvoice = null;
 var autosaveTimer = null;
@@ -415,6 +416,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var role = localStorage.getItem('mb_role');
   if (role === 'kel') { showKel(); }
   else if (role === 'staff') { showStaff(); }
+  // else gate stays visible
   // else gate stays
 });
 
@@ -424,17 +426,18 @@ window.addEventListener('DOMContentLoaded', function() {
 function checkPwd() {
   var val = document.getElementById('gate-input').value;
   var errEl = document.getElementById('gate-error');
-  // Show debug info so we can see exactly what was typed
-  errEl.textContent = 'Typed: [' + val + '] (' + val.length + ' chars)';
-  if (val === PWD) {
+  if (val === PWD_KEL) {
     localStorage.setItem('mb_role', 'kel');
     document.getElementById('gate').classList.add('hidden');
     setTimeout(function(){ document.getElementById('gate').style.display='none'; }, 400);
     showKel();
+  } else if (val === PWD_STAFF) {
+    localStorage.setItem('mb_role', 'staff');
+    document.getElementById('gate').classList.add('hidden');
+    setTimeout(function(){ document.getElementById('gate').style.display='none'; }, 400);
+    showStaff();
   } else {
-    setTimeout(function(){
-      errEl.textContent = 'Incorrect. Try again.';
-    }, 3000);
+    errEl.textContent = 'Incorrect code. Try again.';
     document.getElementById('gate-input').value = '';
   }
 }
