@@ -804,7 +804,11 @@ function publishToStaff() {
   currentInvoice = inv;
 
   binPut(actBin, {published:true, invoice:inv}, function(res) {
-    if (!res || res.message) { showStatus('publish-status','error','Failed: '+(res&&res.message?res.message:'Check bin settings and master key.')); return; }
+    if (!res) { showStatus('publish-status','error','Failed: No response from JSONBin. Check Master Key in Settings.'); return; }
+    if (res.message && res.message !== 'Bin updated successfully.') {
+      showStatus('publish-status','error','JSONBin error: '+res.message);
+      return;
+    }
     if (regBin) { archiveInvoice(inv, function(){}); }
     showStatus('publish-status','success','✓ Published! Staff can now see this invoice.');
     showLiveBar(inv);
