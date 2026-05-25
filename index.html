@@ -804,7 +804,7 @@ function publishToStaff() {
   currentInvoice = inv;
 
   binPut(actBin, {published:true, invoice:inv}, function(res) {
-    if (!res) { showStatus('publish-status','error','Failed. Check your bin settings.'); return; }
+    if (!res || res.message) { showStatus('publish-status','error','Failed: '+(res&&res.message?res.message:'Check bin settings and master key.')); return; }
     if (regBin) { archiveInvoice(inv, function(){}); }
     showStatus('publish-status','success','✓ Published! Staff can now see this invoice.');
     showLiveBar(inv);
@@ -1083,8 +1083,9 @@ function binGet(binId,cb){
 }
 function binPut(binId,data,cb){
   var k=ls('mb_bin_key');
+  if(!k){if(cb)cb(null);return;}
   fetch('https://api.jsonbin.io/v3/b/'+binId,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':k},body:JSON.stringify(data)})
-  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(){if(cb)cb(null);});
+  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(e){console.error('binPut error:',e);if(cb)cb(null);});
 }
 function binCreate(name,data,cb){
   var k=ls('mb_bin_key');
