@@ -646,111 +646,84 @@ var currentInvoice = null;
 var autosaveTimer = null;
 
 // ═══════════════════════════════════════
-// SUPABASE CONFIG
+// SUPABASE CONFIG — via Edge Function proxy
 // ═══════════════════════════════════════
-var SUPA_URL = 'https://lmfpnqcycqesyrcdmfqs.supabase.co';
-var SUPA_KEY = 'sb_publishable_hr-7r2lBVImDTLQ8kzDlfA_Lhnlka2P';
+var PROXY_URL = 'https://lmfpnqcycqesyrcdmfqs.supabase.co/functions/v1/db-proxy';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZnBucWN5Y3Flc3lyY2RtZnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzA0NjQsImV4cCI6MjA5NTgwNjQ2NH0.QC0jpdg-reCyc1TuFwtTrQa1plLXlbC4uLMhm3RrMbI';
 var STORE_ID = 'miss-behavin';
 
-function supaHeaders() {
+function proxyHeaders() {
   return {
     'Content-Type': 'application/json',
-    'apikey': SUPA_KEY
+    'Authorization': 'Bearer ' + SUPA_KEY
   };
 }
 
 // Get active invoice row
 function sbGetActive(cb) {
-  fetch(SUPA_URL + '/rest/v1/active_invoice?store_id=eq.' + STORE_ID + '&limit=1', {
-    headers: supaHeaders()
+  fetch(PROXY_URL + '?action=get_active&store_id=' + STORE_ID, {
+    headers: proxyHeaders()
   })
   .then(function(r){ return r.json(); })
-  .then(function(rows) {
-    if (rows && rows.length > 0) cb(rows[0]);
+  .then(function(res) {
+    if (res.data) cb(res.data);
     else cb(null);
   })
   .catch(function(e){ console.error('sbGetActive error:', e); cb(null); });
 }
 
-// Update active invoice row (upsert — creates if missing, updates if exists)
+// Update active invoice row
 function sbSetActive(published, invoice, cb) {
-  fetch(SUPA_URL + '/rest/v1/active_invoice', {
+  fetch(PROXY_URL + '?action=set_active&store_id=' + STORE_ID, {
     method: 'POST',
-    headers: Object.assign({}, supaHeaders(), {
-      'Prefer': 'resolution=merge-duplicates,return=minimal'
-    }),
-    body: JSON.stringify({
-      store_id: STORE_ID,
-      published: published,
-      invoice: invoice,
-      updated_at: new Date().toISOString()
-    })
+    headers: proxyHeaders(),
+    body: JSON.stringify({ published: published, invoice: invoice, updated_at: new Date().toISOString() })
   })
-  .then(function(r){
-    if (r.ok) { if(cb) cb(true); }
-    else { r.text().then(function(t){ console.error('sbSetActive error:', t); if(cb) cb(false); }); }
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(cb) cb(!res.error);
   })
   .catch(function(e){ console.error('sbSetActive error:', e); if(cb) cb(false); });
 }
 
 // Archive an invoice
 function sbArchiveInvoice(inv, cb) {
-  var vendor = inv.vendor || 'Unknown Vendor';
-  var total = (inv.styles||[]).reduce(function(sum,s){
-    return sum + (s.cost||0) * (s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0);
-  }, 0);
   var record = {
-    store_id: STORE_ID,
-    vendor: vendor,
+    vendor: inv.vendor || 'Unknown Vendor',
     invoice_number: inv.invoice_number || '',
     invoice_date: inv.invoice_date || '',
     status: 'live',
     published: true,
     styles: inv.styles || []
   };
-  // Check if invoice already exists (upsert by invoice_number + store_id)
-  fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&invoice_number=eq.' + encodeURIComponent(inv.invoice_number||''), {
-    headers: supaHeaders()
+  fetch(PROXY_URL + '?action=archive&store_id=' + STORE_ID, {
+    method: 'POST',
+    headers: proxyHeaders(),
+    body: JSON.stringify(record)
   })
   .then(function(r){ return r.json(); })
-  .then(function(rows) {
-    if (rows && rows.length > 0) {
-      // Update existing
-      return fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&invoice_number=eq.' + encodeURIComponent(inv.invoice_number||''), {
-        method: 'PATCH',
-        headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
-        body: JSON.stringify({ styles: inv.styles, status: 'live', updated_at: new Date().toISOString() })
-      });
-    } else {
-      // Insert new
-      return fetch(SUPA_URL + '/rest/v1/invoices', {
-        method: 'POST',
-        headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
-        body: JSON.stringify(record)
-      });
-    }
-  })
-  .then(function(r){ if(cb) cb(r.ok); })
+  .then(function(res){ if(cb) cb(!res.error); })
   .catch(function(e){ console.error('sbArchiveInvoice error:', e); if(cb) cb(false); });
 }
 
 // Load all archived invoices
 function sbLoadArchive(cb) {
-  fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&order=created_at.desc', {
-    headers: supaHeaders()
+  fetch(PROXY_URL + '?action=load_archive&store_id=' + STORE_ID, {
+    headers: proxyHeaders()
   })
   .then(function(r){ return r.json(); })
-  .then(function(rows){ cb(rows||[]); })
+  .then(function(res){ cb(res.data||[]); })
   .catch(function(e){ console.error('sbLoadArchive error:', e); cb([]); });
 }
 
 // Delete an archived invoice
 function sbDeleteInvoice(id, cb) {
-  fetch(SUPA_URL + '/rest/v1/invoices?id=eq.' + id, {
+  fetch(PROXY_URL + '?action=delete_invoice&store_id=' + STORE_ID + '&id=' + id, {
     method: 'DELETE',
-    headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'})
+    headers: proxyHeaders()
   })
-  .then(function(r){ if(cb) cb(r.ok); })
+  .then(function(r){ return r.json(); })
+  .then(function(res){ if(cb) cb(!res.error); })
   .catch(function(e){ console.error('sbDeleteInvoice error:', e); if(cb) cb(false); });
 }
 
