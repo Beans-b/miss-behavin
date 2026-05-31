@@ -142,6 +142,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .p-name-input[readonly]{border-bottom-color:transparent;cursor:default;}
 .p-card-body{padding:10px 12px;}
 
+/* REGEN BUTTON — Stage 2 */
+.regen-btn{background:none;border:1px solid var(--gray-mid);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;color:var(--gray-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;-webkit-appearance:none;padding:0;line-height:1;font-family:inherit;}
+.regen-btn:active{background:var(--gray-light);}
+.regen-btn.spinning{animation:spin .6s linear infinite;pointer-events:none;opacity:.5;}
+.regen-btn.done{color:var(--success-fg);border-color:var(--success-fg);}
+
 /* Cost row (Kel only) */
 .p-cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0eeeb;}
 .p-cost-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
@@ -546,8 +552,7 @@ var STORE_ID = 'miss-behavin';
 function supaHeaders() {
   return {
     'Content-Type': 'application/json',
-    'apikey': SUPA_KEY,
-    'Authorization': 'Bearer ' + SUPA_KEY
+    'apikey': SUPA_KEY
   };
 }
 
@@ -771,6 +776,7 @@ function buildKelCard(style) {
     '<div class="p-card-header">'+
       '<div class="p-code-wrap"><div class="p-code">'+esc(style.code)+'</div><div class="p-type">'+esc(style.type)+'</div></div>'+
       '<input class="p-name-input" type="text" value="'+esc(style.name||'')+'" placeholder="Style name"/>'+
+      '<button class="regen-btn" title="Generate new name">↻</button>'+
     '</div>'+
     '<div class="p-card-body">'+
       '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">$'+cost+'</span></div>'+
@@ -794,6 +800,9 @@ function buildKelCard(style) {
   var mtypeBtns = card.querySelectorAll('.mtype-btn');
 
   nameInput.addEventListener('input', function() { scheduleAutosave(); });
+
+  var regenBtn = card.querySelector('.regen-btn');
+  regenBtn.addEventListener('click', function() { regenName(card, style.code, style.type); });
 
   mtypeBtns.forEach(function(btn) {
     btn.addEventListener('click', function() {
@@ -1400,6 +1409,76 @@ function printLabels() {
 // ═══════════════════════════════════════
 function showStatus(id,type,msg){var el=document.getElementById(id);if(!el)return;el.style.display='block';el.className='status '+type;el.innerHTML=msg;}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════
+// STAGE 2 — NAME REGENERATION
+// ═══════════════════════════════════════
+function regenName(card, code, type) {
+  var apiKey = ls('mb_api_key');
+  var btn = card.querySelector('.regen-btn');
+  var nameInput = card.querySelector('.p-name-input');
+
+  if (!apiKey) {
+    btn.textContent = '!';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'var(--red)';
+    setTimeout(function() {
+      btn.textContent = '↻';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+    showStatus('extract-status', 'error', 'Save your API key in Settings first.');
+    return;
+  }
+
+  var currentName = nameInput.value;
+  btn.classList.add('spinning');
+  btn.disabled = true;
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 15,
+      system: 'Generate a fun flirty product name for Miss Behavin\', a coastal California women\'s boutique (women 12-36). Format: short girl name + item type. Examples: Stella Dress, Coco Top, Mia Romper, Luna Skirt, Zara Blouse, Ava Sweater, Tia Bottom. Return ONLY the name, nothing else — no quotes, no punctuation.',
+      messages: [{
+        role: 'user',
+        content: 'Style: ' + code + ', type: ' + (type||'Item') + '. Current name: "' + currentName + '". Give a different name.'
+      }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+    if (data.error || !data.content || !data.content[0]) {
+      console.error('Name regen error:', data.error || 'empty response');
+      return;
+    }
+    var newName = data.content[0].text.trim().replace(/^["'`]|["'`]$/g, '').replace(/\.$/, '');
+    if (newName && newName !== currentName) {
+      nameInput.value = newName;
+      btn.classList.add('done');
+      btn.textContent = '✓';
+      setTimeout(function() {
+        btn.classList.remove('done');
+        btn.textContent = '↻';
+      }, 1200);
+      scheduleAutosave();
+    }
+  })
+  .catch(function(err) {
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+    console.error('Name regen failed:', err);
+  });
+}
 </script>
 </body>
 </html>
