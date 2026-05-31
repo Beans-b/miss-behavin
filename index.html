@@ -148,6 +148,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .regen-btn.spinning{animation:spin .6s linear infinite;pointer-events:none;opacity:.5;}
 .regen-btn.done{color:var(--success-fg);border-color:var(--success-fg);}
 
+/* HELP TAB */
+.help-section{padding:20px 24px;border-bottom:1px solid var(--gray-mid);}
+.help-section:last-child{border-bottom:none;}
+.help-section-title{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--black);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.help-section-title .help-num{width:20px;height:20px;border-radius:50%;background:var(--black);color:var(--white);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.help-step{display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;}
+.help-step:last-child{margin-bottom:0;}
+.help-step-icon{font-size:16px;flex-shrink:0;width:22px;text-align:center;margin-top:1px;}
+.help-step-text{font-size:13px;color:#333;line-height:1.55;}
+.help-step-text strong{color:var(--black);font-weight:600;}
+.help-callout{background:var(--gray-light);border-left:3px solid var(--black);padding:10px 12px;margin-top:10px;font-size:12px;color:#333;line-height:1.55;}
+.help-callout.warning{background:#fff3cd;border-left-color:#c8900a;color:#7a5800;}
+.help-callout.danger{background:#fdecea;border-left-color:var(--red);color:#8b1a1a;}
+.help-tag{display:inline-block;background:var(--black);color:var(--white);font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:.05em;vertical-align:middle;}
+.help-tag.red{background:var(--red);}
+.help-tag.gold{background:var(--accent);}
+
 /* Cost row (Kel only) */
 .p-cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0eeeb;}
 .p-cost-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
@@ -376,6 +393,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
     <button class="tab-btn active" onclick="kelTab('invoice')">Invoice</button>
     <button class="tab-btn" onclick="kelTab('archive')">Archive</button>
     <button class="tab-btn" onclick="kelTab('settings')">Settings</button>
+    <button class="tab-btn" onclick="kelTab('help')">Help</button>
   </div>
 
   <!-- INVOICE TAB -->
@@ -477,6 +495,99 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div id="storage-meters"><div style="font-size:13px;color:var(--gray-text);">Loading...</div></div>
     </div>
   </div>
+
+  <!-- HELP TAB -->
+  <div id="ktab-help" style="display:none;">
+
+    <div class="help-section">
+      <div class="help-section-title"><span class="help-num">1</span>Upload &amp; Extract Invoice</div>
+      <div class="help-step">
+        <div class="help-step-icon">📷</div>
+        <div class="help-step-text">Photograph each page of the vendor invoice clearly. Select all pages at once when uploading — no need to upload one at a time.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">✨</div>
+        <div class="help-step-text">Tap <strong>Extract All with Claude</strong>. The app reads every style code, color, size, quantity, and wholesale cost automatically.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">🏷️</div>
+        <div class="help-step-text">A fun product name is <strong>auto-generated</strong> for every style. You don't have to do anything — they're ready to go.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title"><span class="help-num">2</span>Product Names</div>
+      <div class="help-step">
+        <div class="help-step-icon">↻</div>
+        <div class="help-step-text">Each style card has a <strong>regenerate button</strong> (the circular arrow ↻) next to the name. Tap it to get a new AI-generated name instantly. You can tap it as many times as you like.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">✏️</div>
+        <div class="help-step-text">Don't like any of the suggestions? <strong>Tap the name field and type your own.</strong> Whatever is in that field at the time of push is what goes into Shopify.</div>
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title"><span class="help-num">3</span>Setting Prices</div>
+      <div class="help-step">
+        <div class="help-step-icon">💲</div>
+        <div class="help-step-text">Use <strong>Apply All</strong> at the top to set the same markup across every style at once — enter a percentage like <strong>50%</strong> or a flat dollar markup like <strong>$20</strong>.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">🎯</div>
+        <div class="help-step-text">Or set prices <strong>individually per style</strong> using the Markup and Retail fields on each card. The retail price calculates automatically from your markup.</div>
+      </div>
+      <div class="help-callout">
+        Wholesale cost is visible only to you. Staff see retail prices only — never what you paid.
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title"><span class="help-num">4</span>Push to Shopify</div>
+      <div class="help-step">
+        <div class="help-step-icon">🔍</div>
+        <div class="help-step-text">Before anything is sent, a <strong>review screen</strong> shows every product that will be created — name, color, sizes, price, and inventory quantities.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">✅</div>
+        <div class="help-step-text">Confirm everything looks correct, then tap <strong>Push to Shopify</strong>.</div>
+      </div>
+      <div class="help-callout danger">
+        ⚠️ Once pushed, products are <strong>immediately LIVE</strong> on the website and available at POS. There is no draft step. Double-check names and prices on the review screen before pushing.
+      </div>
+    </div>
+
+    <div class="help-section">
+      <div class="help-section-title"><span class="help-num">5</span>Red Card — Duplicate Warning</div>
+      <div class="help-step">
+        <div class="help-step-icon">🔴</div>
+        <div class="help-step-text">If a style card turns <strong>completely red</strong> on the review screen, it means that style code already exists as a product in Shopify.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">⚠️</div>
+        <div class="help-step-text">A popup will appear and <strong>you must make a decision</strong> before the push can continue. You have three options:</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">➕</div>
+        <div class="help-step-text"><strong>Add Inventory</strong> — adds the new quantities to the existing product in Shopify. Use this for restocks.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">🆕</div>
+        <div class="help-step-text"><strong>Push as New</strong> — creates a second separate listing. Use this only if you intentionally want two listings.</div>
+      </div>
+      <div class="help-step">
+        <div class="help-step-icon">⏭️</div>
+        <div class="help-step-text"><strong>Skip</strong> — excludes this style from the push entirely. You can handle it manually in Shopify.</div>
+      </div>
+      <div class="help-callout warning">
+        The app will never modify an existing product automatically. Every duplicate requires your decision first.
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:16px 24px 28px;font-size:11px;color:var(--gray-text);">LineSheet by The Clear Stack · Miss Behavin' Santa Barbara</div>
+
+  </div>
+
 </div>
 
 <!-- STAFF VIEW -->
@@ -707,11 +818,11 @@ function showKel() {
 }
 
 function kelTab(name) {
-  ['invoice','archive','settings'].forEach(function(t) {
+  ['invoice','archive','settings','help'].forEach(function(t) {
     document.getElementById('ktab-'+t).style.display = t===name?'block':'none';
   });
   document.querySelectorAll('.tab-btn').forEach(function(b,i) {
-    b.classList.toggle('active', ['invoice','archive','settings'][i]===name);
+    b.classList.toggle('active', ['invoice','archive','settings','help'][i]===name);
   });
   if (name==='archive') loadArchive();
   if (name==='settings') { loadSettingsToUI(); checkStorage(); }
