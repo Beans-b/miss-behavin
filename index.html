@@ -319,14 +319,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .page-item-status.done{color:var(--success-fg);}
 .page-item-status.error{color:var(--red);}
 .page-remove-btn{background:none;border:none;font-size:14px;cursor:pointer;color:var(--gray-text);padding:2px 6px;flex-shrink:0;}
-.pages-summary{font-size:12px;font-weight:600;color:var(--success-fg);padding:8px 0;text-align:center;display:none;}
+/* HEART I */
+.brand-name { display: inline; }
+.brand-name .heart-i {
+  display: inline-block;
+  position: relative;
+  font-style: normal;
+}
+.brand-name .heart-i::after {
+  content: '♥';
+  position: absolute;
+  top: -0.55em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.45em;
+  color: #e8748a;
+  line-height: 1;
+  font-family: serif;
+}
 </style>
 </head>
 <body>
 
 <!-- GATE -->
 <div id="gate">
-  <div class="gate-logo">Miss Behavin'</div>
+  <div class="gate-logo"><span class="brand-name">M<i class="heart-i">ı</i>ss Behav<i class="heart-i">ı</i>n'</span></div>
   <div class="gate-sub">Enter Access Code</div>
   <input type="password" class="gate-input" id="gate-input" placeholder="••••" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')checkPwd()"/>
   <button class="gate-btn" onclick="checkPwd()">Enter</button>
@@ -336,7 +353,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 <!-- KEL VIEW (owner) -->
 <div id="kel-view" style="display:none;">
   <div class="app-header">
-    <div class="store-name">Miss Behavin'</div>
+    <div class="store-name"><span class="brand-name">M<i class="heart-i">ı</i>ss Behav<i class="heart-i">ı</i>n'</span></div>
     <div class="header-meta">
       <div class="header-sub">Owner Dashboard</div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -429,11 +446,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
   <!-- SETTINGS TAB -->
   <div id="ktab-settings" style="display:none;">
     <div class="section">
-      <div class="section-title">API &amp; Storage</div>
-      <div class="field"><label class="field-label">Anthropic API Key</label><input type="password" class="field-input" id="api-key-input" placeholder="sk-ant-..." autocomplete="off"/></div>
-      <div class="field"><label class="field-label">JSONBin Master Key</label><input type="password" class="field-input" id="bin-key-input" placeholder="$2a$10$..." autocomplete="off"/></div>
-      <div class="field"><label class="field-label">Registry Bin ID</label><input type="text" class="field-input" id="registry-bin-input" autocomplete="off"/><div class="field-hint">Create with: {"vendors":{}}</div></div>
-      <div class="field"><label class="field-label">Active Bin ID</label><input type="text" class="field-input" id="active-bin-input" autocomplete="off"/><div class="field-hint">Create with: {"published":false,"invoice":null} — set to Public</div></div>
+      <div class="section-title">API Settings</div>
+      <div class="field"><label class="field-label">Anthropic API Key</label><input type="password" class="field-input" id="api-key-input" placeholder="sk-ant-..." autocomplete="off"/><div class="field-hint">Required for invoice extraction and name generation.</div></div>
       <button class="btn btn-black" onclick="saveSettings()" style="margin-top:8px;">Save Settings</button>
       <div class="status" id="settings-status"></div>
     </div>
@@ -459,7 +473,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 <!-- STAFF VIEW -->
 <div id="staff-view" style="display:none;">
   <div class="app-header">
-    <div class="store-name">Miss Behavin'</div>
+    <div class="store-name"><span class="brand-name">M<i class="heart-i">ı</i>ss Behav<i class="heart-i">ı</i>n'</span></div>
     <div class="header-meta">
       <div class="header-sub">Staff Pricing</div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -516,9 +530,115 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 // ═══════════════════════════════════════
 var PWD_KEL = 'aaaa';
 var PWD_STAFF = 'bbbb';
-var PUBLIC_ACTIVE_BIN = '6a1282d76877513b27c2bcb2';
 var currentInvoice = null;
 var autosaveTimer = null;
+
+// ═══════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════
+var SUPA_URL = 'https://lmfpnqcycqesyrcdmfqs.supabase.co';
+var SUPA_KEY = 'sb_publishable_hr-7r2lBVImDTLQ8kzDlfA_Lhnlka2P';
+var STORE_ID = 'miss-behavin';
+
+function supaHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY
+  };
+}
+
+// Get active invoice row
+function sbGetActive(cb) {
+  fetch(SUPA_URL + '/rest/v1/active_invoice?store_id=eq.' + STORE_ID + '&limit=1', {
+    headers: supaHeaders()
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows) {
+    if (rows && rows.length > 0) cb(rows[0]);
+    else cb(null);
+  })
+  .catch(function(e){ console.error('sbGetActive error:', e); cb(null); });
+}
+
+// Update active invoice row
+function sbSetActive(published, invoice, cb) {
+  fetch(SUPA_URL + '/rest/v1/active_invoice?store_id=eq.' + STORE_ID, {
+    method: 'PATCH',
+    headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
+    body: JSON.stringify({
+      published: published,
+      invoice: invoice,
+      updated_at: new Date().toISOString()
+    })
+  })
+  .then(function(r){
+    if (r.ok) { if(cb) cb(true); }
+    else { r.text().then(function(t){ console.error('sbSetActive error:', t); if(cb) cb(false); }); }
+  })
+  .catch(function(e){ console.error('sbSetActive error:', e); if(cb) cb(false); });
+}
+
+// Archive an invoice
+function sbArchiveInvoice(inv, cb) {
+  var vendor = inv.vendor || 'Unknown Vendor';
+  var total = (inv.styles||[]).reduce(function(sum,s){
+    return sum + (s.cost||0) * (s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0);
+  }, 0);
+  var record = {
+    store_id: STORE_ID,
+    vendor: vendor,
+    invoice_number: inv.invoice_number || '',
+    invoice_date: inv.invoice_date || '',
+    status: 'live',
+    published: true,
+    styles: inv.styles || []
+  };
+  // Check if invoice already exists (upsert by invoice_number + store_id)
+  fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&invoice_number=eq.' + encodeURIComponent(inv.invoice_number||''), {
+    headers: supaHeaders()
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows) {
+    if (rows && rows.length > 0) {
+      // Update existing
+      return fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&invoice_number=eq.' + encodeURIComponent(inv.invoice_number||''), {
+        method: 'PATCH',
+        headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
+        body: JSON.stringify({ styles: inv.styles, status: 'live', updated_at: new Date().toISOString() })
+      });
+    } else {
+      // Insert new
+      return fetch(SUPA_URL + '/rest/v1/invoices', {
+        method: 'POST',
+        headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
+        body: JSON.stringify(record)
+      });
+    }
+  })
+  .then(function(r){ if(cb) cb(r.ok); })
+  .catch(function(e){ console.error('sbArchiveInvoice error:', e); if(cb) cb(false); });
+}
+
+// Load all archived invoices
+function sbLoadArchive(cb) {
+  fetch(SUPA_URL + '/rest/v1/invoices?store_id=eq.' + STORE_ID + '&order=created_at.desc', {
+    headers: supaHeaders()
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(rows){ cb(rows||[]); })
+  .catch(function(e){ console.error('sbLoadArchive error:', e); cb([]); });
+}
+
+// Delete an archived invoice
+function sbDeleteInvoice(id, cb) {
+  fetch(SUPA_URL + '/rest/v1/invoices?id=eq.' + id, {
+    method: 'DELETE',
+    headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'})
+  })
+  .then(function(r){ if(cb) cb(r.ok); })
+  .catch(function(e){ console.error('sbDeleteInvoice error:', e); if(cb) cb(false); });
+}
 
 // ═══════════════════════════════════════
 // INIT
@@ -590,11 +710,9 @@ function kelTab(name) {
 }
 
 function loadActiveInvoiceForKel() {
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
-  binGet(actBin, function(d) {
-    var rec = d && d.record;
-    if (rec && rec.invoice) {
-      currentInvoice = rec.invoice;
+  sbGetActive(function(row) {
+    if (row && row.invoice) {
+      currentInvoice = row.invoice;
       renderKelCards(currentInvoice);
     } else {
       document.getElementById('kel-empty').style.display = 'block';
@@ -778,15 +896,14 @@ function collectCurrentInvoice() {
 }
 
 function saveCurrentInvoice() {
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
   var inv = collectCurrentInvoice();
   if (!inv) return;
   currentInvoice = inv;
   setAutosave('saving');
   var published = document.getElementById('live-bar').style.display !== 'none';
-  binPut(actBin, {published: published, invoice: inv}, function() {
-    setAutosave('saved');
-    if (published) archiveInvoice(inv, function(){});
+  sbSetActive(published, inv, function(ok) {
+    setAutosave(ok ? 'saved' : 'unsaved');
+    if (ok && published) sbArchiveInvoice(inv, function(){});
   });
 }
 
@@ -794,32 +911,21 @@ function saveCurrentInvoice() {
 // PUBLISH TO STAFF
 // ═══════════════════════════════════════
 function publishToStaff() {
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
-  var regBin = ls('mb_registry_bin');
-  if (!actBin) { showStatus('publish-status','error','Set up Active Bin in Settings.'); return; }
   showStatus('publish-status','loading','<span class="spinner"></span>Publishing...');
-
   var inv = collectCurrentInvoice();
   if (!inv) { showStatus('publish-status','error','No invoice to publish.'); return; }
   currentInvoice = inv;
-
-  binPut(actBin, {published:true, invoice:inv}, function(res) {
-    if (!res) { showStatus('publish-status','error','Failed: No response from JSONBin. Check Master Key in Settings.'); return; }
-    if (res.message && res.message !== 'Bin updated successfully.') {
-      showStatus('publish-status','error','JSONBin error: '+res.message);
-      return;
-    }
-    if (regBin) { archiveInvoice(inv, function(){}); }
+  sbSetActive(true, inv, function(ok) {
+    if (!ok) { showStatus('publish-status','error','Failed to publish. Check your connection.'); return; }
+    sbArchiveInvoice(inv, function(){});
     showStatus('publish-status','success','✓ Published! Staff can now see this invoice.');
     showLiveBar(inv);
-    checkStorage();
   });
 }
 
 function unpublish() {
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
   var inv = collectCurrentInvoice();
-  binPut(actBin, {published:false, invoice:inv}, function() {
+  sbSetActive(false, inv, function() {
     document.getElementById('live-bar').style.display = 'none';
   });
 }
@@ -838,10 +944,8 @@ function showLiveBar(inv) {
 }
 
 function checkLiveStatus() {
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
-  binGet(actBin, function(d) {
-    var rec = d && d.record;
-    if (rec && rec.published && rec.invoice) { showLiveBar(rec.invoice); }
+  sbGetActive(function(row) {
+    if (row && row.published && row.invoice) { showLiveBar(row.invoice); }
     else { document.getElementById('live-bar').style.display='none'; }
   });
 }
@@ -863,18 +967,10 @@ function copyLink() {
 function showStaff() {
   document.getElementById('kel-view').style.display = 'none';
   document.getElementById('staff-view').style.display = 'block';
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
-  fetch('https://api.jsonbin.io/v3/b/'+actBin+'/latest')
-  .then(function(r){return r.json();})
-  .then(function(d) {
+  sbGetActive(function(row) {
     document.getElementById('staff-loading').style.display = 'none';
-    var rec = d && d.record;
-    if (rec && rec.published && rec.invoice) { renderStaffView(rec.invoice); }
+    if (row && row.published && row.invoice) { renderStaffView(row.invoice); }
     else { document.getElementById('staff-empty').style.display='block'; }
-  })
-  .catch(function() {
-    document.getElementById('staff-loading').style.display='none';
-    document.getElementById('staff-empty').style.display='block';
   });
 }
 
@@ -1078,151 +1174,105 @@ function processPage(idx, invoiceMeta) {
 }
 
 // ═══════════════════════════════════════
-// JSONBIN
+// STORAGE (legacy removed — now Supabase)
 // ═══════════════════════════════════════
-function binGet(binId,cb){
-  var headers={};var k=ls('mb_bin_key');if(k)headers['X-Master-Key']=k;
-  fetch('https://api.jsonbin.io/v3/b/'+binId+'/latest',{headers:headers})
-  .then(function(r){return r.json();}).then(cb).catch(function(){cb(null);});
-}
-function binPut(binId,data,cb){
-  var k=ls('mb_bin_key');
-  if(!k){if(cb)cb(null);return;}
-  fetch('https://api.jsonbin.io/v3/b/'+binId,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':k},body:JSON.stringify(data)})
-  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(e){console.error('binPut error:',e);if(cb)cb(null);});
-}
-function binCreate(name,data,cb){
-  var k=ls('mb_bin_key');
-  fetch('https://api.jsonbin.io/v3/b',{method:'POST',headers:{'Content-Type':'application/json','X-Master-Key':k,'X-Bin-Name':name,'X-Bin-Private':'true'},body:JSON.stringify(data)})
-  .then(function(r){return r.json();}).then(function(d){if(cb)cb(d);}).catch(function(){if(cb)cb(null);});
+function checkStorage(){
+  // Storage is now Supabase — no limits to display
+  var metersEl=document.getElementById('storage-meters');
+  if(metersEl) metersEl.innerHTML='<div style="font-size:13px;color:var(--gray-text);">Powered by Supabase ✓</div>';
 }
 
-// ═══════════════════════════════════════
-// ARCHIVE
-// ═══════════════════════════════════════
-function archiveInvoice(inv,cb){
-  var regBin=ls('mb_registry_bin');if(!regBin){if(cb)cb();return;}
-  var vendor=inv.vendor||'Unknown Vendor';
-  var fileName=vendor+' · #'+inv.invoice_number+' · '+formatDate(inv.invoice_date)+' · '+inv.styles.length+' styles';
-  var total=inv.styles.reduce(function(sum,s){return sum+(s.cost||0)*(s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0);},0);
-  var trimmed={
-    id:inv.invoice_number+'-'+(inv._savedAt||Date.now()),
-    fileName:fileName,invoice_number:inv.invoice_number,invoice_date:inv.invoice_date,
-    vendor:vendor,style_count:inv.styles.length,wholesale_total:total,
-    status:'live',created_at:new Date().toISOString(),
-    styles:inv.styles.map(function(s){return{code:s.code,name:s.name,cost:s.cost,type:s.type,_retail:s._retail,_markup:s._markup,_markupMode:s._markupMode};})
-  };
-  binGet(regBin,function(regData){
-    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
-    if(!reg.vendors)reg.vendors={};
-    if(reg.vendors[vendor]){
-      binGet(reg.vendors[vendor],function(vData){
-        var vRec=(vData&&vData.record)?vData.record:{vendor:vendor,invoices:[]};
-        if(!vRec.invoices)vRec.invoices=[];
-        // Update existing or add new
-        var existing=vRec.invoices.findIndex(function(i){return i.invoice_number===inv.invoice_number;});
-        if(existing>=0){vRec.invoices[existing]=trimmed;}
-        else{vRec.invoices.forEach(function(i){if(i.status==='live')i.status='draft';});vRec.invoices.unshift(trimmed);}
-        binPut(reg.vendors[vendor],vRec,function(){if(cb)cb();});
-      });
-    }else{
-      binCreate('MB-'+vendor,{vendor:vendor,invoices:[trimmed]},function(newBin){
-        if(!newBin||!newBin.metadata){if(cb)cb();return;}
-        reg.vendors[vendor]=newBin.metadata.id;
-        binPut(regBin,reg,function(){if(cb)cb();});
-      });
+function loadArchive() {
+  var list = document.getElementById('archive-list');
+  var tabBar = document.getElementById('vendor-tab-bar');
+  list.innerHTML = '<div class="archive-empty">Loading...</div>';
+  tabBar.innerHTML = '';
+
+  sbLoadArchive(function(invoices) {
+    if (invoices.length === 0) {
+      list.innerHTML = '<div class="archive-empty">No invoices archived yet.</div>';
+      return;
     }
-  });
-}
+    // Group by vendor
+    var vendors = {};
+    invoices.forEach(function(inv) {
+      var v = inv.vendor || 'Unknown';
+      if (!vendors[v]) vendors[v] = [];
+      vendors[v].push(inv);
+    });
 
-function formatDate(d){return d?d.split('/').join('-'):'';}
-
-function loadArchive(){
-  var regBin=ls('mb_registry_bin');
-  if(!regBin){document.getElementById('archive-list').innerHTML='<div class="archive-empty">Set up Registry Bin in Settings first.</div>';return;}
-  binGet(regBin,function(regData){
-    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
-    var vendors=Object.keys(reg.vendors||{});
-    var tabBar=document.getElementById('vendor-tab-bar');
-    var list=document.getElementById('archive-list');
-    if(vendors.length===0){tabBar.innerHTML='';list.innerHTML='<div class="archive-empty">No invoices archived yet.</div>';return;}
-    tabBar.innerHTML='';
-    vendors.forEach(function(v,i){
-      var btn=document.createElement('button');btn.className='vendor-tab'+(i===0?' active':'');btn.textContent=v;
-      btn.onclick=function(){document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');loadVendorInvoices(v,reg.vendors[v]);};
+    var vendorNames = Object.keys(vendors);
+    tabBar.innerHTML = '';
+    vendorNames.forEach(function(v, i) {
+      var btn = document.createElement('button');
+      btn.className = 'vendor-tab' + (i === 0 ? ' active' : '');
+      btn.textContent = v;
+      btn.onclick = function() {
+        document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});
+        btn.classList.add('active');
+        renderArchiveList(vendors[v]);
+      };
       tabBar.appendChild(btn);
     });
-    loadVendorInvoices(vendors[0],reg.vendors[vendors[0]]);
+    renderArchiveList(vendors[vendorNames[0]]);
   });
 }
 
-function loadVendorInvoices(vendor,binId){
-  var list=document.getElementById('archive-list');
-  list.innerHTML='<div class="archive-empty">Loading...</div>';
-  binGet(binId,function(vData){
-    var vRec=(vData&&vData.record)?vData.record:{invoices:[]};
-    var invoices=vRec.invoices||[];
-    if(invoices.length===0){list.innerHTML='<div class="archive-empty">No invoices for '+esc(vendor)+' yet.</div>';return;}
-    list.innerHTML='';
-    invoices.forEach(function(inv){
-      var item=document.createElement('div');item.className='archive-item';
-      var sLabel=inv.status==='live'?'Live':inv.status==='priced'?'Priced':'Draft';
-      item.innerHTML='<div class="archive-item-info"><div class="archive-file-name">'+esc(inv.fileName||inv.invoice_number)+'</div><div class="archive-meta">'+esc(inv.invoice_date||'')+' · '+inv.style_count+' styles · $'+Number(inv.wholesale_total||0).toFixed(2)+' wholesale</div></div><div class="archive-right"><span class="status-pill '+(inv.status||'draft')+'">'+sLabel+'</span><button class="delete-btn">🗑</button></div>';
-      item.querySelector('.archive-item-info').addEventListener('click',function(){loadArchivedInvoice(inv);});
-      item.querySelector('.delete-btn').addEventListener('click',function(e){
-        e.stopPropagation();
-        if(inv.status==='live'){showModal('Cannot Delete','This invoice is currently published. Unpublish it first.',null,false);return;}
-        showModal('Delete Invoice','Delete "'+inv.fileName+'"? This cannot be undone.',function(){deleteInvoice(inv.id,binId,vRec);},true);
-      });
-      list.appendChild(item);
+function renderArchiveList(invoices) {
+  var list = document.getElementById('archive-list');
+  list.innerHTML = '';
+  if (!invoices || invoices.length === 0) {
+    list.innerHTML = '<div class="archive-empty">No invoices found.</div>';
+    return;
+  }
+  invoices.forEach(function(inv) {
+    var item = document.createElement('div');
+    item.className = 'archive-item';
+    var total = (inv.styles||[]).reduce(function(sum,s){
+      return sum+(s.cost||0)*((s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0));
+    },0);
+    var fileName = (inv.vendor||'') + ' · #' + (inv.invoice_number||'') + ' · ' + (inv.invoice_date||'') + ' · ' + (inv.styles||[]).length + ' styles';
+    var sLabel = inv.status === 'live' ? 'Live' : 'Draft';
+    item.innerHTML =
+      '<div class="archive-item-info">'+
+        '<div class="archive-file-name">'+esc(fileName)+'</div>'+
+        '<div class="archive-meta">'+esc(inv.invoice_date||'')+' · '+(inv.styles||[]).length+' styles · $'+Number(total).toFixed(2)+' wholesale</div>'+
+      '</div>'+
+      '<div class="archive-right">'+
+        '<span class="status-pill '+(inv.status||'draft')+'">'+sLabel+'</span>'+
+        '<button class="delete-btn">🗑</button>'+
+      '</div>';
+    item.querySelector('.archive-item-info').addEventListener('click', function() { loadArchivedInvoice(inv); });
+    item.querySelector('.delete-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (inv.status === 'live') { showModal('Cannot Delete','This invoice is currently published. Unpublish it first.',null,false); return; }
+      showModal('Delete Invoice','Delete this invoice? This cannot be undone.', function() {
+        sbDeleteInvoice(inv.id, function(ok) {
+          closeModal();
+          if (ok) loadArchive();
+        });
+      }, true);
     });
+    list.appendChild(item);
   });
 }
 
-function loadArchivedInvoice(inv){
+function loadArchivedInvoice(inv) {
   selectedFiles = []; allExtractedStyles = [];
   document.getElementById('pages-summary').style.display='none';
   document.getElementById('extract-btn').disabled = true;
   document.getElementById('extract-btn').textContent = 'Extract All with Claude';
   document.getElementById('upload-area').querySelector('.upload-text').textContent = 'Tap to select invoice photos';
   document.getElementById('upload-area').querySelector('.upload-hint').textContent = 'Select one or multiple pages at once';
-  currentInvoice={vendor:inv.vendor,invoice_number:inv.invoice_number,invoice_date:inv.invoice_date,styles:(inv.styles||[]).map(function(s){return Object.assign({colors:[]},s);})};
+  currentInvoice = {
+    vendor: inv.vendor,
+    invoice_number: inv.invoice_number,
+    invoice_date: inv.invoice_date,
+    styles: (inv.styles||[]).map(function(s){ return Object.assign({colors:[]}, s); })
+  };
   kelTab('invoice');
   renderKelCards(currentInvoice);
-  showStatus('extract-status','success','✓ Loaded: '+esc(inv.fileName));
-}
-
-function deleteInvoice(invId,binId,vRec){
-  vRec.invoices=(vRec.invoices||[]).filter(function(i){return i.id!==invId;});
-  binPut(binId,vRec,function(){closeModal();loadArchive();checkStorage();});
-}
-
-// ═══════════════════════════════════════
-// STORAGE
-// ═══════════════════════════════════════
-function checkStorage(){
-  var regBin=ls('mb_registry_bin');if(!regBin)return;
-  binGet(regBin,function(regData){
-    var reg=(regData&&regData.record)?regData.record:{vendors:{}};
-    var vendors=Object.keys(reg.vendors||{});
-    var metersEl=document.getElementById('storage-meters');
-    if(!metersEl)return;
-    if(vendors.length===0){metersEl.innerHTML='<div style="font-size:13px;color:var(--gray-text);">No vendors yet.</div>';return;}
-    metersEl.innerHTML='';
-    var warnList=[];
-    vendors.forEach(function(vendor){
-      binGet(reg.vendors[vendor],function(vData){
-        var bytes=new Blob([JSON.stringify((vData&&vData.record)||{})]).size;
-        var kb=(bytes/1024).toFixed(1);var pct=Math.min(Math.round(bytes/10240*100),100);
-        var cc=pct<60?'green':pct<85?'yellow':'red';
-        if(pct>=85)warnList.push(vendor);
-        var div=document.createElement('div');div.className='storage-vendor';
-        div.innerHTML='<div class="storage-vendor-name"><span>'+esc(vendor)+'</span><span class="storage-pct">'+kb+'KB / 10KB ('+pct+'%)</span></div><div class="storage-bar-bg"><div class="storage-bar-fill '+cc+'" style="width:'+pct+'%"></div></div>';
-        metersEl.appendChild(div);
-        if(warnList.length>0){var b=document.getElementById('storage-warning');if(b){b.style.display='block';b.textContent='⚠️ Storage almost full: '+warnList.join(', ')+'. Delete old invoices or upgrade JSONBin.';}}
-      });
-    });
-  });
+  showStatus('extract-status','success','✓ Loaded: '+esc((inv.vendor||'')+' #'+(inv.invoice_number||'')));
 }
 
 // ═══════════════════════════════════════
@@ -1232,16 +1282,13 @@ function ls(k){return localStorage.getItem(k)||'';}
 function lsSet(k,v){localStorage.setItem(k,v);}
 
 function loadSettingsToUI(){
-  var pairs=[['api-key-input','mb_api_key'],['bin-key-input','mb_bin_key'],['registry-bin-input','mb_registry_bin'],['active-bin-input','mb_active_bin']];
-  pairs.forEach(function(p){var el=document.getElementById(p[0]);if(el)el.value=ls(p[1]);});
+  var el=document.getElementById('api-key-input');
+  if(el) el.value=ls('mb_api_key');
 }
 function saveSettings(){
   var a=document.getElementById('api-key-input').value.trim();
-  var b=document.getElementById('bin-key-input').value.trim();
-  var r=document.getElementById('registry-bin-input').value.trim();
-  var x=document.getElementById('active-bin-input').value.trim();
-  if(!a||!b||!r||!x){showStatus('settings-status','error','Please fill in all four fields.');return;}
-  lsSet('mb_api_key',a);lsSet('mb_bin_key',b);lsSet('mb_registry_bin',r);lsSet('mb_active_bin',x);
+  if(!a){showStatus('settings-status','error','Please enter your Anthropic API key.');return;}
+  lsSet('mb_api_key',a);
   showStatus('settings-status','success','✓ Settings saved.');
 }
 function loadNotifToUI(){
@@ -1293,60 +1340,50 @@ function printLabels() {
     return;
   }
 
-  // Get full invoice data from active bin for colors/sizes
-  var actBin = ls('mb_active_bin') || PUBLIC_ACTIVE_BIN;
-  fetch('https://api.jsonbin.io/v3/b/' + actBin + '/latest')
-  .then(function(r){ return r.json(); })
-  .then(function(d) {
-    var rec = d && d.record;
-    var styles = (rec && rec.invoice && rec.invoice.styles) || [];
+  // Get full invoice data from Supabase for colors/sizes
+  sbGetActive(function(row) {
+    var styles = (row && row.invoice && row.invoice.styles) || [];
 
-    styles.forEach(function(style) {
-      var retail = style._retail || '—';
-      var colorRows = (style.colors || []).map(function(c) {
-        var sizes = Object.entries(c.sizes || {})
-          .filter(function(kv){ return kv[1] > 0; })
-          .map(function(kv){ return kv[0]+':'+kv[1]; })
-          .join(' ');
-        return '<div class="hang-tag-color-row"><span>'+esc(c.color)+'</span><span>'+sizes+'</span></div>';
-      }).join('');
+    if (styles.length === 0) {
+      // Fallback: print from visible staff cards
+      cards.forEach(function(card) {
+        var name = (card.querySelector('.s-name') || {}).textContent || '';
+        var code = (card.querySelector('.s-code') || {}).textContent || '';
+        var retail = (card.querySelector('.s-retail') || {}).textContent || '—';
+        var tag = document.createElement('div');
+        tag.className = 'hang-tag';
+        tag.innerHTML =
+          '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
+          '<div class="hang-tag-name">' + esc(name) + '</div>' +
+          '<div class="hang-tag-code">' + esc(code) + '</div>' +
+          '<div class="hang-tag-price">' + esc(retail) + '</div>' +
+          '<div class="hang-tag-colors"></div>';
+        grid.appendChild(tag);
+      });
+    } else {
+      styles.forEach(function(style) {
+        var retail = style._retail || '—';
+        var colorRows = (style.colors || []).map(function(c) {
+          var sizes = Object.entries(c.sizes || {})
+            .filter(function(kv){ return kv[1] > 0; })
+            .map(function(kv){ return kv[0]+':'+kv[1]; })
+            .join(' ');
+          return '<div class="hang-tag-color-row"><span>'+esc(c.color)+'</span><span>'+sizes+'</span></div>';
+        }).join('');
 
-      var tag = document.createElement('div');
-      tag.className = 'hang-tag';
-      tag.innerHTML =
-        '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
-        '<div class="hang-tag-name">' + esc(style.name || style.code) + '</div>' +
-        '<div class="hang-tag-code">' + esc(style.code) + '</div>' +
-        '<div class="hang-tag-price">' + esc(retail) + '</div>' +
-        '<div class="hang-tag-colors">' + colorRows + '</div>';
-      grid.appendChild(tag);
-    });
+        var tag = document.createElement('div');
+        tag.className = 'hang-tag';
+        tag.innerHTML =
+          '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
+          '<div class="hang-tag-name">' + esc(style.name || style.code) + '</div>' +
+          '<div class="hang-tag-code">' + esc(style.code) + '</div>' +
+          '<div class="hang-tag-price">' + esc(retail) + '</div>' +
+          '<div class="hang-tag-colors">' + colorRows + '</div>';
+        grid.appendChild(tag);
+      });
+    }
 
     // Show print area and trigger print
-    printArea.style.display = 'block';
-    setTimeout(function() {
-      window.print();
-      setTimeout(function() {
-        printArea.style.display = 'none';
-      }, 1000);
-    }, 300);
-  })
-  .catch(function() {
-    // Fallback: print from visible staff cards
-    cards.forEach(function(card) {
-      var name = (card.querySelector('.s-name') || {}).textContent || '';
-      var code = (card.querySelector('.s-code') || {}).textContent || '';
-      var retail = (card.querySelector('.s-retail') || {}).textContent || '—';
-      var tag = document.createElement('div');
-      tag.className = 'hang-tag';
-      tag.innerHTML =
-        '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
-        '<div class="hang-tag-name">' + esc(name) + '</div>' +
-        '<div class="hang-tag-code">' + esc(code) + '</div>' +
-        '<div class="hang-tag-price">' + esc(retail) + '</div>' +
-        '<div class="hang-tag-colors"></div>';
-      grid.appendChild(tag);
-    });
     printArea.style.display = 'block';
     setTimeout(function() {
       window.print();
