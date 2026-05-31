@@ -84,6 +84,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 
 /* AUTOSAVE */
 .autosave-bar{padding:6px 24px;font-size:11px;color:var(--gray-text);background:var(--gray-light);border-bottom:1px solid var(--gray-mid);display:flex;justify-content:space-between;align-items:center;min-height:30px;}
+.bar-btn{background:none;border:1px solid var(--gray-mid);font-size:11px;font-weight:600;color:var(--black);cursor:pointer;font-family:'DM Sans',sans-serif;padding:4px 10px;border-radius:3px;-webkit-appearance:none;}
+.bar-btn:active{background:var(--gray-light);}
+.bar-btn.bar-btn-black{background:var(--black);color:var(--white);border-color:var(--black);}
+.bar-btn.bar-btn-black:active{background:#333;}
 .autosave-dot{width:7px;height:7px;border-radius:50%;background:var(--gray-mid);display:inline-block;margin-right:5px;transition:background .3s;}
 .autosave-dot.saved{background:var(--green);}
 .autosave-dot.saving{background:var(--yellow);animation:pulse 1s infinite;}
@@ -428,7 +432,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
     <div id="pricing-section" style="display:none;">
       <div class="autosave-bar">
         <div><span class="autosave-dot" id="autosave-dot"></span><span id="autosave-text">Not saved</span></div>
-        <button onclick="saveCurrentInvoice()" style="background:none;border:none;font-size:11px;color:var(--black);cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">Save now</button>
+        <div style="display:flex;gap:8px;">
+          <button class="bar-btn" onclick="saveCurrentInvoice()">Save</button>
+          <button class="bar-btn bar-btn-black" onclick="publishToStaff()">Publish to Staff</button>
+        </div>
       </div>
 
       <div class="inv-meta">
@@ -448,9 +455,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div style="padding:0 24px;" id="kel-cards"></div>
 
       <div class="action-section">
-        <div class="action-title">Publish to Staff</div>
+        <div class="action-title">Ready to share?</div>
         <div class="action-note">Staff will see style names and retail prices only — no wholesale costs.</div>
-        <button class="btn btn-black" onclick="publishToStaff()">Publish to Staff</button>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button class="btn btn-outline" onclick="saveCurrentInvoice()" style="flex:1;">Save</button>
+          <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
+        </div>
         <div class="status" id="publish-status"></div>
       </div>
     </div>
