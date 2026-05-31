@@ -427,6 +427,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div id="pages-summary" style="display:none;padding:10px 0;font-size:13px;font-weight:600;text-align:center;color:var(--success-fg);"></div>
       <button class="btn btn-black" id="extract-btn" onclick="extractAllPages()" disabled>Extract All with Claude</button>
       <div class="status" id="extract-status"></div>
+      <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
     </div>
 
     <div id="pricing-section" style="display:none;">
@@ -1516,8 +1517,30 @@ function showStatus(id,type,msg){var el=document.getElementById(id);if(!el)retur
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 // ═══════════════════════════════════════
-// STAGE 2 — NAME REGENERATION
+// SAMPLE INVOICE — NO API COST
 // ═══════════════════════════════════════
+function loadSampleInvoice() {
+  var sample = {
+    vendor: 'Cotton Candy LA',
+    invoice_number: 'SAMPLE-001',
+    date: '05/15/2026',
+    styles: [
+      { code:'CT-13894', type:'Top',    name:'Ivory Dream',      cost:24.00, colors:[{color:'White', sizes:{XS:1,S:3,M:1,L:1}}] },
+      { code:'CT-14027', type:'Top',    name:'Midnight Siren',   cost:16.50, colors:[{color:'Black', sizes:{XS:1,S:3,M:1,L:1}},{color:'Ivory', sizes:{XS:1,S:3,M:1,L:1}}] },
+      { code:'CT-14111', type:'Top',    name:'Shadow Dance',     cost:16.00, colors:[{color:'Black', sizes:{XS:1,S:3,M:1,L:1}}] },
+      { code:'CT-14320', type:'Top',    name:'Sweet Heat',       cost:14.50, colors:[{color:'Cherry', sizes:{XS:1,S:3,M:1,L:1}},{color:'Chocolate', sizes:{XS:1,S:3,M:1,L:1}}] },
+      { code:'SD-326',   type:'Dress',  name:'Moonlit Romance',  cost:31.50, colors:[{color:'Black', sizes:{XS:1,S:1,M:1,L:1}},{color:'Butter', sizes:{XS:1,S:2,M:1,L:1}},{color:'Peony Pink', sizes:{XS:1,S:3,M:1,L:1}}] },
+      { code:'SD-358',   type:'Dress',  name:'Ocean Elegance',   cost:32.50, colors:[{color:'Butter', sizes:{XS:2,S:6,M:2,L:2}},{color:'Navy', sizes:{XS:1,S:3,M:1,L:1}}] }
+    ]
+  };
+  currentInvoice = sample;
+  renderKelCards(sample);
+  document.getElementById('kel-inv-title').textContent = sample.vendor + ' — #' + sample.invoice_number;
+  document.getElementById('kel-inv-details').textContent = sample.date + ' · ' + sample.styles.length + ' styles';
+  document.getElementById('pricing-section').style.display = 'block';
+  document.getElementById('kel-empty').style.display = 'none';
+  setAutosave('unsaved');
+}
 function regenName(card, code, type) {
   var apiKey = ls('mb_api_key');
   var btn = card.querySelector('.regen-btn');
