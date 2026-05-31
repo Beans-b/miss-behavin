@@ -661,12 +661,15 @@ function sbGetActive(cb) {
   .catch(function(e){ console.error('sbGetActive error:', e); cb(null); });
 }
 
-// Update active invoice row
+// Update active invoice row (upsert — creates if missing, updates if exists)
 function sbSetActive(published, invoice, cb) {
-  fetch(SUPA_URL + '/rest/v1/active_invoice?store_id=eq.' + STORE_ID, {
-    method: 'PATCH',
-    headers: Object.assign({}, supaHeaders(), {'Prefer': 'return=minimal'}),
+  fetch(SUPA_URL + '/rest/v1/active_invoice', {
+    method: 'POST',
+    headers: Object.assign({}, supaHeaders(), {
+      'Prefer': 'resolution=merge-duplicates,return=minimal'
+    }),
     body: JSON.stringify({
+      store_id: STORE_ID,
       published: published,
       invoice: invoice,
       updated_at: new Date().toISOString()
