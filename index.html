@@ -1758,6 +1758,7 @@ function loadSampleInvoice() {
 }
 // Name history per style code — tracks every name ever generated this session
 var _nameHistory = {};
+var _shopifyExistingNames = []; // populated on review open — all live Shopify product titles
 
 function regenName(card, code, type) {
   var apiKey = ls('mb_api_key');
@@ -1785,8 +1786,12 @@ function regenName(card, code, type) {
     _nameHistory[code].push(currentName);
   }
 
-  var usedList = _nameHistory[code].length
-    ? 'Names already used — do NOT repeat any of these: ' + _nameHistory[code].join(', ') + '. '
+  var sessionUsed = _nameHistory[code] || [];
+  var allUsed = sessionUsed.concat(
+    _shopifyExistingNames.filter(function(n) { return sessionUsed.indexOf(n) === -1; })
+  );
+  var usedList = allUsed.length
+    ? 'Names already used or live in Shopify — do NOT repeat any of these: ' + allUsed.join(', ') + '. '
     : '';
 
   btn.classList.add('spinning');
@@ -1902,9 +1907,30 @@ function openShopifyReview() {
     return;
   }
 
-  _buildSpReview(inv);
+  // Show overlay immediately with loading state
   var overlay = document.getElementById('shopify-overlay');
+  var cardsEl = document.getElementById('sp-cards');
+  cardsEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--gray-text);font-size:13px;"><span class="spinner"></span> Loading your Shopify catalog…</div>';
+  document.getElementById('sp-count').textContent = 'Loading…';
   overlay.style.display = 'flex';
+
+  // Fetch all existing Shopify product titles for name deduplication
+  _shopifyWorkerPost('shopify_get_titles', { domain: domain, token: token })
+  .then(function(res) {
+    if (res.titles) {
+      // Strip color suffix (e.g. "Iris Top - Navy" → "Iris Top") and store base names
+      _shopifyExistingNames = res.titles.map(function(t) {
+        return t.replace(/\s*-\s*[^-]+$/, '').trim();
+      }).filter(function(n) { return n.length > 0; });
+    }
+  })
+  .catch(function() {
+    // Non-fatal — proceed without the Shopify name list
+    _shopifyExistingNames = [];
+  })
+  .finally(function() {
+    _buildSpReview(inv);
+  });
 }
 
 function closeShopifyReview() {
@@ -2119,9 +2145,7 @@ function _spDoCreate(cd, domain, token) {
   var typeTag     = typeEntry.tag;
 
   var product = {
-    title: (cd.style.colors && cd.style.colors.length > 1)
-      ? (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color
-      : (cd.style.name || cd.style.code),
+    title: (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color,
     vendor: "Miss Behavin'",
     product_type: shopifyType,
     status: 'active',
