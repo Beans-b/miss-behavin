@@ -954,11 +954,13 @@ function checkPwd() {
     localStorage.setItem('mb_role', 'kel');
     document.getElementById('gate').classList.add('hidden');
     setTimeout(function(){ document.getElementById('gate').style.display='none'; }, 400);
+    loadSettingsFromServer();
     showKel();
   } else if (val === PWD_STAFF) {
     localStorage.setItem('mb_role', 'staff');
     document.getElementById('gate').classList.add('hidden');
     setTimeout(function(){ document.getElementById('gate').style.display='none'; }, 400);
+    loadSettingsFromServer();
     showStaff();
   } else {
     errEl.textContent = 'Incorrect code. Try again.';
@@ -1587,6 +1589,20 @@ function loadArchivedInvoice(inv) {
 function ls(k){return localStorage.getItem(k)||'';}
 function lsSet(k,v){localStorage.setItem(k,v);}
 
+function loadSettingsFromServer() {
+  fetch(PROXY_URL+'?action=get_settings')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.data){
+      var s=data.data;
+      if(s.anthropic_key)lsSet('mb_api_key',s.anthropic_key);
+      if(s.shopify_domain)lsSet('mb_shopify_domain',s.shopify_domain);
+      if(s.shopify_token)lsSet('mb_shopify_token',s.shopify_token);
+    }
+  })
+  .catch(function(e){console.log('Settings load error:',e);});
+}
+
 function loadSettingsToUI(){
   var el=document.getElementById('api-key-input');
   if(el) el.value=ls('mb_api_key');
@@ -1595,8 +1611,14 @@ function loadSettingsToUI(){
 function saveSettings(){
   var a=document.getElementById('api-key-input').value.trim();
   if(!a){showStatus('settings-status','error','Please enter your Anthropic API key.');return;}
-  lsSet('mb_api_key',a);
-  showStatus('settings-status','success','✓ Settings saved.');
+  showStatus('settings-status','loading','<span class="spinner"></span>Saving...');
+  fetch(PROXY_URL+'?action=save_settings',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({anthropic_key:a})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.data){lsSet('mb_api_key',a);showStatus('settings-status','success','✓ Settings saved.');}
+    else{showStatus('settings-status','error','Save failed.');}
+  }).catch(function(){showStatus('settings-status','error','Save failed.');});
 }
 function loadNotifToUI(){
   var phone=ls('mb_staff_phone');var doS=ls('mb_notif_sms')==='true';
@@ -1815,11 +1837,15 @@ function saveShopifySettings() {
     showStatus('shopify-settings-status', 'error', 'Enter both store domain and API token.');
     return;
   }
-  // Normalize domain — strip protocol and trailing slash
   domain = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();
-  lsSet('mb_shopify_domain', domain);
-  lsSet('mb_shopify_token', token);
-  showStatus('shopify-settings-status', 'success', '✓ Shopify settings saved.');
+  showStatus('shopify-settings-status','loading','<span class="spinner"></span>Saving...');
+  fetch(PROXY_URL+'?action=save_settings',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({shopify_domain:domain,shopify_token:token})
+  }).then(function(r){return r.json();}).then(function(d){
+    if(d.data){lsSet('mb_shopify_domain',domain);lsSet('mb_shopify_token',token);showStatus('shopify-settings-status','success','✓ Shopify settings saved.');}
+    else{showStatus('shopify-settings-status','error','Save failed.');}
+  }).catch(function(){showStatus('shopify-settings-status','error','Save failed.');});
 }
 
 // ─── Open Review Screen ─────────────────
