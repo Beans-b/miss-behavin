@@ -2119,7 +2119,9 @@ function _spDoCreate(cd, domain, token) {
   var typeTag     = typeEntry.tag;
 
   var product = {
-    title: (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color,
+    title: (cd.style.colors && cd.style.colors.length > 1)
+      ? (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color
+      : (cd.style.name || cd.style.code),
     vendor: "Miss Behavin'",
     product_type: shopifyType,
     status: 'active',
