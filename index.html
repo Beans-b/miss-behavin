@@ -646,17 +646,13 @@ var currentInvoice = null;
 var autosaveTimer = null;
 
 // ═══════════════════════════════════════
-// SUPABASE CONFIG — via Edge Function proxy
+// CLOUDFLARE WORKER API
 // ═══════════════════════════════════════
-var PROXY_URL = 'https://lmfpnqcycqesyrcdmfqs.supabase.co/functions/v1/db-proxy';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxtZnBucWN5Y3Flc3lyY2RtZnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzA0NjQsImV4cCI6MjA5NTgwNjQ2NH0.QC0jpdg-reCyc1TuFwtTrQa1plLXlbC4uLMhm3RrMbI';
+var PROXY_URL = 'https://linesheet-api.brianburge.workers.dev';
 var STORE_ID = 'miss-behavin';
 
 function proxyHeaders() {
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + SUPA_KEY
-  };
+  return { 'Content-Type': 'application/json' };
 }
 
 // Get active invoice row
@@ -666,8 +662,11 @@ function sbGetActive(cb) {
   })
   .then(function(r){ return r.json(); })
   .then(function(res) {
-    if (res.data) cb(res.data);
-    else cb(null);
+    if (res.data && res.data.invoice) {
+      var row = res.data;
+      row.invoice = typeof row.invoice === 'string' ? JSON.parse(row.invoice) : row.invoice;
+      cb(row);
+    } else cb(null);
   })
   .catch(function(e){ console.error('sbGetActive error:', e); cb(null); });
 }
