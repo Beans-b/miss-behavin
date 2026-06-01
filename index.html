@@ -712,7 +712,15 @@ function sbLoadArchive(cb) {
     headers: proxyHeaders()
   })
   .then(function(r){ return r.json(); })
-  .then(function(res){ cb(res.data||[]); })
+  .then(function(res){
+    var rows = res.data || [];
+    rows.forEach(function(inv) {
+      if (typeof inv.styles === 'string') {
+        try { inv.styles = JSON.parse(inv.styles); } catch(e) { inv.styles = []; }
+      }
+    });
+    cb(rows);
+  })
   .catch(function(e){ console.error('sbLoadArchive error:', e); cb([]); });
 }
 
