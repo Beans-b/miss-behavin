@@ -2084,18 +2084,37 @@ function _spDoCreate(cd, domain, token) {
     inventory.push({ sku: sku, quantity: qty });
   });
 
+  // Map invoice types → Shopify product_type + collection tags
+  var _typeMap = {
+    'Dress':    { shopify: 'Dresses',   tag: 'dress' },
+    'Romper':   { shopify: 'Rompers',   tag: 'dress' },
+    'Jumpsuit': { shopify: 'Rompers',   tag: 'dress' },
+    'Top':      { shopify: 'Tops',      tag: 'top' },
+    'Blouse':   { shopify: 'Tops',      tag: 'top' },
+    'Sweater':  { shopify: 'Sweaters',  tag: 'sweater' },
+    'Bottom':   { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Skirt':    { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Shorts':   { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Shoe':     { shopify: 'Shoes',     tag: 'shoes' },
+    'Accessory':{ shopify: 'Accessories', tag: 'accessories' }
+  };
+  var rawType    = cd.style.type || 'Apparel';
+  var typeEntry  = _typeMap[rawType] || { shopify: rawType + 's', tag: rawType.toLowerCase() };
+  var shopifyType = typeEntry.shopify;
+  var typeTag     = typeEntry.tag;
+
   var product = {
     title: (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color,
     vendor: "Miss Behavin'",
-    product_type: cd.style.type || 'Apparel',
+    product_type: shopifyType,
     status: 'active',
-    tags: cd.colorObj.color + ', ' + (cd.style.type || 'Apparel'),
+    tags: cd.colorObj.color + ', ' + typeTag,
     options: [{ name: 'Size', values: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }) }],
     variants: variants
   };
 
+  // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
   var collNames = ['New Arrivals'];
-  if (cd.style.type) collNames.push(cd.style.type + 's');
 
   _shopifyWorkerPost('shopify_create_product', {
     domain: domain, token: token,
