@@ -1756,6 +1756,9 @@ function loadSampleInvoice() {
   document.getElementById('kel-empty').style.display = 'none';
   setAutosave('unsaved');
 }
+// Name history per style code — tracks every name ever generated this session
+var _nameHistory = {};
+
 function regenName(card, code, type) {
   var apiKey = ls('mb_api_key');
   var btn = card.querySelector('.regen-btn');
@@ -1775,6 +1778,17 @@ function regenName(card, code, type) {
   }
 
   var currentName = nameInput.value;
+
+  // Track history per style code
+  if (!_nameHistory[code]) _nameHistory[code] = [];
+  if (currentName && _nameHistory[code].indexOf(currentName) === -1) {
+    _nameHistory[code].push(currentName);
+  }
+
+  var usedList = _nameHistory[code].length
+    ? 'Names already used — do NOT repeat any of these: ' + _nameHistory[code].join(', ') + '. '
+    : '';
+
   btn.classList.add('spinning');
   btn.disabled = true;
 
@@ -1789,10 +1803,10 @@ function regenName(card, code, type) {
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 15,
-      system: 'Generate a fun flirty product name for Miss Behavin\', a coastal California women\'s boutique (women 12-36). Format: short girl name + item type. Examples: Stella Dress, Coco Top, Mia Romper, Luna Skirt, Zara Blouse, Ava Sweater, Tia Bottom. Return ONLY the name, nothing else — no quotes, no punctuation.',
+      system: 'You name products for Miss Behavin\', a fun coastal California women\'s boutique. Your names are fresh, flirty, and feel alive — the kind a confident 19-year-old or a stylish 27-year-old would both love. Format: short girl name + item type. The girl name should feel current and cool — think names like Mila, Demi, Remi, Lux, Nova, Jade, Suki, Rio, Tate, Bri, Gia, Lexi, Roxy, Vivi, Kai, Bebe, Cali, Dani, Lola, Noa, Rue, Sloane, Wren, Zadie. Mix in item type naturally: Mila Dress, Demi Top, Rio Romper. Every name must feel DIFFERENT — no duplicates, no safe choices. Return ONLY the name, nothing else — no quotes, no punctuation, no explanation.',
       messages: [{
         role: 'user',
-        content: 'Style: ' + code + ', type: ' + (type||'Item') + '. Current name: "' + currentName + '". Give a different name.'
+        content: usedList + 'Style code: ' + code + ', item type: ' + (type||'Item') + '. Generate one fresh name now.'
       }]
     })
   })
@@ -1805,7 +1819,8 @@ function regenName(card, code, type) {
       return;
     }
     var newName = data.content[0].text.trim().replace(/^["'`]|["'`]$/g, '').replace(/\.$/, '');
-    if (newName && newName !== currentName) {
+    if (newName && _nameHistory[code].indexOf(newName) === -1) {
+      _nameHistory[code].push(newName);
       nameInput.value = newName;
       btn.classList.add('done');
       btn.textContent = '✓';
