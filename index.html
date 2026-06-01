@@ -231,6 +231,131 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 
 .app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
 
+/* ═══════════════════════════════════════
+   STAGE 3 — SHOPIFY
+   ═══════════════════════════════════════ */
+.btn-shopify{background:#1a5e20;color:#fff;margin-top:0;}
+.btn-shopify:active{background:#154a1a;}
+
+/* SHOPIFY OVERLAY */
+#shopify-overlay{
+  position:fixed;inset:0;background:var(--white);z-index:1500;
+  display:none;flex-direction:column;max-width:480px;margin:0 auto;
+}
+.sp-head{
+  padding:16px 24px;border-bottom:2px solid var(--black);flex-shrink:0;
+  background:var(--black);color:var(--white);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sp-head-title{font-family:'Playfair Display',serif;font-size:18px;}
+.sp-head-meta{font-size:11px;color:#888;letter-spacing:.06em;margin-top:2px;}
+.sp-close{
+  background:none;border:1px solid #555;color:#fff;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:7px 14px;cursor:pointer;
+  flex-shrink:0;-webkit-appearance:none;
+}
+.sp-close:active{background:#222;}
+.sp-body{flex:1;overflow-y:auto;padding:16px 24px 90px;-webkit-overflow-scrolling:touch;}
+.sp-hint{font-size:12px;color:var(--gray-text);margin-bottom:14px;line-height:1.55;}
+
+.sp-foot{
+  flex-shrink:0;padding:12px 24px;border-top:1px solid var(--gray-mid);
+  background:var(--gray-light);display:flex;justify-content:space-between;align-items:center;
+}
+.sp-foot-msg{font-size:12px;color:var(--gray-text);}
+.sp-foot-count{font-size:12px;font-weight:600;color:var(--success-fg);}
+
+/* SHOPIFY CARD */
+.sp-card{border:1px solid var(--gray-mid);margin-bottom:12px;transition:border-color .2s,background .2s;}
+.sp-card[data-state="success"]{border-color:var(--green);background:#f0fff4;}
+.sp-card[data-state="added"]  {border-color:var(--green);background:#f0fff4;}
+.sp-card[data-state="error"]  {border-color:var(--red);background:#fff5f5;}
+.sp-card[data-state="duplicate"]{border-color:#d97706;background:#fffbeb;}
+.sp-card[data-state="skipped"] {opacity:.42;}
+
+.sp-card-head{
+  display:flex;align-items:flex-start;gap:8px;
+  padding:10px 14px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);
+}
+.sp-card-info{flex:1;min-width:0;}
+.sp-card-title{font-size:14px;font-weight:600;line-height:1.2;}
+.sp-card-meta {font-size:11px;color:var(--gray-text);margin-top:2px;letter-spacing:.04em;}
+
+.sp-badge{
+  font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;
+}
+.sb-idle     {background:var(--gray-light);color:var(--gray-text);border:1px solid var(--gray-mid);}
+.sb-checking {background:#fef9c3;color:#854d0e;border:1px solid #fbbf24;}
+.sb-duplicate{background:#fef3c7;color:#92400e;border:1px solid #d97706;}
+.sb-pushing  {background:#e0e7ff;color:#3730a3;border:1px solid #a5b4fc;}
+.sb-success  {background:var(--success-bg);color:var(--success-fg);border:1px solid var(--green);}
+.sb-error    {background:var(--error-bg);color:var(--red);border:1px solid var(--red);}
+.sb-skipped  {background:var(--gray-light);color:var(--gray-text);border:1px solid var(--gray-mid);}
+
+.sp-card-body{padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.sp-size-grid{display:flex;gap:10px;flex-wrap:wrap;}
+.sp-size-cell{text-align:center;min-width:26px;}
+.sp-sz-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
+.sp-sz-qty  {font-size:17px;font-weight:700;color:var(--black);}
+.sp-retail  {font-size:22px;font-weight:700;color:var(--black);white-space:nowrap;flex-shrink:0;}
+
+.sp-card-foot{
+  padding:10px 14px;border-top:1px solid var(--gray-mid);
+  display:flex;gap:8px;align-items:center;
+}
+.sp-push-btn{
+  flex:1;background:var(--black);color:var(--white);border:none;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:11px 14px;
+  cursor:pointer;-webkit-appearance:none;text-align:center;transition:background .15s;
+}
+.sp-push-btn:active:not(:disabled){background:#333;}
+.sp-push-btn:disabled{opacity:.38;cursor:not-allowed;}
+.sp-push-btn.sp-btn-success{background:#1a5e20;cursor:default;}
+.sp-push-btn.sp-btn-error  {background:var(--red);}
+.sp-push-btn.sp-btn-warning{background:#d97706;}
+.sp-view-link{
+  font-size:11px;color:var(--gray-text);text-decoration:underline;
+  letter-spacing:.04em;white-space:nowrap;flex-shrink:0;
+}
+
+/* ERROR DETAIL */
+.sp-error-detail{
+  font-size:11px;color:var(--red);padding:6px 14px 10px;line-height:1.4;
+  border-top:1px solid var(--gray-mid);
+}
+
+/* DUPLICATE MODAL */
+#dup-modal{
+  position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;
+  background:var(--white);border-top:3px solid #d97706;
+  padding:18px 24px 44px;z-index:2100;display:none;
+  box-shadow:0 -4px 24px rgba(0,0,0,.18);
+}
+#dup-modal.open{display:block;animation:dupUp .22s ease-out;}
+@keyframes dupUp{from{transform:translateY(60%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.dup-title{font-family:'Playfair Display',serif;font-size:17px;color:#92400e;margin-bottom:5px;}
+.dup-desc {font-size:12px;color:var(--gray-text);line-height:1.6;margin-bottom:16px;}
+.dup-opts {display:flex;flex-direction:column;gap:7px;}
+.dup-opt{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;
+  border:1px solid var(--gray-mid);background:transparent;
+  cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;
+  width:100%;-webkit-appearance:none;transition:background .12s;
+}
+.dup-opt:active{background:var(--gray-light);}
+.dup-opt-icon {font-size:20px;flex-shrink:0;}
+.dup-opt-label{font-size:13px;font-weight:600;display:block;margin-bottom:1px;}
+.dup-opt-desc {font-size:11px;color:var(--gray-text);line-height:1.35;display:block;}
+.dup-cancel{
+  margin-top:10px;width:100%;background:none;border:1px solid var(--gray-mid);
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;padding:11px;
+  cursor:pointer;color:var(--gray-text);-webkit-appearance:none;
+}
+
 /* PRINT STYLES */
 @media print {
   body * { visibility: hidden; }
@@ -465,6 +590,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
         <div id="bottom-save-status" style="font-size:11px;color:#666;margin-top:6px;text-align:center;"></div>
         <div class="status" id="publish-status"></div>
       </div>
+
+      <div class="action-section" style="border-top:2px solid #1a5e20;margin-top:0;">
+        <div class="action-title">Push to Shopify</div>
+        <div class="action-note">Review every product before it goes live. Wholesale costs are never sent.</div>
+        <button class="btn btn-shopify" style="margin-top:12px;" onclick="openShopifyReview()">🛒 Review &amp; Push to Shopify</button>
+      </div>
     </div>
 
     <div id="kel-empty" class="center-state" style="display:none;">
@@ -487,6 +618,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div class="field"><label class="field-label">Anthropic API Key</label><input type="password" class="field-input" id="api-key-input" placeholder="sk-ant-..." autocomplete="off"/><div class="field-hint">Required for invoice extraction and name generation.</div></div>
       <button class="btn btn-black" onclick="saveSettings()" style="margin-top:8px;">Save Settings</button>
       <div class="status" id="settings-status"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">Shopify Integration</div>
+      <div class="field">
+        <label class="field-label">Store Domain</label>
+        <input type="text" class="field-input" id="shopify-domain-input" placeholder="miss-behavin-2.myshopify.com" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
+        <div class="field-hint">Shopify Admin → Settings → Store details → Store address.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Admin API Token</label>
+        <input type="password" class="field-input" id="shopify-token-input" placeholder="shpat_..." autocomplete="off"/>
+        <div class="field-hint">Settings → Apps → Develop apps. Needs: write_products, write_inventory, read_inventory, read_products.</div>
+      </div>
+      <button class="btn btn-black" onclick="saveShopifySettings()" style="margin-top:8px;">Save Shopify Settings</button>
+      <div class="status" id="shopify-settings-status"></div>
     </div>
     <div class="section">
       <div class="section-title">Staff Notifications</div>
@@ -635,6 +781,55 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <button class="btn btn-danger" style="margin-top:0;display:none;" id="modal-confirm-btn">Delete</button>
     </div>
   </div>
+</div>
+
+<!-- SHOPIFY REVIEW OVERLAY -->
+<div id="shopify-overlay">
+  <div class="sp-head">
+    <div>
+      <div class="sp-head-title">Review &amp; Push to Shopify</div>
+      <div class="sp-head-meta" id="sp-count">— products</div>
+    </div>
+    <button class="sp-close" onclick="closeShopifyReview()">✕ Close</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-hint">Products are <strong>immediately live</strong> after each push — no draft step. Review carefully.</div>
+    <div id="sp-cards"></div>
+  </div>
+  <div class="sp-foot">
+    <div class="sp-foot-msg" id="sp-progress">Tap Push on each product to go live</div>
+    <div class="sp-foot-count" id="sp-done"></div>
+  </div>
+</div>
+
+<!-- DUPLICATE DECISION MODAL -->
+<div id="dup-modal">
+  <div class="dup-title">⚠ Already in Shopify</div>
+  <div class="dup-desc" id="dup-modal-desc"></div>
+  <div class="dup-opts">
+    <button class="dup-opt" onclick="dupDecision('add')">
+      <div class="dup-opt-icon">📦</div>
+      <div>
+        <span class="dup-opt-label">Add Inventory</span>
+        <span class="dup-opt-desc">Add these quantities to the existing product. Use for restocks.</span>
+      </div>
+    </button>
+    <button class="dup-opt" onclick="dupDecision('new')">
+      <div class="dup-opt-icon">🆕</div>
+      <div>
+        <span class="dup-opt-label">Push as New</span>
+        <span class="dup-opt-desc">Create a second separate listing in Shopify.</span>
+      </div>
+    </button>
+    <button class="dup-opt" onclick="dupDecision('skip')">
+      <div class="dup-opt-icon">⏭</div>
+      <div>
+        <span class="dup-opt-label">Skip</span>
+        <span class="dup-opt-desc">Exclude this style. Handle it manually in Shopify.</span>
+      </div>
+    </button>
+  </div>
+  <button class="dup-cancel" onclick="closeDupModal()">Cancel</button>
 </div>
 
 <script>
@@ -801,7 +996,7 @@ function kelTab(name) {
     b.classList.toggle('active', ['invoice','archive','settings','help'][i]===name);
   });
   if (name==='archive') loadArchive();
-  if (name==='settings') { loadSettingsToUI(); checkStorage(); }
+  if (name==='settings') { loadSettingsToUI(); loadShopifySettingsUI(); checkStorage(); }
 }
 
 function loadActiveInvoiceForKel() {
@@ -1395,6 +1590,7 @@ function lsSet(k,v){localStorage.setItem(k,v);}
 function loadSettingsToUI(){
   var el=document.getElementById('api-key-input');
   if(el) el.value=ls('mb_api_key');
+  loadShopifySettingsUI();
 }
 function saveSettings(){
   var a=document.getElementById('api-key-input').value.trim();
@@ -1598,6 +1794,385 @@ function regenName(card, code, type) {
     btn.classList.remove('spinning');
     btn.disabled = false;
     console.error('Name regen failed:', err);
+  });
+}
+// ═══════════════════════════════════════
+// STAGE 3 — SHOPIFY PUSH
+// ═══════════════════════════════════════
+
+// ─── Shopify Settings ───────────────────
+function loadShopifySettingsUI() {
+  var d = document.getElementById('shopify-domain-input');
+  var t = document.getElementById('shopify-token-input');
+  if (d) d.value = ls('mb_shopify_domain');
+  if (t) t.value = ls('mb_shopify_token');
+}
+
+function saveShopifySettings() {
+  var domain = (document.getElementById('shopify-domain-input').value || '').trim();
+  var token  = (document.getElementById('shopify-token-input').value  || '').trim();
+  if (!domain || !token) {
+    showStatus('shopify-settings-status', 'error', 'Enter both store domain and API token.');
+    return;
+  }
+  // Normalize domain — strip protocol and trailing slash
+  domain = domain.replace(/^https?:\/\//i, '').replace(/\/$/, '').toLowerCase();
+  lsSet('mb_shopify_domain', domain);
+  lsSet('mb_shopify_token', token);
+  showStatus('shopify-settings-status', 'success', '✓ Shopify settings saved.');
+}
+
+// ─── Open Review Screen ─────────────────
+var _spCards   = [];  // [{card, style, colorObj, slug, baseSku, activeSizes, retail, state, dupVariant}]
+var _activeDup = null;
+
+function openShopifyReview() {
+  var token  = ls('mb_shopify_token');
+  var domain = ls('mb_shopify_domain');
+
+  if (!token || !domain) {
+    kelTab('settings');
+    setTimeout(function() {
+      showStatus('shopify-settings-status', 'error', 'Add your Shopify token and domain to continue.');
+    }, 80);
+    return;
+  }
+
+  var inv = collectCurrentInvoice();
+  if (!inv || !(inv.styles || []).length) {
+    showModal('No Invoice', 'Extract and price an invoice first.', null, false);
+    return;
+  }
+  currentInvoice = inv;
+
+  // Require all styles to be priced
+  var unpriced = (inv.styles || []).filter(function(s) { return _spParseRetail(s._retail) <= 0; });
+  if (unpriced.length) {
+    showModal(
+      'Prices Missing',
+      unpriced.length + ' style' + (unpriced.length > 1 ? 's are' : ' is') +
+      ' missing a retail price. Set all prices before pushing.',
+      null, false
+    );
+    return;
+  }
+
+  _buildSpReview(inv);
+  var overlay = document.getElementById('shopify-overlay');
+  overlay.style.display = 'flex';
+}
+
+function closeShopifyReview() {
+  document.getElementById('shopify-overlay').style.display = 'none';
+  closeDupModal();
+}
+
+// ─── Helpers ────────────────────────────
+function _spParseRetail(str) {
+  return parseFloat(String(str || '').replace(/[^0-9.]/g, '')) || 0;
+}
+
+function _spColorSlug(color) {
+  return String(color).toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9\-]/g, '');
+}
+
+// ─── Build Review Cards ─────────────────
+function _buildSpReview(inv) {
+  var container = document.getElementById('sp-cards');
+  container.innerHTML = '';
+  _spCards = [];
+
+  (inv.styles || []).forEach(function(style) {
+    var retail = _spParseRetail(style._retail);
+
+    (style.colors || []).forEach(function(colorObj) {
+      var slug    = _spColorSlug(colorObj.color);
+      var baseSku = style.code + '-' + slug;
+
+      // Only sizes with qty > 0
+      var sizeOrder = ['XS', 'S', 'M', 'L'];
+      var activeSizes = {};
+      sizeOrder.forEach(function(sz) {
+        var q = (colorObj.sizes || {})[sz] || 0;
+        if (q > 0) activeSizes[sz] = q;
+      });
+      if (!Object.keys(activeSizes).length) return; // skip colorways with no inventory
+
+      var sizeHtml = '';
+      sizeOrder.forEach(function(sz) {
+        if (!activeSizes[sz]) return;
+        sizeHtml +=
+          '<div class="sp-size-cell">' +
+            '<div class="sp-sz-label">' + sz + '</div>' +
+            '<div class="sp-sz-qty">' + activeSizes[sz] + '</div>' +
+          '</div>';
+      });
+
+      var card = document.createElement('div');
+      card.className = 'sp-card';
+      card.setAttribute('data-state', 'idle');
+
+      card.innerHTML =
+        '<div class="sp-card-head">' +
+          '<div class="sp-card-info">' +
+            '<div class="sp-card-title">' + esc(style.name || style.code) + ' — ' + esc(colorObj.color) + '</div>' +
+            '<div class="sp-card-meta">' + esc(style.code) + ' · ' + esc(style.type || 'Item') + '</div>' +
+          '</div>' +
+          '<div class="sp-badge sb-idle">Ready</div>' +
+        '</div>' +
+        '<div class="sp-card-body">' +
+          '<div class="sp-size-grid">' + sizeHtml + '</div>' +
+          '<div class="sp-retail">$' + retail.toFixed(2) + '</div>' +
+        '</div>' +
+        '<div class="sp-card-foot">' +
+          '<button class="sp-push-btn">Push to Shopify</button>' +
+        '</div>';
+
+      var cd = {
+        card: card, style: style, colorObj: colorObj,
+        slug: slug, baseSku: baseSku, activeSizes: activeSizes,
+        retail: retail, state: 'idle', dupVariant: null
+      };
+
+      _spCards.push(cd);
+      container.appendChild(card);
+
+      // Wire initial push btn
+      _spWireBtn(cd);
+    });
+  });
+
+  var n = _spCards.length;
+  document.getElementById('sp-count').textContent = n + ' product' + (n !== 1 ? 's' : '');
+  document.getElementById('sp-progress').textContent = 'Tap Push on each product to go live';
+  document.getElementById('sp-done').textContent = '';
+}
+
+// ─── Wire Push Button ────────────────────
+function _spWireBtn(cd) {
+  var btn = cd.card.querySelector('.sp-push-btn');
+  btn.onclick = function() { _spPushCard(cd); };
+}
+
+// ─── State Machine ───────────────────────
+function _spSetState(cd, state, badgeText, btnText, btnExtra) {
+  cd.state = state;
+  cd.card.setAttribute('data-state', state);
+
+  var badge = cd.card.querySelector('.sp-badge');
+  var btn   = cd.card.querySelector('.sp-push-btn');
+
+  var badgeMap = {
+    idle:'sb-idle', checking:'sb-checking', duplicate:'sb-duplicate',
+    pushing:'sb-pushing', restocking:'sb-pushing',
+    success:'sb-success', added:'sb-success',
+    error:'sb-error', skipped:'sb-skipped'
+  };
+  badge.className = 'sp-badge ' + (badgeMap[state] || 'sb-idle');
+  badge.textContent = badgeText;
+
+  btn.textContent = btnText || 'Push to Shopify';
+  btn.className   = 'sp-push-btn' + (btnExtra ? ' ' + btnExtra : '');
+  btn.disabled    = (['pushing','restocking','success','added','skipped'].indexOf(state) >= 0);
+  btn.onclick     = null;
+
+  // Re-wire for actionable states
+  if (state === 'idle' || state === 'error') {
+    btn.onclick = function() { _spPushCard(cd); };
+  } else if (state === 'duplicate') {
+    btn.onclick = function() { showDupModal(cd); };
+  }
+
+  _spUpdateProgress();
+}
+
+function _spUpdateProgress() {
+  var done   = _spCards.filter(function(c){ return ['success','added','skipped','error'].indexOf(c.state) >= 0; }).length;
+  var pushed = _spCards.filter(function(c){ return c.state === 'success' || c.state === 'added'; }).length;
+  var n      = _spCards.length;
+  if (done > 0) {
+    document.getElementById('sp-progress').textContent = done + ' of ' + n + ' handled';
+    document.getElementById('sp-done').textContent     = pushed > 0 ? pushed + ' live ✓' : '';
+  }
+}
+
+// ─── Push a single card ──────────────────
+function _spPushCard(cd) {
+  var token  = ls('mb_shopify_token');
+  var domain = ls('mb_shopify_domain');
+
+  _spSetState(cd, 'checking', 'Checking…', 'Checking…');
+
+  // Remove old error detail if any
+  var oldErr = cd.card.querySelector('.sp-error-detail');
+  if (oldErr) oldErr.remove();
+
+  // Canonical SKU to check: prefer S, fall back to first active size
+  var sizes     = ['XS','S','M','L'].filter(function(sz){ return cd.activeSizes[sz]; });
+  var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
+  var checkSku  = cd.baseSku + '-' + checkSize;
+
+  _shopifyWorkerPost('shopify_check_sku', { domain: domain, token: token, sku: checkSku })
+  .then(function(res) {
+    if (res.error) throw new Error(res.error);
+
+    if (res.exists) {
+      cd.dupVariant = res.variant;
+      _spSetState(cd, 'duplicate', '⚠ In Shopify', '⚠ Already in Shopify — Decide', 'sp-btn-warning');
+      showDupModal(cd);
+      return;
+    }
+
+    _spDoCreate(cd, domain, token);
+  })
+  .catch(function(err) {
+    _spSetState(cd, 'error', '✗ Error', '✗ Error — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, err.message || 'Unknown error');
+  });
+}
+
+function _spDoCreate(cd, domain, token) {
+  _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
+
+  var sizeOrder   = ['XS','S','M','L'];
+  var activeSizes = Object.keys(cd.activeSizes);
+  var variants    = [];
+  var inventory   = [];
+
+  sizeOrder.forEach(function(sz) {
+    var qty = cd.activeSizes[sz];
+    if (!qty) return;
+    var sku = cd.baseSku + '-' + sz;
+    variants.push({
+      option1: sz,
+      price: cd.retail.toFixed(2),
+      sku: sku,
+      barcode: sku,
+      inventory_management: 'shopify',
+      inventory_policy: 'deny'
+    });
+    inventory.push({ sku: sku, quantity: qty });
+  });
+
+  var product = {
+    title: (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color,
+    vendor: "Miss Behavin'",
+    product_type: cd.style.type || 'Apparel',
+    status: 'active',
+    tags: cd.colorObj.color + ', ' + (cd.style.type || 'Apparel'),
+    options: [{ name: 'Size', values: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }) }],
+    variants: variants
+  };
+
+  var collNames = ['New Arrivals'];
+  if (cd.style.type) collNames.push(cd.style.type + 's');
+
+  _shopifyWorkerPost('shopify_create_product', {
+    domain: domain, token: token,
+    product: product, inventory: inventory, collectionNames: collNames
+  })
+  .then(function(res) {
+    if (res.error) throw new Error(res.error);
+    _spSetState(cd, 'success', '✓ Live', '✓ Live in Shopify', 'sp-btn-success');
+
+    // Append warnings (collection misses etc.)
+    if (res.warnings && res.warnings.length) {
+      _spShowErrorDetail(cd, 'Note: ' + res.warnings.join(' · '), 'color:var(--gray-text);');
+    }
+
+    // View link
+    if (res.handle) {
+      var foot = cd.card.querySelector('.sp-card-foot');
+      var a = document.createElement('a');
+      a.href = 'https://' + domain + '/products/' + res.handle;
+      a.target = '_blank';
+      a.className = 'sp-view-link';
+      a.textContent = 'View in Shopify ↗';
+      foot.appendChild(a);
+    }
+  })
+  .catch(function(err) {
+    _spSetState(cd, 'error', '✗ Failed', '✗ Failed — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, err.message || 'Push failed');
+  });
+}
+
+function _spDoAddInventory(cd, domain, token) {
+  _spSetState(cd, 'restocking', 'Adding Inventory…', 'Adding…');
+
+  var sizeOrder   = ['XS','S','M','L'];
+  var adjustments = [];
+  sizeOrder.forEach(function(sz) {
+    var qty = cd.activeSizes[sz];
+    if (!qty) return;
+    adjustments.push({ sku: cd.baseSku + '-' + sz, delta: qty });
+  });
+
+  _shopifyWorkerPost('shopify_adjust_inventory', {
+    domain: domain, token: token, adjustments: adjustments
+  })
+  .then(function(res) {
+    if (res.error) throw new Error(res.error);
+    _spSetState(cd, 'added', '✓ Restocked', '✓ Inventory Added', 'sp-btn-success');
+  })
+  .catch(function(err) {
+    _spSetState(cd, 'error', '✗ Failed', '✗ Failed — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, err.message || 'Adjustment failed');
+  });
+}
+
+function _spShowErrorDetail(cd, msg, extraStyle) {
+  var old = cd.card.querySelector('.sp-error-detail');
+  if (old) old.remove();
+  var div = document.createElement('div');
+  div.className = 'sp-error-detail';
+  if (extraStyle) div.style.cssText = extraStyle;
+  div.textContent = msg;
+  cd.card.appendChild(div);
+}
+
+// ─── Duplicate Modal ─────────────────────
+function showDupModal(cd) {
+  _activeDup = cd;
+  var existing = (cd.dupVariant && cd.dupVariant.product)
+    ? '"' + cd.dupVariant.product.title + '"'
+    : 'an existing product';
+  document.getElementById('dup-modal-desc').textContent =
+    '"' + (cd.style.name || cd.style.code) + ' — ' + cd.colorObj.color +
+    '" matches ' + existing + ' in Shopify. What should happen?';
+  document.getElementById('dup-modal').classList.add('open');
+}
+
+function closeDupModal() {
+  document.getElementById('dup-modal').classList.remove('open');
+  _activeDup = null;
+}
+
+function dupDecision(choice) {
+  var cd    = _activeDup;
+  closeDupModal();
+  if (!cd) return;
+  var token  = ls('mb_shopify_token');
+  var domain = ls('mb_shopify_domain');
+  if (choice === 'skip') {
+    _spSetState(cd, 'skipped', 'Skipped', 'Skipped');
+  } else if (choice === 'new') {
+    _spDoCreate(cd, domain, token);
+  } else if (choice === 'add') {
+    _spDoAddInventory(cd, domain, token);
+  }
+}
+
+// ─── Worker Proxy ────────────────────────
+function _shopifyWorkerPost(action, payload) {
+  return fetch(PROXY_URL + '?action=' + action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function(r) {
+    if (!r.ok) return r.text().then(function(t){ throw new Error('Worker ' + r.status + ': ' + t.slice(0,120)); });
+    return r.json();
   });
 }
 </script>
