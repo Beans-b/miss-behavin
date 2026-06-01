@@ -790,7 +790,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div class="sp-head-title">Review &amp; Push to Shopify</div>
       <div class="sp-head-meta" id="sp-count">— products</div>
     </div>
-    <button class="sp-close" onclick="closeShopifyReview()">✕ Close</button>
+    <button class="sp-close" onclick="closeShopifyReview()">← Back to Invoice</button>
   </div>
   <div class="sp-body">
     <div class="sp-hint">Products are <strong>immediately live</strong> after each push — no draft step. Review carefully.</div>
@@ -2084,7 +2084,7 @@ function _spDoCreate(cd, domain, token) {
     if (res.handle) {
       var foot = cd.card.querySelector('.sp-card-foot');
       var a = document.createElement('a');
-      a.href = 'https://' + domain + '/products/' + res.handle;
+      a.href = 'https://admin.shopify.com/store/miss-behavin-2/products/' + res.product_id;
       a.target = '_blank';
       a.className = 'sp-view-link';
       a.textContent = 'View in Shopify ↗';
