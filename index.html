@@ -447,7 +447,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
       <div class="global-fill">
         <p>Apply markup to all styles at once:</p>
         <div class="global-row">
-          <input type="text" inputmode="decimal" class="global-input" id="global-price" placeholder="e.g. 50% or $20"/>
+          <input type="text" inputmode="decimal" class="global-input" id="global-price" placeholder="e.g. 50 or 50% or $48"/>
           <button class="global-apply" onclick="applyGlobal()">Apply All</button>
         </div>
         <div class="global-note">Or set each style individually below.</div>
@@ -462,6 +462,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
           <button class="btn btn-outline" onclick="saveCurrentInvoice()" style="flex:1;">Save</button>
           <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
         </div>
+        <div id="bottom-save-status" style="font-size:11px;color:#666;margin-top:6px;text-align:center;"></div>
         <div class="status" id="publish-status"></div>
       </div>
     </div>
@@ -921,21 +922,22 @@ function recalcRetail(card) {
 function applyGlobal() {
   var raw = document.getElementById('global-price').value.trim();
   var num = parseFloat(raw.replace(/[^0-9.]/g,''));
-  var isPct = raw.indexOf('%')>=0;
+  if (!num) return;
+  // Default to percentage unless $ is explicitly used
+  var isDollarRetail = raw.indexOf('$') >= 0 && raw.indexOf('%') < 0;
   document.querySelectorAll('.p-card').forEach(function(card) {
-    if (!num) return;
     var mi = card.querySelector('.p-markup-input');
     var ri = card.querySelector('.p-retail-input');
-    if (isPct) {
+    if (isDollarRetail) {
+      ri.value = '$' + num.toFixed(2);
+      ri.dataset.manual = 'true';
+    } else {
       var pb = card.querySelector('[data-mode="pct"]');
       card.querySelectorAll('.mtype-btn').forEach(function(b){b.classList.remove('active');});
       pb.classList.add('active');
       mi.value = num;
       ri.dataset.manual = '';
       recalcRetail(card);
-    } else {
-      ri.value = raw.indexOf('$')>=0 ? raw : '$'+num.toFixed(2);
-      ri.dataset.manual = 'true';
     }
   });
   scheduleAutosave();
@@ -947,10 +949,21 @@ function applyGlobal() {
 function setAutosave(state) {
   var dot = document.getElementById('autosave-dot');
   var txt = document.getElementById('autosave-text');
+  var bottom = document.getElementById('bottom-save-status');
   if (!dot) return;
-  if (state==='saved') { dot.className='autosave-dot saved'; txt.textContent='All changes saved'; }
-  else if (state==='saving') { dot.className='autosave-dot saving'; txt.textContent='Saving...'; }
-  else { dot.className='autosave-dot'; txt.textContent='Unsaved changes'; }
+  if (state==='saved') {
+    dot.className='autosave-dot saved';
+    txt.textContent='All changes saved';
+    if (bottom) { bottom.textContent='✓ All changes saved'; bottom.style.color='var(--green)'; }
+  } else if (state==='saving') {
+    dot.className='autosave-dot saving';
+    txt.textContent='Saving...';
+    if (bottom) { bottom.textContent='Saving...'; bottom.style.color='var(--gray-text)'; }
+  } else {
+    dot.className='autosave-dot';
+    txt.textContent='Unsaved changes';
+    if (bottom) { bottom.textContent=''; }
+  }
 }
 
 function scheduleAutosave() {
