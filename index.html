@@ -376,6 +376,58 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 /* TOAST */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--black);color:var(--white);font-size:12px;padding:12px 20px;z-index:3000;display:none;letter-spacing:.04em;max-width:90%;text-align:center;}
 
+/* ═══════ SOCIAL ═══════ */
+.soc-card{position:relative;}
+.soc-card.selected{border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--accent);}
+.soc-check{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--gray-mid);display:flex;align-items:center;justify-content:center;font-size:14px;color:transparent;}
+.soc-card.selected .soc-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+.soc-days{position:absolute;top:8px;left:8px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(10,10,10,.78);color:#fff;padding:3px 7px;}
+#soc-genbar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--black);padding:12px 24px calc(12px + env(safe-area-inset-bottom));z-index:1400;display:none;}
+#soc-genbar .btn{margin-top:0;}
+#soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
+.soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
+.soc-thumb{position:relative;flex-shrink:0;width:72px;height:96px;border:1px solid var(--gray-mid);padding:0;background:var(--gray-light);cursor:pointer;-webkit-appearance:none;}
+.soc-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.soc-thumb.off img{opacity:.25;}
+.soc-thumb .soc-check{top:4px;right:4px;width:22px;height:22px;font-size:12px;}
+.soc-thumb.on .soc-check{background:var(--accent);border-color:var(--accent);color:#fff;}
+.soc-plat-row{display:flex;gap:8px;padding:0 24px 4px;}
+.soc-plat{flex:1;border:1px solid var(--gray-mid);background:var(--white);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:12px 4px;cursor:pointer;color:var(--gray-text);-webkit-appearance:none;min-height:44px;}
+.soc-plat.on{background:var(--black);color:var(--white);border-color:var(--black);}
+.cap-block{padding:14px 24px;border-bottom:1px solid var(--gray-mid);}
+.cap-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.cap-plat{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}
+.cap-count{font-size:11px;color:var(--gray-text);}
+.cap-count.over{color:var(--red);font-weight:700;}
+.cap-opt{display:block;width:100%;text-align:left;border:1px solid var(--gray-mid);background:var(--white);font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.5;color:#444;padding:10px 12px;margin-bottom:6px;cursor:pointer;-webkit-appearance:none;white-space:pre-wrap;word-break:break-word;}
+.cap-opt.picked{border-color:var(--black);background:var(--gray-light);}
+.cap-edit{width:100%;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;padding:10px 12px;outline:none;resize:vertical;min-height:96px;background:transparent;-webkit-appearance:none;}
+.cap-edit:focus{border-color:var(--black);}
+.soc-note{font-size:11px;color:var(--gray-text);line-height:1.5;padding:2px 24px 10px;}
+.q-card{border:1px solid var(--gray-mid);margin:0 24px 12px;}
+.q-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:10px 14px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
+.q-title{font-size:13px;font-weight:600;line-height:1.3;}
+.q-meta{font-size:11px;color:var(--gray-text);margin-top:2px;}
+.q-body{padding:10px 14px;font-size:12px;color:#444;line-height:1.5;}
+.q-caption{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.q-error{color:var(--red);font-size:11px;line-height:1.45;margin-top:6px;word-break:break-word;}
+.q-links{margin-top:6px;font-size:11px;}
+.q-links a{color:var(--gray-text);margin-right:12px;}
+.q-foot{padding:10px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;}
+.q-foot .btn{margin-top:0;padding:11px;font-size:11px;flex:1;}
+.status-pill.scheduled{background:#e8f0ff;color:#3730a3;}
+.status-pill.posted{background:var(--success-bg);color:var(--success-fg);}
+.status-pill.failed{background:var(--error-bg);color:var(--red);}
+.status-pill.posting{background:#fef9c3;color:#854d0e;}
+.perf-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid #f0eeeb;font-size:12px;}
+.perf-plat{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);width:80px;flex-shrink:0;}
+.perf-nums{display:flex;gap:12px;color:#444;}
+.perf-nums span b{color:var(--black);}
+.perf-summary{display:flex;gap:10px;padding:14px 24px;}
+.perf-box{flex:1;border:1px solid var(--gray-mid);padding:12px 10px;text-align:center;}
+.perf-box-num{font-size:22px;font-weight:700;}
+.perf-box-label{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);margin-top:3px;}
+
 /* CATEGORY TABLE */
 .cat-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;}
 .cat-table th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);border-bottom:1px solid var(--black);padding:8px 4px;}
@@ -613,12 +665,64 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div id="cat-log" style="font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#0a0a0a;color:#d8d8d8;padding:12px;margin:14px 24px;max-height:220px;overflow:auto;white-space:pre-wrap;display:none;"></div>
   </div>
 
+  <!-- SOCIAL (admin + employee) -->
+  <div id="view-social" style="display:none;">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="socTab('arrivals')">New Arrivals</button>
+      <button class="tab-btn" onclick="socTab('queue')">Queue</button>
+      <button class="tab-btn" onclick="socTab('perf')">Performance</button>
+    </div>
+
+    <div id="soctab-arrivals">
+      <div class="soc-note" style="padding-top:12px;">Added to Shopify in the last 30 days and not posted yet. Tap to select one or more, then Generate Post.</div>
+      <div id="soc-grid" class="fc-grid"></div>
+      <div id="soc-arrivals-empty" class="fc-empty" style="display:none;">No new arrivals waiting — everything from the last 30 days has been posted.</div>
+      <div id="soc-arrivals-loading" class="fc-empty"><span class="spinner"></span> Loading new arrivals&#8230;</div>
+    </div>
+
+    <div id="soctab-queue" style="display:none;">
+      <div class="log-filters">
+        <div class="field" style="flex:1;margin-bottom:0;">
+          <label class="field-label">Status</label>
+          <select class="field-input" id="soc-q-status" onchange="socLoadQueue()">
+            <option value="">All</option>
+            <option value="draft">Draft</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="posted">Posted</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+        <div class="field" style="flex:1;margin-bottom:0;">
+          <label class="field-label">Platform</label>
+          <select class="field-input" id="soc-q-platform" onchange="socLoadQueue()">
+            <option value="">All</option>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+            <option value="tiktok">TikTok</option>
+          </select>
+        </div>
+      </div>
+      <div id="soc-queue-list" style="padding-top:14px;"></div>
+    </div>
+
+    <div id="soctab-perf" style="display:none;">
+      <div style="padding:14px 24px 0;">
+        <button class="btn btn-outline" id="soc-refresh-btn" onclick="socRefreshMetrics()" style="margin-top:0;">&#8635; Refresh Numbers</button>
+        <div class="status" id="soc-perf-status"></div>
+      </div>
+      <div class="section-title" style="padding:16px 24px 0;">Last 30 Days</div>
+      <div class="perf-summary" id="soc-perf-summary"></div>
+      <div id="soc-perf-list"></div>
+    </div>
+  </div>
+
   <!-- SETTINGS + ACTIVITY LOG (admin) -->
   <div id="view-settings" style="display:none;">
     <div class="tab-bar">
       <button class="tab-btn active" onclick="setTab('log')">Activity Log</button>
       <button class="tab-btn" onclick="setTab('people')">People</button>
       <button class="tab-btn" onclick="setTab('store')">Store</button>
+      <button class="tab-btn" onclick="setTab('social')">Social</button>
     </div>
 
     <div id="stab-log">
@@ -654,6 +758,30 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         </div>
         <button class="btn btn-black" onclick="saveCode()">Save Person</button>
         <div class="status" id="codes-status"></div>
+      </div>
+    </div>
+
+    <div id="stab-social" style="display:none;">
+      <div class="section">
+        <div class="section-title">Instagram + Facebook (Meta)</div>
+        <div id="soc-meta-status" style="font-size:13px;color:#444;line-height:1.6;">Checking&#8230;</div>
+        <div class="field-hint" style="margin-top:8px;">Meta uses a long-lived Page token set as a Worker secret &#8212; nothing to connect here. If it shows Not configured, follow SOCIAL-DEPLOYMENT.md step 2.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">TikTok</div>
+        <div id="soc-tiktok-status" style="font-size:13px;color:#444;line-height:1.6;">Checking&#8230;</div>
+        <button class="btn btn-black" id="soc-tiktok-connect" onclick="socTiktokConnect()" style="margin-top:12px;">Connect TikTok</button>
+        <button class="btn btn-outline" id="soc-tiktok-disconnect" onclick="socTiktokDisconnect()" style="display:none;">Disconnect TikTok</button>
+        <div class="status" id="soc-tiktok-connect-status"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">TikTok URL Verification File</div>
+        <div style="font-size:12px;color:var(--gray-text);line-height:1.6;margin-bottom:10px;">TikTok only pulls photos from a URL prefix you have verified. In the TikTok developer portal, verify the prefix shown below with the &#8220;Signature file&#8221; method, then paste the file name and its content here &#8212; the app will host it.</div>
+        <div style="font-size:12px;color:#444;word-break:break-all;margin-bottom:12px;" id="soc-verify-prefix"></div>
+        <div class="field"><label class="field-label">File name (e.g. tiktok1a2B3c4D.txt)</label><input class="field-input" id="soc-verify-name" autocomplete="off" autocapitalize="off"/></div>
+        <div class="field"><label class="field-label">File content</label><input class="field-input" id="soc-verify-content" autocomplete="off" autocapitalize="off"/></div>
+        <button class="btn btn-black" onclick="socSaveVerifyFile()">Save Verification File</button>
+        <div class="status" id="soc-verify-status"></div>
       </div>
     </div>
 
@@ -737,6 +865,46 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </button>
   </div>
   <button class="dup-cancel" onclick="closeDupModal()">Cancel</button>
+</div>
+
+<!-- SOCIAL: GENERATE BAR -->
+<div id="soc-genbar">
+  <button class="btn" style="background:var(--accent);color:#fff;" id="soc-gen-btn" onclick="socOpenComposer()">Generate Post</button>
+</div>
+
+<!-- SOCIAL: COMPOSER OVERLAY -->
+<div id="soc-composer">
+  <div class="sp-head">
+    <div>
+      <div class="sp-head-title">New Social Post</div>
+      <div class="sp-head-meta" id="soc-comp-meta"></div>
+    </div>
+    <button class="sp-close" onclick="socCloseComposer()">Close</button>
+  </div>
+  <div class="sp-body" style="padding:0 0 110px;">
+    <div class="section-title" style="padding:14px 24px 0;">Photos &#8212; tap to include / exclude</div>
+    <div class="soc-thumbs" id="soc-thumbs"></div>
+    <div class="soc-note" id="soc-photo-count"></div>
+    <div class="section-title" style="padding:6px 24px 8px;">Platforms</div>
+    <div class="soc-plat-row">
+      <button class="soc-plat on" data-plat="instagram" onclick="socTogglePlat(this)">Instagram</button>
+      <button class="soc-plat on" data-plat="facebook" onclick="socTogglePlat(this)">Facebook</button>
+      <button class="soc-plat on" data-plat="tiktok" onclick="socTogglePlat(this)">TikTok</button>
+    </div>
+    <div id="soc-gen-status" class="status" style="margin:10px 24px;"></div>
+    <div id="soc-caps"></div>
+    <div class="action-section" id="soc-approve-section" style="display:none;">
+      <div class="action-title">Review &amp; approve</div>
+      <div class="action-note">Nothing posts until you approve it here. Post Now sends immediately; Schedule posts automatically at the chosen time (Pacific).</div>
+      <button class="btn btn-black" onclick="socApprovePostNow()">&#10003; Approve &amp; Post Now</button>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <input class="field-input" type="datetime-local" id="soc-sched-input" style="flex:1;border:1px solid var(--gray-mid);padding:10px;"/>
+        <button class="btn btn-outline" style="flex-shrink:0;width:auto;padding:12px 16px;margin-top:0;" onclick="socApproveSchedule()">Schedule</button>
+      </div>
+      <button class="btn btn-outline" onclick="socSaveDraft(true)" style="margin-top:12px;">Save as Draft</button>
+      <div class="status" id="soc-send-status"></div>
+    </div>
+  </div>
 </div>
 
 <!-- SCANNER OVERLAY -->
@@ -829,13 +997,14 @@ var MENU = [
   { id:'floorcount', icon:'📦', label:'Floor Count',   desc:'Count inventory and fix prices on the floor', roles:['admin','employee'] },
   { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin'] },
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
+  { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','linesheet','staff','categories','settings'];
+var VIEWS = ['menu','floorcount','linesheet','staff','social','categories','settings'];
 
 function showMenu(){
-  closeFcDetail(); closeShopifyReview();
+  closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar();
   switchView('menu');
   el('header-sub').textContent = 'Menu';
   el('back-row').style.display = 'none';
@@ -863,9 +1032,11 @@ function openView(id, label){
   switchView(id);
   el('header-sub').textContent = label;
   el('back-row').style.display = SESSION.role === 'staff' ? 'none' : 'block';
+  if (id !== 'social') socHideGenBar();
   if (id === 'floorcount') fcInit();
   if (id === 'linesheet') { kelTab('invoice'); checkLiveStatus(); loadActiveInvoiceForKel(); }
   if (id === 'staff') showStaff();
+  if (id === 'social') socInit();
   if (id === 'settings') { setTab('log'); loadLog(); loadCodes(); loadLocations(); loadNotifToUI(); }
 }
 
@@ -1275,9 +1446,10 @@ function closeScanner(){
    SETTINGS: ACTIVITY LOG / PEOPLE / STORE
    ═══════════════════════════════════════ */
 function setTab(name){
-  ['log','people','store'].forEach(function(t){ el('stab-'+t).style.display = t===name?'block':'none'; });
-  var btns = document.querySelectorAll('#view-settings .tab-btn');
-  ['log','people','store'].forEach(function(t,i){ btns[i].classList.toggle('active', t===name); });
+  ['log','people','store','social'].forEach(function(t){ el('stab-'+t).style.display = t===name?'block':'none'; });
+  var btns = document.querySelectorAll('#view-settings .tab-bar .tab-btn');
+  ['log','people','store','social'].forEach(function(t,i){ btns[i].classList.toggle('active', t===name); });
+  if (name === 'social') socLoadConnectStatus();
 }
 
 function loadLog(){
@@ -2657,6 +2829,576 @@ function catApply(){
     .finally(function(){ setTimeout(next, 250); });
   }
   next();
+}
+
+/* ═══════════════════════════════════════
+   SOCIAL — new arrivals → captions → approve → post.
+   All provider calls live in the Worker; the browser
+   never sees a platform token.
+   ═══════════════════════════════════════ */
+var SOC_LIMITS = {
+  instagram: { chars: 2200, photos: 10 },
+  facebook:  { chars: 5000, photos: 10 },
+  tiktok:    { chars: 4000, photos: 35 }
+};
+var SOC_PLATS = ['instagram','facebook','tiktok'];
+var SOC_LABEL = { instagram:'Instagram', facebook:'Facebook', tiktok:'TikTok' };
+var socState = { arrivals: [], selected: {}, inited: false, queue: [] };
+var socComp = null;
+
+function socFmtPT(iso){
+  if (!iso) return '';
+  return new Date(iso).toLocaleString('en-US', { timeZone:'America/Los_Angeles', month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
+function socInit(){
+  socState.selected = {};
+  socTab('arrivals');
+  socLoadArrivals();
+}
+
+function socTab(name){
+  ['arrivals','queue','perf'].forEach(function(t){ el('soctab-'+t).style.display = t===name?'block':'none'; });
+  var btns = document.querySelectorAll('#view-social .tab-bar .tab-btn');
+  ['arrivals','queue','perf'].forEach(function(t,i){ btns[i].classList.toggle('active', t===name); });
+  if (name === 'queue') socLoadQueue();
+  if (name === 'perf') socLoadPerf();
+  socUpdateGenBar(name === 'arrivals');
+}
+
+/* ── NEW ARRIVALS ── */
+function socLoadArrivals(){
+  el('soc-arrivals-loading').style.display = 'block';
+  el('soc-arrivals-empty').style.display = 'none';
+  el('soc-grid').innerHTML = '';
+  api('social_new_arrivals', {})
+  .then(function(res){
+    el('soc-arrivals-loading').style.display = 'none';
+    socState.arrivals = res.products || [];
+    if (!socState.arrivals.length) { el('soc-arrivals-empty').style.display = 'block'; return; }
+    socRenderArrivals();
+  })
+  .catch(function(e){
+    el('soc-arrivals-loading').style.display = 'none';
+    toast('Could not load new arrivals: ' + e.message);
+  });
+}
+
+function socRenderArrivals(){
+  var grid = el('soc-grid');
+  grid.innerHTML = '';
+  socState.arrivals.forEach(function(p){
+    var card = document.createElement('button');
+    card.className = 'fc-card soc-card' + (socState.selected[p.id] ? ' selected' : '');
+    var img = p.thumb
+      ? '<img class="fc-card-img" loading="lazy" src="'+esc(p.thumb)+'" alt=""/>'
+      : '<div class="fc-card-noimg">&#128092;</div>';
+    card.innerHTML = img +
+      '<div class="soc-days">'+(p.daysAgo === 0 ? 'today' : p.daysAgo + 'd ago')+'</div>' +
+      '<div class="soc-check">&#10003;</div>' +
+      '<div class="fc-card-body">' +
+        '<div class="fc-card-title">'+esc(p.title)+'</div>' +
+        '<div class="fc-card-meta"><span>'+(p.price!=null?('$'+parseFloat(p.price).toFixed(2)):'')+'</span><span>'+esc(p.type||'')+'</span></div>' +
+      '</div>';
+    card.onclick = function(){
+      if (socState.selected[p.id]) delete socState.selected[p.id];
+      else socState.selected[p.id] = p;
+      card.classList.toggle('selected', !!socState.selected[p.id]);
+      socUpdateGenBar(true);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function socUpdateGenBar(onArrivals){
+  var n = Object.keys(socState.selected).length;
+  var bar = el('soc-genbar');
+  if (!bar) return;
+  if (!onArrivals || !n || el('view-social').style.display === 'none') { bar.style.display = 'none'; return; }
+  el('soc-gen-btn').textContent = 'Generate Post (' + n + ' item' + (n>1?'s':'') + ')';
+  bar.style.display = 'block';
+}
+function socHideGenBar(){ var b = el('soc-genbar'); if (b) b.style.display = 'none'; }
+
+/* ── COMPOSER ── */
+function socOpenComposer(){
+  var products = Object.keys(socState.selected).map(function(k){ return socState.selected[k]; });
+  if (!products.length) return;
+  socComp = {
+    editingId: null,
+    products: products,
+    media: [],           // [{url, on}]
+    platforms: { instagram:true, facebook:true, tiktok:true },
+    options: null,       // {platform: [3 options]}
+    captions: {}         // chosen/edited text per platform
+  };
+  products.forEach(function(p){
+    (p.images || []).forEach(function(u, i){
+      socComp.media.push({ url: u, on: i === 0 }); // first image of each product on by default
+    });
+  });
+  if (socComp.media.length === 1) socComp.media[0].on = true;
+  el('soc-comp-meta').textContent = products.map(function(p){ return p.title; }).join(' + ');
+  document.querySelectorAll('#soc-composer .soc-plat').forEach(function(b){ b.classList.add('on'); });
+  el('soc-composer').style.display = 'flex';
+  el('soc-caps').innerHTML = '';
+  el('soc-approve-section').style.display = 'none';
+  el('soc-send-status').style.display = 'none';
+  socRenderThumbs();
+  socGenerate();
+}
+
+function socEditDraft(post){
+  socComp = {
+    editingId: post.id,
+    products: (post.product_ids || []).map(function(id, i){
+      return { id: id, title: (post.product_titles || [])[i] || 'Item', images: [] };
+    }),
+    media: (post.media_urls || []).map(function(u){ return { url: u, on: true }; }),
+    platforms: { instagram:false, facebook:false, tiktok:false },
+    options: null,
+    captions: post.captions || {}
+  };
+  (post.platforms || []).forEach(function(p){ socComp.platforms[p] = true; });
+  el('soc-comp-meta').textContent = (post.product_titles || []).join(' + ');
+  document.querySelectorAll('#soc-composer .soc-plat').forEach(function(b){
+    b.classList.toggle('on', !!socComp.platforms[b.dataset.plat]);
+  });
+  el('soc-composer').style.display = 'flex';
+  el('soc-gen-status').style.display = 'none';
+  socRenderThumbs();
+  socRenderCaps();
+}
+
+function socCloseComposer(){
+  var c = el('soc-composer');
+  if (c) c.style.display = 'none';
+  socComp = null;
+}
+
+function socRenderThumbs(){
+  var wrap = el('soc-thumbs');
+  wrap.innerHTML = '';
+  socComp.media.forEach(function(m){
+    var b = document.createElement('button');
+    b.className = 'soc-thumb ' + (m.on ? 'on' : 'off');
+    b.innerHTML = '<img loading="lazy" src="'+esc(m.url)+'" alt=""/><div class="soc-check">&#10003;</div>';
+    b.onclick = function(){ m.on = !m.on; b.className = 'soc-thumb ' + (m.on ? 'on' : 'off'); socUpdatePhotoCount(); };
+    wrap.appendChild(b);
+  });
+  socUpdatePhotoCount();
+}
+
+function socUpdatePhotoCount(){
+  var n = socComp.media.filter(function(m){ return m.on; }).length;
+  var notes = [n + ' photo' + (n===1?'':'s') + ' selected.'];
+  if (socComp.platforms.instagram && n > SOC_LIMITS.instagram.photos) notes.push('Instagram takes the first ' + SOC_LIMITS.instagram.photos + '.');
+  if (socComp.platforms.tiktok && n > SOC_LIMITS.tiktok.photos) notes.push('TikTok takes the first ' + SOC_LIMITS.tiktok.photos + '.');
+  if (socComp.platforms.facebook && n > SOC_LIMITS.facebook.photos) notes.push('Facebook takes the first ' + SOC_LIMITS.facebook.photos + '.');
+  if (!n) notes.push('Pick at least one photo.');
+  el('soc-photo-count').textContent = notes.join(' ');
+}
+
+function socTogglePlat(btn){
+  var p = btn.dataset.plat;
+  socComp.platforms[p] = !socComp.platforms[p];
+  btn.classList.toggle('on', socComp.platforms[p]);
+  socRenderCaps();
+  socUpdatePhotoCount();
+}
+
+function socGenerate(){
+  showStatus('soc-gen-status','loading','<span class="spinner"></span>Writing captions with Claude&#8230;');
+  var payload = socComp.products.map(function(p){
+    return { title: p.title, type: p.type, price: p.price, vendor: p.vendor };
+  });
+  api('social_generate_captions', { products: payload, multi: payload.length > 1 })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    var txt = String(res.text || '').trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
+    var opts = JSON.parse(txt);
+    socComp.options = opts;
+    SOC_PLATS.forEach(function(p){
+      if (!socComp.captions[p] && opts[p] && opts[p][0]) socComp.captions[p] = opts[p][0];
+    });
+    el('soc-gen-status').style.display = 'none';
+    socRenderCaps();
+  })
+  .catch(function(e){
+    showStatus('soc-gen-status','error','Caption generation failed: ' + esc(e.message) + ' — you can write captions by hand below, or close and retry.');
+    socRenderCaps();
+  });
+}
+
+function socRenderCaps(){
+  var wrap = el('soc-caps');
+  wrap.innerHTML = '';
+  SOC_PLATS.forEach(function(p){
+    if (!socComp.platforms[p]) return;
+    var block = document.createElement('div');
+    block.className = 'cap-block';
+    var optsHtml = '';
+    ((socComp.options || {})[p] || []).forEach(function(opt, i){
+      var picked = socComp.captions[p] === opt;
+      optsHtml += '<button class="cap-opt'+(picked?' picked':'')+'" data-i="'+i+'">'+esc(opt)+'</button>';
+    });
+    block.innerHTML =
+      '<div class="cap-head"><span class="cap-plat">'+SOC_LABEL[p]+'</span><span class="cap-count" id="cap-count-'+p+'"></span></div>' +
+      optsHtml +
+      '<textarea class="cap-edit" id="cap-edit-'+p+'" placeholder="Caption for '+SOC_LABEL[p]+'&#8230;"></textarea>' +
+      (p === 'tiktok' ? '<div class="soc-note" style="padding:6px 0 0;">TikTok ignores line breaks; the first 90 characters double as the title.</div>' : '');
+    wrap.appendChild(block);
+    var ta = block.querySelector('.cap-edit');
+    ta.value = socComp.captions[p] || '';
+    ta.addEventListener('input', function(){
+      socComp.captions[p] = ta.value;
+      socCapCount(p);
+      block.querySelectorAll('.cap-opt').forEach(function(b){ b.classList.remove('picked'); });
+    });
+    block.querySelectorAll('.cap-opt').forEach(function(b){
+      b.addEventListener('click', function(){
+        var opt = ((socComp.options || {})[p] || [])[parseInt(b.dataset.i, 10)];
+        if (opt == null) return;
+        socComp.captions[p] = opt;
+        ta.value = opt;
+        block.querySelectorAll('.cap-opt').forEach(function(x){ x.classList.remove('picked'); });
+        b.classList.add('picked');
+        socCapCount(p);
+      });
+    });
+    socCapCount(p);
+  });
+  el('soc-approve-section').style.display = SOC_PLATS.some(function(p){ return socComp.platforms[p]; }) ? 'block' : 'none';
+}
+
+function socCapCount(p){
+  var e = el('cap-count-' + p);
+  if (!e) return;
+  var len = (socComp.captions[p] || '').length;
+  e.textContent = len + ' / ' + SOC_LIMITS[p].chars;
+  e.classList.toggle('over', len > SOC_LIMITS[p].chars);
+}
+
+function socCollect(){
+  if (!socComp) return null;
+  var platforms = SOC_PLATS.filter(function(p){ return socComp.platforms[p]; });
+  if (!platforms.length) { toast('Pick at least one platform.'); return null; }
+  var media = socComp.media.filter(function(m){ return m.on; }).map(function(m){ return m.url; });
+  if (!media.length) { toast('Pick at least one photo.'); return null; }
+  var captions = {};
+  for (var i = 0; i < platforms.length; i++) {
+    var p = platforms[i];
+    var cap = (socComp.captions[p] || '').trim();
+    if (!cap) { toast('Missing ' + SOC_LABEL[p] + ' caption.'); return null; }
+    if (cap.length > SOC_LIMITS[p].chars) { toast(SOC_LABEL[p] + ' caption is over ' + SOC_LIMITS[p].chars + ' characters.'); return null; }
+    captions[p] = cap;
+  }
+  return {
+    id: socComp.editingId || undefined,
+    product_ids: socComp.products.map(function(p){ return p.id; }),
+    product_titles: socComp.products.map(function(p){ return p.title; }),
+    platforms: platforms,
+    captions: captions,
+    media_urls: media
+  };
+}
+
+function socSaveDraft(closeAfter, cb){
+  var body = socCollect();
+  if (!body) return;
+  showStatus('soc-send-status','loading','<span class="spinner"></span>Saving&#8230;');
+  api('social_save_post', body)
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    socComp.editingId = res.id;
+    if (cb) { cb(res.id); return; }
+    showStatus('soc-send-status','success','&#10003; Saved as draft — find it in the Queue.');
+    if (closeAfter) setTimeout(function(){ socCloseComposer(); socState.selected = {}; socLoadArrivals(); socUpdateGenBar(true); }, 900);
+  })
+  .catch(function(e){ showStatus('soc-send-status','error', esc(e.message)); });
+}
+
+function socApprovePostNow(){
+  socSaveDraft(false, function(id){
+    showStatus('soc-send-status','loading','<span class="spinner"></span>Posting&#8230; this can take up to a minute.');
+    api('social_post_now', { id: id })
+    .then(function(res){
+      if (res.error) throw new Error(res.error);
+      if (res.status === 'posted') {
+        showStatus('soc-send-status','success','&#10003; Posted! TikTok may show as processing for a couple of minutes.');
+      } else {
+        showStatus('soc-send-status','error','Partly failed: ' + esc((res.errors||[]).join(' · ')) + ' — see the Queue to retry.');
+      }
+      setTimeout(function(){ socCloseComposer(); socState.selected = {}; socTab('queue'); }, 1600);
+    })
+    .catch(function(e){ showStatus('soc-send-status','error', esc(e.message)); });
+  });
+}
+
+function socApproveSchedule(){
+  var v = el('soc-sched-input').value;
+  if (!v) { toast('Pick a date and time first.'); return; }
+  var dt = new Date(v); // device local time — the store's iPhones run Pacific
+  if (isNaN(dt.getTime())) { toast('That date didn’t parse.'); return; }
+  if (dt.getTime() < Date.now() + 60000) { toast('Pick a time in the future.'); return; }
+  socSaveDraft(false, function(id){
+    api('social_schedule', { id: id, scheduled_at: dt.toISOString() })
+    .then(function(res){
+      if (res.error) throw new Error(res.error);
+      showStatus('soc-send-status','success','&#10003; Scheduled for ' + socFmtPT(dt.toISOString()) + ' (Pacific). The app posts it automatically.');
+      setTimeout(function(){ socCloseComposer(); socState.selected = {}; socTab('queue'); }, 1400);
+    })
+    .catch(function(e){ showStatus('soc-send-status','error', esc(e.message)); });
+  });
+}
+
+/* ── QUEUE ── */
+function socLoadQueue(){
+  var list = el('soc-queue-list');
+  list.innerHTML = '<div class="fc-empty"><span class="spinner"></span></div>';
+  api('social_queue', {
+    status: el('soc-q-status').value || null,
+    platform: el('soc-q-platform').value || null
+  })
+  .then(function(res){
+    socState.queue = res.posts || [];
+    socRenderQueue();
+  })
+  .catch(function(e){ list.innerHTML = '<div class="fc-empty">'+esc(e.message)+'</div>'; });
+}
+
+function socRenderQueue(){
+  var list = el('soc-queue-list');
+  list.innerHTML = '';
+  if (!socState.queue.length) { list.innerHTML = '<div class="fc-empty">Nothing here yet.</div>'; return; }
+  socState.queue.forEach(function(post){
+    var card = document.createElement('div');
+    card.className = 'q-card';
+    var title = (post.product_titles || []).join(' + ') || 'Post #' + post.id;
+    var platHtml = (post.platforms || []).map(function(p){
+      var entry = (post.provider_post_id || {})[p];
+      var mark = '';
+      if (entry && (entry.id || entry.publish_id)) {
+        mark = (p === 'tiktok' && !entry.id) ? ' &#9203;' : ' &#10003;';
+      } else if (post.status === 'failed') { mark = ' &#10007;'; }
+      return SOC_LABEL[p] + mark;
+    }).join(' &#183; ');
+    var when = '';
+    if (post.status === 'scheduled') when = 'Scheduled ' + socFmtPT(post.scheduled_at) + ' (PT)';
+    else if (post.posted_at) when = 'Posted ' + socFmtPT(post.posted_at);
+    else when = 'Created ' + socFmtPT(post.created_ts) + ' by ' + esc(post.created_by || '');
+    var firstCap = '';
+    (post.platforms || []).some(function(p){ if ((post.captions||{})[p]) { firstCap = post.captions[p]; return true; } return false; });
+    var links = [];
+    Object.keys(post.provider_post_id || {}).forEach(function(p){
+      var en = post.provider_post_id[p];
+      if (en && en.url) links.push('<a href="'+esc(en.url)+'" target="_blank">'+SOC_LABEL[p]+' &#8599;</a>');
+    });
+    card.innerHTML =
+      '<div class="q-head">' +
+        '<div><div class="q-title">'+esc(title)+'</div><div class="q-meta">'+platHtml+' &#183; '+when+'</div></div>' +
+        '<span class="status-pill '+esc(post.status)+'">'+esc(post.status)+'</span>' +
+      '</div>' +
+      '<div class="q-body">' +
+        '<div class="q-caption">'+esc(firstCap)+'</div>' +
+        (post.error ? '<div class="q-error">'+esc(post.error)+'</div>' : '') +
+        (links.length ? '<div class="q-links">'+links.join('')+'</div>' : '') +
+      '</div>' +
+      '<div class="q-foot"></div>' +
+      '<div class="q-resched" style="display:none;padding:10px 14px;border-top:1px solid var(--gray-mid);">' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<input class="field-input" type="datetime-local" style="flex:1;border:1px solid var(--gray-mid);padding:10px;"/>' +
+          '<button class="btn btn-black" style="flex-shrink:0;width:auto;padding:12px 16px;margin-top:0;">Set</button>' +
+        '</div>' +
+      '</div>';
+    var foot = card.querySelector('.q-foot');
+    function addBtn(label, cls, fn){
+      var b = document.createElement('button');
+      b.className = 'btn ' + cls;
+      b.textContent = label;
+      b.onclick = fn;
+      foot.appendChild(b);
+    }
+    if (post.status === 'draft') {
+      addBtn('Edit', 'btn-outline', function(){ socEditDraft(post); });
+      addBtn('Delete', 'btn-danger', function(){
+        showModal('Delete this draft?', 'This can’t be undone.', function(){
+          closeModal();
+          api('social_delete', { id: post.id }).then(socLoadQueue).catch(function(e){ toast(e.message); });
+        }, true);
+      });
+    }
+    if (post.status === 'scheduled') {
+      addBtn('Reschedule', 'btn-outline', function(){
+        var r = card.querySelector('.q-resched');
+        r.style.display = r.style.display === 'none' ? 'block' : 'none';
+      });
+      addBtn('Cancel', 'btn-outline', function(){
+        api('social_cancel', { id: post.id }).then(socLoadQueue).catch(function(e){ toast(e.message); });
+      });
+    }
+    if (post.status === 'failed') {
+      addBtn('Retry', 'btn-black', function(){
+        foot.querySelectorAll('.btn').forEach(function(b){ b.disabled = true; });
+        api('social_retry', { id: post.id })
+        .then(function(res){
+          toast(res.status === 'posted' ? 'Posted ✓' : 'Still failing — see the error on the card.');
+          socLoadQueue();
+        })
+        .catch(function(e){ toast('Retry failed: ' + e.message); socLoadQueue(); });
+      });
+      addBtn('Delete', 'btn-danger', function(){
+        showModal('Delete this failed post?', 'Any platforms that already went out stay live.', function(){
+          closeModal();
+          api('social_delete', { id: post.id }).then(socLoadQueue).catch(function(e){ toast(e.message); });
+        }, true);
+      });
+    }
+    var rs = card.querySelector('.q-resched');
+    rs.querySelector('.btn').onclick = function(){
+      var v = rs.querySelector('input').value;
+      if (!v) { toast('Pick a date and time.'); return; }
+      var dt = new Date(v);
+      if (isNaN(dt.getTime()) || dt.getTime() < Date.now() + 60000) { toast('Pick a future time.'); return; }
+      api('social_schedule', { id: post.id, scheduled_at: dt.toISOString() })
+      .then(function(){ toast('Rescheduled ✓'); socLoadQueue(); })
+      .catch(function(e){ toast(e.message); });
+    };
+    if (!foot.children.length) foot.style.display = 'none';
+    list.appendChild(card);
+  });
+}
+
+/* ── PERFORMANCE ── */
+function socLoadPerf(){
+  el('soc-perf-list').innerHTML = '<div class="fc-empty"><span class="spinner"></span></div>';
+  api('social_metrics')
+  .then(function(res){
+    var posts = res.posts || [];
+    var latest = res.latest || {};
+    // 30-day summary
+    var cutoff = Date.now() - 30 * 864e5;
+    var recent = posts.filter(function(p){ return p.posted_at && new Date(p.posted_at).getTime() >= cutoff; });
+    var totalEng = 0, best = null, bestEng = -1;
+    recent.forEach(function(p){
+      var eng = 0;
+      (p.platforms || []).forEach(function(pl){
+        var m = latest[p.id + ':' + pl];
+        if (m) eng += (m.likes||0) + (m.comments||0) + (m.shares||0);
+      });
+      totalEng += eng;
+      if (eng > bestEng) { bestEng = eng; best = p; }
+    });
+    el('soc-perf-summary').innerHTML =
+      '<div class="perf-box"><div class="perf-box-num">'+recent.length+'</div><div class="perf-box-label">Posts</div></div>' +
+      '<div class="perf-box"><div class="perf-box-num">'+totalEng+'</div><div class="perf-box-label">Engagement</div></div>' +
+      '<div class="perf-box"><div class="perf-box-num" style="font-size:12px;line-height:1.4;padding-top:6px;">'+(best ? esc((best.product_titles||[]).join(' + ')).slice(0,60) : '&#8212;')+'</div><div class="perf-box-label">Best Post</div></div>';
+    var list = el('soc-perf-list');
+    list.innerHTML = '';
+    if (!posts.length) { list.innerHTML = '<div class="fc-empty">No posted posts yet. Numbers appear here after your first post + refresh.</div>'; return; }
+    if (res.last_refresh) {
+      var note = document.createElement('div');
+      note.className = 'soc-note';
+      note.textContent = 'Numbers last refreshed ' + socFmtPT(new Date(parseInt(res.last_refresh,10)).toISOString()) + ' (PT). TikTok stats can lag 24–48h.';
+      list.appendChild(note);
+    }
+    posts.forEach(function(p){
+      var card = document.createElement('div');
+      card.className = 'q-card';
+      var rows = (p.platforms || []).map(function(pl){
+        var m = latest[p.id + ':' + pl];
+        if (!m) return '<div class="perf-row"><span class="perf-plat">'+SOC_LABEL[pl]+'</span><span class="perf-nums" style="color:var(--gray-text);">no data yet</span></div>';
+        return '<div class="perf-row"><span class="perf-plat">'+SOC_LABEL[pl]+'</span><div class="perf-nums">' +
+          '<span>&#128065; <b>'+(m.impressions!=null?m.impressions:'—')+'</b></span>' +
+          '<span>&#10084; <b>'+(m.likes||0)+'</b></span>' +
+          '<span>&#128172; <b>'+(m.comments||0)+'</b></span>' +
+          '<span>&#8618; <b>'+(m.shares||0)+'</b></span>' +
+        '</div></div>';
+      }).join('');
+      card.innerHTML =
+        '<div class="q-head"><div><div class="q-title">'+esc((p.product_titles||[]).join(' + '))+'</div>' +
+        '<div class="q-meta">Posted '+socFmtPT(p.posted_at)+'</div></div></div>' +
+        '<div class="q-body">'+rows+'</div>';
+      list.appendChild(card);
+    });
+  })
+  .catch(function(e){ el('soc-perf-list').innerHTML = '<div class="fc-empty">'+esc(e.message)+'</div>'; });
+}
+
+function socRefreshMetrics(){
+  var btn = el('soc-refresh-btn');
+  btn.disabled = true;
+  showStatus('soc-perf-status','loading','<span class="spinner"></span>Pulling fresh numbers&#8230;');
+  api('social_refresh_metrics', {})
+  .then(function(res){
+    btn.disabled = false;
+    if (res.throttled) {
+      showStatus('soc-perf-status','error','Refreshed recently — try again in ' + Math.ceil((res.retry_in_s||60)/60) + ' min.');
+      return;
+    }
+    showStatus('soc-perf-status','success','&#10003; Updated ' + (res.fetched||0) + ' snapshot' + (res.fetched===1?'':'s') + (res.problems && res.problems.length ? ' · ' + res.problems.length + ' had issues' : '') + '.');
+    socLoadPerf();
+  })
+  .catch(function(e){ btn.disabled = false; showStatus('soc-perf-status','error', esc(e.message)); });
+}
+
+/* ── SETTINGS → SOCIAL (connections, admin) ── */
+function socLoadConnectStatus(){
+  api('social_connect_status', {})
+  .then(function(res){
+    var m = res.meta || {};
+    el('soc-meta-status').innerHTML = m.configured
+      ? '&#9989; Configured — Page <b>' + esc(m.page_id||'') + '</b>, IG account <b>' + esc(m.ig_user_id||'') + '</b>.'
+      : '&#9888;&#65039; Not configured. The three META_* secrets are missing on the Worker.';
+    var t = res.tiktok || {};
+    var ts = el('soc-tiktok-status');
+    if (!t.client_configured) {
+      ts.innerHTML = '&#9888;&#65039; TIKTOK_CLIENT_KEY / TIKTOK_CLIENT_SECRET secrets are not set on the Worker.';
+    } else if (t.connected) {
+      ts.innerHTML = '&#9989; Connected.' + (t.reconnect_by ? ' Reconnect needed by ' + socFmtPT(t.reconnect_by) + ' (yearly).' : '');
+    } else {
+      ts.innerHTML = 'Not connected yet. Tap Connect and log in with the boutique’s TikTok account.';
+    }
+    el('soc-tiktok-connect').style.display = t.connected ? 'none' : 'block';
+    el('soc-tiktok-disconnect').style.display = t.connected ? 'block' : 'none';
+    el('soc-verify-prefix').innerHTML = 'Prefix to verify: <b>' + esc((res.worker_base || PROXY_URL) + '/media/') + '</b>' + (res.verify_file ? ' &#183; current file: ' + esc(res.verify_file) : '');
+  })
+  .catch(function(e){
+    el('soc-meta-status').textContent = e.message;
+    el('soc-tiktok-status').textContent = '';
+  });
+}
+
+function socTiktokConnect(){
+  showStatus('soc-tiktok-connect-status','loading','<span class="spinner"></span>Opening TikTok&#8230;');
+  api('social_tiktok_start')
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    el('soc-tiktok-connect-status').style.display = 'none';
+    window.location.href = res.url; // come back to the app after TikTok confirms
+  })
+  .catch(function(e){ showStatus('soc-tiktok-connect-status','error', esc(e.message)); });
+}
+
+function socTiktokDisconnect(){
+  showModal('Disconnect TikTok?', 'Scheduled TikTok posts will fail until it’s reconnected.', function(){
+    closeModal();
+    api('social_tiktok_disconnect', {}).then(socLoadConnectStatus).catch(function(e){ toast(e.message); });
+  }, true);
+}
+
+function socSaveVerifyFile(){
+  var name = el('soc-verify-name').value.trim();
+  var content = el('soc-verify-content').value;
+  if (!name || !content) { showStatus('soc-verify-status','error','Enter both the file name and its content.'); return; }
+  showStatus('soc-verify-status','loading','<span class="spinner"></span>Saving&#8230;');
+  api('social_config_save', { verify_name: name, verify_content: content })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    showStatus('soc-verify-status','success','&#10003; Saved. TikTok can now fetch it — finish verification in their portal.');
+    socLoadConnectStatus();
+  })
+  .catch(function(e){ showStatus('soc-verify-status','error', esc(e.message)); });
 }
 
 </script>
