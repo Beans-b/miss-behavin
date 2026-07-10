@@ -453,6 +453,15 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-images .sp-img.off{opacity:.35;}
 .sp-cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--gray-mid);background:#fff;padding:4px;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;}
 .sp-cand img{width:48px;height:64px;object-fit:cover;}
+
+/* v2 — name pick-list under the pricing card header */
+.name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
+.nc-loading,.nc-empty{font-size:12px;color:var(--gray-text);padding:4px 0;line-height:1.4;}
+.nc-opt{display:block;width:100%;text-align:left;border:1px solid var(--gray-mid);background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:10px 12px;margin-bottom:5px;cursor:pointer;-webkit-appearance:none;}
+.nc-opt:active{background:var(--gray-light);}
+.nc-bar{display:flex;gap:8px;margin-top:2px;}
+.nc-more,.nc-close{flex:1;border:1px solid var(--gray-mid);background:#fff;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:9px;cursor:pointer;-webkit-appearance:none;min-height:40px;}
+.nc-more{background:var(--black);color:#fff;border-color:var(--black);}
 </style>
 </head>
 <body>
@@ -2249,46 +2258,93 @@ function loadSampleInvoice() {
 var _nameHistory = {};
 var _shopifyExistingNames = [];
 
-function regenName(card, code, type) {
-  var btn = card.querySelector('.regen-btn');
-  var nameInput = card.querySelector('.p-name-input');
-  var currentName = nameInput.value;
-
-  if (!_nameHistory[code]) _nameHistory[code] = [];
-  if (currentName && _nameHistory[code].indexOf(currentName) === -1) {
-    _nameHistory[code].push(currentName);
-  }
-
-  var sessionUsed = _nameHistory[code] || [];
-  var allUsed = sessionUsed.concat(
-    _shopifyExistingNames.filter(function(n) { return sessionUsed.indexOf(n) === -1; })
-  );
-
-  btn.classList.add('spinning');
-  btn.disabled = true;
-
-  api('generate_name', { code: code, type: type, used: allUsed })
-  .then(function(data) {
-    btn.classList.remove('spinning');
-    btn.disabled = false;
-    if (data.error || !data.text) { console.error('Name regen error:', data.error || 'empty'); return; }
-    var newName = data.text.trim().replace(/^["'`]|["'`]$/g, '').replace(/\.$/, '');
-    if (newName && _nameHistory[code].indexOf(newName) === -1) {
-      _nameHistory[code].push(newName);
-      nameInput.value = newName;
-      btn.classList.add('done');
-      btn.textContent = '✓';
-      setTimeout(function() {
-        btn.classList.remove('done');
-        btn.textContent = '↻';
-      }, 1200);
-      scheduleAutosave();
+// Load active Shopify product names ONCE (lazy, on first regenerate), cached for
+// the session, so name suggestions cross-check live products everywhere — not
+// just on the Push screen. Fails open so a fetch error never blocks naming.
+var _shopifyNamesLoaded = false;
+function ensureShopifyNames(cb) {
+  if (_shopifyNamesLoaded) { cb(); return; }
+  api('shopify_get_titles', {})
+  .then(function(res) {
+    if (res && res.titles) {
+      _shopifyExistingNames = res.titles.map(function(t) {
+        return t.replace(/\s*-\s*[^-]+$/, '').trim();   // strip "- Color" suffix
+      }).filter(function(n) { return n.length > 0; });
     }
+    _shopifyNamesLoaded = true; cb();
   })
-  .catch(function(err) {
-    btn.classList.remove('spinning');
-    btn.disabled = false;
-    console.error('Name regen failed:', err);
+  .catch(function() { _shopifyNamesLoaded = true; cb(); });
+}
+
+// Fetch a fresh batch of name options from the Worker (excludes `used`).
+function _fetchNames(code, type, used, cb) {
+  api('generate_name', { code: code, type: type, used: used, count: 5 })
+  .then(function(data) {
+    var names = data && data.names;
+    if (!names && data && data.text) {
+      try { names = JSON.parse(data.text); }
+      catch (e) { names = String(data.text).split(',').map(function(s){ return s.trim(); }); }
+    }
+    cb((names || []).filter(Boolean));
+  })
+  .catch(function() { cb([]); });
+}
+
+// Show a pick-list of 5 fresh names under the card header. Everything shown is
+// added to the per-style exclude list so "More" always returns new names, and
+// live Shopify names are excluded silently.
+function _openNameChoices(card, code, type, nameInput) {
+  var existing = card.querySelector('.name-choices');
+  if (existing) existing.remove();
+  if (!_nameHistory[code]) _nameHistory[code] = [];
+  var cur = nameInput.value;
+  if (cur && _nameHistory[code].indexOf(cur) === -1) _nameHistory[code].push(cur);
+
+  var box = document.createElement('div');
+  box.className = 'name-choices';
+  card.querySelector('.p-card-header').insertAdjacentElement('afterend', box);
+
+  function load() {
+    box.innerHTML = '<div class="nc-loading"><span class="spinner"></span> finding names…</div>';
+    var used = _nameHistory[code].concat(
+      _shopifyExistingNames.filter(function(n) { return _nameHistory[code].indexOf(n) === -1; })
+    );
+    _fetchNames(code, type, used, function(names) {
+      names = names.filter(function(n) { return _nameHistory[code].indexOf(n) === -1; });
+      box.innerHTML = '';
+      if (!names.length) {
+        box.innerHTML = '<div class="nc-empty">No new names came back — tap More to try again.</div>';
+      } else {
+        names.forEach(function(n) {
+          _nameHistory[code].push(n);   // seen → excluded next time
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'nc-opt'; b.textContent = n;
+          b.onclick = function() { nameInput.value = n; box.remove(); scheduleAutosave(); };
+          box.appendChild(b);
+        });
+      }
+      var bar = document.createElement('div'); bar.className = 'nc-bar';
+      var more = document.createElement('button');
+      more.type = 'button'; more.className = 'nc-more'; more.textContent = '↻ More';
+      more.onclick = load;
+      var close = document.createElement('button');
+      close.type = 'button'; close.className = 'nc-close'; close.textContent = 'Close';
+      close.onclick = function() { box.remove(); };
+      bar.appendChild(more); bar.appendChild(close);
+      box.appendChild(bar);
+    });
+  }
+  load();
+}
+
+// Regenerate button → ensure the Shopify name list is loaded, then show choices.
+function regenName(card, code, type) {
+  var nameInput = card.querySelector('.p-name-input');
+  var btn = card.querySelector('.regen-btn');
+  btn.classList.add('spinning'); btn.disabled = true;
+  ensureShopifyNames(function() {
+    btn.classList.remove('spinning'); btn.disabled = false;
+    _openNameChoices(card, code, type, nameInput);
   });
 }
 
