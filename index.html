@@ -438,6 +438,21 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .cat-pill.set{background:#e8f5ee;color:var(--success-fg);}
 .cat-pill.no{background:#fdecea;color:var(--red);}
 .cat-pill.same{background:var(--gray-light);color:var(--gray-text);}
+
+/* v2 — SEO + vendor-details block on the Shopify review card */
+.sp-seo{padding:10px 14px;border-top:1px solid var(--gray-mid);}
+.sp-seo .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
+.sp-seo input,.sp-seo textarea{width:100%;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 8px;outline:none;-webkit-appearance:none;resize:vertical;}
+.sp-seo input:focus,.sp-seo textarea:focus{border-color:var(--black);}
+.sp-fetch-btn{width:100%;background:var(--gray-light);border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;padding:10px;cursor:pointer;-webkit-appearance:none;margin-bottom:6px;}
+.sp-fetch-btn:disabled{opacity:.5;}
+.sp-fetch-status{font-size:11px;color:var(--gray-text);padding:2px 0 6px;line-height:1.4;}
+.sp-images{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;}
+.sp-images .sp-img{width:52px;height:70px;object-fit:cover;border:2px solid transparent;cursor:pointer;background:var(--gray-light);}
+.sp-images .sp-img.on{border-color:var(--green);}
+.sp-images .sp-img.off{opacity:.35;}
+.sp-cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--gray-mid);background:#fff;padding:4px;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;}
+.sp-cand img{width:48px;height:64px;object-fit:cover;}
 </style>
 </head>
 <body>
@@ -2393,6 +2408,7 @@ function _buildSpReview(inv) {
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
+      _spInitDetails(cd);
     });
   });
 
@@ -2515,7 +2531,14 @@ function _spDoCreate(cd) {
     product_type: typeEntry.shopify,
     tags: [cd.colorObj.color, typeEntry.tag],
     sizes: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }),
-    variants: variants
+    variants: variants,
+    // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
+    seo_title: cd.els ? cd.els.title.value.trim() : '',
+    seo_description: cd.els ? cd.els.desc.value.trim() : '',
+    body_description: cd.els ? cd.els.bodyd.value.trim() : '',
+    product_category: cd.els ? cd.els.cat.value.trim() : '',
+    image_alt: cd.els ? cd.els.alt.value.trim() : '',
+    images: _spChosenImages(cd)
   };
 
   // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
@@ -3399,6 +3422,145 @@ function socSaveVerifyFile(){
     socLoadConnectStatus();
   })
   .catch(function(e){ showStatus('soc-verify-status','error', esc(e.message)); });
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   v2 — SEO copy + vendor image/fabric/fit on the Shopify review card.
+   generate_seo prefills editable copy (one card at a time so we don't burst
+   the API). fetch_vendor_details pulls images + fabric + fit from the vendor's
+   own Shopify site by style code, then refreshes the copy.
+   ═══════════════════════════════════════════════════════════════════════ */
+var _spSeoRunning = false, _spSeoQ = [];
+function _spInitDetails(cd){
+  if (!cd || !cd.card || cd.els) return;
+  var wrap = document.createElement('div');
+  wrap.className = 'sp-seo';
+  wrap.innerHTML =
+    '<button type="button" class="sp-fetch-btn">&#8595; Images &amp; fabric from ' + esc((currentInvoice && currentInvoice.vendor) || 'vendor') + '</button>' +
+    '<div class="sp-fetch-status"></div>' +
+    '<div class="sp-images"></div>' +
+    '<label class="sp-l">SEO title</label><input class="sp-seo-title" maxlength="60"/>' +
+    '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
+    '<label class="sp-l">Product description</label><textarea class="sp-seo-body" rows="3"></textarea>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<div style="flex:1;"><label class="sp-l">Category</label><input class="sp-seo-cat"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
+    '</div>';
+  cd.card.insertBefore(wrap, cd.card.querySelector('.sp-card-foot'));
+  cd.els = {
+    fetchBtn: wrap.querySelector('.sp-fetch-btn'),
+    fetchStatus: wrap.querySelector('.sp-fetch-status'),
+    images: wrap.querySelector('.sp-images'),
+    title: wrap.querySelector('.sp-seo-title'),
+    desc: wrap.querySelector('.sp-seo-desc'),
+    bodyd: wrap.querySelector('.sp-seo-body'),
+    cat: wrap.querySelector('.sp-seo-cat'),
+    alt: wrap.querySelector('.sp-seo-alt')
+  };
+  cd.images = []; cd.userEdited = false;
+  ['title','desc','bodyd','cat','alt'].forEach(function(k){
+    cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
+  });
+  cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
+  _spSeoEnqueue(cd);
+}
+function _spSeoEnqueue(cd){ _spSeoQ.push(cd); _spSeoPump(); }
+function _spSeoPump(){
+  if (_spSeoRunning) return;
+  var cd = _spSeoQ.shift();
+  if (!cd) return;
+  _spSeoRunning = true;
+  _spGenSeo(cd, function(){ _spSeoRunning = false; setTimeout(_spSeoPump, 150); });
+}
+function _spGenSeo(cd, done){
+  if (!cd.els) { if (done) done(); return; }
+  var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  cd.els.title.placeholder = 'Generating…';
+  api('generate_seo', {
+    title: cd.style.name || cd.style.code,
+    brand: vendor,
+    type: cd.style.type || '',
+    colors: [cd.colorObj.color],
+    fabric: cd.fabric || cd.style.fabric || undefined,
+    fit: cd.fit || cd.style.fit || undefined,
+    price: cd.retail ? cd.retail.toFixed(2) : undefined
+  })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    var t = String(res.text || '').trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
+    var j = JSON.parse(t);
+    cd.els.title.placeholder = '';
+    if (cd.userEdited) { if (done) done(); return; }
+    cd.els.title.value = j.seo_title || '';
+    cd.els.desc.value  = j.seo_description || '';
+    cd.els.bodyd.value = j.body_description || '';
+    cd.els.cat.value   = j.product_category || '';
+    cd.els.alt.value   = j.image_alt || '';
+    if (done) done();
+  })
+  .catch(function(e){ cd.els.title.placeholder = ''; cd.els.fetchStatus.textContent = 'SEO copy: ' + e.message; if (done) done(); });
+}
+function _spFetchVendor(cd){
+  var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
+  cd.els.fetchBtn.disabled = true;
+  api('fetch_vendor_details', { vendor: vendor, styleCode: cd.style.code })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    var cands = res.candidates || [];
+    if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; return; }
+    var want = String(cd.colorObj.color || '').toLowerCase();
+    var pick = cands.find(function(c){ return (c.colors || []).some(function(cl){ return String(cl).toLowerCase() === want; }); }) || (cands.length === 1 ? cands[0] : null);
+    if (!pick) { _spCandidatePicker(cd, cands); return; }
+    _spUseCandidate(cd, pick);
+  })
+  .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
+}
+function _spCandidatePicker(cd, cands){
+  cd.els.fetchStatus.textContent = 'Pick the match:';
+  cd.els.images.innerHTML = '';
+  cands.forEach(function(c){
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'sp-cand';
+    b.innerHTML = (c.images && c.images[0] ? '<img src="' + esc(c.images[0]) + '"/>' : '') + '<span>' + esc((c.colors || []).join(', ') || c.title) + '</span>';
+    b.onclick = function(){ _spUseCandidate(cd, c); };
+    cd.els.images.appendChild(b);
+  });
+  cd.els.fetchBtn.disabled = false;
+}
+function _spUseCandidate(cd, cand){
+  var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  cd.els.fetchStatus.textContent = 'Loading details…';
+  if (cand.handle){
+    api('fetch_vendor_details', { vendor: vendor, handle: cand.handle })
+    .then(function(res){
+      if (res.error) throw new Error(res.error);
+      cd.images = res.images || cand.images || [];
+      cd.fabric = res.fabric || null; cd.fit = res.fit || null;
+      _spRenderImages(cd);
+      cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
+      cd.els.fetchBtn.disabled = false;
+      _spGenSeo(cd);
+    })
+    .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
+  } else {
+    cd.images = cand.images || []; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
+  }
+}
+function _spRenderImages(cd){
+  cd.els.images.innerHTML = '';
+  (cd.images || []).forEach(function(u, i){
+    var im = document.createElement('img');
+    im.src = u; im.className = 'sp-img' + (i < 10 ? ' on' : ' off'); im.dataset.on = i < 10 ? '1' : '0';
+    im.onclick = function(){ var on = im.dataset.on === '1'; im.dataset.on = on ? '0' : '1'; im.className = 'sp-img' + (on ? ' off' : ' on'); };
+    cd.els.images.appendChild(im);
+  });
+}
+function _spChosenImages(cd){
+  var out = [];
+  if (cd.card) cd.card.querySelectorAll('.sp-images .sp-img').forEach(function(im){ if (im.dataset.on === '1') out.push(im.src); });
+  return out;
 }
 
 </script>
