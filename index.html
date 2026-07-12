@@ -413,6 +413,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render h2{font-family:'Playfair Display',serif;font-size:16px;margin:12px 0 6px;}
 .edit-render p{margin:0 0 10px;}
 .edit-render a{color:var(--accent);}
+.edit-render img{max-width:100%;height:auto;margin:8px 0;}
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
 #blog-due-banner button{background:var(--black);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;cursor:pointer;flex-shrink:0;min-height:38px;}
@@ -807,21 +808,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
       <div class="field">
         <label class="field-label">Featured brand</label>
-        <div class="edit-brand-row" id="edit-topic-brand">
-          <button class="edit-brand-btn on" data-brand="Free People" onclick="editPickBrand(this)">Free People</button>
-          <button class="edit-brand-btn" data-brand="Motel Rocks" onclick="editPickBrand(this)">Motel Rocks</button>
-        </div>
-        <div class="edit-frozen-note">Only Free People and Motel Rocks are eligible. Rolla&#8217;s and Gorjana are frozen and cannot be featured.</div>
+        <select class="field-input" id="edit-topic-brand" onchange="editState.brand=this.value;"><option value="">Loading brands&#8230;</option></select>
+        <div class="edit-frozen-note">Any brand you carry can be featured. Frozen brands (Rolla&#8217;s, Gorjana) are excluded automatically.</div>
       </div>
     </div>
 
     <!-- MODE B: new arrivals / brand drop picker (reuses Social's arrivals feed) -->
     <div id="edit-pane-arrivals" class="edit-pane" style="display:none;">
-      <div class="edit-brand-row">
-        <button class="edit-brand-btn on" data-fbrand="all" onclick="editFilterBrand(this)">All eligible</button>
-        <button class="edit-brand-btn" data-fbrand="Free People" onclick="editFilterBrand(this)">Free People</button>
-        <button class="edit-brand-btn" data-fbrand="Motel Rocks" onclick="editFilterBrand(this)">Motel Rocks</button>
-      </div>
+      <select class="field-input" id="edit-arr-brand" style="margin-bottom:12px;" onchange="editState.filter=this.value;editRenderArrivals();"><option value="all">All eligible brands</option></select>
       <div class="edit-arr-note">Recent arrivals from Free People and Motel Rocks. Tap to select the pieces this post is about.</div>
       <div id="edit-arr-grid" class="fc-grid"></div>
       <div id="edit-arr-empty" class="fc-empty" style="display:none;">No eligible Free People or Motel Rocks arrivals in the last 30 days.</div>
@@ -1072,14 +1066,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div style="padding:14px 24px 0;">
       <div id="edit-save-status" class="status"></div>
     </div>
-    <div id="edit-publish-wrap" style="display:none;padding:12px 24px 0;">
-      <button class="btn btn-black" id="edit-publish-btn" onclick="editPublish()">Publish to live site</button>
+    <div style="padding:12px 24px 0;">
       <div id="edit-publish-status" class="status"></div>
     </div>
   </div>
   <div class="edit-actionbar">
-    <button class="btn btn-outline" id="edit-regen-btn" style="flex:1;" onclick="editRegenerate()">&#8635; Variation</button>
-    <button class="btn btn-black" id="edit-save-btn" style="flex:1;" onclick="editSave()">Save to Shopify (hidden)</button>
+    <button class="btn btn-outline" id="edit-regen-btn" style="flex:1;" onclick="editRegenerate()" title="New variation">&#8635;</button>
+    <button class="btn btn-outline" id="edit-save-btn" style="flex:2;" onclick="editSave()">Save Draft</button>
+    <button class="btn btn-black" id="edit-publishnow-btn" style="flex:2;" onclick="editPublishNow()">Publish Now</button>
   </div>
 </div>
 
@@ -3780,12 +3774,14 @@ function _spChosenImages(cd){
    articles under blog `news` for human approval. No publish path here.
    ═══════════════════════════════════════ */
 // Only these two brands are eligible. Rolla's and Gorjana are frozen.
-var EDIT_BRANDS = ['Free People', 'Motel Rocks'];
+var EDIT_FROZEN = ["Rolla's", 'Gorjana'];  // hard blocklist; everything else is eligible
+var editBrandsCache = null;
+function editNormC(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
 function editBrandOf(vendor){
-  var v = String(vendor || '').toLowerCase();
-  if (v.indexOf('free people') >= 0) return 'Free People';
-  if (v.indexOf('motel') >= 0) return 'Motel Rocks';
-  return null; // ineligible / frozen — never selectable
+  if (!vendor) return null;
+  var n = editNormC(vendor);
+  for (var i = 0; i < EDIT_FROZEN.length; i++) { if (editNormC(EDIT_FROZEN[i]) === n) return null; }
+  return String(vendor).trim();
 }
 
 var editState = null;
@@ -3798,7 +3794,37 @@ function editInit(){
   editReset();
   editTab('write');
   editSetMode('topic');
+  editLoadBrands();
   var s = el('edit-gen-status'); if (s) s.style.display = 'none';
+}
+
+// Populate the Featured brand dropdown from the store's real vendors (minus
+// frozen). Cached per session. New vendors show up with no code change.
+function editLoadBrands(){
+  var sel = el('edit-topic-brand');
+  if (!sel) return;
+  if (editBrandsCache) { editFillBrandSelect(editBrandsCache); return; }
+  api('edit_brands', {})
+  .then(function(res){ editBrandsCache = (res && res.brands) || []; editFillBrandSelect(editBrandsCache); })
+  .catch(function(){ editFillBrandSelect([]); });
+}
+function editFillBrandSelect(brands){
+  var sel = el('edit-topic-brand');
+  if (!sel) return;
+  if (!brands || !brands.length) brands = ['Free People', 'Motel Rocks'];
+  sel.innerHTML = brands.map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
+  editState.brand = sel.value;
+}
+// Build the arrivals brand filter from whatever vendors are actually in the feed.
+function editFillArrFilter(){
+  var sel = el('edit-arr-brand');
+  if (!sel) return;
+  var vendors = {};
+  editState.arrivals.forEach(function(p){ var b = editBrandOf(p.vendor); if (b) vendors[b] = true; });
+  var list = Object.keys(vendors).sort();
+  sel.innerHTML = '<option value="all">All eligible brands</option>' +
+    list.map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
+  sel.value = editState.filter || 'all';
 }
 
 function editTab(name){
@@ -3842,17 +3868,7 @@ function editSetMode(m){
   if (m === 'arrivals' && !editState.arrLoaded) editLoadArrivals();
 }
 
-function editPickBrand(btn){
-  editState.brand = btn.dataset.brand;
-  var row = el('edit-topic-brand');
-  row.querySelectorAll('.edit-brand-btn').forEach(function(b){ b.classList.toggle('on', b === btn); });
-}
-
-function editFilterBrand(btn){
-  editState.filter = btn.dataset.fbrand;
-  btn.parentNode.querySelectorAll('.edit-brand-btn').forEach(function(b){ b.classList.toggle('on', b === btn); });
-  editRenderArrivals();
-}
+// Brand pickers are dropdowns now (see editLoadBrands / editFillArrFilter).
 
 // Reuse the Social module's arrivals feed (existing read-only product data).
 function editLoadArrivals(){
@@ -3863,8 +3879,9 @@ function editLoadArrivals(){
   .then(function(res){
     el('edit-arr-loading').style.display = 'none';
     editState.arrLoaded = true;
-    // Keep only eligible brands (Free People / Motel Rocks). Frozen brands dropped.
+    // Keep only eligible vendors (anything not frozen).
     editState.arrivals = (res.products || []).filter(function(p){ return editBrandOf(p.vendor) !== null; });
+    editFillArrFilter();
     editRenderArrivals();
   })
   .catch(function(e){
@@ -3903,20 +3920,21 @@ function editRenderArrivals(){
 }
 
 function editBuildPayload(){
+  var byline = 'Sophie'; // blog publisher name (single named voice)
   if (editState.mode === 'topic') {
     var topic = el('edit-topic').value.trim();
     if (!topic) { toast('Add a topic or question first.'); return null; }
-    return { mode:'topic', topic:topic, angle:el('edit-angle').value.trim(), brand:editState.brand, products:[] };
+    return { mode:'topic', topic:topic, angle:el('edit-angle').value.trim(), brand:editState.brand, products:[], byline:byline };
   }
   var picked = Object.keys(editState.selected).map(function(k){ return editState.selected[k]; });
   if (!picked.length) { toast('Pick at least one arrival.'); return null; }
   // Guard: strip anything that is not an eligible brand before it ever leaves the client.
   picked = picked.filter(function(p){ return editBrandOf(p.vendor) !== null; });
-  if (!picked.length) { toast('Only Free People and Motel Rocks pieces are eligible.'); return null; }
-  var products = picked.map(function(p){ return { title:p.title, type:p.type, price:p.price, brand:editBrandOf(p.vendor) }; });
+  if (!picked.length) { toast('Only eligible brands can be featured.'); return null; }
+  var products = picked.map(function(p){ return { title:p.title, type:p.type, price:p.price, brand:editBrandOf(p.vendor), image:(p.images&&p.images[0])||p.thumb||null }; });
   // Single-brand drop if all picks share a brand, else default to first.
   var brands = products.map(function(p){ return p.brand; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
-  return { mode:'arrivals', brand:brands.length===1?brands[0]:products[0].brand, products:products };
+  return { mode:'arrivals', brand:brands.length===1?brands[0]:products[0].brand, products:products, byline:byline };
 }
 
 function editParseDraft(res){
@@ -3982,7 +4000,8 @@ function editFillFields(){
   editSync();
   // A fresh/regenerated draft is not the saved article anymore — reset publish.
   if (editState) editState.savedArticleId = null;
-  var pw = el('edit-publish-wrap'); if (pw) pw.style.display = 'none';
+  var ps = el('edit-publish-status'); if (ps) ps.style.display = 'none';
+  var ss = el('edit-save-status'); if (ss) ss.style.display = 'none';
 }
 
 // Live preview render. Body is trusted admin-authored/Claude HTML; title shown above it.
@@ -4012,39 +4031,37 @@ function editRenderLinks(links){
   });
 }
 
-function editSave(){
+function editCollectPayload(){
   var title = el('edit-f-title').value.trim();
   var body = el('edit-f-body').value.trim();
-  if (!title) { toast('Title is required.'); return; }
-  if (!body) { toast('Body is required.'); return; }
-  var payload = {
+  if (!title) { toast('Title is required.'); return null; }
+  if (!body) { toast('Body is required.'); return null; }
+  var p = {
     title: title,
     body_html: body,
     author: el('edit-f-author').value.trim(),
     meta_title: el('edit-f-metatitle').value.trim(),
     meta_description: el('edit-f-metadesc').value.trim(),
     source: editState.mode
-    // NOTE: intentionally no published/visible flag. The Worker forces isPublished:false.
   };
-  showStatus('edit-save-status','loading','<span class="spinner"></span>Saving hidden draft to Shopify&#8230;');
+  // If already saved once, update that same article instead of creating a duplicate.
+  if (editState.savedArticleId) p.article_id = editState.savedArticleId;
+  return p;
+}
+
+// Save Draft — stores it hidden, does not go live.
+function editSave(){
+  var payload = editCollectPayload();
+  if (!payload) return;
+  showStatus('edit-save-status','loading','<span class="spinner"></span>Saving draft&#8230;');
   el('edit-save-btn').disabled = true;
   api('edit_save_article', payload)
   .then(function(res){
     if (res.error) throw new Error(res.error);
     el('edit-save-btn').disabled = false;
-    editState.savedArticleId = res.article_id || null;
-    var url = res.admin_url || '';
-    showStatus('edit-save-status','success',
-      'Saved as a HIDDEN draft (not live yet). Tap Publish below to make it live, or open it in Shopify admin:<br>' +
-      (url ? '<a href="'+esc(url)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all;">'+esc(url)+'</a>' : '(admin URL unavailable)'));
-    toast('Hidden draft saved to Shopify.');
-    // Reveal the one-tap publish button now that we have an article id.
-    if (editState.savedArticleId) {
-      el('edit-publish-btn').style.display = 'block';
-      el('edit-publish-btn').disabled = false;
-      el('edit-publish-status').style.display = 'none';
-      el('edit-publish-wrap').style.display = 'block';
-    }
+    editState.savedArticleId = res.article_id || editState.savedArticleId;
+    showStatus('edit-save-status','success','Saved as a draft. It stays hidden until you publish it. You will find it under the Posts tab.');
+    toast('Draft saved.');
   })
   .catch(function(e){
     el('edit-save-btn').disabled = false;
@@ -4052,22 +4069,30 @@ function editSave(){
   });
 }
 
-// One-tap publish, behind an explicit confirmation. Only path that makes a
-// post live; publishing still needs a human tap.
-function editPublish(){
-  if (!editState || !editState.savedArticleId) { toast('Save the draft first.'); return; }
+// Publish Now — saves the current version, then makes it live, then offers a View link.
+function editPublishNow(){
+  var payload = editCollectPayload();
+  if (!payload) return;
   if (!confirm('Publish this post live to your blog now? It will be visible to everyone on your site.')) return;
-  showStatus('edit-publish-status','loading','<span class="spinner"></span>Publishing live&#8230;');
-  el('edit-publish-btn').disabled = true;
-  api('edit_publish_article', { article_id: editState.savedArticleId })
+  el('edit-publishnow-btn').disabled = true;
+  showStatus('edit-publish-status','loading','<span class="spinner"></span>Saving&#8230;');
+  api('edit_save_article', payload)
   .then(function(res){
     if (res.error) throw new Error(res.error);
-    el('edit-publish-btn').style.display = 'none';
-    showStatus('edit-publish-status','success','Published live.' + (res.public_path ? ' It is now on your blog at ' + esc(res.public_path) : ''));
+    editState.savedArticleId = res.article_id;
+    showStatus('edit-publish-status','loading','<span class="spinner"></span>Publishing live&#8230;');
+    return api('edit_publish_article', { article_id: editState.savedArticleId });
+  })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    el('edit-publishnow-btn').disabled = false;
+    var url = res.public_url || '';
+    showStatus('edit-publish-status','success','Published live.' +
+      (url ? ' <a href="'+esc(url)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">View post &#8599;</a>' : ''));
     toast('Post published live.');
   })
   .catch(function(e){
-    el('edit-publish-btn').disabled = false;
+    el('edit-publishnow-btn').disabled = false;
     showStatus('edit-publish-status','error','Publish failed: ' + esc(e.message));
   });
 }
