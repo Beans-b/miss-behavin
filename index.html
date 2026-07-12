@@ -416,6 +416,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
 #blog-due-banner button{background:var(--black);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;cursor:pointer;flex-shrink:0;min-height:38px;}
+.edit-posts-note{font-size:11px;color:var(--gray-text);padding:14px 24px 6px;line-height:1.4;}
+.edit-post-row{padding:12px 24px;border-bottom:1px solid var(--gray-light);}
+.edit-post-row a{color:var(--accent);text-decoration:none;font-weight:600;font-size:13px;word-break:break-word;}
+.edit-post-title{font-weight:600;font-size:13px;word-break:break-word;}
+.edit-post-when{font-size:11px;color:var(--gray-text);margin-top:3px;}
+.edit-post-draft{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--gray-mid);color:#fff;padding:2px 6px;margin-left:6px;vertical-align:middle;}
 #soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
 .soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
 .soc-thumb{position:relative;flex-shrink:0;width:72px;height:96px;border:1px solid var(--gray-mid);padding:0;background:var(--gray-light);cursor:pointer;-webkit-appearance:none;}
@@ -777,6 +783,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
   <!-- THE EDIT (blog drafting → hidden Shopify article) -->
   <div id="view-edit" style="display:none;">
+    <div class="tab-bar">
+      <button class="tab-btn active" id="edittab-btn-write" onclick="editTab('write')">Write</button>
+      <button class="tab-btn" id="edittab-btn-posts" onclick="editTab('posts')">Posts</button>
+    </div>
+    <div id="edittab-write">
     <div class="edit-howto">Write a post for your Shopify blog. Pick a topic or new arrivals, tap Generate Draft, edit the wording, then Save. Saved posts stay hidden until you tap Publish.</div>
     <div class="edit-mode-row">
       <button class="edit-mode-btn on" id="edit-mode-topic" onclick="editSetMode('topic')">Topic / Angle</button>
@@ -820,6 +831,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div style="padding:0 24px;">
       <div id="edit-gen-status" class="status"></div>
       <button class="btn btn-black" id="edit-gen-btn" onclick="editGenerate()">Generate Draft</button>
+    </div>
+    </div><!-- /edittab-write -->
+
+    <div id="edittab-posts" style="display:none;">
+      <div class="edit-posts-note">Posts you have saved or published. Published ones link to the live page; drafts wait in Shopify until you publish them.</div>
+      <div id="edit-posts-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
     </div>
   </div>
 
@@ -3779,8 +3796,41 @@ function editReset(){
 
 function editInit(){
   editReset();
+  editTab('write');
   editSetMode('topic');
   var s = el('edit-gen-status'); if (s) s.style.display = 'none';
+}
+
+function editTab(name){
+  el('edittab-write').style.display = name === 'write' ? 'block' : 'none';
+  el('edittab-posts').style.display = name === 'posts' ? 'block' : 'none';
+  el('edittab-btn-write').classList.toggle('active', name === 'write');
+  el('edittab-btn-posts').classList.toggle('active', name === 'posts');
+  if (name === 'posts') editLoadPosts();
+}
+
+function editLoadPosts(){
+  var list = el('edit-posts-list');
+  list.innerHTML = '<div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div>';
+  api('edit_list_posts', {})
+  .then(function(res){
+    var posts = (res && res.posts) || [];
+    if (!posts.length) { list.innerHTML = '<div class="fc-empty">No posts yet. Write your first one from the Write tab.</div>'; return; }
+    list.innerHTML = '';
+    posts.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'edit-post-row';
+      var titleHtml = (p.published && p.public_url)
+        ? '<a href="'+esc(p.public_url)+'" target="_blank" rel="noopener">'+esc(p.title)+'</a>'
+        : '<span class="edit-post-title">'+esc(p.title)+'</span><span class="edit-post-draft">Draft</span>';
+      var when = p.published_at
+        ? new Date(p.published_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
+        : 'Not published yet';
+      row.innerHTML = titleHtml + '<div class="edit-post-when">'+esc(when)+'</div>';
+      list.appendChild(row);
+    });
+  })
+  .catch(function(e){ list.innerHTML = '<div class="fc-empty">'+esc(e.message)+'</div>'; });
 }
 
 function editSetMode(m){
