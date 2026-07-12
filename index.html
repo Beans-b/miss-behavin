@@ -413,6 +413,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render h2{font-family:'Playfair Display',serif;font-size:16px;margin:12px 0 6px;}
 .edit-render p{margin:0 0 10px;}
 .edit-render a{color:var(--accent);}
+.edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
+#blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
+#blog-due-banner button{background:var(--black);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;cursor:pointer;flex-shrink:0;min-height:38px;}
 #soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
 .soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
 .soc-thumb{position:relative;flex-shrink:0;width:72px;height:96px;border:1px solid var(--gray-mid);padding:0;background:var(--gray-light);cursor:pointer;-webkit-appearance:none;}
@@ -524,6 +527,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
   <!-- MENU -->
   <div id="view-menu">
+    <div id="blog-due-banner"></div>
     <div class="menu-list" id="menu-list"></div>
   </div>
 
@@ -773,6 +777,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
   <!-- THE EDIT (blog drafting → hidden Shopify article) -->
   <div id="view-edit" style="display:none;">
+    <div class="edit-howto">Write a post for your Shopify blog. Pick a topic or new arrivals, tap Generate Draft, edit the wording, then Save. Saved posts stay hidden until you tap Publish.</div>
     <div class="edit-mode-row">
       <button class="edit-mode-btn on" id="edit-mode-topic" onclick="editSetMode('topic')">Topic / Angle</button>
       <button class="edit-mode-btn" id="edit-mode-arrivals" onclick="editSetMode('arrivals')">New Arrivals</button>
@@ -1050,6 +1055,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div style="padding:14px 24px 0;">
       <div id="edit-save-status" class="status"></div>
     </div>
+    <div id="edit-publish-wrap" style="display:none;padding:12px 24px 0;">
+      <button class="btn btn-black" id="edit-publish-btn" onclick="editPublish()">Publish to live site</button>
+      <div id="edit-publish-status" class="status"></div>
+    </div>
   </div>
   <div class="edit-actionbar">
     <button class="btn btn-outline" id="edit-regen-btn" style="flex:1;" onclick="editRegenerate()">&#8635; Variation</button>
@@ -1170,6 +1179,7 @@ function showMenu(){
     b.onclick = function(){ openView(m.id, m.label); };
     list.appendChild(b);
   });
+  editCheckDue();
   // staff role: jump straight into pricing (their only destination)
   if (SESSION.role === 'staff') openView('staff', 'Staff Pricing');
 }
@@ -3763,7 +3773,7 @@ function editBrandOf(vendor){
 
 var editState = null;
 function editReset(){
-  editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false };
+  editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false, savedArticleId:null };
   var pv = el('edit-preview'); if (pv) pv.style.display = 'none';
 }
 
@@ -3920,6 +3930,9 @@ function editFillFields(){
   editCount('metadesc',155);
   editRenderLinks(d.links || []);
   editSync();
+  // A fresh/regenerated draft is not the saved article anymore — reset publish.
+  if (editState) editState.savedArticleId = null;
+  var pw = el('edit-publish-wrap'); if (pw) pw.style.display = 'none';
 }
 
 // Live preview render. Body is trusted admin-authored/Claude HTML; title shown above it.
@@ -3969,11 +3982,19 @@ function editSave(){
   .then(function(res){
     if (res.error) throw new Error(res.error);
     el('edit-save-btn').disabled = false;
+    editState.savedArticleId = res.article_id || null;
     var url = res.admin_url || '';
     showStatus('edit-save-status','success',
-      'Saved as a HIDDEN draft. Review and publish it in Shopify admin:<br>' +
+      'Saved as a HIDDEN draft (not live yet). Tap Publish below to make it live, or open it in Shopify admin:<br>' +
       (url ? '<a href="'+esc(url)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all;">'+esc(url)+'</a>' : '(admin URL unavailable)'));
     toast('Hidden draft saved to Shopify.');
+    // Reveal the one-tap publish button now that we have an article id.
+    if (editState.savedArticleId) {
+      el('edit-publish-btn').style.display = 'block';
+      el('edit-publish-btn').disabled = false;
+      el('edit-publish-status').style.display = 'none';
+      el('edit-publish-wrap').style.display = 'block';
+    }
   })
   .catch(function(e){
     el('edit-save-btn').disabled = false;
@@ -3981,7 +4002,45 @@ function editSave(){
   });
 }
 
+// One-tap publish, behind an explicit confirmation. Only path that makes a
+// post live; publishing still needs a human tap.
+function editPublish(){
+  if (!editState || !editState.savedArticleId) { toast('Save the draft first.'); return; }
+  if (!confirm('Publish this post live to your blog now? It will be visible to everyone on your site.')) return;
+  showStatus('edit-publish-status','loading','<span class="spinner"></span>Publishing live&#8230;');
+  el('edit-publish-btn').disabled = true;
+  api('edit_publish_article', { article_id: editState.savedArticleId })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    el('edit-publish-btn').style.display = 'none';
+    showStatus('edit-publish-status','success','Published live.' + (res.public_path ? ' It is now on your blog at ' + esc(res.public_path) : ''));
+    toast('Post published live.');
+  })
+  .catch(function(e){
+    el('edit-publish-btn').disabled = false;
+    showStatus('edit-publish-status','error','Publish failed: ' + esc(e.message));
+  });
+}
+
 function editClosePreview(){ el('edit-preview').style.display = 'none'; }
+
+// Weekly nudge: check the last published post; show a banner on the menu when
+// a new one is due. Fails silent — a hiccup never nags. Admin/employee only.
+function editCheckDue(){
+  var banner = el('blog-due-banner');
+  if (!banner) return;
+  if (!SESSION || ['admin','employee'].indexOf(SESSION.role) < 0) { banner.style.display = 'none'; return; }
+  api('edit_last_posted', {})
+  .then(function(res){
+    if (!res || !res.due) { banner.style.display = 'none'; return; }
+    var msg = res.last_posted
+      ? ('&#128221; A new blog post is due &#8212; last one was ' + (res.days_since || 0) + ' day' + (res.days_since === 1 ? '' : 's') + ' ago.')
+      : '&#128221; No blog posts published yet &#8212; time to create your first.';
+    banner.innerHTML = '<span>' + msg + '</span><button onclick="openView(\'edit\',\'Create Blog\')">Create</button>';
+    banner.style.display = 'flex';
+  })
+  .catch(function(){ banner.style.display = 'none'; });
+}
 
 </script>
 </body>
