@@ -809,7 +809,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="field">
         <label class="field-label">Featured brand</label>
         <select class="field-input" id="edit-topic-brand" onchange="editState.brand=this.value;"><option value="">Loading brands&#8230;</option></select>
-        <div class="edit-frozen-note">Any brand you carry can be featured. Frozen brands (Rolla&#8217;s, Gorjana) are excluded automatically.</div>
+        <div class="edit-frozen-note">Any brand you carry can be featured, or choose General for a post not tied to a brand. Frozen brands (Rolla&#8217;s, Gorjana) are excluded automatically.</div>
       </div>
     </div>
 
@@ -3812,8 +3812,9 @@ function editFillBrandSelect(brands){
   var sel = el('edit-topic-brand');
   if (!sel) return;
   if (!brands || !brands.length) brands = ['Free People', 'Motel Rocks'];
-  sel.innerHTML = brands.map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('');
-  editState.brand = sel.value;
+  sel.innerHTML = brands.map(function(b){ return '<option value="'+esc(b)+'">'+esc(b)+'</option>'; }).join('') +
+    '<option value="">General (no specific brand)</option>';
+  editState.brand = sel.value; // first real brand by default; General is available at the bottom
 }
 // Build the arrivals brand filter from whatever vendors are actually in the feed.
 function editFillArrFilter(){
