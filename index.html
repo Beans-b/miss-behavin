@@ -384,6 +384,35 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .soc-days{position:absolute;top:8px;left:8px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(10,10,10,.78);color:#fff;padding:3px 7px;}
 #soc-genbar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--black);padding:12px 24px calc(12px + env(safe-area-inset-bottom));z-index:1400;display:none;}
 #soc-genbar .btn{margin-top:0;}
+
+/* THE EDIT (blog drafting) */
+.edit-mode-row{display:flex;gap:8px;padding:16px 24px 4px;}
+.edit-mode-btn{flex:1;padding:10px 6px;background:none;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-text);cursor:pointer;min-height:44px;}
+.edit-mode-btn.on{border-color:var(--black);color:var(--black);}
+.edit-pane{padding:8px 24px 24px;}
+.edit-brand-row{display:flex;gap:8px;margin-bottom:12px;}
+.edit-brand-btn{flex:1;padding:9px 6px;background:none;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--gray-text);cursor:pointer;min-height:40px;}
+.edit-brand-btn.on{border-color:var(--black);color:var(--black);}
+.edit-arr-note{font-size:11px;color:var(--gray-text);margin-bottom:10px;line-height:1.4;}
+.edit-frozen-note{font-size:11px;color:var(--gray-text);margin-top:8px;line-height:1.4;}
+/* preview overlay */
+#edit-preview{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
+.edit-prev-body{flex:1;overflow-y:auto;padding:0 0 120px;}
+.edit-field{padding:14px 24px 0;}
+.edit-field textarea,.edit-field input{width:100%;background:transparent;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px;outline:none;color:var(--black);line-height:1.5;}
+.edit-field textarea:focus,.edit-field input:focus{border-color:var(--black);}
+.edit-body-area{min-height:280px;font-family:'DM Sans',sans-serif;}
+.edit-charcount{font-size:10px;color:var(--gray-text);margin-top:4px;text-align:right;}
+.edit-charcount.over{color:var(--red);}
+.edit-links{padding:14px 24px 0;}
+.edit-link-item{font-size:12px;color:#444;padding:6px 0;border-bottom:1px solid var(--gray-light);word-break:break-word;line-height:1.4;}
+.edit-link-item .lk{color:var(--accent);}
+.edit-actionbar{position:fixed;bottom:0;left:0;right:0;max-width:480px;margin:0 auto;background:var(--white);border-top:1px solid var(--gray-mid);padding:12px 24px calc(12px + env(safe-area-inset-bottom));z-index:1600;display:flex;gap:8px;}
+.edit-actionbar .btn{margin-top:0;}
+.edit-render{border:1px solid var(--gray-mid);padding:14px;margin:6px 24px 0;font-size:13px;line-height:1.55;max-height:220px;overflow-y:auto;}
+.edit-render h2{font-family:'Playfair Display',serif;font-size:16px;margin:12px 0 6px;}
+.edit-render p{margin:0 0 10px;}
+.edit-render a{color:var(--accent);}
 #soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
 .soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
 .soc-thumb{position:relative;flex-shrink:0;width:72px;height:96px;border:1px solid var(--gray-mid);padding:0;background:var(--gray-light);cursor:pointer;-webkit-appearance:none;}
@@ -742,6 +771,53 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </div>
   </div>
 
+  <!-- THE EDIT (blog drafting → hidden Shopify article) -->
+  <div id="view-edit" style="display:none;">
+    <div class="edit-mode-row">
+      <button class="edit-mode-btn on" id="edit-mode-topic" onclick="editSetMode('topic')">Topic / Angle</button>
+      <button class="edit-mode-btn" id="edit-mode-arrivals" onclick="editSetMode('arrivals')">New Arrivals</button>
+    </div>
+
+    <!-- MODE A: free-text topic -->
+    <div id="edit-pane-topic" class="edit-pane">
+      <div class="field">
+        <label class="field-label">Topic or question</label>
+        <input type="text" class="field-input" id="edit-topic" placeholder="e.g. How to style Free People wide-leg jeans" autocomplete="off"/>
+        <div class="field-hint">Phrase it as a question or angle. The post opens by answering it directly.</div>
+      </div>
+      <div class="field">
+        <label class="field-label">Angle / notes (optional)</label>
+        <input type="text" class="field-input" id="edit-angle" placeholder="e.g. summer, casual, Santa Barbara"/>
+      </div>
+      <div class="field">
+        <label class="field-label">Featured brand</label>
+        <div class="edit-brand-row" id="edit-topic-brand">
+          <button class="edit-brand-btn on" data-brand="Free People" onclick="editPickBrand(this)">Free People</button>
+          <button class="edit-brand-btn" data-brand="Motel Rocks" onclick="editPickBrand(this)">Motel Rocks</button>
+        </div>
+        <div class="edit-frozen-note">Only Free People and Motel Rocks are eligible. Rolla&#8217;s and Gorjana are frozen and cannot be featured.</div>
+      </div>
+    </div>
+
+    <!-- MODE B: new arrivals / brand drop picker (reuses Social's arrivals feed) -->
+    <div id="edit-pane-arrivals" class="edit-pane" style="display:none;">
+      <div class="edit-brand-row">
+        <button class="edit-brand-btn on" data-fbrand="all" onclick="editFilterBrand(this)">All eligible</button>
+        <button class="edit-brand-btn" data-fbrand="Free People" onclick="editFilterBrand(this)">Free People</button>
+        <button class="edit-brand-btn" data-fbrand="Motel Rocks" onclick="editFilterBrand(this)">Motel Rocks</button>
+      </div>
+      <div class="edit-arr-note">Recent arrivals from Free People and Motel Rocks. Tap to select the pieces this post is about.</div>
+      <div id="edit-arr-grid" class="fc-grid"></div>
+      <div id="edit-arr-empty" class="fc-empty" style="display:none;">No eligible Free People or Motel Rocks arrivals in the last 30 days.</div>
+      <div id="edit-arr-loading" class="fc-empty"><span class="spinner"></span> Loading arrivals&#8230;</div>
+    </div>
+
+    <div style="padding:0 24px;">
+      <div id="edit-gen-status" class="status"></div>
+      <button class="btn btn-black" id="edit-gen-btn" onclick="editGenerate()">Generate Draft</button>
+    </div>
+  </div>
+
   <!-- SETTINGS + ACTIVITY LOG (admin) -->
   <div id="view-settings" style="display:none;">
     <div class="tab-bar">
@@ -933,6 +1009,54 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
   </div>
 </div>
 
+<!-- THE EDIT: DRAFT PREVIEW OVERLAY (editable before save) -->
+<div id="edit-preview">
+  <div class="sp-head">
+    <div>
+      <div class="sp-head-title">Draft &#8212; The Edit</div>
+      <div class="sp-head-meta">Unpublished. Nothing goes live until you publish it in Shopify admin.</div>
+    </div>
+    <button class="sp-close" onclick="editClosePreview()">Close</button>
+  </div>
+  <div class="edit-prev-body">
+    <div class="edit-field">
+      <label class="field-label">Title</label>
+      <input type="text" id="edit-f-title" oninput="editSync()"/>
+    </div>
+    <div class="section-title" style="padding:16px 24px 4px;">Preview</div>
+    <div class="edit-render" id="edit-render"></div>
+    <div class="edit-field">
+      <label class="field-label">Body (HTML) &#8212; edit freely</label>
+      <textarea class="edit-body-area" id="edit-f-body" oninput="editSync()"></textarea>
+    </div>
+    <div class="edit-field">
+      <label class="field-label">Author byline</label>
+      <input type="text" id="edit-f-author"/>
+    </div>
+    <div class="edit-field">
+      <label class="field-label">Meta title</label>
+      <input type="text" id="edit-f-metatitle" maxlength="70" oninput="editCount('metatitle',60)"/>
+      <div class="edit-charcount" id="edit-cc-metatitle"></div>
+    </div>
+    <div class="edit-field">
+      <label class="field-label">Meta description</label>
+      <textarea id="edit-f-metadesc" rows="2" maxlength="170" oninput="editCount('metadesc',155)"></textarea>
+      <div class="edit-charcount" id="edit-cc-metadesc"></div>
+    </div>
+    <div class="edit-links">
+      <div class="section-title" style="padding:0 0 6px;">Suggested internal links</div>
+      <div id="edit-links-list"></div>
+    </div>
+    <div style="padding:14px 24px 0;">
+      <div id="edit-save-status" class="status"></div>
+    </div>
+  </div>
+  <div class="edit-actionbar">
+    <button class="btn btn-outline" id="edit-regen-btn" style="flex:1;" onclick="editRegenerate()">&#8635; Variation</button>
+    <button class="btn btn-black" id="edit-save-btn" style="flex:1;" onclick="editSave()">Save to Shopify (hidden)</button>
+  </div>
+</div>
+
 <!-- SCANNER OVERLAY -->
 <div id="scan-overlay">
   <video id="scan-video" muted playsinline></video>
@@ -1024,13 +1148,14 @@ var MENU = [
   { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin'] },
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
+  { id:'edit',       icon:'✍️', label:'The Edit',      desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','linesheet','staff','social','categories','settings'];
+var VIEWS = ['menu','floorcount','linesheet','staff','social','edit','categories','settings'];
 
 function showMenu(){
-  closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar();
+  closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar(); editReset();
   switchView('menu');
   el('header-sub').textContent = 'Menu';
   el('back-row').style.display = 'none';
@@ -1063,6 +1188,7 @@ function openView(id, label){
   if (id === 'linesheet') { kelTab('invoice'); checkLiveStatus(); loadActiveInvoiceForKel(); }
   if (id === 'staff') showStaff();
   if (id === 'social') socInit();
+  if (id === 'edit') editInit();
   if (id === 'settings') { setTab('log'); loadLog(); loadCodes(); loadLocations(); loadNotifToUI(); }
 }
 
@@ -3620,6 +3746,242 @@ function _spChosenImages(cd){
   if (cd.card) cd.card.querySelectorAll('.sp-images .sp-img').forEach(function(im){ if (im.dataset.on === '1') out.push(im.src); });
   return out;
 }
+
+/* ═══════════════════════════════════════
+   THE EDIT — SEO/AEO blog drafts → HIDDEN Shopify articles
+   Drafts with Claude (via Worker), previews, and saves UNPUBLISHED
+   articles under blog `news` for human approval. No publish path here.
+   ═══════════════════════════════════════ */
+// Only these two brands are eligible. Rolla's and Gorjana are frozen.
+var EDIT_BRANDS = ['Free People', 'Motel Rocks'];
+function editBrandOf(vendor){
+  var v = String(vendor || '').toLowerCase();
+  if (v.indexOf('free people') >= 0) return 'Free People';
+  if (v.indexOf('motel') >= 0) return 'Motel Rocks';
+  return null; // ineligible / frozen — never selectable
+}
+
+var editState = null;
+function editReset(){
+  editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false };
+  var pv = el('edit-preview'); if (pv) pv.style.display = 'none';
+}
+
+function editInit(){
+  editReset();
+  editSetMode('topic');
+  var s = el('edit-gen-status'); if (s) s.style.display = 'none';
+}
+
+function editSetMode(m){
+  editState.mode = m;
+  el('edit-mode-topic').classList.toggle('on', m === 'topic');
+  el('edit-mode-arrivals').classList.toggle('on', m === 'arrivals');
+  el('edit-pane-topic').style.display = m === 'topic' ? 'block' : 'none';
+  el('edit-pane-arrivals').style.display = m === 'arrivals' ? 'block' : 'none';
+  if (m === 'arrivals' && !editState.arrLoaded) editLoadArrivals();
+}
+
+function editPickBrand(btn){
+  editState.brand = btn.dataset.brand;
+  var row = el('edit-topic-brand');
+  row.querySelectorAll('.edit-brand-btn').forEach(function(b){ b.classList.toggle('on', b === btn); });
+}
+
+function editFilterBrand(btn){
+  editState.filter = btn.dataset.fbrand;
+  btn.parentNode.querySelectorAll('.edit-brand-btn').forEach(function(b){ b.classList.toggle('on', b === btn); });
+  editRenderArrivals();
+}
+
+// Reuse the Social module's arrivals feed (existing read-only product data).
+function editLoadArrivals(){
+  el('edit-arr-loading').style.display = 'block';
+  el('edit-arr-empty').style.display = 'none';
+  el('edit-arr-grid').innerHTML = '';
+  api('social_new_arrivals', {})
+  .then(function(res){
+    el('edit-arr-loading').style.display = 'none';
+    editState.arrLoaded = true;
+    // Keep only eligible brands (Free People / Motel Rocks). Frozen brands dropped.
+    editState.arrivals = (res.products || []).filter(function(p){ return editBrandOf(p.vendor) !== null; });
+    editRenderArrivals();
+  })
+  .catch(function(e){
+    el('edit-arr-loading').style.display = 'none';
+    toast('Could not load arrivals: ' + e.message);
+  });
+}
+
+function editRenderArrivals(){
+  var grid = el('edit-arr-grid');
+  grid.innerHTML = '';
+  var list = editState.arrivals.filter(function(p){
+    return editState.filter === 'all' || editBrandOf(p.vendor) === editState.filter;
+  });
+  if (!list.length) { el('edit-arr-empty').style.display = 'block'; return; }
+  el('edit-arr-empty').style.display = 'none';
+  list.forEach(function(p){
+    var card = document.createElement('button');
+    card.className = 'fc-card soc-card' + (editState.selected[p.id] ? ' selected' : '');
+    var img = p.thumb
+      ? '<img class="fc-card-img" loading="lazy" src="'+esc(p.thumb)+'" alt=""/>'
+      : '<div class="fc-card-noimg">&#128092;</div>';
+    card.innerHTML = img +
+      '<div class="soc-check">&#10003;</div>' +
+      '<div class="fc-card-body">' +
+        '<div class="fc-card-title">'+esc(p.title)+'</div>' +
+        '<div class="fc-card-meta"><span>'+esc(editBrandOf(p.vendor))+'</span><span>'+esc(p.type||'')+'</span></div>' +
+      '</div>';
+    card.onclick = function(){
+      if (editState.selected[p.id]) delete editState.selected[p.id];
+      else editState.selected[p.id] = p;
+      card.classList.toggle('selected', !!editState.selected[p.id]);
+    };
+    grid.appendChild(card);
+  });
+}
+
+function editBuildPayload(){
+  if (editState.mode === 'topic') {
+    var topic = el('edit-topic').value.trim();
+    if (!topic) { toast('Add a topic or question first.'); return null; }
+    return { mode:'topic', topic:topic, angle:el('edit-angle').value.trim(), brand:editState.brand, products:[] };
+  }
+  var picked = Object.keys(editState.selected).map(function(k){ return editState.selected[k]; });
+  if (!picked.length) { toast('Pick at least one arrival.'); return null; }
+  // Guard: strip anything that is not an eligible brand before it ever leaves the client.
+  picked = picked.filter(function(p){ return editBrandOf(p.vendor) !== null; });
+  if (!picked.length) { toast('Only Free People and Motel Rocks pieces are eligible.'); return null; }
+  var products = picked.map(function(p){ return { title:p.title, type:p.type, price:p.price, brand:editBrandOf(p.vendor) }; });
+  // Single-brand drop if all picks share a brand, else default to first.
+  var brands = products.map(function(p){ return p.brand; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
+  return { mode:'arrivals', brand:brands.length===1?brands[0]:products[0].brand, products:products };
+}
+
+function editParseDraft(res){
+  if (res.error) throw new Error(res.error);
+  var txt = String(res.text || '').trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
+  return JSON.parse(txt);
+}
+
+function editGenerate(){
+  var payload = editBuildPayload();
+  if (!payload) return;
+  editState.lastPayload = payload;
+  showStatus('edit-gen-status','loading','<span class="spinner"></span>Drafting with Claude&#8230;');
+  el('edit-gen-btn').disabled = true;
+  api('edit_generate', payload)
+  .then(function(res){
+    editState.draft = editParseDraft(res);
+    el('edit-gen-status').style.display = 'none';
+    el('edit-gen-btn').disabled = false;
+    editOpenPreview();
+  })
+  .catch(function(e){
+    el('edit-gen-btn').disabled = false;
+    showStatus('edit-gen-status','error','Draft failed: ' + esc(e.message) + ' — try again.');
+  });
+}
+
+function editRegenerate(){
+  if (!editState.lastPayload) return;
+  showStatus('edit-save-status','loading','<span class="spinner"></span>Writing a variation&#8230;');
+  el('edit-regen-btn').disabled = true;
+  api('edit_regenerate', editState.lastPayload)
+  .then(function(res){
+    editState.draft = editParseDraft(res);
+    el('edit-save-status').style.display = 'none';
+    el('edit-regen-btn').disabled = false;
+    editFillFields();
+  })
+  .catch(function(e){
+    el('edit-regen-btn').disabled = false;
+    showStatus('edit-save-status','error','Variation failed: ' + esc(e.message));
+  });
+}
+
+function editOpenPreview(){
+  editFillFields();
+  var pv = el('edit-preview');
+  pv.style.display = 'flex';
+  el('edit-save-status').style.display = 'none';
+  pv.querySelector('.edit-prev-body').scrollTop = 0;
+}
+
+function editFillFields(){
+  var d = editState.draft || {};
+  el('edit-f-title').value = d.title || '';
+  el('edit-f-body').value = d.body_html || '';
+  el('edit-f-author').value = d.author || '';
+  el('edit-f-metatitle').value = d.meta_title || '';
+  el('edit-f-metadesc').value = d.meta_description || '';
+  editCount('metatitle',60);
+  editCount('metadesc',155);
+  editRenderLinks(d.links || []);
+  editSync();
+}
+
+// Live preview render. Body is trusted admin-authored/Claude HTML; title shown above it.
+function editSync(){
+  var title = esc(el('edit-f-title').value);
+  var body = el('edit-f-body').value;
+  el('edit-render').innerHTML = (title ? '<h2>'+title+'</h2>' : '') + body;
+}
+
+function editCount(field, limit){
+  var v = el('edit-f-' + field).value.length;
+  var cc = el('edit-cc-' + field);
+  cc.textContent = v + ' / ' + limit;
+  cc.classList.toggle('over', v > limit);
+}
+
+function editRenderLinks(links){
+  var wrap = el('edit-links-list');
+  wrap.innerHTML = '';
+  if (!links.length) { wrap.innerHTML = '<div class="edit-arr-note">No link suggestions returned.</div>'; return; }
+  links.forEach(function(l){
+    var kind = l.type === 'money' ? 'Money page' : 'Related post';
+    var div = document.createElement('div');
+    div.className = 'edit-link-item';
+    div.innerHTML = '<strong>'+esc(kind)+':</strong> ' + esc(l.anchor||'') + ' <span class="lk">&#8594; '+esc(l.url||'')+'</span>';
+    wrap.appendChild(div);
+  });
+}
+
+function editSave(){
+  var title = el('edit-f-title').value.trim();
+  var body = el('edit-f-body').value.trim();
+  if (!title) { toast('Title is required.'); return; }
+  if (!body) { toast('Body is required.'); return; }
+  var payload = {
+    title: title,
+    body_html: body,
+    author: el('edit-f-author').value.trim(),
+    meta_title: el('edit-f-metatitle').value.trim(),
+    meta_description: el('edit-f-metadesc').value.trim(),
+    source: editState.mode
+    // NOTE: intentionally no published/visible flag. The Worker forces isPublished:false.
+  };
+  showStatus('edit-save-status','loading','<span class="spinner"></span>Saving hidden draft to Shopify&#8230;');
+  el('edit-save-btn').disabled = true;
+  api('edit_save_article', payload)
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    el('edit-save-btn').disabled = false;
+    var url = res.admin_url || '';
+    showStatus('edit-save-status','success',
+      'Saved as a HIDDEN draft. Review and publish it in Shopify admin:<br>' +
+      (url ? '<a href="'+esc(url)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;word-break:break-all;">'+esc(url)+'</a>' : '(admin URL unavailable)'));
+    toast('Hidden draft saved to Shopify.');
+  })
+  .catch(function(e){
+    el('edit-save-btn').disabled = false;
+    showStatus('edit-save-status','error','Save failed: ' + esc(e.message));
+  });
+}
+
+function editClosePreview(){ el('edit-preview').style.display = 'none'; }
 
 </script>
 </body>
