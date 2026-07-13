@@ -431,6 +431,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-post-row a{color:var(--accent);text-decoration:none;font-weight:600;font-size:13px;word-break:break-word;}
 .edit-post-title{font-weight:600;font-size:13px;word-break:break-word;}
 .edit-post-when{font-size:11px;color:var(--gray-text);margin-top:3px;}
+.edit-post-del{background:none;border:1px solid var(--gray-mid);color:#a33;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer;margin-top:8px;}
 .edit-post-draft{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--gray-mid);color:#fff;padding:2px 6px;margin-left:6px;vertical-align:middle;}
 #soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
 .soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
@@ -940,7 +941,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 14</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3870,10 +3871,37 @@ function editLoadPosts(){
         ? new Date(p.published_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
         : 'Not published yet';
       row.innerHTML = titleHtml + '<div class="edit-post-when">'+esc(when)+'</div>';
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'edit-post-del';
+      del.textContent = 'Delete';
+      del.onclick = function(ev){ ev.stopPropagation(); editDeletePost(p, row); };
+      row.appendChild(del);
       list.appendChild(row);
     });
   })
   .catch(function(e){ list.innerHTML = '<div class="fc-empty">'+esc(e.message)+'</div>'; });
+}
+
+// Delete a post (draft or published) from the Posts tab, with a hard confirm.
+function editDeletePost(p, row){
+  var warn = p.published
+    ? 'Delete the PUBLISHED post \u201c' + p.title + '\u201d? It disappears from your live site immediately. This cannot be undone.'
+    : 'Delete the draft \u201c' + p.title + '\u201d? This cannot be undone.';
+  if (!confirm(warn)) return;
+  row.style.opacity = '0.4';
+  api('edit_delete_article', { article_id: p.id, title: p.title, published: p.published })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    row.remove();
+    toast('Post deleted.');
+    var list = el('edit-posts-list');
+    if (list && !list.children.length) list.innerHTML = '<div class="fc-empty">No posts yet. Write your first one from the Write tab.</div>';
+  })
+  .catch(function(e){
+    row.style.opacity = '1';
+    toast('Delete failed: ' + e.message);
+  });
 }
 
 function editSetMode(m){
