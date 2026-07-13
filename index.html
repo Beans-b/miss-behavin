@@ -406,8 +406,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-img-load{width:100%;padding:10px;background:none;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:8px;min-height:44px;}
 .edit-img-load:disabled{opacity:.5;}
 .edit-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
-.edit-img-grid img{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--gray-mid);cursor:pointer;display:block;}
-.edit-img-grid img.used{outline:3px solid var(--black);outline-offset:-3px;}
+.edit-img-cell{background:none;border:1px solid var(--gray-mid);padding:0 0 6px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;display:block;width:100%;}
+.edit-img-cell img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-bottom:1px solid var(--gray-light);}
+.edit-img-cell.used{outline:3px solid var(--black);outline-offset:-3px;}
+.edit-img-cap{font-size:10px;line-height:1.35;padding:5px 6px 0;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.edit-img-cap .v{color:var(--gray-text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .edit-img-note{font-size:11px;color:var(--gray-text);margin-top:6px;line-height:1.4;}
 .edit-charcount.over{color:var(--red);}
 .edit-links{padding:14px 24px 0;}
@@ -4065,13 +4068,14 @@ function editLoadImages(){
     var imgs = res.images || [];
     if (!imgs.length) { grid.innerHTML = '<div class="edit-img-note">No product photos found for this selection.</div>'; return; }
     imgs.forEach(function(im){
-      var t = document.createElement('img');
-      t.src = im.thumb || im.src;
-      t.alt = im.alt || im.title || '';
-      t.title = (im.title || '') + ' &#8212; tap to insert';
-      t.loading = 'lazy';
-      t.onclick = function(){ editInsertImage(im, t); };
-      grid.appendChild(t);
+      var cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'edit-img-cell';
+      cell.title = (im.title || '') + (im.vendor ? ' (' + im.vendor + ')' : '') + ' \u2014 tap to insert';
+      cell.innerHTML = '<img loading="lazy" src="'+esc(im.thumb || im.src)+'" alt="'+esc(im.alt || im.title || '')+'"/>' +
+        '<div class="edit-img-cap">'+esc(im.title || '')+'<span class="v">'+esc(im.vendor || '')+'</span></div>';
+      cell.onclick = function(){ editInsertImage(im, cell); };
+      grid.appendChild(cell);
     });
   })
   .catch(function(e){
