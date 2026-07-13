@@ -403,6 +403,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-field textarea:focus,.edit-field input:focus{border-color:var(--black);}
 .edit-body-area{min-height:280px;font-family:'DM Sans',sans-serif;}
 .edit-charcount{font-size:10px;color:var(--gray-text);margin-top:4px;text-align:right;}
+.edit-img-load{width:100%;padding:10px;background:none;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:8px;min-height:44px;}
+.edit-img-load:disabled{opacity:.5;}
+.edit-img-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
+.edit-img-grid img{width:100%;aspect-ratio:1/1;object-fit:cover;border:1px solid var(--gray-mid);cursor:pointer;display:block;}
+.edit-img-grid img.used{outline:3px solid var(--black);outline-offset:-3px;}
+.edit-img-note{font-size:11px;color:var(--gray-text);margin-top:6px;line-height:1.4;}
 .edit-charcount.over{color:var(--red);}
 .edit-links{padding:14px 24px 0;}
 .edit-link-item{font-size:12px;color:#444;padding:6px 0;border-bottom:1px solid var(--gray-light);word-break:break-word;line-height:1.4;}
@@ -1044,6 +1050,13 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div class="edit-field">
       <label class="field-label">Body (HTML) &#8212; edit freely</label>
       <textarea class="edit-body-area" id="edit-f-body" oninput="editSync()"></textarea>
+    </div>
+    <div class="edit-field">
+      <label class="field-label">Product photos</label>
+      <div class="edit-img-note">Tap a photo to drop it into the post at your cursor. The first photo you add also becomes the article&#8217;s featured image (shown on the blog page and in link previews).</div>
+      <div id="edit-img-status" class="status" style="display:none;"></div>
+      <button type="button" class="edit-img-load" id="edit-img-load" onclick="editLoadImages()">Load product photos</button>
+      <div class="edit-img-grid" id="edit-img-grid"></div>
     </div>
     <div class="edit-field">
       <label class="field-label">Author byline</label>
@@ -4001,6 +4014,10 @@ function editFillFields(){
   editSync();
   // A fresh/regenerated draft is not the saved article anymore — reset publish.
   if (editState) editState.savedArticleId = null;
+  editState.featuredImage = null;
+  var ig = el('edit-img-grid'); if (ig) ig.innerHTML = '';
+  var ib = el('edit-img-load'); if (ib) { ib.style.display = 'block'; ib.disabled = false; }
+  var ist = el('edit-img-status'); if (ist) ist.style.display = 'none';
   var ps = el('edit-publish-status'); if (ps) ps.style.display = 'none';
   var ss = el('edit-save-status'); if (ss) ss.style.display = 'none';
 }
@@ -4032,6 +4049,56 @@ function editRenderLinks(links){
   });
 }
 
+// ── IMAGE PICKER: real product photos, tap to insert. First insert = featured image.
+function editLoadImages(){
+  var btn = el('edit-img-load');
+  btn.disabled = true;
+  showStatus('edit-img-status','loading','<span class="spinner"></span>Loading product photos&#8230;');
+  var brand = (editState.lastPayload && editState.lastPayload.brand) || '';
+  api('edit_images', { brand: brand })
+  .then(function(res){
+    if (res.error) throw new Error(res.error);
+    el('edit-img-status').style.display = 'none';
+    btn.style.display = 'none';
+    var grid = el('edit-img-grid');
+    grid.innerHTML = '';
+    var imgs = res.images || [];
+    if (!imgs.length) { grid.innerHTML = '<div class="edit-img-note">No product photos found for this selection.</div>'; return; }
+    imgs.forEach(function(im){
+      var t = document.createElement('img');
+      t.src = im.thumb || im.src;
+      t.alt = im.alt || im.title || '';
+      t.title = (im.title || '') + ' &#8212; tap to insert';
+      t.loading = 'lazy';
+      t.onclick = function(){ editInsertImage(im, t); };
+      grid.appendChild(t);
+    });
+  })
+  .catch(function(e){
+    btn.disabled = false;
+    showStatus('edit-img-status','error','Could not load photos: ' + esc(e.message));
+  });
+}
+
+function editInsertImage(im, thumbEl){
+  var ta = el('edit-f-body');
+  var alt = esc(im.alt || im.title || '');
+  var tag = '\n<p style="text-align:center;"><img src="'+im.src+'" alt="'+alt+'" style="max-width:100%;height:auto;" loading="lazy"/></p>\n';
+  var pos = (ta.selectionStart > 0) ? ta.selectionStart : ta.value.length;
+  ta.value = ta.value.slice(0, pos) + tag + ta.value.slice(pos);
+  if (!editState.featuredImage) editState.featuredImage = { src: im.src, alt: im.alt || im.title || '' };
+  if (thumbEl) thumbEl.classList.add('used');
+  editSync();
+  toast('Photo added to the post.');
+}
+
+// Keep save/publish feedback visible: the status sits above the action bar and
+// can be scrolled out of view, so bring it into view whenever it changes.
+function editScrollStatus(id){
+  var e = el(id);
+  if (e && e.scrollIntoView) setTimeout(function(){ e.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 60);
+}
+
 function editCollectPayload(){
   var title = el('edit-f-title').value.trim();
   var body = el('edit-f-body').value.trim();
@@ -4047,6 +4114,7 @@ function editCollectPayload(){
   };
   // If already saved once, update that same article instead of creating a duplicate.
   if (editState.savedArticleId) p.article_id = editState.savedArticleId;
+  if (editState.featuredImage) p.image = editState.featuredImage;
   return p;
 }
 
@@ -4055,6 +4123,7 @@ function editSave(){
   var payload = editCollectPayload();
   if (!payload) return;
   showStatus('edit-save-status','loading','<span class="spinner"></span>Saving draft&#8230;');
+  editScrollStatus('edit-save-status');
   el('edit-save-btn').disabled = true;
   api('edit_save_article', payload)
   .then(function(res){
@@ -4062,11 +4131,13 @@ function editSave(){
     el('edit-save-btn').disabled = false;
     editState.savedArticleId = res.article_id || editState.savedArticleId;
     showStatus('edit-save-status','success','Saved as a draft. It stays hidden until you publish it. You will find it under the Posts tab.');
+    editScrollStatus('edit-save-status');
     toast('Draft saved.');
   })
   .catch(function(e){
     el('edit-save-btn').disabled = false;
     showStatus('edit-save-status','error','Save failed: ' + esc(e.message));
+    editScrollStatus('edit-save-status');
   });
 }
 
@@ -4077,6 +4148,7 @@ function editPublishNow(){
   if (!confirm('Publish this post live to your blog now? It will be visible to everyone on your site.')) return;
   el('edit-publishnow-btn').disabled = true;
   showStatus('edit-publish-status','loading','<span class="spinner"></span>Saving&#8230;');
+  editScrollStatus('edit-publish-status');
   api('edit_save_article', payload)
   .then(function(res){
     if (res.error) throw new Error(res.error);
@@ -4090,11 +4162,13 @@ function editPublishNow(){
     var url = res.public_url || '';
     showStatus('edit-publish-status','success','Published live.' +
       (url ? ' <a href="'+esc(url)+'" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline;">View post &#8599;</a>' : ''));
+    editScrollStatus('edit-publish-status');
     toast('Post published live.');
   })
   .catch(function(e){
     el('edit-publishnow-btn').disabled = false;
     showStatus('edit-publish-status','error','Publish failed: ' + esc(e.message));
+    editScrollStatus('edit-publish-status');
   });
 }
 
