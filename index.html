@@ -322,6 +322,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .cm-badge.done{background:#e6f4ea;color:#2e7d32;}
 .cm-sizes{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
 .cm-verify{width:100%;}
+.cm-verify.done{background:#2e7d32!important;color:#fff!important;}
+.cm-card.cm-counted{border-color:#2e7d32;box-shadow:0 0 0 2px rgba(46,125,50,.25);}
+.cm-search{flex:1;min-width:160px;padding:6px 10px;border:1px solid #ccc;border-radius:8px;font-size:13px;}
 
 /* ═══════ FLOOR COUNT ═══════ */
 .fc-search-bar{display:flex;gap:8px;padding:14px 24px;border-bottom:1px solid var(--gray-mid);align-items:center;position:sticky;top:0;background:var(--white);z-index:50;}
@@ -628,6 +631,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
       <div class="cm-progress"><div class="cm-progress-fill" id="cm-progress-fill"></div></div>
       <div class="cm-progress-text" id="cm-progress-text">Loading&#8230;</div>
+      <div class="cm-bar-row" style="margin-top:8px;">
+        <input type="text" id="cm-search" class="cm-search" placeholder="Fix an item - search name or SKU" autocomplete="off"/>
+        <button class="btn btn-outline" id="cm-search-clear" style="display:none;padding:6px 10px;font-size:12px;" onclick="cmClearSearch()">Clear</button>
+      </div>
     </div>
     <div id="cm-feed" class="cm-feed"></div>
     <div id="cm-empty" class="fc-empty" style="display:none;">&#127881; Everything is counted for this date.</div>
@@ -990,7 +997,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 15</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 16</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1543,6 +1550,10 @@ function cmInit(){
     d.addEventListener('change', cmReset);
     el('cm-density').addEventListener('change', cmReset);
     el('cm-remaining').addEventListener('change', cmReset);
+    var sb = el('cm-search');
+    var deb = null;
+    sb.addEventListener('input', function(){ clearTimeout(deb); deb = setTimeout(function(){ cmSearch(sb.value.trim()); }, 400); });
+    sb.addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); clearTimeout(deb); cmSearch(sb.value.trim()); } });
   }
   cmReset();
 }
@@ -1675,30 +1686,75 @@ function cmScheduleInvWrite(p, v, row, newVal){
   }, 700);
 }
 
+var cmSearchMode = false;
+
 function cmVerify(p, card){
   var btn = card.querySelector('.cm-verify');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled = true; btn.textContent = 'Saving...';
   api('fc_mark_counted', { productId: p.id, date: el('cm-date').value, title: p.title })
   .then(function(){
-    toast('Counted: ' + p.title);
     cmLoadProgress();
-    if (el('cm-remaining').checked) {
-      card.style.transition = 'opacity .3s'; card.style.opacity = '0';
+    btn.classList.add('done'); btn.disabled = false; btn.textContent = 'Counted ✓';
+    card.classList.add('cm-counted');
+    var badge = card.querySelector('.cm-badge');
+    if (badge) { badge.className = 'cm-badge done'; badge.innerHTML = '✓ counted ' + esc(el('cm-date').value); }
+    if (el('cm-remaining').checked && !cmSearchMode) {
       setTimeout(function(){
-        card.remove();
-        if (!el('cm-feed').children.length) cmFetch();
-      }, 300);
+        card.style.transition = 'opacity .35s'; card.style.opacity = '0';
+        setTimeout(function(){ card.remove(); if (!el('cm-feed').children.length) cmFetch(); }, 350);
+      }, 700);
     } else {
-      var badge = card.querySelector('.cm-badge');
-      if (badge) { badge.className = 'cm-badge done'; badge.innerHTML = '✓ counted ' + esc(el('cm-date').value); }
-      btn.disabled = false; btn.textContent = 'Counted ✓ (mark again)';
+      btn.textContent = 'Counted ✓ (mark again)';
     }
   })
   .catch(function(e){
-    btn.disabled = false; btn.textContent = 'Mark counted ✓';
+    btn.disabled = false; btn.classList.remove('done'); btn.textContent = 'Mark counted ✓';
     toast('Could not mark counted: ' + e.message);
   });
 }
+
+// Search inside Full Count: pull up any product (even already-counted) to fix
+// its count without leaving. Reuses the deployed fc_products + fc_product.
+function cmSearch(q){
+  if (!q) { cmClearSearch(); return; }
+  cmSearchMode = true;
+  el('cm-search-clear').style.display = '';
+  el('cm-feed').innerHTML = '';
+  el('cm-empty').style.display = 'none';
+  el('cm-more').style.display = 'none';
+  el('cm-loading').style.display = 'block';
+  api('fc_products', { q: q })
+  .then(function(res){
+    el('cm-loading').style.display = 'none';
+    var items = (res.products || []).slice(0, 8);
+    if (!items.length) { el('cm-empty').textContent = 'No matches. Try fewer letters or a SKU.'; el('cm-empty').style.display = 'block'; return; }
+    items.forEach(function(it){ cmAddEditableCard(it.id); });
+  })
+  .catch(function(e){ el('cm-loading').style.display = 'none'; toast('Search failed: ' + e.message); });
+}
+
+function cmAddEditableCard(productId){
+  api('fc_product', { id: productId })
+  .then(function(res){
+    if (!res.product) return;
+    if (res.locationId) cmState.locationId = res.locationId;
+    cmRenderCard({
+      id: res.product.id, title: res.product.title, vendor: res.product.vendor,
+      image: res.product.image, countedOn: null, countedBy: null,
+      variants: res.variants || []
+    });
+  })
+  .catch(function(){});
+}
+
+function cmClearSearch(){
+  cmSearchMode = false;
+  var sb = el('cm-search'); if (sb) sb.value = '';
+  el('cm-search-clear').style.display = 'none';
+  el('cm-empty').textContent = '🎉 Everything is counted for this date.';
+  cmReset();
+}
+
 
 /* Printable master sheet: pages through ALL active products (mode=all) and
    opens a print-friendly window with a blank "Counted" column. */
