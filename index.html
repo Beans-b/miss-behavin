@@ -299,6 +299,30 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .brand-name .heart-i{display:inline-block;position:relative;font-style:normal;overflow:visible;}
 .brand-name .heart-i::after{content:"\2665";position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;color:#e8748a;line-height:1;font-family:Arial,sans-serif;display:block;pointer-events:none;}
 
+/* ═══════ COUNT MODE ═══════ */
+.cm-bar{position:sticky;top:0;z-index:5;background:#fff;padding:10px 16px;border-bottom:1px solid #eee;}
+.cm-bar-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;}
+.cm-lbl{color:var(--gray-text,#666);font-weight:600;}
+.cm-date,.cm-density{padding:6px 8px;border:1px solid #ccc;border-radius:8px;font-size:13px;background:#fff;}
+.cm-toggle{display:flex;align-items:center;gap:4px;cursor:pointer;}
+.cm-print{margin-left:auto;padding:6px 10px;font-size:12px;}
+.cm-progress{height:8px;background:#eee;border-radius:6px;margin-top:8px;overflow:hidden;}
+.cm-progress-fill{height:100%;background:var(--success-fg,#2e7d32);width:0;transition:width .3s;}
+.cm-progress-text{font-size:12px;color:var(--gray-text,#666);margin-top:4px;}
+.cm-feed{padding:12px 16px 90px;display:flex;flex-direction:column;gap:14px;}
+.cm-card{border:1px solid #e6e6e6;border-radius:14px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.05);background:#fff;}
+.cm-head{display:flex;gap:12px;margin-bottom:10px;}
+.cm-img{width:84px;height:84px;object-fit:cover;border-radius:10px;background:#f4f4f4;flex:none;}
+.cm-noimg{display:flex;align-items:center;justify-content:center;font-size:30px;}
+.cm-meta{flex:1;min-width:0;}
+.cm-title{font-weight:700;font-size:15px;line-height:1.3;}
+.cm-vendor{font-size:12px;color:var(--gray-text,#666);margin:2px 0 6px;}
+.cm-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.cm-badge.todo{background:#fdecea;color:#c0392b;}
+.cm-badge.done{background:#e6f4ea;color:#2e7d32;}
+.cm-sizes{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.cm-verify{width:100%;}
+
 /* ═══════ FLOOR COUNT ═══════ */
 .fc-search-bar{display:flex;gap:8px;padding:14px 24px;border-bottom:1px solid var(--gray-mid);align-items:center;position:sticky;top:0;background:var(--white);z-index:50;}
 .fc-search{flex:1;border:none;border-bottom:2px solid var(--black);font-family:'DM Sans',sans-serif;font-size:16px;padding:10px 0;outline:none;background:transparent;min-width:0;}
@@ -584,6 +608,31 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="section-title" style="padding:14px 24px 4px;">On Hand at Store &#8212; tap to adjust</div>
       <div id="fcd-variants"></div>
     </div>
+  </div>
+
+  <!-- COUNT MODE -->
+  <div id="view-countmode" style="display:none;">
+    <div class="cm-bar">
+      <div class="cm-bar-row">
+        <span class="cm-lbl">Count date</span>
+        <input type="date" id="cm-date" class="cm-date"/>
+        <span class="cm-lbl">Per screen</span>
+        <select id="cm-density" class="cm-density">
+          <option value="1">1</option>
+          <option value="5" selected>5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+        </select>
+        <label class="cm-toggle"><input type="checkbox" id="cm-remaining" checked/> Hide counted</label>
+        <button class="btn btn-outline cm-print" onclick="cmPrint()">Print sheet</button>
+      </div>
+      <div class="cm-progress"><div class="cm-progress-fill" id="cm-progress-fill"></div></div>
+      <div class="cm-progress-text" id="cm-progress-text">Loading&#8230;</div>
+    </div>
+    <div id="cm-feed" class="cm-feed"></div>
+    <div id="cm-empty" class="fc-empty" style="display:none;">&#127881; Everything is counted for this date.</div>
+    <button class="btn btn-outline fc-load-more" id="cm-more" style="display:none;" onclick="cmLoadMore()">Next batch</button>
+    <div id="cm-loading" class="fc-empty"><span class="spinner"></span> Loading products&#8230;</div>
   </div>
 
   <!-- LINESHEET (admin) -->
@@ -879,7 +928,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="field"><label class="field-label">Access code (4+ characters)</label><input class="field-input" id="code-code" placeholder="e.g. 7291" autocomplete="off"/></div>
         <div class="field"><label class="field-label">Role</label>
           <select class="field-input" id="code-role">
-            <option value="employee">Employee &#8212; Floor Count + Staff Pricing</option>
+            <option value="employee">Employee &#8212; Floor Count, Count Mode + Staff Pricing</option>
             <option value="staff">Staff &#8212; Staff Pricing only (read-only)</option>
             <option value="admin">Admin &#8212; everything</option>
           </select>
@@ -941,7 +990,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 14</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 15</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1182,6 +1231,7 @@ function enterApp(){
 /* ── MENU ── */
 var MENU = [
   { id:'floorcount', icon:'📦', label:'Floor Count',   desc:'Count inventory and fix prices on the floor', roles:['admin','employee'] },
+  { id:'countmode',  icon:'🧮', label:'Count Mode',    desc:'Guided full inventory count with sign-off', roles:['admin','employee'] },
   { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin'] },
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
@@ -1189,7 +1239,7 @@ var MENU = [
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','linesheet','staff','social','edit','categories','settings'];
+var VIEWS = ['menu','floorcount','countmode','linesheet','staff','social','edit','categories','settings'];
 
 function showMenu(){
   closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar(); editReset();
@@ -1223,6 +1273,7 @@ function openView(id, label){
   el('back-row').style.display = SESSION.role === 'staff' ? 'none' : 'block';
   if (id !== 'social') socHideGenBar();
   if (id === 'floorcount') fcInit();
+  if (id === 'countmode') cmInit();
   if (id === 'linesheet') { kelTab('invoice'); checkLiveStatus(); loadActiveInvoiceForKel(); }
   if (id === 'staff') showStaff();
   if (id === 'social') socInit();
@@ -1468,6 +1519,232 @@ function fcSavePrice(){
     stateEl.textContent = ok ? '✓' : '↻';
     if (ok) input.dataset.prev = val.toFixed(2);
   });
+}
+
+/* ═══════════════════════════════════════
+   COUNT MODE — guided full inventory count
+   Reuses the Floor Count write queue (enqueue + setRowState) for size
+   counts, so every count is an idempotent, retry-safe absolute set. Adds a
+   per-product verified stamp (fc_mark_counted) and burn-down progress.
+   ═══════════════════════════════════════ */
+var cmState = { cursor:null, hasMore:true, loading:false, locationId:null, count:0, inited:false };
+var _cmInvTimers = {};
+
+function todayISO(){
+  var t = new Date();
+  return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+}
+
+function cmInit(){
+  if (!cmState.inited) {
+    cmState.inited = true;
+    var d = el('cm-date');
+    if (!d.value) d.value = todayISO();
+    d.addEventListener('change', cmReset);
+    el('cm-density').addEventListener('change', cmReset);
+    el('cm-remaining').addEventListener('change', cmReset);
+  }
+  cmReset();
+}
+
+function cmReset(){
+  cmState.cursor = null; cmState.hasMore = true; cmState.count = 0;
+  el('cm-feed').innerHTML = '';
+  el('cm-empty').style.display = 'none';
+  el('cm-more').style.display = 'none';
+  cmLoadProgress();
+  cmFetch();
+}
+
+function cmLoadProgress(){
+  api('fc_count_progress', { sessionDate: el('cm-date').value })
+  .then(function(r){
+    var pct = r.total ? Math.round(r.counted / r.total * 100) : 0;
+    el('cm-progress-fill').style.width = pct + '%';
+    el('cm-progress-text').textContent = r.counted + ' of ' + r.total + ' counted • ' + r.remaining + ' left';
+  })
+  .catch(function(){ el('cm-progress-text').textContent = ''; });
+}
+
+function cmLoadMore(){ cmFetch(); }
+
+function cmFetch(){
+  if (cmState.loading || !cmState.hasMore) return;
+  cmState.loading = true;
+  el('cm-loading').style.display = 'block';
+  el('cm-more').style.display = 'none';
+  el('cm-empty').style.display = 'none';
+  api('fc_count_feed', {
+    n: parseInt(el('cm-density').value, 10) || 5,
+    mode: el('cm-remaining').checked ? 'remaining' : 'all',
+    sessionDate: el('cm-date').value,
+    cursor: cmState.cursor
+  })
+  .then(function(res){
+    cmState.loading = false;
+    el('cm-loading').style.display = 'none';
+    cmState.cursor = res.endCursor;
+    cmState.hasMore = res.hasNextPage;
+    cmState.locationId = res.locationId;
+    (res.products || []).forEach(cmRenderCard);
+    cmState.count += (res.products || []).length;
+    el('cm-more').style.display = cmState.hasMore ? 'block' : 'none';
+    el('cm-empty').style.display = cmState.count ? 'none' : 'block';
+  })
+  .catch(function(e){
+    cmState.loading = false;
+    el('cm-loading').style.display = 'none';
+    toast('Could not load products: ' + e.message);
+  });
+}
+
+function cmRenderCard(p){
+  var card = document.createElement('div');
+  card.className = 'cm-card';
+  card.dataset.pid = p.id;
+  var img = p.image
+    ? '<img class="cm-img" loading="lazy" src="'+esc(p.image)+'" alt=""/>'
+    : '<div class="cm-img cm-noimg">&#128087;</div>';
+  var badge = p.countedOn
+    ? '<span class="cm-badge done">&#10003; counted '+esc(p.countedOn)+(p.countedBy?(' by '+esc(p.countedBy)):'')+'</span>'
+    : '<span class="cm-badge todo">Not counted</span>';
+  card.innerHTML =
+    '<div class="cm-head">'+img+
+      '<div class="cm-meta"><div class="cm-title">'+esc(p.title)+'</div>'+
+        '<div class="cm-vendor">'+esc(p.vendor||'')+'</div>'+badge+'</div>'+
+    '</div>'+
+    '<div class="cm-sizes"></div>'+
+    '<button class="btn btn-primary cm-verify">Mark counted &#10003;</button>';
+  var sizes = card.querySelector('.cm-sizes');
+  (p.variants || []).forEach(function(v){ sizes.appendChild(cmSizeRow(p, v)); });
+  card.querySelector('.cm-verify').onclick = function(){ cmVerify(p, card); };
+  el('cm-feed').appendChild(card);
+}
+
+function cmSizeRow(p, v){
+  var row = document.createElement('div');
+  row.className = 'fc-variant';
+  var qtyVal = v.available == null ? '' : v.available;
+  row.innerHTML =
+    '<div class="fcv-label">'+
+      '<div class="fcv-size">'+esc(v.title)+'</div>'+
+      '<div class="fcv-sku">'+esc(v.sku || '')+'</div>'+
+      (v.stockedHere ? '' : '<div class="fcv-nostock">Not stocked at this location</div>')+
+    '</div>'+
+    '<div class="fcv-stepper">'+
+      '<button class="fcv-btn" data-d="-1">&#8722;</button>'+
+      '<input class="fcv-qty" type="text" inputmode="numeric" value="'+qtyVal+'"/>'+
+      '<button class="fcv-btn" data-d="1">+</button>'+
+    '</div>'+
+    '<div class="fcv-state"></div>';
+  var qty = row.querySelector('.fcv-qty');
+  row._stateEl = row.querySelector('.fcv-state');
+  qty.dataset.server = v.available == null ? 0 : v.available;
+  function commit(nv){
+    nv = Math.max(0, parseInt(nv, 10) || 0);
+    qty.value = nv;
+    if (!v.stockedHere) { toast('Not stocked at this location — connect it in Shopify admin first.'); qty.value = ''; return; }
+    cmScheduleInvWrite(p, v, row, nv);
+  }
+  row.querySelectorAll('.fcv-btn').forEach(function(b){
+    b.addEventListener('click', function(){ commit((parseInt(qty.value, 10) || 0) + parseInt(b.dataset.d, 10)); });
+  });
+  qty.addEventListener('change', function(){ commit(qty.value); });
+  return row;
+}
+
+function cmScheduleInvWrite(p, v, row, newVal){
+  setRowState(row, 'saving');
+  clearTimeout(_cmInvTimers[v.id]);
+  _cmInvTimers[v.id] = setTimeout(function(){
+    var prev = parseInt(row.querySelector('.fcv-qty').dataset.server, 10) || 0;
+    if (newVal === prev) { setRowState(row, 'saved'); return; }
+    enqueue({
+      kind: 'inventory',
+      key: uuid(),
+      variantId: v.id,
+      payload: {
+        inventoryItemId: v.inventoryItemId,
+        locationId: cmState.locationId,
+        quantity: newVal, prev: prev,
+        productId: p.id, variantId: v.id,
+        title: p.title + ' — ' + v.title,
+        key: null
+      }
+    }, row);
+  }, 700);
+}
+
+function cmVerify(p, card){
+  var btn = card.querySelector('.cm-verify');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  api('fc_mark_counted', { productId: p.id, date: el('cm-date').value, title: p.title })
+  .then(function(){
+    toast('Counted: ' + p.title);
+    cmLoadProgress();
+    if (el('cm-remaining').checked) {
+      card.style.transition = 'opacity .3s'; card.style.opacity = '0';
+      setTimeout(function(){
+        card.remove();
+        if (!el('cm-feed').children.length) cmFetch();
+      }, 300);
+    } else {
+      var badge = card.querySelector('.cm-badge');
+      if (badge) { badge.className = 'cm-badge done'; badge.innerHTML = '✓ counted ' + esc(el('cm-date').value); }
+      btn.disabled = false; btn.textContent = 'Counted ✓ (mark again)';
+    }
+  })
+  .catch(function(e){
+    btn.disabled = false; btn.textContent = 'Mark counted ✓';
+    toast('Could not mark counted: ' + e.message);
+  });
+}
+
+/* Printable master sheet: pages through ALL active products (mode=all) and
+   opens a print-friendly window with a blank "Counted" column. */
+function cmPrint(){
+  toast('Building print sheet…');
+  var all = [];
+  (function step(cursor){
+    api('fc_count_feed', { n: 30, mode: 'all', sessionDate: el('cm-date').value, cursor: cursor })
+    .then(function(res){
+      all = all.concat(res.products || []);
+      if (res.hasNextPage && all.length < 3000) step(res.endCursor);
+      else cmRenderPrint(all);
+    })
+    .catch(function(e){ toast('Print failed: ' + e.message); });
+  })(null);
+}
+
+function cmRenderPrint(products){
+  var rows = '';
+  products.forEach(function(p){
+    var vs = p.variants || [];
+    if (!vs.length) {
+      rows += '<tr><td>'+esc(p.title)+'</td><td>'+esc(p.vendor||'')+'</td><td>&mdash;</td><td></td><td class="sys"></td><td class="blank"></td></tr>';
+      return;
+    }
+    vs.forEach(function(v, i){
+      rows += '<tr><td>'+(i===0?esc(p.title):'')+'</td><td>'+(i===0?esc(p.vendor||''):'')+'</td><td>'+esc(v.title)+'</td><td>'+esc(v.sku||'')+'</td><td class="sys">'+(v.available==null?'':v.available)+'</td><td class="blank"></td></tr>';
+    });
+  });
+  var w = window.open('', '_blank');
+  if (!w) { toast('Allow pop-ups to print.'); return; }
+  w.document.write(
+    '<html><head><title>Inventory Count Sheet</title><style>'+
+    'body{font-family:sans-serif;padding:16px;color:#111;}h1{font-size:18px;margin:0 0 2px;}'+
+    'table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;}'+
+    'th,td{border:1px solid #ccc;padding:4px 6px;text-align:left;}th{background:#f2f2f2;}'+
+    'td.blank{width:80px;}td.sys{color:#888;width:60px;text-align:center;}'+
+    '@media print{.noprint{display:none;}}'+
+    '</style></head><body>'+
+    '<div class="noprint" style="margin-bottom:10px;"><button onclick="window.print()">Print</button></div>'+
+    '<h1>Miss Behavin’ — Inventory Count Sheet</h1>'+
+    '<div style="font-size:12px;color:#555;">'+products.length+' products • generated '+new Date().toLocaleString()+'</div>'+
+    '<table><thead><tr><th>Product</th><th>Vendor</th><th>Size</th><th>SKU</th><th>System</th><th>Counted</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table></body></html>'
+  );
+  w.document.close();
 }
 
 /* ── WRITE QUEUE (optimistic UI + retry on spotty Wi-Fi) ──
