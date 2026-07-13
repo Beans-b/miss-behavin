@@ -323,6 +323,24 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .cm-sizes{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
 .cm-verify{width:100%;}
 .cm-verify.done{background:#2e7d32!important;color:#fff!important;}
+.cm-search::placeholder{color:#999;}
+.ap-bar{position:sticky;top:0;background:#fff;padding:10px 16px;border-bottom:1px solid #eee;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.ap-count{font-size:12px;color:var(--gray-text,#666);margin-left:auto;}
+.ap-list{padding:12px 16px 90px;display:flex;flex-direction:column;gap:12px;}
+.ap-card{border:1px solid #e6e6e6;border-radius:12px;padding:12px;background:#fff;}
+.ap-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;gap:8px;}
+.ap-title{font-weight:700;font-size:15px;}
+.ap-by{font-size:11px;color:var(--gray-text,#666);white-space:nowrap;}
+.ap-lines{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.ap-line{display:grid;grid-template-columns:1fr auto auto auto 60px;gap:8px;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid #f3f3f3;}
+.ap-size{font-weight:600;}
+.ap-sys,.ap-cnt{color:var(--gray-text,#666);font-size:12px;white-space:nowrap;}
+.ap-var{font-weight:700;text-align:center;min-width:34px;}
+.ap-var-ok{color:#2e7d32;}
+.ap-var-bad{color:#c0392b;}
+.ap-ov{width:56px;padding:4px 6px;border:1px solid #ccc;border-radius:6px;font-size:13px;text-align:center;}
+.ap-actions{display:flex;gap:8px;}
+.ap-actions .btn{flex:1;}
 .cm-card.cm-counted{border-color:#2e7d32;box-shadow:0 0 0 2px rgba(46,125,50,.25);}
 .cm-search{flex:1;min-width:160px;padding:6px 10px;border:1px solid #ccc;border-radius:8px;font-size:13px;}
 
@@ -642,7 +660,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div id="cm-loading" class="fc-empty"><span class="spinner"></span> Loading products&#8230;</div>
   </div>
 
-  <!-- LINESHEET (admin) -->
+  <!-- APPROVALS (admin) -->
+  <div id="view-approvals" style="display:none;">
+    <div class="ap-bar">
+      <button class="btn btn-outline" onclick="apInit()">Refresh</button>
+      <button class="btn btn-primary" id="ap-approve-all" onclick="apApproveAll()" style="display:none;">Approve all</button>
+      <span id="ap-count" class="ap-count"></span>
+    </div>
+    <div id="ap-list" class="ap-list"></div>
+    <div id="ap-empty" class="fc-empty" style="display:none;">No counts waiting for approval.</div>
+    <div id="ap-loading" class="fc-empty"><span class="spinner"></span> Loading&#8230;</div>
+  </div>  <!-- LINESHEET (admin) -->
   <div id="view-linesheet" style="display:none;">
     <div class="tab-bar">
       <button class="tab-btn active" onclick="kelTab('invoice')">Invoice</button>
@@ -997,7 +1025,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 16</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 17</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1237,8 +1265,9 @@ function enterApp(){
 
 /* ── MENU ── */
 var MENU = [
-  { id:'floorcount', icon:'📦', label:'Quick Fix',   desc:'Scan or search to fix one item', roles:['admin','employee'] },
+  { id:'floorcount', icon:'📦', label:'Quick Fix',   desc:'Scan or search to fix one item (manager)', roles:['admin'] },
   { id:'countmode',  icon:'🧮', label:'Full Count',    desc:'Count every product, with sign-off', roles:['admin','employee'] },
+  { id:'approvals',  icon:'\u2705', label:'Approvals',    desc:'Review & approve submitted counts', roles:['admin'] },
   { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin'] },
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
@@ -1246,7 +1275,7 @@ var MENU = [
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','countmode','linesheet','staff','social','edit','categories','settings'];
+var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','settings'];
 
 function showMenu(){
   closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar(); editReset();
@@ -1281,6 +1310,7 @@ function openView(id, label){
   if (id !== 'social') socHideGenBar();
   if (id === 'floorcount') fcInit();
   if (id === 'countmode') cmInit();
+  if (id === 'approvals') apInit();
   if (id === 'linesheet') { kelTab('invoice'); checkLiveStatus(); loadActiveInvoiceForKel(); }
   if (id === 'staff') showStaff();
   if (id === 'social') socInit();
@@ -1579,6 +1609,8 @@ function cmLoadProgress(){
 
 function cmLoadMore(){ cmFetch(); }
 
+var cmBlind = false;
+
 function cmFetch(){
   if (cmState.loading || !cmState.hasMore) return;
   cmState.loading = true;
@@ -1597,6 +1629,7 @@ function cmFetch(){
     cmState.cursor = res.endCursor;
     cmState.hasMore = res.hasNextPage;
     cmState.locationId = res.locationId;
+    cmBlind = !!res.blind;
     (res.products || []).forEach(cmRenderCard);
     cmState.count += (res.products || []).length;
     el('cm-more').style.display = cmState.hasMore ? 'block' : 'none';
@@ -1609,6 +1642,7 @@ function cmFetch(){
   });
 }
 
+
 function cmRenderCard(p){
   var card = document.createElement('div');
   card.className = 'cm-card';
@@ -1619,23 +1653,29 @@ function cmRenderCard(p){
   var badge = p.countedOn
     ? '<span class="cm-badge done">&#10003; counted '+esc(p.countedOn)+(p.countedBy?(' by '+esc(p.countedBy)):'')+'</span>'
     : '<span class="cm-badge todo">Not counted</span>';
+  var btnLabel = cmBlind ? 'Submit count' : 'Mark counted &#10003;';
   card.innerHTML =
     '<div class="cm-head">'+img+
       '<div class="cm-meta"><div class="cm-title">'+esc(p.title)+'</div>'+
         '<div class="cm-vendor">'+esc(p.vendor||'')+'</div>'+badge+'</div>'+
     '</div>'+
     '<div class="cm-sizes"></div>'+
-    '<button class="btn btn-primary cm-verify">Mark counted &#10003;</button>';
+    '<button class="btn btn-primary cm-verify">'+btnLabel+'</button>';
   var sizes = card.querySelector('.cm-sizes');
   (p.variants || []).forEach(function(v){ sizes.appendChild(cmSizeRow(p, v)); });
-  card.querySelector('.cm-verify').onclick = function(){ cmVerify(p, card); };
+  card.querySelector('.cm-verify').onclick = function(){ if (cmBlind) cmSubmit(p, card); else cmVerify(p, card); };
   el('cm-feed').appendChild(card);
 }
+
 
 function cmSizeRow(p, v){
   var row = document.createElement('div');
   row.className = 'fc-variant';
-  var qtyVal = v.available == null ? '' : v.available;
+  row.dataset.vid = v.id;
+  row.dataset.iid = v.inventoryItemId || '';
+  row.dataset.size = v.title || '';
+  var qtyVal = (cmBlind || v.available == null) ? '' : v.available;
+  var ph = cmBlind ? 'count' : '';
   row.innerHTML =
     '<div class="fcv-label">'+
       '<div class="fcv-size">'+esc(v.title)+'</div>'+
@@ -1644,17 +1684,18 @@ function cmSizeRow(p, v){
     '</div>'+
     '<div class="fcv-stepper">'+
       '<button class="fcv-btn" data-d="-1">&#8722;</button>'+
-      '<input class="fcv-qty" type="text" inputmode="numeric" value="'+qtyVal+'"/>'+
+      '<input class="fcv-qty" type="text" inputmode="numeric" value="'+qtyVal+'" placeholder="'+ph+'"/>'+
       '<button class="fcv-btn" data-d="1">+</button>'+
     '</div>'+
     '<div class="fcv-state"></div>';
   var qty = row.querySelector('.fcv-qty');
   row._stateEl = row.querySelector('.fcv-state');
-  qty.dataset.server = v.available == null ? 0 : v.available;
+  qty.dataset.server = (v.available == null ? 0 : v.available);
   function commit(nv){
     nv = Math.max(0, parseInt(nv, 10) || 0);
     qty.value = nv;
-    if (!v.stockedHere) { toast('Not stocked at this location — connect it in Shopify admin first.'); qty.value = ''; return; }
+    if (cmBlind) return;
+    if (!v.stockedHere) { toast('Not stocked at this location - connect it in Shopify admin first.'); qty.value = ''; return; }
     cmScheduleInvWrite(p, v, row, nv);
   }
   row.querySelectorAll('.fcv-btn').forEach(function(b){
@@ -1663,6 +1704,7 @@ function cmSizeRow(p, v){
   qty.addEventListener('change', function(){ commit(qty.value); });
   return row;
 }
+
 
 function cmScheduleInvWrite(p, v, row, newVal){
   setRowState(row, 'saving');
@@ -1723,15 +1765,18 @@ function cmSearch(q){
   el('cm-empty').style.display = 'none';
   el('cm-more').style.display = 'none';
   el('cm-loading').style.display = 'block';
-  api('fc_products', { q: q })
+  api('fc_count_feed', { q: q, mode: 'all', n: 8, sessionDate: el('cm-date').value })
   .then(function(res){
     el('cm-loading').style.display = 'none';
-    var items = (res.products || []).slice(0, 8);
+    cmBlind = !!res.blind;
+    if (res.locationId) cmState.locationId = res.locationId;
+    var items = res.products || [];
     if (!items.length) { el('cm-empty').textContent = 'No matches. Try fewer letters or a SKU.'; el('cm-empty').style.display = 'block'; return; }
-    items.forEach(function(it){ cmAddEditableCard(it.id); });
+    items.forEach(cmRenderCard);
   })
   .catch(function(e){ el('cm-loading').style.display = 'none'; toast('Search failed: ' + e.message); });
 }
+
 
 function cmAddEditableCard(productId){
   api('fc_product', { id: productId })
@@ -1801,6 +1846,128 @@ function cmRenderPrint(products){
     '<tbody>'+rows+'</tbody></table></body></html>'
   );
   w.document.close();
+}
+
+// Employee blind submit: gather the entered size counts and send them for
+// approval. Writes NOTHING to Shopify — a manager approves in the Approvals tab.
+function cmSubmit(p, card){
+  var btn = card.querySelector('.cm-verify');
+  var items = [];
+  card.querySelectorAll('.fc-variant').forEach(function(row){
+    var val = row.querySelector('.fcv-qty').value.trim();
+    if (val === '') return;
+    items.push({ variantId: row.dataset.vid, inventoryItemId: row.dataset.iid, size: row.dataset.size, countedQty: Math.max(0, parseInt(val, 10) || 0) });
+  });
+  if (!items.length) { toast('Enter at least one size count first.'); return; }
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  api('count_submit', { productId: p.id, title: p.title, sessionDate: el('cm-date').value, items: items })
+  .then(function(){
+    cmLoadProgress();
+    btn.classList.add('done'); btn.textContent = 'Submitted ✓';
+    card.classList.add('cm-counted');
+    var badge = card.querySelector('.cm-badge');
+    if (badge) { badge.className = 'cm-badge done'; badge.innerHTML = '✓ submitted for approval'; }
+    if (el('cm-remaining').checked && !cmSearchMode) {
+      setTimeout(function(){
+        card.style.transition = 'opacity .35s'; card.style.opacity = '0';
+        setTimeout(function(){ card.remove(); if (!el('cm-feed').children.length) cmFetch(); }, 350);
+      }, 700);
+    } else {
+      btn.disabled = false; btn.textContent = 'Submitted ✓ (resubmit)';
+    }
+  })
+  .catch(function(e){ btn.disabled = false; btn.classList.remove('done'); btn.textContent = 'Submit count'; toast('Submit failed: ' + e.message); });
+}
+
+/* ═══════════════════════════════════════
+   APPROVALS (admin) — review submitted counts, approve -> writes Shopify
+   ═══════════════════════════════════════ */
+var apState = { products: [] };
+
+function apInit(){
+  el('ap-list').innerHTML = '';
+  el('ap-empty').style.display = 'none';
+  el('ap-loading').style.display = 'block';
+  el('ap-approve-all').style.display = 'none';
+  api('count_pending', {})
+  .then(function(res){
+    el('ap-loading').style.display = 'none';
+    apState.products = res.products || [];
+    if (!apState.products.length) { el('ap-empty').style.display = 'block'; el('ap-count').textContent = ''; return; }
+    var lines = apState.products.reduce(function(a,p){ return a + p.lines.length; }, 0);
+    el('ap-count').textContent = apState.products.length + ' product(s), ' + lines + ' line(s) pending';
+    el('ap-approve-all').style.display = '';
+    apState.products.forEach(apRenderProduct);
+  })
+  .catch(function(e){ el('ap-loading').style.display = 'none'; toast('Could not load approvals: ' + e.message); });
+}
+
+function apRenderProduct(p){
+  var card = document.createElement('div');
+  card.className = 'ap-card'; card.dataset.pid = p.productId;
+  var rows = (p.lines || []).map(function(l){
+    var vcls = (l.variance == null ? '' : (l.variance === 0 ? 'ap-var-ok' : 'ap-var-bad'));
+    var vtxt = (l.variance == null ? '?' : (l.variance > 0 ? ('+' + l.variance) : String(l.variance)));
+    return '<div class="ap-line" data-id="'+l.id+'">'+
+      '<div class="ap-size">'+esc(l.size||'')+'</div>'+
+      '<div class="ap-sys">system '+(l.systemQty==null?'?':l.systemQty)+'</div>'+
+      '<div class="ap-cnt">counted '+l.countedQty+'</div>'+
+      '<div class="ap-var '+vcls+'">'+vtxt+'</div>'+
+      '<input class="ap-ov" type="text" inputmode="numeric" value="'+l.countedQty+'" title="Final qty to write (override the count if needed)"/>'+
+    '</div>';
+  }).join('');
+  card.innerHTML =
+    '<div class="ap-head"><div class="ap-title">'+esc(p.title)+'</div>'+
+      '<div class="ap-by">by '+esc(p.submittedBy||'')+' &middot; '+esc(p.sessionDate||'')+'</div></div>'+
+    '<div class="ap-lines">'+rows+'</div>'+
+    '<div class="ap-actions">'+
+      '<button class="btn btn-primary" onclick="apApproveProduct(this)">Approve</button>'+
+      '<button class="btn btn-outline" onclick="apRejectProduct(this)">Reject</button>'+
+    '</div>';
+  el('ap-list').appendChild(card);
+}
+
+function apGather(scope){
+  var ids = [], overrides = {};
+  scope.querySelectorAll('.ap-line').forEach(function(line){
+    var id = parseInt(line.dataset.id, 10); ids.push(id);
+    var ov = line.querySelector('.ap-ov').value.trim();
+    if (ov !== '') overrides[id] = ov;
+  });
+  return { ids: ids, overrides: overrides };
+}
+
+function apApproveProduct(btn){
+  var card = btn.closest('.ap-card'); var g = apGather(card);
+  btn.disabled = true; btn.textContent = 'Approving...';
+  api('count_approve', g)
+  .then(function(){ toast('Approved and updated Shopify.'); card.remove(); apAfterChange(); })
+  .catch(function(e){ btn.disabled = false; btn.textContent = 'Approve'; toast('Approve failed: ' + e.message); });
+}
+
+function apRejectProduct(btn){
+  var card = btn.closest('.ap-card'); var g = apGather(card);
+  if (!confirm('Reject these counts? Nothing is written to Shopify.')) return;
+  api('count_reject', { ids: g.ids })
+  .then(function(){ toast('Rejected.'); card.remove(); apAfterChange(); })
+  .catch(function(e){ toast('Reject failed: ' + e.message); });
+}
+
+function apApproveAll(){
+  var g = apGather(el('ap-list'));
+  if (!g.ids.length) return;
+  if (!confirm('Approve all ' + g.ids.length + ' counts and update Shopify?')) return;
+  api('count_approve', g)
+  .then(function(r){ toast('Approved ' + (r.approved || g.ids.length) + ' and updated Shopify.'); apInit(); })
+  .catch(function(e){ toast('Approve all failed: ' + e.message); });
+}
+
+function apAfterChange(){
+  if (!el('ap-list').children.length) {
+    el('ap-empty').style.display = 'block';
+    el('ap-approve-all').style.display = 'none';
+    el('ap-count').textContent = '';
+  }
 }
 
 /* ── WRITE QUEUE (optimistic UI + retry on spotty Wi-Fi) ──
