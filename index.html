@@ -930,14 +930,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
   <!-- SEO COPY GENERATOR (admin + employee) -->
   <div id="view-seocopy" style="display:none;">
-    <div class="edit-howto">Copy for a new page, generated to the master template. Brand mode researches the brand live (30 to 90 seconds), reads who ranks for &#8220;where to buy&#8221;, and returns every field with sources. Product mode uses only the facts you type &#8212; no research, nothing invented.</div>
+    <div class="edit-howto">One page, one run: pick Brand, type the brand name, tap Generate. It researches the brand live on the web (30 to 90 seconds), reads who ranks for &#8220;where to buy&#8221;, and returns every field ready to paste, with sources. You do NOT need this for products &#8212; LineSheet writes each product&#8217;s SEO automatically at intake. Category and Single product cover the rare pages that flow doesn&#8217;t.</div>
     <div style="padding:0 24px;">
       <div class="field">
         <label class="field-label">Page type</label>
         <select class="field-input" id="scg-mode" onchange="scgModeChanged()">
-          <option value="brand">Brand collection (researches the brand)</option>
-          <option value="category">Category collection</option>
-          <option value="product">Product (facts only, no research)</option>
+          <option value="brand">Brand page (the main one)</option>
+          <option value="category">Category page &#8212; new categories only</option>
+          <option value="product">Single product added by hand (rare)</option>
         </select>
       </div>
       <div class="field">
@@ -1069,7 +1069,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 17</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 18</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
