@@ -1060,7 +1060,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 21</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 22</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4877,14 +4877,15 @@ function scgRender(d, targetId, append){
   }
   h += scgField('Image alt (product)', 'Product \u2192 Media \u2192 alt text', d.image_alt, d.image_alt?scgCount(d.image_alt.length,1,110,'chars'):'');
   h += scgField('Body description (product)', 'Product \u2192 Description', d.body_description, '');
-  if (d.internal_links){
-    var scgOb = (d.internal_links.outbound||[]).map(function(o){
-      if (typeof o === 'string') return o;
-      return (o.anchor||'') + ' \u2192 ' + (o.url ? o.url : '(no live page \u2014 skipped)');
-    }).join('\n');
-    if (scgOb) h += scgField('Outbound links (embedded)', 'Already embedded in the description above \u2014 listed here only so you can confirm each link.', scgOb, '');
-    var scgIn = (d.internal_links.inbound||[]).join('\n');
-    if (scgIn) h += scgField('Inbound links \u2014 add on OTHER pages', 'ADD THESE ON OTHER PAGES, not this one: go to each page named below and link the suggested anchor text to THIS collection\u2019s URL. This is how the store\u2019s own pages point at the new page.', scgIn, '');
+  if (d.internal_links && Array.isArray(d.internal_links.inbound) && d.internal_links.inbound.length){
+    h += '<div style="margin-top:18px;font-weight:700;font-size:13px;">Inbound links \u2014 paste on OTHER pages, not this one</div>' +
+         '<div style="font-size:11px;color:var(--gray-text,#777);margin-top:2px;">These make the store\u2019s existing pages point at the new page. Open each page below in Shopify admin and paste its snippet into that page\u2019s Description using the &lt;&gt; HTML view.</div>';
+    d.internal_links.inbound.forEach(function(ib){
+      if (typeof ib === 'string'){ h += scgField('Inbound suggestion (manual)', 'Add on another page by hand.', ib, ''); return; }
+      h += scgField('On ' + esc(ib.target_label||'') + ' (' + esc(ib.target_url||'') + ')',
+        'Open that page \u2192 Description \u2192 &lt;&gt; HTML view \u2192 paste this snippet. The link inside already points back to this page.',
+        ib.snippet_html || '', '');
+    });
   }
   if (d.rank_log_row){
     h += scgField('Rank log row (monthly)', 'missb_sov_scores_log.csv \u2014 organic_position + aio_rendered columns',
