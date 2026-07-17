@@ -928,6 +928,50 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </div>
   </div>
 
+  <!-- SEO COPY GENERATOR (admin + employee) -->
+  <div id="view-seocopy" style="display:none;">
+    <div class="edit-howto">Copy for a new page, generated to the master template. Brand mode researches the brand live (30 to 90 seconds), reads who ranks for &#8220;where to buy&#8221;, and returns every field with sources. Product mode uses only the facts you type &#8212; no research, nothing invented.</div>
+    <div style="padding:0 24px;">
+      <div class="field">
+        <label class="field-label">Page type</label>
+        <select class="field-input" id="scg-mode" onchange="scgModeChanged()">
+          <option value="brand">Brand collection (researches the brand)</option>
+          <option value="category">Category collection</option>
+          <option value="product">Product (facts only, no research)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" id="scg-name-label">Brand name (exact, e.g. Baggu)</label>
+        <input type="text" class="field-input" id="scg-name" placeholder="Baggu" autocomplete="off"/>
+      </div>
+      <div id="scg-brand-extras">
+        <div class="field">
+          <label class="field-label">Current styles in stock (optional)</label>
+          <input type="text" class="field-input" id="scg-styles" placeholder="e.g. Monarch cowboy boots, Patsy tan boot"/>
+          <div class="field-hint">Lets the copy name real styles instead of a [CONFIRM] placeholder.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Staff fit note (optional)</label>
+          <input type="text" class="field-input" id="scg-fit" placeholder="e.g. boots run narrow, size up half"/>
+          <div class="field-hint">Enables an honest sizing Q&amp;A. Blank skips it &#8212; never invented.</div>
+        </div>
+      </div>
+      <div id="scg-product-extras" style="display:none;">
+        <div class="field"><label class="field-label">Brand (blank if house label)</label><input type="text" class="field-input" id="scg-p-brand"/></div>
+        <div class="field"><label class="field-label">Color</label><input type="text" class="field-input" id="scg-p-color"/></div>
+        <div class="field"><label class="field-label">Garment type</label><input type="text" class="field-input" id="scg-p-type" placeholder="Slip Dress"/></div>
+        <div class="field"><label class="field-label">One concrete detail (fabric / fit / print)</label><input type="text" class="field-input" id="scg-p-detail"/></div>
+      </div>
+      <div class="field">
+        <label class="field-label">Notes (optional)</label>
+        <input type="text" class="field-input" id="scg-notes"/>
+      </div>
+      <div id="scg-status" class="status"></div>
+      <button class="btn btn-black" id="scg-btn" onclick="scgGenerate()">Generate Copy</button>
+      <div id="scg-out" style="padding-bottom:24px;"></div>
+    </div>
+  </div>
+
   <!-- SETTINGS + ACTIVITY LOG (admin) -->
   <div id="view-settings" style="display:none;">
     <div class="tab-bar">
@@ -1272,10 +1316,11 @@ var MENU = [
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
   { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
+  { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','settings'];
+var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','seocopy','settings'];
 
 function showMenu(){
   closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar(); editReset();
@@ -1315,6 +1360,7 @@ function openView(id, label){
   if (id === 'staff') showStaff();
   if (id === 'social') socInit();
   if (id === 'edit') editInit();
+  if (id === 'seocopy') scgInit();
   if (id === 'settings') { setTab('log'); loadLog(); loadCodes(); loadLocations(); loadNotifToUI(); }
 }
 
@@ -4722,6 +4768,97 @@ function editCheckDue(){
     banner.style.display = 'flex';
   })
   .catch(function(){ banner.style.display = 'none'; });
+}
+
+
+/* ═══════════════════════════════════════
+   SEO COPY GENERATOR (view-seocopy)
+   Worker action: seo_page_generate (v19+, tag V19-SEO-GEN).
+   Docs: missb_seo_copy_generator_build_2026-07-17.md
+   ═══════════════════════════════════════ */
+var scgVals = {};
+function scgInit(){ /* stateless; last result stays until regenerated */ }
+function scgModeChanged(){
+  var m = el('scg-mode').value;
+  el('scg-brand-extras').style.display = m==='brand' ? 'block' : 'none';
+  el('scg-product-extras').style.display = m==='product' ? 'block' : 'none';
+  el('scg-name-label').textContent = m==='brand' ? 'Brand name (exact, e.g. Baggu)' : (m==='category' ? 'Category (e.g. Outerwear)' : 'Style name');
+}
+function scgGenerate(){
+  var m = el('scg-mode').value, name = el('scg-name').value.trim();
+  if (!name){ showStatus('scg-status','error','Name is required.'); return; }
+  var body = { mode:m, name:name, notes: el('scg-notes').value.trim() };
+  if (m==='brand'){ body.known_styles = el('scg-styles').value.trim(); body.fit_note = el('scg-fit').value.trim(); }
+  if (m==='product'){ body.product = { style_name:name, brand:el('scg-p-brand').value.trim(), color:el('scg-p-color').value.trim(), garment_type:el('scg-p-type').value.trim(), detail:el('scg-p-detail').value.trim(), house_label: !el('scg-p-brand').value.trim() }; }
+  var btn = el('scg-btn'); btn.disabled = true;
+  showStatus('scg-status','loading', m==='product' ? 'Writing&#8230;' : 'Researching the field, then writing &#8212; 30 to 90 seconds&#8230;');
+  el('scg-out').innerHTML='';
+  api('seo_page_generate', body).then(function(r){
+    btn.disabled=false;
+    if (!r || !r.ok){ showStatus('scg-status','error', (r && r.error) || 'Failed &#8212; tap Generate again.'); return; }
+    el('scg-status').style.display='none';
+    scgRender(r.data);
+  }).catch(function(e){ btn.disabled=false; showStatus('scg-status','error', esc(e.message || 'Failed — tap Generate again.')); });
+}
+function scgCopy(k, btn){
+  navigator.clipboard.writeText(scgVals[k] || '').then(function(){ toast('Copied'); },
+    function(){ toast('Copy failed — select and copy by hand'); });
+}
+function scgField(label, dest, value, counter){
+  if (!value) return '';
+  var k = 'k' + Math.random().toString(36).slice(2,9);
+  scgVals[k] = value;
+  return '<div style="border:1px solid var(--border,#ddd);border-radius:10px;padding:12px;margin-top:12px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+    '<div><div style="font-weight:700;font-size:13px;">'+label+'</div><div style="font-size:11px;color:var(--gray-text,#777);margin-top:2px;">Paste into: '+dest+'</div></div>' +
+    '<div style="flex-shrink:0;">'+(counter||'')+' <button class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;" onclick="scgCopy(\''+k+'\',this)">Copy</button></div></div>' +
+    '<div style="margin-top:8px;font-size:13px;white-space:pre-wrap;background:var(--bg,#faf9f7);border:1px dashed var(--border,#ddd);border-radius:6px;padding:10px;">'+esc(value)+'</div></div>';
+}
+function scgCount(n, lo, hi, unit){
+  var ok = n >= lo && n <= hi;
+  return '<span style="font-size:11px;font-weight:700;color:'+(ok?'#1c7c33':'#b3261e')+';">'+n+' '+unit+'</span>';
+}
+function scgRender(d){
+  scgVals = {};
+  var h = '';
+  if (d.lane && d.lane.verdict && d.lane.verdict !== 'N/A'){
+    var head = d.lane.verdict === 'HEAD';
+    h += '<div style="margin-top:14px;padding:10px 12px;border-radius:8px;font-size:13px;background:'+(head?'#e8f2e9':'#fdf3e3')+';border:1px solid '+(head?'#bcd8bf':'#ecd9b0')+';">' +
+      '<b>Lane: '+esc(d.lane.verdict)+'</b> ('+esc(d.lane.confidence||'')+')<br>'+esc(d.lane.field_read||'')+'<br><em>'+esc(d.lane.rationale||'')+'</em></div>';
+  }
+  (d.warnings||[]).forEach(function(w){
+    h += '<div style="margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;background:#fdecec;border:1px solid #f2c1c1;">&#9888; '+esc(w)+'</div>';
+  });
+  h += scgField('SEO page title', 'Collection &#8594; Search engine listing &#8594; Page title', d.page_title, scgCount((d.page_title||'').length,1,60,'chars'));
+  h += scgField('Meta description', 'Collection &#8594; Search engine listing &#8594; Meta description', d.meta_description, scgCount((d.meta_description||'').length,140,155,'chars'));
+  if (d.description_html){
+    var plain = d.description_html.replace(/<\/p>\s*<p>/g,'\n\n').replace(/<\/?p>/g,'').trim();
+    h += scgField('Collection description (parts 1&#8211;4 only)', 'Collection &#8594; Description box &#8212; keep the paragraph breaks', plain, '');
+  }
+  if (d.quick_answers && d.quick_answers.length){
+    var qa = d.quick_answers.map(function(x){ return x.q + '\n' + x.a; }).join('\n\n');
+    h += scgField('Quick answers ('+d.quick_answers.length+' Q&amp;As)', 'Collection &#8594; Metafields &#8594; Quick answers (custom.quick_answers) &#8212; NOT the description box. Questions as Heading 2.', qa, '');
+  }
+  h += scgField('Image alt (product)', 'Product &#8594; Media &#8594; alt text', d.image_alt, d.image_alt?scgCount(d.image_alt.length,1,110,'chars'):'');
+  h += scgField('Body description (product)', 'Product &#8594; Description', d.body_description, '');
+  if (d.internal_links){
+    h += scgField('Internal links', 'Outbound: hyperlink inside the description. Inbound: add links FROM these pages the same day.',
+      'Outbound: ' + (d.internal_links.outbound||[]).join(' · ') + '\nInbound (add from): ' + (d.internal_links.inbound||[]).join(' · '), '');
+  }
+  if (d.rank_log_row){
+    h += scgField('Rank log row (monthly)', 'missb_sov_scores_log.csv &#8212; organic_position + aio_rendered columns',
+      (d.rank_log_row.query||'') + ' — ' + (d.rank_log_row.note||''), '');
+  }
+  if (d.sources && d.sources.length){
+    h += '<div style="margin-top:14px;font-size:12px;"><b>Sources the research used:</b><br>' + d.sources.map(function(s){
+      return '<a href="'+esc(s.url)+'" target="_blank" rel="noopener" style="color:var(--accent,#8a6d4f);">'+esc(s.title||s.url)+'</a> &#8212; seen '+esc(s.seen||'');
+    }).join('<br>') + '</div>';
+  }
+  if (d.brand_facts_used && d.brand_facts_used.length){
+    h += '<div style="margin-top:10px;font-size:12px;color:var(--gray-text,#777);"><b>Brand facts used (verify anything surprising):</b><br>&#8226; ' + d.brand_facts_used.map(esc).join('<br>&#8226; ') + '</div>';
+  }
+  h += '<div style="margin-top:10px;font-size:11px;color:var(--gray-text,#777);">'+esc(d.model||'')+' &#183; '+esc(d.generated_at||'')+' &#183; [CONFIRM] means a store fact is missing &#8212; fill it, never publish it.</div>';
+  el('scg-out').innerHTML = h;
 }
 
 </script>
