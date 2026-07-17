@@ -930,15 +930,36 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
   <!-- SEO COPY GENERATOR (admin + employee) -->
   <div id="view-seocopy" style="display:none;">
-    <div class="edit-howto">Type the brand, tap Generate. It pulls that vendor&#8217;s current styles from your own catalog, researches the brand and its &#8220;where to buy&#8221; field live on the web (30 to 90 seconds), and returns every field ready to paste, with sources. Products never need this &#8212; LineSheet writes product SEO automatically at intake.</div>
-    <div style="padding:0 24px;">
-      <div class="field">
-        <label class="field-label">Brand name (exact, e.g. Baggu)</label>
-        <input type="text" class="field-input" id="scg-name" placeholder="Baggu" autocomplete="off"/>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="scgtab-btn-generate" onclick="scgTab('generate')">Generate</button>
+      <button class="tab-btn" id="scgtab-btn-archive" onclick="scgTab('archive')">Archive</button>
+    </div>
+    <div id="scgtab-generate">
+      <div class="edit-howto">Type the brand, tap Generate. It pulls that vendor&#8217;s current styles from your own catalog, researches the brand live on the web, and returns every field ready to paste &#8212; internal links already embedded in the description. Every run saves itself to the Archive tab.</div>
+      <div style="padding:0 24px;">
+        <div class="field">
+          <label class="field-label">Brand name (exact, e.g. Baggu)</label>
+          <input type="text" class="field-input" id="scg-name" placeholder="Baggu" autocomplete="off"/>
+        </div>
+        <div id="scg-status" class="status"></div>
+        <div id="scg-progress" style="display:none;margin:14px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-text,#777);margin-bottom:6px;">
+            <span id="scg-prog-label">Researching the brand&#8230;</span><span id="scg-prog-secs">0s</span>
+          </div>
+          <div style="height:6px;background:var(--border,#e4e0da);border-radius:3px;overflow:hidden;">
+            <div id="scg-prog-bar" style="height:100%;width:2%;background:var(--ink,#1a1a1a);transition:width .45s;"></div>
+          </div>
+        </div>
+        <button class="btn btn-black" id="scg-btn" onclick="scgGenerate()">Generate Copy</button>
+        <div id="scg-out" style="padding-bottom:24px;"></div>
       </div>
-      <div id="scg-status" class="status"></div>
-      <button class="btn btn-black" id="scg-btn" onclick="scgGenerate()">Generate Copy</button>
-      <div id="scg-out" style="padding-bottom:24px;"></div>
+    </div>
+    <div id="scgtab-archive" style="display:none;">
+      <div class="edit-posts-note">Every generate saves here automatically, newest first &#8212; a new run never overwrites an old one. Tap one to reopen its full output read-only and copy from it again.</div>
+      <div style="padding:0 24px;">
+        <div id="scg-arch-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
+        <div id="scg-arch-out" style="padding-bottom:24px;"></div>
+      </div>
     </div>
   </div>
 
@@ -1039,7 +1060,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 20</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 21</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4747,19 +4768,73 @@ function editCheckDue(){
    Docs: missb_seo_copy_generator_build_2026-07-17.md
    ═══════════════════════════════════════ */
 var scgVals = {};
-function scgInit(){ /* stateless; last result stays until regenerated */ }
+var scgProgT = null, scgProgStart = 0;
+function scgInit(){ scgTab('generate'); }
+function scgTab(t){
+  el('scgtab-generate').style.display = t==='generate' ? 'block' : 'none';
+  el('scgtab-archive').style.display  = t==='archive'  ? 'block' : 'none';
+  el('scgtab-btn-generate').className = 'tab-btn' + (t==='generate' ? ' active' : '');
+  el('scgtab-btn-archive').className  = 'tab-btn' + (t==='archive'  ? ' active' : '');
+  if (t==='archive') scgLoadArchive();
+}
+/* HONEST NOTE: this progress bar is a TIMED ESTIMATE, not real server progress.
+   The Worker call is a single request/response, so nothing streams back to
+   measure. True percent would mean streaming the Anthropic response through the
+   Worker as SSE — a larger follow-up, deliberately not built. The bar eases
+   toward ~90% over ~60s and snaps to 100% when the response actually lands. */
+function scgProgressStart(){
+  scgProgStart = Date.now();
+  el('scg-progress').style.display='block';
+  el('scg-prog-bar').style.width='2%';
+  var stages = [[0,'Researching the brand\u2026'],[15,'Reading where-to-buy results\u2026'],[32,'Classifying the lane\u2026'],[45,'Writing copy\u2026'],[75,'Finishing\u2026']];
+  scgProgT = setInterval(function(){
+    var t = (Date.now()-scgProgStart)/1000;
+    var pct = Math.min(90, 90*(1-Math.exp(-t/25)));
+    el('scg-prog-bar').style.width = pct.toFixed(1)+'%';
+    el('scg-prog-secs').textContent = Math.floor(t)+'s';
+    for (var i=stages.length-1;i>=0;i--){ if (t>=stages[i][0]){ el('scg-prog-label').textContent = stages[i][1]; break; } }
+  }, 450);
+}
+function scgProgressStop(done){
+  if (scgProgT){ clearInterval(scgProgT); scgProgT=null; }
+  if (done){ el('scg-prog-bar').style.width='100%'; setTimeout(function(){ el('scg-progress').style.display='none'; }, 650); }
+  else { el('scg-progress').style.display='none'; }
+}
 function scgGenerate(){
   var name = el('scg-name').value.trim();
   if (!name){ showStatus('scg-status','error','Type the brand name.'); return; }
   var btn = el('scg-btn'); btn.disabled = true;
-  showStatus('scg-status','loading','Checking your catalog, researching the field, writing &#8212; 30 to 90 seconds&#8230;');
+  el('scg-status').style.display='none';
   el('scg-out').innerHTML='';
+  scgProgressStart();
   api('seo_page_generate', { mode:'brand', name:name }).then(function(r){
     btn.disabled=false;
-    if (!r || !r.ok){ showStatus('scg-status','error', (r && r.error) || 'Failed &#8212; tap Generate again.'); return; }
-    el('scg-status').style.display='none';
-    scgRender(r.data);
-  }).catch(function(e){ btn.disabled=false; showStatus('scg-status','error', esc(e.message || 'Failed — tap Generate again.')); });
+    if (!r || !r.ok){ scgProgressStop(false); showStatus('scg-status','error', (r && r.error) || 'Failed \u2014 tap Generate again.'); return; }
+    scgProgressStop(true);
+    scgRender(r.data, 'scg-out');
+  }).catch(function(e){ btn.disabled=false; scgProgressStop(false); showStatus('scg-status','error', esc(e.message || 'Failed — tap Generate again.')); });
+}
+function scgLoadArchive(){
+  el('scg-arch-out').innerHTML='';
+  el('scg-arch-list').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Loading\u2026</div>';
+  api('seo_list_saved').then(function(r){
+    var rows = (r && r.rows) || [];
+    if (!rows.length){ el('scg-arch-list').innerHTML = '<div class="fc-empty">Nothing saved yet \u2014 every generate lands here automatically.</div>'; return; }
+    el('scg-arch-list').innerHTML = rows.map(function(x){
+      var d = new Date(x.created_at);
+      var when = d.toLocaleDateString() + ', ' + d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+      return '<button class="menu-item" onclick="scgOpenSaved('+x.id+')"><div><div class="menu-item-label">'+esc(x.name)+'</div><div class="menu-item-desc">'+esc(when)+(x.user_name?(' \u00b7 '+esc(x.user_name)):'')+'</div></div><div class="menu-item-arrow">&#8250;</div></button>';
+    }).join('');
+  }).catch(function(){ el('scg-arch-list').innerHTML = '<div class="fc-empty">Could not load the archive \u2014 try again.</div>'; });
+}
+function scgOpenSaved(id){
+  el('scg-arch-out').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Opening\u2026</div>';
+  api('seo_get_saved&id='+encodeURIComponent(id)).then(function(r){
+    if (!r || !r.ok){ el('scg-arch-out').innerHTML = '<div class="fc-empty">Could not open that one.</div>'; return; }
+    var d = new Date(r.created_at);
+    el('scg-arch-out').innerHTML = '<div style="margin-top:10px;font-size:12px;color:var(--gray-text,#777);">Saved run \u2014 '+esc(r.name)+', '+esc(d.toLocaleString())+'. Read-only: copy freely; regenerate for fresh research and links.</div>';
+    scgRender(r.data, 'scg-arch-out', true);
+  }).catch(function(){ el('scg-arch-out').innerHTML = '<div class="fc-empty">Could not open that one.</div>'; });
 }
 function scgCopy(k, btn){
   navigator.clipboard.writeText(scgVals[k] || '').then(function(){ toast('Copied'); },
@@ -4779,8 +4854,9 @@ function scgCount(n, lo, hi, unit){
   var ok = n >= lo && n <= hi;
   return '<span style="font-size:11px;font-weight:700;color:'+(ok?'#1c7c33':'#b3261e')+';">'+n+' '+unit+'</span>';
 }
-function scgRender(d){
-  scgVals = {};
+function scgRender(d, targetId, append){
+  var target = targetId || 'scg-out';
+  if (!append) scgVals = {};
   var h = '';
   if (d.lane && d.lane.verdict && d.lane.verdict !== 'N/A'){
     var head = d.lane.verdict === 'HEAD';
@@ -4790,28 +4866,28 @@ function scgRender(d){
   (d.warnings||[]).forEach(function(w){
     h += '<div style="margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;background:#fdecec;border:1px solid #f2c1c1;">&#9888; '+esc(w)+'</div>';
   });
-  h += scgField('SEO page title', 'Collection &#8594; Search engine listing &#8594; Page title', d.page_title, scgCount((d.page_title||'').length,1,60,'chars'));
-  h += scgField('Meta description', 'Collection &#8594; Search engine listing &#8594; Meta description', d.meta_description, scgCount((d.meta_description||'').length,140,155,'chars'));
+  h += scgField('SEO page title', 'Collection \u2192 Search engine listing \u2192 Page title', d.page_title, scgCount((d.page_title||'').length,1,60,'chars'));
+  h += scgField('Meta description', 'Collection \u2192 Search engine listing \u2192 Meta description', d.meta_description, scgCount((d.meta_description||'').length,140,155,'chars'));
   if (d.description_html){
-    var plain = d.description_html.replace(/<\/p>\s*<p>/g,'\n\n').replace(/<\/?p>/g,'').trim();
-    h += scgField('Collection description (parts 1&#8211;4 only)', 'Collection &#8594; Description box &#8212; keep the paragraph breaks', plain, '');
+    h += scgField('Collection description (HTML \u2014 links embedded)', 'Paste into the collection Description using the &lt;&gt; HTML view \u2014 the outbound links are already embedded.', d.description_html, '');
   }
   if (d.quick_answers && d.quick_answers.length){
     var qa = d.quick_answers.map(function(x){ return x.q + '\n' + x.a; }).join('\n\n');
-    h += scgField('Quick answers ('+d.quick_answers.length+' Q&amp;As)', 'Collection &#8594; Metafields &#8594; Quick answers (custom.quick_answers) &#8212; NOT the description box. Questions as Heading 2.', qa, '');
+    h += scgField('Quick answers ('+d.quick_answers.length+' Q&amp;As)', 'Collection \u2192 Metafields \u2192 Quick answers (custom.quick_answers) \u2014 NOT the description box. Questions as Heading 2.', qa, '');
   }
-  h += scgField('Image alt (product)', 'Product &#8594; Media &#8594; alt text', d.image_alt, d.image_alt?scgCount(d.image_alt.length,1,110,'chars'):'');
-  h += scgField('Body description (product)', 'Product &#8594; Description', d.body_description, '');
+  h += scgField('Image alt (product)', 'Product \u2192 Media \u2192 alt text', d.image_alt, d.image_alt?scgCount(d.image_alt.length,1,110,'chars'):'');
+  h += scgField('Body description (product)', 'Product \u2192 Description', d.body_description, '');
   if (d.internal_links){
     var scgOb = (d.internal_links.outbound||[]).map(function(o){
       if (typeof o === 'string') return o;
       return (o.anchor||'') + ' \u2192 ' + (o.url ? o.url : '(no live page \u2014 skipped)');
     }).join('\n');
-    h += scgField('Internal links', 'Outbound: hyperlink these anchors in the description \u2014 the URLs are real, resolved from your store. Inbound: add links FROM these pages the same day.',
-      'Outbound:\n' + scgOb + '\n\nInbound (add from): ' + (d.internal_links.inbound||[]).join(' \u00b7 '), '');
+    if (scgOb) h += scgField('Outbound links (embedded)', 'Already embedded in the description above \u2014 listed here only so you can confirm each link.', scgOb, '');
+    var scgIn = (d.internal_links.inbound||[]).join('\n');
+    if (scgIn) h += scgField('Inbound links \u2014 add on OTHER pages', 'ADD THESE ON OTHER PAGES, not this one: go to each page named below and link the suggested anchor text to THIS collection\u2019s URL. This is how the store\u2019s own pages point at the new page.', scgIn, '');
   }
   if (d.rank_log_row){
-    h += scgField('Rank log row (monthly)', 'missb_sov_scores_log.csv &#8212; organic_position + aio_rendered columns',
+    h += scgField('Rank log row (monthly)', 'missb_sov_scores_log.csv \u2014 organic_position + aio_rendered columns',
       (d.rank_log_row.query||'') + ' — ' + (d.rank_log_row.note||''), '');
   }
   if (d.sources && d.sources.length){
@@ -4822,8 +4898,8 @@ function scgRender(d){
   if (d.brand_facts_used && d.brand_facts_used.length){
     h += '<div style="margin-top:10px;font-size:12px;color:var(--gray-text,#777);"><b>Brand facts used (verify anything surprising):</b><br>&#8226; ' + d.brand_facts_used.map(esc).join('<br>&#8226; ') + '</div>';
   }
-  h += '<div style="margin-top:10px;font-size:11px;color:var(--gray-text,#777);">'+esc(d.model||'')+' &#183; '+esc(d.generated_at||'')+' &#183; [CONFIRM] means a store fact is missing &#8212; fill it, never publish it.</div>';
-  el('scg-out').innerHTML = h;
+  h += '<div style="margin-top:10px;font-size:11px;color:var(--gray-text,#777);">'+esc(d.model||'')+' &#183; '+esc(d.generated_at||'')+' &#183; [CONFIRM] means a store fact is missing \u2014 fill it, never publish it.</div>';
+  if (append) el(target).innerHTML += h; else el(target).innerHTML = h;
 }
 
 </script>
