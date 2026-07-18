@@ -1060,7 +1060,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 23</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 24</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4887,7 +4887,7 @@ function scgRender(d, targetId, append){
   h += scgField('Body description (product)', 'Product \u2192 Description', d.body_description, '');
   if (d.internal_links && Array.isArray(d.internal_links.inbound) && d.internal_links.inbound.length){
     h += '<div style="margin-top:18px;font-weight:700;font-size:13px;">Inbound links \u2014 paste on OTHER pages, not this one</div>' +
-         '<div style="font-size:11px;color:var(--gray-text,#777);margin-top:2px;">These make the store\u2019s existing pages point at the new page. Open each page below in Shopify admin and paste its snippet into that page\u2019s Description using the &lt;&gt; HTML view.</div>';
+         '<div style="font-size:11px;color:var(--gray-text,#777);margin-top:2px;">These make the store\u2019s existing pages point at the new page. Open each page below in Shopify admin and paste its snippet into that page\u2019s Description using the &lt;&gt; HTML view. Your Shop by Brand nav already links here from every page \u2014 these are light, relevant extras, not required.</div>';
     d.internal_links.inbound.forEach(function(ib){
       if (typeof ib === 'string'){ h += scgField('Inbound suggestion (manual)', 'Add on another page by hand.', ib, ''); return; }
       h += scgField('On ' + esc(ib.target_label||'') + ' (' + esc(ib.target_url||'') + ')',
