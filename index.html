@@ -1060,7 +1060,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 24</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 25</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3510,23 +3510,25 @@ function showPrint(printArea){
    CATEGORIES — keyword rules + preview/apply,
    ported verbatim from the live category tool.
    ═══════════════════════════════════════ */
+/* v29/build25 — labels below are the FINAL canonical 16 (source:
+   missb_category_master_map_2026-07-11.md + the Worker's CATEGORY_GIDS).
+   The Worker resolves each via a hardcoded GID — no name-search anywhere. */
 var CAT_RULES = [
-  [/romper/i, 'One-Pieces'],
-  [/jumpsuit/i, 'Jumpsuits'],
+  [/romper|jumpsuit/i, 'Rompers & Jumpsuits'],
+  [/matching set|co-?ord/i, 'Sets & Co-ords'],
   [/dress/i, 'Dresses'],
-  [/skort/i, 'Skorts'],
-  [/skirt/i, 'Skirts'],
+  [/skort|skirt/i, 'Skirts'],
   [/short|shortie/i, 'Shorts'],
   [/\bjeans?\b|denim/i, 'Jeans'],
   [/\bpants?\b|trouser|legging/i, 'Pants'],
   [/sweater|cardigan|\bcardi\b|pullover|knit/i, 'Sweaters'],
   [/bikini|swim|bathing suit|one[-\s]?piece|suit set/i, 'Swimwear'],
-  [/cami|blouse|tops?|tank|tee|t-shirt|bodysuit|corset|halter|crop|henley|shirt|bralette|crewneck|turtleneck|mock neck|long[- ]?sleeve/i, 'Clothing Tops'],
+  [/jacket|coat|blazer|windbreaker|puffer/i, 'Outerwear'],
+  [/cami|blouse|tops?|tank|tee|t-shirt|bodysuit|corset|halter|crop|henley|shirt|bralette|crewneck|turtleneck|mock neck|long[- ]?sleeve/i, 'Tops'],
   [/sandal|heel|\bshoe|boot|sneaker|\bflats?\b|mule|clog/i, 'Shoes'],
   [/necklace|bracelet|earring|\bring\b|huggie|hoop|anklet|jewel/i, 'Jewelry'],
-  [/\bhat\b|beanie|\bcap\b|visor/i, 'Hats'],
-  [/headband|hair clip|scrunchie|barrette/i, 'Hair Accessories'],
-  [/\bbag\b|purse|clutch|tote|crossbody|belt\b|scarf|sunglass/i, 'Handbags']
+  [/\bbag\b|purse|clutch|tote|crossbody/i, 'Bags'],
+  [/\bhat\b|beanie|\bcap\b|visor|headband|hair clip|scrunchie|barrette|belt\b|scarf|sunglass/i, 'Accessories']
 ];
 var CAT_ROWS = [];
 
@@ -4203,7 +4205,9 @@ function _spInitDetails(cd){
     '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
     '<label class="sp-l">Product description</label><textarea class="sp-seo-body" rows="3"></textarea>' +
     '<div style="display:flex;gap:8px;">' +
-      '<div style="flex:1;"><label class="sp-l">Category</label><input class="sp-seo-cat"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Category</label><select class="sp-seo-cat"><option value="">\u2014</option>' +
+        ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Shorts','Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear','Jewelry','Bags','Accessories','Shoes']
+          .map(function(c){ return '<option>'+c+'</option>'; }).join('') + '</select></div>' +
       '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
     '</div>';
   cd.card.insertBefore(wrap, cd.card.querySelector('.sp-card-foot'));
