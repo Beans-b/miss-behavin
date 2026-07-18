@@ -705,6 +705,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-black" id="extract-btn" onclick="extractAllPages()" disabled>Extract All with Claude</button>
         <div class="status" id="extract-status"></div>
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
+        <button class="btn btn-outline" onclick="el('kel-manual').style.display = el('kel-manual').style.display==='none' ? 'block' : 'none';" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
+        <div id="kel-manual" style="display:none;border:1px solid var(--border,#ddd);border-radius:10px;padding:14px;margin-top:10px;">
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">For buys with no paperwork. One row per style + color. Put the quantity under OS for one-size items (clips, bags, hats); use XS&#8211;L for sized pieces. Everything downstream is identical to a photo invoice: naming, pricing, SEO, category, barcodes, Shopify push.</div>
+          <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor" placeholder="e.g. Emi Jay"/></div>
+          <div id="man-rows"></div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-outline" style="flex:1;margin-top:0;" onclick="manualAddRow()">+ Add style</button>
+            <button class="btn btn-black" style="flex:2;margin-top:0;" onclick="manualStart()">Start review &#8594;</button>
+          </div>
+          <div id="man-status" class="status"></div>
+        </div>
       </div>
 
       <div id="pricing-section" style="display:none;">
@@ -1068,7 +1079,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 26</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 27</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2942,6 +2953,71 @@ function loadArchivedInvoice(inv) {
 }
 
 /* ── SAMPLE INVOICE (unchanged) ── */
+/* ── MANUAL ENTRY (no invoice) — builds the SAME invoice object photo
+   extraction produces and feeds the SAME review pipeline. One row per
+   style+color; OS = One Size for accessories. ── */
+var _manTypes = ['Accessory','Top','Blouse','Dress','Romper','Jumpsuit','Sweater','Bottom','Skirt','Shorts','Shoe'];
+function manualAddRow(){
+  var row = document.createElement('div');
+  row.className = 'man-row';
+  row.style.cssText = 'border-top:1px solid var(--border,#eee);padding-top:10px;margin-top:10px;';
+  row.innerHTML =
+    '<div style="display:flex;gap:8px;">' +
+      '<div style="flex:2;"><label class="sp-l">Style name</label><input type="text" class="field-input man-name" placeholder="Big Effing Clip"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Type</label><select class="field-input man-type">' + _manTypes.map(function(t){ return '<option>'+t+'</option>'; }).join('') + '</select></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:6px;">' +
+      '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color" placeholder="Buttercream"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Cost $</label><input type="number" step="0.01" class="field-input man-cost" placeholder="12.50"/></div>' +
+    '</div>' +
+    '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
+      ['XS','S','M','L','OS'].map(function(sz){
+        return '<div style="flex:1;text-align:center;"><label class="sp-l">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;" placeholder="0"/></div>';
+      }).join('') +
+      '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.parentNode.parentNode.remove()">&#10005;</button>' +
+    '</div>';
+  el('man-rows').appendChild(row);
+}
+function manualStart(){
+  var vendor = el('man-vendor').value.trim();
+  if (!vendor){ showStatus('man-status','error','Vendor is required (exact brand spelling).'); return; }
+  var rows = el('man-rows').querySelectorAll('.man-row');
+  if (!rows.length){ showStatus('man-status','error','Add at least one style row.'); return; }
+  var styles = [], bad = 0;
+  Array.prototype.forEach.call(rows, function(row, i){
+    var name = row.querySelector('.man-name').value.trim();
+    var type = row.querySelector('.man-type').value;
+    var color = row.querySelector('.man-color').value.trim() || 'Default';
+    var cost = parseFloat(row.querySelector('.man-cost').value);
+    var sizes = {};
+    ['XS','S','M','L','OS'].forEach(function(sz){
+      var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
+      if (q > 0) sizes[sz] = q;
+    });
+    if (!name || !(cost > 0) || !Object.keys(sizes).length){ bad++; return; }
+    styles.push({ code: 'MAN-' + (i+1), type: type, name: name, cost: cost,
+                  colors: [{ color: color, sizes: sizes }], notes: null, barcode: null, fabric: null, fit: null });
+  });
+  if (!styles.length){ showStatus('man-status','error','Every row needs a style name, a cost, and at least one quantity.'); return; }
+  if (bad) showStatus('man-status','error', bad + ' incomplete row(s) skipped (need name + cost + a quantity).');
+  else el('man-status').style.display = 'none';
+  var d = new Date();
+  var manual = {
+    vendor: vendor,
+    invoice_number: 'MANUAL-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'),
+    date: (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear(),
+    styles: styles
+  };
+  currentInvoice = manual;
+  renderKelCards(manual);
+  el('kel-inv-title').textContent = manual.vendor + ' — #' + manual.invoice_number;
+  el('kel-inv-details').textContent = manual.date + ' · ' + manual.styles.length + ' styles';
+  el('pricing-section').style.display = 'block';
+  el('kel-empty').style.display = 'none';
+  el('kel-manual').style.display = 'none';
+  setAutosave('unsaved');
+}
+
 function loadSampleInvoice() {
   var sample = {
     vendor: 'Cotton Candy LA',
@@ -3130,7 +3206,7 @@ function _buildSpReview(inv) {
       var slug    = _spColorSlug(colorObj.color);
       var baseSku = style.code + '-' + slug;
 
-      var sizeOrder = ['XS', 'S', 'M', 'L'];
+      var sizeOrder = ['XS', 'S', 'M', 'L', 'OS']; // OS = One Size (accessories)
       var activeSizes = {};
       sizeOrder.forEach(function(sz) {
         var q = (colorObj.sizes || {})[sz] || 0;
@@ -3236,7 +3312,7 @@ function _spPushCard(cd) {
   if (oldErr) oldErr.remove();
 
   // Canonical SKU to check: prefer S, fall back to first active size
-  var sizes     = ['XS','S','M','L'].filter(function(sz){ return cd.activeSizes[sz]; });
+  var sizes     = ['XS','S','M','L','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
   var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
   var checkSku  = cd.baseSku + '-' + checkSize;
 
@@ -3260,7 +3336,7 @@ function _spPushCard(cd) {
 function _spDoCreate(cd) {
   _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
 
-  var sizeOrder = ['XS','S','M','L'];
+  var sizeOrder = ['XS','S','M','L','OS'];
   var variants  = [];
   sizeOrder.forEach(function(sz) {
     var qty = cd.activeSizes[sz];
@@ -3336,7 +3412,7 @@ function _spDoCreate(cd) {
 function _spDoAddInventory(cd) {
   _spSetState(cd, 'restocking', 'Adding Inventory…', 'Adding…');
 
-  var sizeOrder   = ['XS','S','M','L'];
+  var sizeOrder   = ['XS','S','M','L','OS'];
   var adjustments = [];
   sizeOrder.forEach(function(sz) {
     var qty = cd.activeSizes[sz];
