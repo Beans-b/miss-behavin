@@ -1060,7 +1060,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 22</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 23</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4809,7 +4809,15 @@ function scgGenerate(){
   scgProgressStart();
   api('seo_page_generate', { mode:'brand', name:name }).then(function(r){
     btn.disabled=false;
-    if (!r || !r.ok){ scgProgressStop(false); showStatus('scg-status','error', (r && r.error) || 'Failed \u2014 tap Generate again.'); return; }
+    if (!r || !r.ok){
+      scgProgressStop(false);
+      showStatus('scg-status','error', (r && r.error) || 'Failed \u2014 tap Generate again.');
+      if (r && r.raw){
+        el('scg-out').innerHTML = '<div style="margin-top:10px;font-size:11px;color:var(--gray-text,#777);">What came back (diagnostic'+(r.stop_reason?(' \u00b7 stop_reason: '+esc(r.stop_reason)):'')+'):</div>' +
+          '<div style="margin-top:6px;font-size:12px;white-space:pre-wrap;background:#fbfaf8;border:1px dashed var(--border,#ddd);border-radius:6px;padding:10px;max-height:220px;overflow:auto;">'+esc(r.raw)+'</div>';
+      }
+      return;
+    }
     scgProgressStop(true);
     scgRender(r.data, 'scg-out');
   }).catch(function(e){ btn.disabled=false; scgProgressStop(false); showStatus('scg-status','error', esc(e.message || 'Failed — tap Generate again.')); });
