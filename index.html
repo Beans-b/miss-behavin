@@ -933,6 +933,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div class="tab-bar">
       <button class="tab-btn active" id="scgtab-btn-generate" onclick="scgTab('generate')">Generate</button>
       <button class="tab-btn" id="scgtab-btn-archive" onclick="scgTab('archive')">Archive</button>
+      <button class="tab-btn" id="scgtab-btn-products" onclick="scgTab('products')">Products</button>
     </div>
     <div id="scgtab-generate">
       <div class="edit-howto">Type the brand, tap Generate. It pulls that vendor&#8217;s current styles from your own catalog, researches the brand live on the web, and returns every field ready to paste &#8212; internal links already embedded in the description. Every run saves itself to the Archive tab.</div>
@@ -952,6 +953,13 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         </div>
         <button class="btn btn-black" id="scg-btn" onclick="scgGenerate()">Generate Copy</button>
         <div id="scg-out" style="padding-bottom:24px;"></div>
+      </div>
+    </div>
+    <div id="scgtab-products" style="display:none;">
+      <div class="edit-posts-note">Products added by hand in Shopify admin skip LineSheet, so they arrive with no SEO. This lists active products missing an SEO title &#8212; tap one, review the generated copy, then Apply. Apply fills ONLY empty fields (SEO title, meta, category) and never touches titles, prices, tags, or anything a person already set. Products intaken through LineSheet never appear here.</div>
+      <div style="padding:0 24px;">
+        <div id="scg-prod-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
+        <div id="scg-prod-out" style="padding-bottom:24px;"></div>
       </div>
     </div>
     <div id="scgtab-archive" style="display:none;">
@@ -1060,7 +1068,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 25</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 26</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4775,11 +4783,12 @@ var scgVals = {};
 var scgProgT = null, scgProgStart = 0;
 function scgInit(){ scgTab('generate'); }
 function scgTab(t){
-  el('scgtab-generate').style.display = t==='generate' ? 'block' : 'none';
-  el('scgtab-archive').style.display  = t==='archive'  ? 'block' : 'none';
-  el('scgtab-btn-generate').className = 'tab-btn' + (t==='generate' ? ' active' : '');
-  el('scgtab-btn-archive').className  = 'tab-btn' + (t==='archive'  ? ' active' : '');
+  ['generate','archive','products'].forEach(function(k){
+    el('scgtab-'+k).style.display = t===k ? 'block' : 'none';
+    el('scgtab-btn-'+k).className = 'tab-btn' + (t===k ? ' active' : '');
+  });
   if (t==='archive') scgLoadArchive();
+  if (t==='products') scgLoadProducts();
 }
 /* HONEST NOTE: this progress bar is a TIMED ESTIMATE, not real server progress.
    The Worker call is a single request/response, so nothing streams back to
@@ -4825,6 +4834,47 @@ function scgGenerate(){
     scgProgressStop(true);
     scgRender(r.data, 'scg-out');
   }).catch(function(e){ btn.disabled=false; scgProgressStop(false); showStatus('scg-status','error', esc(e.message || 'Failed — tap Generate again.')); });
+}
+var scgFixData = null;
+function scgLoadProducts(){
+  el('scg-prod-out').innerHTML='';
+  el('scg-prod-list').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Scanning for products missing SEO\u2026</div>';
+  api('seo_product_scan').then(function(r){
+    var rows = (r && r.products) || [];
+    if (!rows.length){ el('scg-prod-list').innerHTML = '<div class="fc-empty">Nothing missing SEO \u2014 every active product is covered.</div>'; return; }
+    el('scg-prod-list').innerHTML = rows.map(function(x){
+      return '<button class="menu-item" onclick="scgFixProduct(\''+x.id.replace(/'/g,'')+'\')"><div><div class="menu-item-label">'+esc(x.title)+'</div><div class="menu-item-desc">'+esc(x.vendor||'no vendor')+' \u00b7 missing: '+esc(x.missing)+'</div></div><div class="menu-item-arrow">&#8250;</div></button>';
+    }).join('');
+  }).catch(function(){ el('scg-prod-list').innerHTML = '<div class="fc-empty">Scan failed \u2014 try again.</div>'; });
+}
+function scgFixProduct(id){
+  el('scg-prod-out').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Writing copy from this product\u2019s own data\u2026</div>';
+  api('seo_product_fix', { id: id }).then(function(r){
+    if (!r || !r.ok){ el('scg-prod-out').innerHTML = '<div class="fc-empty">'+esc((r && r.error) || 'Failed \u2014 tap it again.')+'</div>'; return; }
+    scgFixData = r;
+    var h = '<div style="margin-top:12px;font-weight:700;font-size:13px;">'+esc(r.title)+'</div>';
+    (r.warnings||[]).forEach(function(w){ h += '<div style="margin-top:8px;padding:10px 12px;border-radius:8px;font-size:13px;background:#fdecec;border:1px solid #f2c1c1;">&#9888; '+esc(w)+'</div>'; });
+    h += scgField('SEO page title', 'Apply writes this if the field is empty', r.fields.seo_title, scgCount((r.fields.seo_title||'').length,1,60,'chars'));
+    h += scgField('Meta description', 'Apply writes this if the field is empty', r.fields.seo_description, scgCount((r.fields.seo_description||'').length,100,155,'chars'));
+    h += scgField('Category', 'Apply sets this if no category is chosen', r.fields.product_category, '');
+    h += scgField('Image alt', 'Copy by hand: Product \u2192 Media \u2192 alt text (Apply does not write media)', r.fields.image_alt, r.fields.image_alt?scgCount(r.fields.image_alt.length,1,110,'chars'):'');
+    h += scgField('Body description', 'Optional \u2014 copy by hand only if you want to replace the supplier text', r.fields.body_description, '');
+    h += '<button class="btn btn-black" style="margin-top:14px;" onclick="scgApplyProduct()">Apply to product (fills empty fields only)</button>' +
+         '<div id="scg-prod-apply-status" class="status" style="margin-top:10px;"></div>';
+    el('scg-prod-out').innerHTML = h;
+  }).catch(function(e){ el('scg-prod-out').innerHTML = '<div class="fc-empty">'+esc(e.message||'Failed \u2014 tap it again.')+'</div>'; });
+}
+function scgApplyProduct(){
+  if (!scgFixData) return;
+  showStatus('scg-prod-apply-status','loading','Applying\u2026');
+  api('seo_product_apply', { id: scgFixData.id, seo_title: scgFixData.fields.seo_title, seo_description: scgFixData.fields.seo_description, product_category: scgFixData.fields.product_category })
+  .then(function(r){
+    if (!r || !r.ok){ showStatus('scg-prod-apply-status','error', (r && r.error) || 'Apply failed.'); return; }
+    var msg = (r.written && r.written.length) ? ('Wrote: ' + r.written.join(', ') + '.') : (r.note || 'Nothing to write.');
+    if (r.skipped && r.skipped.length) msg += ' Skipped: ' + r.skipped.join('; ') + '.';
+    showStatus('scg-prod-apply-status','success', esc(msg));
+    toast('Applied');
+  }).catch(function(e){ showStatus('scg-prod-apply-status','error', esc(e.message||'Apply failed.')); });
 }
 function scgLoadArchive(){
   el('scg-arch-out').innerHTML='';
