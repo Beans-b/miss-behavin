@@ -1086,7 +1086,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 28</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 29</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2976,6 +2976,12 @@ function manualPull(){
     el('man-status').style.display='none';
     if (res.vendor && !el('man-vendor').value.trim()) el('man-vendor').value = res.vendor;
     var colors = (res.colors && res.colors.length) ? res.colors : [''];
+    // One-colorway vendor pages (Emi Jay style) carry the color in the TITLE,
+    // not a Color option — split "Name in Color" so we never ship "- Default".
+    if (!colors[0]){
+      var tm = String(res.title || '').match(/^(.*)\s+in\s+([A-Za-z][A-Za-z \-]{2,30})$/);
+      if (tm){ colors = [tm[2].trim()]; res.title = tm[1].trim(); }
+    }
     colors.forEach(function(c){
       manualAddRow();
       var rows = el('man-rows').querySelectorAll('.man-row');
@@ -2983,7 +2989,7 @@ function manualPull(){
       _manPullN++;
       var key = 'PULL-' + _manPullN;
       row.dataset.imgkey = key;
-      _manImages[key] = res.images || [];
+      _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null };
       var nm = String(res.title || '').trim();
       if (c){
         var cEsc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -3038,8 +3044,10 @@ function manualStart(){
     var s = { code: 'MAN-' + (i+1), type: type, name: name, cost: cost,
               colors: [{ color: color, sizes: sizes }], notes: null, barcode: null, fabric: null, fit: null };
     var ik = row.dataset.imgkey;
-    if (ik && _manImages[ik] && _manImages[ik].length){
-      s.vendor_images = _manImages[ik];
+    if (ik && _manImages[ik] && (_manImages[ik].images || []).length){
+      s.vendor_images = _manImages[ik].images;
+      s.vendor_fabric = _manImages[ik].fabric || null;
+      s.vendor_fit = _manImages[ik].fit || null;
       _manImages['C-' + s.code] = _manImages[ik]; // survives even if a re-collect drops custom fields
     }
     styles.push(s);
@@ -3415,10 +3423,13 @@ function _spDoCreate(cd) {
   var typeEntry   = _typeMap[rawType] || { shopify: rawType + 's', tag: rawType.toLowerCase() };
 
   var product = {
-    title: (cd.style.name || cd.style.code) + ' - ' + cd.colorObj.color,
-    vendor: "Miss Behavin'",
+    // build29 — colorless items (e.g. one-colorway accessories) get a clean
+    // title, and the vendor is the INVOICE vendor, not hardcoded house label
+    // (the N-4 vendor bug — branded items were landing as Miss Behavin').
+    title: (cd.style.name || cd.style.code) + ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : ''),
+    vendor: (currentInvoice && currentInvoice.vendor) || "Miss Behavin'",
     product_type: typeEntry.shopify,
-    tags: [cd.colorObj.color, typeEntry.tag],
+    tags: [cd.colorObj.color, typeEntry.tag].filter(function(x){ return x && x !== 'Default'; }),
     sizes: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }),
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
@@ -4355,11 +4366,14 @@ function _spInitDetails(cd){
   // v32 — manual-entry styles pulled from a vendor page arrive with photos:
   // seed the existing picker (first 10 pre-selected, tap to toggle, exactly
   // like a vendor-search fetch).
-  var _vimgs = (cd.style && cd.style.vendor_images) || (cd.style && typeof _manImages !== 'undefined' && _manImages['C-' + cd.style.code]) || [];
+  var _mk = (cd.style && typeof _manImages !== 'undefined' && _manImages['C-' + cd.style.code]) || null;
+  var _vimgs = (cd.style && cd.style.vendor_images) || (_mk && _mk.images) || [];
   if (_vimgs.length){
     cd.images = _vimgs.slice();
+    cd.fabric = (cd.style && cd.style.vendor_fabric) || (_mk && _mk.fabric) || cd.fabric || null;
+    cd.fit    = (cd.style && cd.style.vendor_fit)    || (_mk && _mk.fit)    || cd.fit || null;
     _spRenderImages(cd);
-    if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page \u2014 tap to toggle.';
+    if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page' + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
   }
   ['title','desc','bodyd','cat','alt'].forEach(function(k){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
