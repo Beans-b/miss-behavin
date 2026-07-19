@@ -735,6 +735,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="center-title">No active sheet</div>
         <div class="center-sub">Upload an invoice or use Manual Entry above.<br>Past sheets live under Archive &#8212; tap one to reopen it.</div>
       </div>
+
+      <!-- build 37 — one-tap channels repair + diagnostic -->
+      <div class="section" style="border-bottom:none;">
+        <div class="section-title">Store Utilities</div>
+        <button class="btn btn-outline" id="fixch-btn" onclick="fixAllChannels()">Publish all products to every sales channel</button>
+        <div class="field-hint">Safety net: puts every active product on all sales channels &#8212; fixes any that were created on 0. Safe to run anytime.</div>
+        <div id="fixch-status" class="status"></div>
+      </div>
     </div>
 
     <div id="ktab-archive" style="display:none;">
@@ -1053,7 +1061,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 36</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 37</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2613,6 +2621,24 @@ function unpublishSheet(inv, cb) {
     if (ok) sheetLive = false;
     if (cb) cb(ok);
   });
+}
+
+/* build 37 — one-tap channels repair. Publishes every active product to
+   every sales channel via the worker (idempotent). If the API token can't
+   see the channels, the error names the missing scopes on screen. */
+function fixAllChannels() {
+  var btn = el('fixch-btn');
+  btn.disabled = true;
+  showStatus('fixch-status','loading','<span class="spinner"></span>Publishing every active product to all channels… (30–60s)');
+  api('fix_channels', {})
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('fixch-status','error', esc(r.error)); return; }
+    var msg = '✓ ' + r.published + ' product' + (r.published===1?'':'s') + ' now on all ' + r.channels + ' sales channels.';
+    if ((r.failed||[]).length) msg += ' — ' + r.failed.length + ' failed: ' + esc(r.failed.slice(0,3).join(' · '));
+    showStatus('fixch-status', (r.failed||[]).length ? 'error' : 'success', msg);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Failed — tap again.')); });
 }
 
 function closeSheet() {
