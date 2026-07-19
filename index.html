@@ -683,7 +683,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. You add the quantity (OS for one-size items like clips; XS&#8211;L for sized pieces), then Review &amp; publish.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. You add the quantity (under One Size for clips, bags, and brushes; XS&#8211;L for sized pieces), then Review &amp; publish.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -693,7 +693,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
             <div class="field-hint">Works on any Shopify vendor site &#8212; most of ours. No URL? Just type into the row below instead.</div>
           </div>
           <div id="man-rows"></div>
-          <button class="btn btn-black" id="man-start-btn" style="display:none;margin-top:12px;" onclick="manualStart()">Review &amp; publish &#8594;</button>
+          <div id="man-next" style="font-size:12px;color:var(--gray-text);margin-top:12px;display:none;"></div>
+          <button class="btn btn-black" id="man-start-btn" style="display:none;margin-top:10px;" onclick="manualStart()">Review &amp; publish &#8594;</button>
           <div id="man-status" class="status"></div>
         </div>
       </div>
@@ -1052,7 +1053,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 34</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 35</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3038,8 +3039,11 @@ function manualPull(){
     });
     el('man-url').value = '';
     manualFormChanged();
-    // build 34 \u2014 tell him exactly what to do next
-    showStatus('man-status','success','\u2713 Pulled. Now enter the quantity on each row \u2014 under OS for one-size items (clips, brushes, bags). Review &amp; publish appears when that&#8217;s done.');
+    // build 35 \u2014 the message matches what the page actually gave us; the
+    // "Still needed" line under the rows tracks the rest live.
+    showStatus('man-status','success', res.title
+      ? '\u2713 Pulled. Check the row, then add the quantity \u2014 under One Size for clips, bags, and brushes.'
+      : '\u2713 Pulled what the page offered (photos). The line above shows what still needs typing.');
     toast(((res.images||[]).length) + ' photo(s) pulled \u00b7 ' + colors.length + ' row(s) added');
   })
   .catch(function(e){ showStatus('man-status','error', esc(e.message || 'Could not read that page \u2014 enter by hand.')); });
@@ -3054,25 +3058,42 @@ function manualOpen(){
   if (opening) manualFormChanged();
 }
 
-/* build 33 — one visible action at a time: Review & publish appears when the
-   vendor is set and a row is complete (name + retail price + qty). Cost is
-   optional — margin tracking only. */
+/* build 35 — one visible action at a time, and the app SAYS what's missing.
+   Review & publish appears when the vendor is set and a row is complete
+   (name + retail price + qty). Cost is optional — margin tracking only. */
 function manualFormChanged(){
   var btn = el('man-start-btn');
   if (!btn) return;
-  var ok = false;
-  if (el('man-vendor').value.trim()) {
-    var rows = el('man-rows').querySelectorAll('.man-row');
-    Array.prototype.forEach.call(rows, function(row){
-      var name = row.querySelector('.man-name').value.trim();
-      var retail = parseFloat(row.querySelector('.man-retail').value);
-      var qty = ['XS','S','M','L','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
-      if (name && retail > 0 && qty > 0) ok = true;
-    });
+  var missing = [];
+  if (!el('man-vendor').value.trim()) missing.push('vendor name');
+  var rows = el('man-rows').querySelectorAll('.man-row');
+  var rowOk = false, rowNeed = null;
+  Array.prototype.forEach.call(rows, function(row){
+    if (rowOk) return;
+    var need = [];
+    if (!row.querySelector('.man-name').value.trim()) need.push('style name');
+    if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
+    var qty = ['XS','S','M','L','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
+    if (!(qty > 0)) need.push('a quantity');
+    if (!need.length) { rowOk = true; }
+    else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
+  });
+  if (!rows.length) rowNeed = ['a style row'];
+  var ok = rowOk && !missing.length;
+
+  var hint = el('man-next');
+  if (hint) {
+    hint.style.display = 'block';
+    if (ok) { hint.innerHTML = '&#10003; Ready &#8212; tap Review &amp; publish.'; hint.style.color = 'var(--success-fg)'; }
+    else {
+      var need = missing.concat(rowOk ? [] : (rowNeed || []));
+      hint.innerHTML = '<strong>Still needed:</strong> ' + need.join(' &#183; ');
+      hint.style.color = 'var(--gray-text)';
+    }
   }
   var wasHidden = btn.style.display === 'none';
   btn.style.display = ok ? 'block' : 'none';
-  if (ok && wasHidden) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });   // build 34 — surface the next step
+  if (ok && wasHidden) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function manualAddRow(){
@@ -3090,7 +3111,8 @@ function manualAddRow(){
     '</div>' +
     '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
       ['XS','S','M','L','OS'].map(function(sz){
-        return '<div style="flex:1;text-align:center;"><label class="sp-l">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
+        var lbl = sz === 'OS' ? 'One Size' : sz;   // build 35 — nobody knew what "OS" meant
+        return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+lbl+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.parentNode.parentNode.remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
@@ -3166,6 +3188,7 @@ function resetManualPane() {
   el('man-url').value = '';
   el('man-status').style.display = 'none';
   el('man-start-btn').style.display = 'none';
+  el('man-next').style.display = 'none';
   Object.keys(_manImages).forEach(function(k){ if (k.indexOf('C-') !== 0) delete _manImages[k]; });
   _manPullN = 0;
 }
