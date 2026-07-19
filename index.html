@@ -10,7 +10,7 @@
 <title>Miss Behavin' — Store App</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--black:#38332d;--white:#faf9f7;--gray-light:#f1eee9;--gray-mid:#e2ded6;--gray-text:#7a7670;--accent:#c9a96e;--green:#5f7d69;--yellow:#c99f32;--red:#b05a43;--success-bg:#eef2ee;--success-fg:#44684f;--error-bg:#f8efe9;--primary:#6e675c;--primary-deep:#59534a;}
+:root{--black:#111111;--white:#ffffff;--gray-light:#f6f6f6;--gray-mid:#e4e4e4;--gray-text:#6f6f6f;--accent:#c9a96e;--green:#4e7a5c;--yellow:#c99f32;--red:#b0483f;--success-bg:#edf4ee;--success-fg:#2f6b45;--error-bg:#faeeee;--primary:#1a1a1a;--primary-deep:#000000;--pull:#c25573;}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black);min-height:100vh;max-width:480px;margin:0 auto;padding-bottom:80px;}
 
@@ -59,6 +59,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .btn[disabled]{opacity:.35;cursor:not-allowed;}
 .btn-black{background:var(--primary);color:#fff;margin-top:0;}
 .btn-primary{background:var(--primary);color:#fff;margin-top:0;}
+.btn-pull{background:var(--pull);color:#fff;margin-top:0;}
+.btn-pull:active{background:#a84560;}
 .btn-outline{background:transparent;color:var(--black);border:1px solid var(--gray-mid);}
 .btn-danger{background:var(--red);color:var(--white);}
 .btn-accent{background:var(--accent);color:var(--white);}
@@ -681,17 +683,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">For buys with no paperwork. Paste the brand&#8217;s product page and tap Pull &#8212; it fills the name, color, photos, and the brand&#8217;s retail price. You type only your cost and the quantity (OS for one-size items like clips; XS&#8211;L for sized pieces). Then Start review lights up.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. You add the quantity (OS for one-size items like clips; XS&#8211;L for sized pieces), then Review &amp; publish.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
               <input type="text" class="field-input" id="man-url" style="flex:1;"/>
-              <button class="btn btn-black" style="width:auto;padding:10px 18px;margin:0;" onclick="manualPull()">Pull</button>
+              <button class="btn btn-pull" style="width:auto;padding:10px 18px;margin:0;" onclick="manualPull()">Pull</button>
             </div>
             <div class="field-hint">Works on any Shopify vendor site &#8212; most of ours. No URL? Just type into the row below instead.</div>
           </div>
           <div id="man-rows"></div>
-          <button class="btn btn-black" id="man-start-btn" style="display:none;margin-top:12px;" onclick="manualStart()">Start review &#8594;</button>
+          <button class="btn btn-black" id="man-start-btn" style="display:none;margin-top:12px;" onclick="manualStart()">Review &amp; publish &#8594;</button>
           <div id="man-status" class="status"></div>
         </div>
       </div>
@@ -746,7 +748,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="section-title" style="margin-top:18px;">Product Names</div>
         <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Tap the circular arrow (&#8635;) next to any name for a new AI-generated one, as many times as you like. Or tap the name and type your own. Whatever is in the field at push time goes to Shopify.</div>
         <div class="section-title" style="margin-top:18px;">Setting Prices</div>
-        <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Retail prefills automatically &#8212; the brand&#8217;s own retail when a product page was pulled, otherwise 2&#215; cost rounded up to the next 50&#162;. Adjust Markup or Retail on any card; wholesale cost is visible only to you.</div>
+        <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">The retail price you enter (or the pull fills in) rides straight through to the card and the Shopify push. Adjust Markup or Retail on any card if needed; wholesale cost is optional and visible only to you.</div>
         <div class="section-title" style="margin-top:18px;">Push to Shopify</div>
         <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">The review screen shows every product before it's sent. Products are <strong>immediately live</strong> after each push &#8212; no draft step, no undo from the app. Every variant gets a barcode (its SKU) so it can be scanned in Quick Fix and printed on hang tags.</div>
         <div class="section-title" style="margin-top:18px;">Duplicate Warning</div>
@@ -804,7 +806,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </div>
     <div id="cat-summary" style="font-size:13px;padding:0 24px;margin:8px 0;"></div>
     <div id="cat-table" style="padding:0 24px;overflow-x:auto;"></div>
-    <div id="cat-log" style="font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#38332d;color:#d8d4cd;padding:12px;margin:14px 24px;max-height:220px;overflow:auto;white-space:pre-wrap;display:none;"></div>
+    <div id="cat-log" style="font-family:ui-monospace,Menlo,monospace;font-size:11px;background:#111;color:#d8d8d8;padding:12px;margin:14px 24px;max-height:220px;overflow:auto;white-space:pre-wrap;display:none;"></div>
   </div>
 
   <!-- SOCIAL (admin + employee) -->
@@ -930,7 +932,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
             <span id="scg-prog-label">Researching the brand&#8230;</span><span id="scg-prog-secs">0s</span>
           </div>
           <div style="height:6px;background:var(--border,#e4e0da);border-radius:3px;overflow:hidden;">
-            <div id="scg-prog-bar" style="height:100%;width:2%;background:var(--primary,#6e675c);transition:width .45s;"></div>
+            <div id="scg-prog-bar" style="height:100%;width:2%;background:var(--primary,#1a1a1a);transition:width .45s;"></div>
           </div>
         </div>
         <button class="btn btn-black" id="scg-btn" onclick="scgGenerate()">Generate Copy</button>
@@ -1050,7 +1052,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 32</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 33</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2436,7 +2438,8 @@ function renderKelCards(inv) {
 }
 
 function buildKelCard(style) {
-  var cost = Number(style.cost||0).toFixed(2);
+  var costNum = Number(style.cost||0);
+  var cost = costNum.toFixed(2);
   var markup = style._markup || '';
   var markupMode = style._markupMode || 'pct';
   var retail = style._retail || '';
@@ -2456,7 +2459,7 @@ function buildKelCard(style) {
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
     '<div class="p-card-body">'+
-      '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">$'+cost+'</span></div>'+
+      '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">'+(costNum>0?'$'+cost:'&#8212;')+'</span></div>'+
       '<div class="p-markup-row">'+
         '<span class="p-markup-label">Markup</span>'+
         '<input class="p-markup-input" type="text" inputmode="decimal" placeholder="0" value="'+esc(markup)+'"/>'+
@@ -2494,6 +2497,10 @@ function buildKelCard(style) {
     retailInput.dataset.manual = retailInput.value ? 'true' : '';
     scheduleAutosave();
   });
+
+  // build 33 — a prefilled retail (pulled brand price or typed in the manual
+  // row) counts as manually set, so markup math never silently overwrites it.
+  if (retail) retailInput.dataset.manual = 'true';
 
   return card;
 }
@@ -2906,11 +2913,17 @@ function renderArchiveList(invoices, liveNum) {
     var namesTxt = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) + ' more' : '');
 
     var fileName = (inv.vendor||'') + ' · #' + (inv.invoice_number||'');
+    var units = (inv.styles||[]).reduce(function(sum,s){
+      return sum + (s.colors||[]).reduce(function(t,c){
+        return t + (c.total || Object.keys(c.sizes||{}).reduce(function(x,k){ return x + (parseInt(c.sizes[k],10)||0); }, 0));
+      },0);
+    },0);
     var metaBits = [];
     if (when) metaBits.push(when);
     metaBits.push((inv.styles||[]).length + (((inv.styles||[]).length===1)?' style':' styles'));
     if (namesTxt) metaBits.push(namesTxt);
-    metaBits.push('$'+Number(total).toFixed(2)+' wholesale');
+    // build 33 — sheets entered without wholesale costs show units instead of a misleading $0.00
+    metaBits.push(total > 0 ? '$'+Number(total).toFixed(2)+' wholesale' : units + ' units');
 
     var rightHtml = isLive
       ? '<span class="status-pill live">Live</span>'+
@@ -3008,15 +3021,9 @@ function manualPull(){
       }
       row.querySelector('.man-name').value = nm;
       if (c) row.querySelector('.man-color').value = c;
-      // build 32 \u2014 brand retail is a visible line, never placeholder text
-      // (grey text inside the box kept reading as a filled-in value), and it
-      // rides along to prefill the Retail on the pricing card.
-      if (res.price) {
-        row.dataset.retail = res.price;
-        var hint = row.querySelector('.man-hint');
-        hint.textContent = 'Brand retail: $' + Number(res.price).toFixed(2) + ' \u2014 this becomes your retail price. Type what YOU pay in the cost box.';
-        hint.style.display = 'block';
-      }
+      // build 33 \u2014 the pulled brand retail lands straight in the Retail
+      // field (editable). The only thing left to type is the quantity.
+      if (res.price) row.querySelector('.man-retail').value = Number(res.price).toFixed(2);
     });
     // build 32 \u2014 a pull replaces the truly-empty starter row (anything the
     // user began typing in, even partially, stays)
@@ -3024,6 +3031,7 @@ function manualPull(){
       var hasData = row.dataset.imgkey ||
         row.querySelector('.man-name').value.trim() ||
         row.querySelector('.man-color').value.trim() ||
+        row.querySelector('.man-retail').value ||
         row.querySelector('.man-cost').value ||
         ['XS','S','M','L','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
       if (!hasData) row.remove();
@@ -3044,8 +3052,9 @@ function manualOpen(){
   if (opening) manualFormChanged();
 }
 
-/* build 32 — one visible action at a time: Start review appears only when
-   the vendor is set and at least one row is complete (name + cost + qty). */
+/* build 33 — one visible action at a time: Review & publish appears when the
+   vendor is set and a row is complete (name + retail price + qty). Cost is
+   optional — margin tracking only. */
 function manualFormChanged(){
   var btn = el('man-start-btn');
   if (!btn) return;
@@ -3054,9 +3063,9 @@ function manualFormChanged(){
     var rows = el('man-rows').querySelectorAll('.man-row');
     Array.prototype.forEach.call(rows, function(row){
       var name = row.querySelector('.man-name').value.trim();
-      var cost = parseFloat(row.querySelector('.man-cost').value);
+      var retail = parseFloat(row.querySelector('.man-retail').value);
       var qty = ['XS','S','M','L','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
-      if (name && cost > 0 && qty > 0) ok = true;
+      if (name && retail > 0 && qty > 0) ok = true;
     });
   }
   btn.style.display = ok ? 'block' : 'none';
@@ -3073,14 +3082,16 @@ function manualAddRow(){
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Your cost $</label><input type="number" step="0.01" class="field-input man-cost"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="number" step="0.01" class="field-input man-retail"/></div>' +
     '</div>' +
-    '<div class="man-hint" style="display:none;font-size:11px;color:var(--gray-text);margin-top:4px;"></div>' +
     '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
       ['XS','S','M','L','OS'].map(function(sz){
         return '<div style="flex:1;text-align:center;"><label class="sp-l">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.parentNode.parentNode.remove();manualFormChanged();">&#10005;</button>' +
+    '</div>' +
+    '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
+      '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="number" step="0.01" class="field-input man-cost"/></div>' +
     '</div>';
   el('man-rows').appendChild(row);
 }
@@ -3094,21 +3105,20 @@ function manualStart(){
     var name = row.querySelector('.man-name').value.trim();
     var type = row.querySelector('.man-type').value;
     var color = row.querySelector('.man-color').value.trim() || 'Default';
-    var cost = parseFloat(row.querySelector('.man-cost').value);
+    var retail = parseFloat(row.querySelector('.man-retail').value);
+    var cost = parseFloat(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
     ['XS','S','M','L','OS'].forEach(function(sz){
       var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
       if (q > 0) sizes[sz] = q;
     });
-    if (!name || !(cost > 0) || !Object.keys(sizes).length){ bad++; return; }
+    if (!name || !(retail > 0) || !Object.keys(sizes).length){ bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
     var s = { code: 'MAN-' + (i+1), type: type, name: name, cost: cost,
               colors: [{ color: color, sizes: sizes, total: units }], notes: null, barcode: null, fabric: null, fit: null };
-    // build 32 — price is entered ONCE. Pulled brand retail prefills the
-    // pricing card; hand-typed rows default to keystone (2× cost, rounded
-    // up to the next 50¢). Both stay editable on the card.
-    var pulledRetail = parseFloat(row.dataset.retail);
-    s._retail = '$' + (pulledRetail > 0 ? pulledRetail : Math.ceil(cost * 2 * 2) / 2).toFixed(2);
+    // build 33 — the price he entered IS the retail; it rides straight
+    // through to the pricing card and the Shopify push.
+    s._retail = '$' + retail.toFixed(2);
     var ik = row.dataset.imgkey;
     if (ik && _manImages[ik] && (_manImages[ik].images || []).length){
       s.vendor_images = _manImages[ik].images;
@@ -3118,8 +3128,8 @@ function manualStart(){
     }
     styles.push(s);
   });
-  if (!styles.length){ showStatus('man-status','error','Every row needs a style name, a cost, and at least one quantity.'); return; }
-  if (bad) showStatus('man-status','error', bad + ' incomplete row(s) skipped (need name + cost + a quantity).');
+  if (!styles.length){ showStatus('man-status','error','Every row needs a style name, a retail price, and at least one quantity.'); return; }
+  if (bad) showStatus('man-status','error', bad + ' incomplete row(s) skipped (need name + retail price + a quantity).');
   else el('man-status').style.display = 'none';
   var d = new Date();
   var manual = {
@@ -3138,6 +3148,8 @@ function manualStart(){
   el('kel-manual').style.display = 'none';
   resetManualPane();   // build 31 — next manual buy starts with a clean form
   setAutosave('unsaved');
+  // build 33 — prices are already set, so jump straight to the review sheet
+  el('pricing-section').scrollIntoView({ behavior: 'smooth' });
 }
 
 /* build 31 — clear the Manual Entry form. Keeps the C-<code> image copies
@@ -5138,7 +5150,7 @@ function scgField(label, dest, value, counter){
     '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
     '<div><div style="font-weight:700;font-size:13px;">'+label+'</div><div style="font-size:11px;color:var(--gray-text,#777);margin-top:2px;">Paste into: '+dest+'</div></div>' +
     '<div style="flex-shrink:0;">'+(counter||'')+' <button class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;" onclick="scgCopy(\''+k+'\',this)">Copy</button></div></div>' +
-    '<div style="margin-top:8px;font-size:13px;white-space:pre-wrap;background:var(--bg,#faf9f7);border:1px dashed var(--border,#ddd);border-radius:6px;padding:10px;">'+esc(value)+'</div></div>';
+    '<div style="margin-top:8px;font-size:13px;white-space:pre-wrap;background:var(--gray-light,#f6f6f6);border:1px dashed var(--gray-mid,#e4e4e4);border-radius:6px;padding:10px;">'+esc(value)+'</div></div>';
 }
 function scgCount(n, lo, hi, unit){
   var ok = n >= lo && n <= hi;
