@@ -1053,7 +1053,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 35</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 36</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3020,6 +3020,14 @@ function manualPull(){
         var cEsc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         nm = nm.replace(new RegExp('\\s*(?:-|in)\\s*' + cEsc + '\\s*$', 'i'), '').trim() || nm;
       }
+      // build 36 — og:titles often end in the site name ("… – Baggu",
+      // "… | BAGGU"); strip a trailing separator + vendor so the brand
+      // never rides into the product name.
+      var vend = (res.vendor || el('man-vendor').value || '').trim();
+      if (vend && nm){
+        var vEsc = vend.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        nm = nm.replace(new RegExp('\\s*[|\\u2013\\u2014-]\\s*' + vEsc + '\\s*$', 'i'), '').trim() || nm;
+      }
       row.querySelector('.man-name').value = nm;
       if (c) row.querySelector('.man-color').value = c;
       // build 33 \u2014 the pulled brand retail lands straight in the Retail
@@ -3127,6 +3135,13 @@ function manualStart(){
   var rows = el('man-rows').querySelectorAll('.man-row');
   if (!rows.length){ showStatus('man-status','error','Add at least one style row.'); return; }
   var styles = [], bad = 0;
+  // build 36 — manual style codes must be UNIQUE ACROSS SHEETS. They used to
+  // restart at MAN-1 every time, so the SKU of any first manual item collided
+  // with every other first manual item ever pushed (the "Baggu bag matches
+  // Big Effing Clip" duplicate warning). Date+time makes them one-of-a-kind.
+  var _cd = new Date();
+  var _stamp = String(_cd.getMonth()+1).padStart(2,'0') + String(_cd.getDate()).padStart(2,'0') +
+               String(_cd.getHours()).padStart(2,'0') + String(_cd.getMinutes()).padStart(2,'0');
   Array.prototype.forEach.call(rows, function(row, i){
     var name = row.querySelector('.man-name').value.trim();
     var type = row.querySelector('.man-type').value;
@@ -3140,7 +3155,7 @@ function manualStart(){
     });
     if (!name || !(retail > 0) || !Object.keys(sizes).length){ bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
-    var s = { code: 'MAN-' + (i+1), type: type, name: name, cost: cost,
+    var s = { code: 'MAN-' + _stamp + '-' + (i+1), type: type, name: name, cost: cost,
               colors: [{ color: color, sizes: sizes, total: units }], notes: null, barcode: null, fabric: null, fit: null };
     // build 33 — the price he entered IS the retail; it rides straight
     // through to the pricing card and the Shopify push.
@@ -3405,7 +3420,7 @@ function _buildSpReview(inv) {
       card.innerHTML =
         '<div class="sp-card-head">' +
           '<div class="sp-card-info">' +
-            '<div class="sp-card-title">' + esc(style.name || style.code) + ' — ' + esc(colorObj.color) + '</div>' +
+            '<div class="sp-card-title">' + esc(style.name || style.code) + (colorObj.color && colorObj.color !== 'Default' ? ' — ' + esc(colorObj.color) : '') + '</div>' +
             '<div class="sp-card-meta">' + esc(style.code) + ' · ' + esc(style.type || 'Item') + '</div>' +
           '</div>' +
           '<div class="sp-badge sb-idle">Ready</div>' +
@@ -3629,7 +3644,7 @@ function showDupModal(cd) {
     ? '"' + cd.dupVariant.product.title + '"'
     : 'an existing product';
   el('dup-modal-desc').textContent =
-    '"' + (cd.style.name || cd.style.code) + ' — ' + cd.colorObj.color +
+    '"' + (cd.style.name || cd.style.code) + (cd.colorObj.color && cd.colorObj.color !== 'Default' ? ' — ' + cd.colorObj.color : '') +
     '" matches ' + existing + ' in Shopify. What should happen?';
   el('dup-modal').classList.add('open');
 }
