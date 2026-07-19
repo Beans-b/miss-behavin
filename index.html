@@ -154,8 +154,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .mtype-btn{background:var(--gray-light);border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:8px 10px;cursor:pointer;color:var(--gray-text);transition:all .15s;-webkit-appearance:none;flex-shrink:0;}
 .mtype-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 .p-retail-row{display:flex;align-items:center;gap:8px;}
-.p-retail-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);width:56px;flex-shrink:0;}
-.p-retail-input{flex:1;border:none;border-bottom:2px solid var(--accent);font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;padding:3px 0;outline:none;background:transparent;color:var(--black);-webkit-appearance:none;min-width:0;}
+.p-retail-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);width:56px;flex-shrink:0;}
+.p-retail-input{flex:1;border:none;border-bottom:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;padding:3px 0;outline:none;background:transparent;color:var(--black);-webkit-appearance:none;min-width:0;}
+.p-retail-input:focus{border-bottom-color:var(--black);}
 .p-retail-input::placeholder{color:var(--gray-mid);font-weight:400;font-size:14px;}
 .p-colors{margin-top:8px;padding-top:7px;border-top:1px solid #f0eeeb;}
 .p-color-row{display:flex;justify-content:space-between;font-size:11px;color:var(--gray-text);padding:2px 0;}
@@ -170,15 +171,6 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .inv-meta{padding:14px 24px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
 .inv-title{font-family:'Playfair Display',serif;font-size:17px;margin-bottom:2px;}
 .inv-details{font-size:11px;color:var(--gray-text);letter-spacing:.05em;}
-
-/* GLOBAL FILL */
-.global-fill{padding:14px 24px;border-bottom:1px solid var(--gray-mid);}
-.global-fill p{font-size:12px;font-weight:500;margin-bottom:8px;}
-.global-row{display:flex;gap:8px;align-items:center;}
-.global-input{flex:1;border:none;border-bottom:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;padding:4px 0;outline:none;background:transparent;}
-.global-input:focus{border-bottom-color:var(--black);}
-.global-apply{background:var(--primary);color:#fff;border:none;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;flex-shrink:0;-webkit-appearance:none;min-height:44px;}
-.global-note{font-size:11px;color:var(--gray-text);margin-top:6px;font-style:italic;}
 
 /* SEND / PUBLISH */
 .action-section{padding:20px 24px;border-top:1px solid var(--gray-mid);}
@@ -720,15 +712,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="inv-title" id="kel-inv-title">Invoice</div>
           <div class="inv-details" id="kel-inv-details"></div>
         </div>
-        <div class="global-fill">
-          <p>Apply markup to all styles at once:</p>
-          <div class="global-row">
-            <input type="text" inputmode="decimal" class="global-input" id="global-price" placeholder="e.g. 50 or 50% or $48"/>
-            <button class="global-apply" onclick="applyGlobal()">Apply All</button>
-          </div>
-          <div class="global-note">Or set each style individually below.</div>
-        </div>
-        <div style="padding:0 24px;" id="kel-cards"></div>
+        <div style="padding:16px 24px 0;" id="kel-cards"></div>
         <div class="action-section">
           <div class="action-title">Ready to share?</div>
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
@@ -1069,7 +1053,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 30</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 31</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2366,7 +2350,7 @@ function sbArchiveInvoice(inv, cb) {
   var record = {
     vendor: inv.vendor || 'Unknown Vendor',
     invoice_number: inv.invoice_number || '',
-    invoice_date: inv.invoice_date || '',
+    invoice_date: inv.invoice_date || inv.date || '',
     status: 'live',
     published: true,
     styles: inv.styles || []
@@ -2527,29 +2511,6 @@ function recalcRetail(card) {
   ri.value = '$'+retail.toFixed(2);
 }
 
-function applyGlobal() {
-  var raw = el('global-price').value.trim();
-  var num = parseFloat(raw.replace(/[^0-9.]/g,''));
-  if (!num) return;
-  var isDollarRetail = raw.indexOf('$') >= 0 && raw.indexOf('%') < 0;
-  document.querySelectorAll('.p-card').forEach(function(card) {
-    var mi = card.querySelector('.p-markup-input');
-    var ri = card.querySelector('.p-retail-input');
-    if (isDollarRetail) {
-      ri.value = '$' + num.toFixed(2);
-      ri.dataset.manual = 'true';
-    } else {
-      var pb = card.querySelector('[data-mode="pct"]');
-      card.querySelectorAll('.mtype-btn').forEach(function(b){b.classList.remove('active');});
-      pb.classList.add('active');
-      mi.value = num;
-      ri.dataset.manual = '';
-      recalcRetail(card);
-    }
-  });
-  scheduleAutosave();
-}
-
 /* ── AUTOSAVE (1.5s debounce, unchanged) ── */
 function setAutosave(state) {
   var dot = el('autosave-dot');
@@ -2665,6 +2626,9 @@ function closeSheet() {
     el('pricing-section').style.display = 'none';
     el('kel-empty').style.display = 'block';
     var ps = el('publish-status'); if (ps) ps.style.display = 'none';
+    _manImages = {};                                   // build 31 — done with this sheet's pulled photos
+    resetManualPane();
+    el('kel-manual').style.display = 'none';
     toast('Sheet closed — find it under Archive');
   }, true, 'Close Sheet');
 }
@@ -2919,10 +2883,40 @@ function renderArchiveList(invoices, liveNum) {
     var isLive = liveNum !== null && liveNum !== undefined && (inv.invoice_number || '') === liveNum;
     var item = document.createElement('div');
     item.className = 'archive-item';
+
+    // build 31 — units per color falls back to summing the size grid
+    // (manual-entry sheets never stored a per-color total, so the old
+    // calc showed $0.00 wholesale on every one of them).
     var total = (inv.styles||[]).reduce(function(sum,s){
-      return sum+(s.cost||0)*((s.colors||[]).reduce(function(t,c){return t+(c.total||0);},0));
+      var units = (s.colors||[]).reduce(function(t,c){
+        var ct = c.total || Object.keys(c.sizes||{}).reduce(function(x,k){ return x + (parseInt(c.sizes[k],10)||0); }, 0);
+        return t + ct;
+      },0);
+      return sum + (s.cost||0)*units;
     },0);
-    var fileName = (inv.vendor||'') + ' · #' + (inv.invoice_number||'') + ' · ' + (inv.invoice_date||'') + ' · ' + (inv.styles||[]).length + ' styles';
+
+    // build 31 — date logged: invoice date if the sheet has one, otherwise
+    // the archive row's created_at (manual sheets before build 31 stored no date).
+    var when = inv.invoice_date || inv.date || '';
+    if (!when && inv.created_at) {
+      var dt = new Date(inv.created_at);
+      if (!isNaN(dt.getTime())) when = (dt.getMonth()+1)+'/'+dt.getDate()+'/'+dt.getFullYear();
+    }
+
+    // build 31 — say what's actually in the sheet, not just a count
+    var names = (inv.styles||[]).map(function(s){
+      var c = ((s.colors||[])[0]||{}).color;
+      return (s.name||s.code||'') + (c && c !== 'Default' ? ' — ' + c : '');
+    }).filter(Boolean);
+    var namesTxt = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) + ' more' : '');
+
+    var fileName = (inv.vendor||'') + ' · #' + (inv.invoice_number||'');
+    var metaBits = [];
+    if (when) metaBits.push(when);
+    metaBits.push((inv.styles||[]).length + (((inv.styles||[]).length===1)?' style':' styles'));
+    if (namesTxt) metaBits.push(namesTxt);
+    metaBits.push('$'+Number(total).toFixed(2)+' wholesale');
+
     var rightHtml = isLive
       ? '<span class="status-pill live">Live</span>'+
         '<button class="arch-link arch-copy">Link</button>'+
@@ -2932,7 +2926,7 @@ function renderArchiveList(invoices, liveNum) {
     item.innerHTML =
       '<div class="archive-item-info">'+
         '<div class="archive-file-name">'+esc(fileName)+'</div>'+
-        '<div class="archive-meta">'+esc(inv.invoice_date||'')+' · '+(inv.styles||[]).length+' styles · $'+Number(total).toFixed(2)+' wholesale</div>'+
+        '<div class="archive-meta">'+esc(metaBits.join(' · '))+'</div>'+
       '</div>'+
       '<div class="archive-right">'+rightHtml+'</div>';
     item.querySelector('.archive-item-info').addEventListener('click', function() { loadArchivedInvoice(inv); });
@@ -3063,8 +3057,9 @@ function manualStart(){
       if (q > 0) sizes[sz] = q;
     });
     if (!name || !(cost > 0) || !Object.keys(sizes).length){ bad++; return; }
+    var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
     var s = { code: 'MAN-' + (i+1), type: type, name: name, cost: cost,
-              colors: [{ color: color, sizes: sizes }], notes: null, barcode: null, fabric: null, fit: null };
+              colors: [{ color: color, sizes: sizes, total: units }], notes: null, barcode: null, fabric: null, fit: null };
     var ik = row.dataset.imgkey;
     if (ik && _manImages[ik] && (_manImages[ik].images || []).length){
       s.vendor_images = _manImages[ik].images;
@@ -3082,6 +3077,7 @@ function manualStart(){
     vendor: vendor,
     invoice_number: 'MANUAL-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'),
     date: (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear(),
+    invoice_date: (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear(),   // build 31 — archives were logging manual sheets with no date
     styles: styles
   };
   currentInvoice = manual;
@@ -3091,7 +3087,19 @@ function manualStart(){
   el('pricing-section').style.display = 'block';
   el('kel-empty').style.display = 'none';
   el('kel-manual').style.display = 'none';
+  resetManualPane();   // build 31 — next manual buy starts with a clean form
   setAutosave('unsaved');
+}
+
+/* build 31 — clear the Manual Entry form. Keeps the C-<code> image copies
+   (the push pipeline reads those); only the PULL-n staging keys go. */
+function resetManualPane() {
+  el('man-rows').innerHTML = '';
+  el('man-vendor').value = '';
+  el('man-url').value = '';
+  el('man-status').style.display = 'none';
+  Object.keys(_manImages).forEach(function(k){ if (k.indexOf('C-') !== 0) delete _manImages[k]; });
+  _manPullN = 0;
 }
 
 function loadSampleInvoice() {
@@ -3471,6 +3479,9 @@ function _spDoCreate(cd) {
 
     if (res.warnings && res.warnings.length) {
       _spShowErrorDetail(cd, 'Note: ' + res.warnings.join(' · '), 'color:var(--gray-text);');
+    } else if (typeof res.channels_published === 'number' && res.channels_published > 0) {
+      // build 31 — say it out loud so a 0-channel product can never pass silently
+      _spShowErrorDetail(cd, '✓ Live on ' + res.channels_published + ' sales channel' + (res.channels_published===1?'':'s'), 'color:var(--success-fg);');
     }
     if (res.handle) {
       var foot = cd.card.querySelector('.sp-card-foot');
