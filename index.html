@@ -62,6 +62,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .btn-pull{background:var(--pull);color:#fff;margin-top:0;border:none;border-radius:8px;font-weight:700;box-shadow:0 2px 10px rgba(18,161,80,.35);}
 .btn-pull:active{background:#0e7c3e;box-shadow:0 1px 4px rgba(18,161,80,.3);}
 .btn-outline{background:transparent;color:var(--black);border:1px solid var(--gray-mid);}
+/* build 38 — one-size / sized toggle on manual rows */
+.man-mode-btn{width:auto;padding:6px 12px;margin:0;font-size:12px;border-radius:14px;}
+.man-mode-btn.man-mode-on{background:var(--black);color:var(--white);border-color:var(--black);}
 .btn-danger{background:var(--red);color:var(--white);}
 .btn-accent{background:var(--accent);color:var(--white);}
 
@@ -673,17 +676,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="section-title">Upload Invoice</div>
         <div id="upload-area" onclick="document.getElementById('file-input').click()">
           <div class="upload-icon">&#128247;</div>
-          <div class="upload-text">Tap to select invoice photos</div>
-          <div class="upload-hint">Select one or multiple pages at once</div>
+          <div class="upload-text">Tap to select invoice photos or PDFs</div>
+          <div class="upload-hint">Photos or a PDF invoice &#8212; one or multiple files</div>
         </div>
-        <input type="file" id="file-input" accept="image/*" multiple style="display:none;" onchange="handleFiles(event)"/>
+        <input type="file" id="file-input" accept="image/*,application/pdf,.pdf" multiple style="display:none;" onchange="handleFiles(event)"/>
         <div id="pages-summary" style="display:none;padding:10px 0;font-size:13px;font-weight:600;text-align:center;color:var(--success-fg);"></div>
         <button class="btn btn-black" id="extract-btn" onclick="extractAllPages()" disabled>Extract All with Claude</button>
         <div class="status" id="extract-status"></div>
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. You add the quantity (under One Size for clips, bags, and brushes; XS&#8211;L for sized pieces), then Review &amp; publish.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. Type the quantity (rows are one-size by default; tap Sized XS&#8211;L for sized apparel), then Review &amp; publish.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -742,6 +745,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" id="fixch-btn" onclick="fixAllChannels()">Publish all products to every sales channel</button>
         <div class="field-hint">Safety net: puts every active product on all sales channels &#8212; fixes any that were created on 0. Safe to run anytime.</div>
         <div id="fixch-status" class="status"></div>
+        <!-- build 38 — one-size cleanup: no more "Size: One Size" dropdowns -->
+        <button class="btn btn-outline" id="fixos-btn" style="margin-top:10px;" onclick="fixOsSizes()">Remove size picker from one-size products</button>
+        <div class="field-hint">Products whose only variant is One Size (clips, bags, cases) stop showing a size dropdown online. Scans first and asks before changing anything; prices, inventory, SKUs, and barcodes are untouched. Needs worker v37.</div>
+        <div id="fixos-status" class="status"></div>
       </div>
     </div>
 
@@ -753,7 +760,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div id="ktab-help" style="display:none;">
       <div class="section">
         <div class="section-title">Upload &amp; Extract Invoice</div>
-        <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Photograph each page of the vendor invoice and select all pages at once when uploading. Tap <strong>Extract All with Claude</strong> &#8212; the app reads every style code, color, size, quantity, and wholesale cost automatically, and generates a product name for every style.</div>
+        <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Photograph each page of the vendor invoice and select all pages at once &#8212; or upload the invoice PDF itself (Faire &#8594; Orders &#8594; download the invoice) and every page reads in one pass. Tap <strong>Extract All with Claude</strong> &#8212; the app reads every style code, color, size, quantity, and wholesale cost automatically, and generates a product name for every style.</div>
         <div class="section-title" style="margin-top:18px;">Product Names</div>
         <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Tap the circular arrow (&#8635;) next to any name for a new AI-generated one, as many times as you like. Or tap the name and type your own. Whatever is in the field at push time goes to Shopify.</div>
         <div class="section-title" style="margin-top:18px;">Setting Prices</div>
@@ -1061,7 +1068,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 37</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 38</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1237,7 +1244,15 @@ function ls(k){return localStorage.getItem(k)||'';}
 function lsSet(k,v){localStorage.setItem(k,v);}
 function el(id){ return document.getElementById(id); }
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function showStatus(id,type,msg){var e=el(id);if(!e)return;e.style.display='block';e.className='status '+type;e.innerHTML=msg;}
+/* build 38 — error banners are tappable to dismiss, so a failed read never
+   wedges the screen. Loading/success banners behave exactly as before. */
+function showStatus(id,type,msg){
+  var e=el(id);if(!e)return;
+  e.style.display='block';e.className='status '+type;
+  e.innerHTML=(type==='error')?msg+' <span style="text-decoration:underline;cursor:pointer;font-weight:600;">Dismiss</span>':msg;
+  if(type==='error'){e.onclick=function(){e.style.display='none';e.onclick=null;};}
+  else{e.onclick=null;}
+}
 function toast(msg){var t=el('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none';},2600);}
 function uuid(){
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -2641,6 +2656,43 @@ function fixAllChannels() {
   .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Failed — tap again.')); });
 }
 
+/* build 38 — remove the size picker from one-size products (worker v37).
+   Two steps by design: a dry-run scan lists what would change, a modal
+   confirms, and only then does the apply run. The worker re-reads every
+   product after changing it and only counts it fixed when Shopify itself
+   reports the picker is gone. */
+function fixOsSizes() {
+  var btn = el('fixos-btn');
+  btn.disabled = true;
+  showStatus('fixos-status','loading','<span class="spinner"></span>Scanning products&#8230;');
+  api('fix_os_options', { dry_run: true })
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('fixos-status','error', esc(r.error)); return; }
+    if (!r.count) { showStatus('fixos-status','success','✓ Nothing to fix — no one-size product shows a size picker.'); return; }
+    el('fixos-status').style.display = 'none';
+    var names = (r.products || []).slice(0, 6).join(' · ') + (r.count > 6 ? ' · +' + (r.count - 6) + ' more' : '');
+    showModal('Remove the size picker from ' + r.count + ' product' + (r.count === 1 ? '' : 's') + '?',
+      names + ' — only the One Size dropdown goes away. Prices, inventory, SKUs, and barcodes are untouched.',
+      function() { closeModal(); fixOsApply(); });
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('fixos-status','error', esc(e.message || 'Scan failed — tap again.')); });
+}
+function fixOsApply() {
+  var btn = el('fixos-btn');
+  btn.disabled = true;
+  showStatus('fixos-status','loading','<span class="spinner"></span>Removing size pickers&#8230; (30–60s)');
+  api('fix_os_options', {})
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('fixos-status','error', esc(r.error)); return; }
+    var msg = '✓ ' + r.fixed + ' of ' + r.count + ' product' + (r.count === 1 ? '' : 's') + ' fixed.';
+    if ((r.failed || []).length) msg += ' Failed: ' + esc(r.failed.slice(0, 3).join(' · '));
+    showStatus('fixos-status', (r.failed || []).length ? 'error' : 'success', msg);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('fixos-status','error', esc(e.message || 'Failed — tap again.')); });
+}
+
 function closeSheet() {
   var inv = collectCurrentInvoice();
   if (!inv) return;
@@ -2715,14 +2767,34 @@ function renderStaffView(inv) {
   });
 }
 
-/* ── UPLOAD + EXTRACTION (Claude calls now proxied by the Worker) ── */
+/* ── UPLOAD + EXTRACTION (Claude calls now proxied by the Worker) ──
+   build 38 — PDF invoices are first-class. A PDF never touches the image
+   compressor (that was the "Image load error"); it goes to the Worker
+   whole, and Claude reads EVERY page of it in one call (worker v37+).
+   Photos keep the exact same per-page path as before. */
 var selectedFiles = [];
 var allExtractedStyles = [];
+
+function isPdf(f){ return f.type === 'application/pdf' || /\.pdf$/i.test(f.name); }
+function readFileB64(file, cb){   // raw base64, no compression — for PDFs
+  try {
+    var reader = new FileReader();
+    reader.onerror = function(){ cb(null, null, 'FileReader error'); };
+    reader.onload = function(e){
+      var s = String(e.target.result || '');
+      var i = s.indexOf(',');
+      if (i < 0) { cb(null, null, 'Unreadable file data'); return; }
+      cb(s.slice(i + 1), 'application/pdf', null);
+    };
+    reader.readAsDataURL(file);
+  } catch(err){ cb(null, null, 'Read error: ' + err.message); }
+}
 
 function handleFiles(e) {
   var raw = Array.from(e.target.files);
   el('file-input').value = '';
   if (raw.length === 0) return;
+  el('extract-status').style.display = 'none';   // build 38 — a fresh selection clears any stale error
   var seen = {};
   selectedFiles = raw.filter(function(f){
     if (seen[f.name]) return false;
@@ -2730,30 +2802,28 @@ function handleFiles(e) {
   });
   var dupes = raw.length - selectedFiles.length;
   if (dupes > 0) {
-    showStatus('extract-status','error', dupes+' duplicate page'+(dupes>1?'s were':' was')+' removed automatically.');
+    showStatus('extract-status','error', dupes+' duplicate file'+(dupes>1?'s were':' was')+' removed automatically.');
     setTimeout(function(){ el('extract-status').style.display='none'; }, 3000);
   }
 
   var summary = el('pages-summary');
   summary.style.display = 'block';
-  summary.textContent = selectedFiles.length + ' page' + (selectedFiles.length > 1 ? 's' : '') + ' selected: ' + selectedFiles.map(function(f){return f.name;}).join(', ');
+  summary.textContent = selectedFiles.length + ' file' + (selectedFiles.length > 1 ? 's' : '') + ' selected: ' + selectedFiles.map(function(f){
+    return f.name + (isPdf(f) ? ' (PDF — every page reads in one pass)' : '');
+  }).join(', ');
 
   el('extract-btn').disabled = false;
-  el('extract-btn').textContent = 'Extract All ' + selectedFiles.length + ' Page' + (selectedFiles.length>1?'s':'') + ' with Claude';
+  el('extract-btn').textContent = 'Extract All with Claude';
 
-  var reader = new FileReader();
-  reader.onload = function() {
-    el('upload-area').querySelector('.upload-text').textContent = selectedFiles.length + ' page' + (selectedFiles.length>1?'s':'')+' ready';
-    el('upload-area').querySelector('.upload-hint').textContent = 'Tap to change selection';
-  };
-  reader.readAsDataURL(selectedFiles[0]);
+  el('upload-area').querySelector('.upload-text').textContent = selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'')+' ready';
+  el('upload-area').querySelector('.upload-hint').textContent = 'Tap to change selection';
 }
 
 function extractAllPages() {
   if (selectedFiles.length === 0) return;
   allExtractedStyles = [];
   el('extract-btn').disabled = true;
-  showStatus('extract-status','loading','<span class="spinner"></span>Processing page 1 of ' + selectedFiles.length + '...');
+  showStatus('extract-status','loading','<span class="spinner"></span>Processing file 1 of ' + selectedFiles.length + '...');
   processPage(0, {});
 }
 
@@ -2795,28 +2865,41 @@ function processPage(idx, invoiceMeta) {
     }
     currentInvoice = Object.assign({}, invoiceMeta, {styles: allExtractedStyles});
     renderKelCards(currentInvoice);
-    showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' page' + (selectedFiles.length>1?'s':'') + '.');
+    showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
     el('extract-btn').disabled = false;
     el('pricing-section').scrollIntoView({behavior:'smooth'});
     return;
   }
 
-  showStatus('extract-status','loading','<span class="spinner"></span>Reading page ' + (idx+1) + ' of ' + selectedFiles.length + '...');
+  // build 38 — a PDF goes to the Worker whole (raw base64, no compression);
+  // Claude reads every page of it in one call. Photos keep the old path.
+  var file = selectedFiles[idx];
+  var pdf = isPdf(file);
+  if (pdf && file.size > 10 * 1024 * 1024) {
+    showStatus('extract-status','error', file.name + ' is over 10MB — too big to send as a PDF. Screenshot its pages and upload those instead.');
+    el('extract-btn').disabled = false;
+    return;
+  }
 
-  compressImage(selectedFiles[idx], function(b64, mime, compErr) {
+  showStatus('extract-status','loading','<span class="spinner"></span>Reading ' + (pdf ? 'PDF' : 'file') + ' ' + (idx+1) + ' of ' + selectedFiles.length + '...');
+
+  var readFn = pdf ? readFileB64 : compressImage;
+  readFn(file, function(b64, mime, compErr) {
     if (compErr || !b64) {
-      showStatus('extract-status','error','Image read error: '+(compErr||'unknown')+'. Try a clearer photo.');
+      showStatus('extract-status','error','File read error: '+(compErr||'unknown')+'. '+(pdf?'If the PDF keeps failing, screenshot it and upload the image.':'Try a clearer photo.'));
       el('extract-btn').disabled = false;
       return;
     }
-    showStatus('extract-status','loading','<span class="spinner"></span>Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...');
+    showStatus('extract-status','loading','<span class="spinner"></span>' + (pdf
+      ? 'Sending the PDF to Claude — every page reads in one pass (up to 2 minutes)...'
+      : 'Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...'));
     var fetchPromise = api('extract_invoice', { image: b64, media_type: mime })
     .then(function(res){
-      showStatus('extract-status','loading','<span class="spinner"></span>Got response from Claude, parsing page '+(idx+1)+'...');
+      showStatus('extract-status','loading','<span class="spinner"></span>Got response from Claude, parsing file '+(idx+1)+'...');
       return res;
     });
     var timeoutPromise = new Promise(function(_,reject){
-      setTimeout(function(){ reject(new Error('timeout')); }, 40000);
+      setTimeout(function(){ reject(new Error('timeout')); }, pdf ? 120000 : 40000);
     });
     Promise.race([fetchPromise, timeoutPromise])
     .then(function(data) {
@@ -2850,8 +2933,8 @@ function processPage(idx, invoiceMeta) {
       processPage(idx + 1, invoiceMeta);
     })
     .catch(function(err) {
-      var msg = err.message==='timeout' ? 'Page '+(idx+1)+' timed out — skipping.' : 'Error on page '+(idx+1)+': '+err.message;
-      showStatus('extract-status','loading','<span class="spinner"></span>'+msg+' Trying next page...');
+      var msg = err.message==='timeout' ? 'File '+(idx+1)+' timed out — skipping.' : 'Error on file '+(idx+1)+': '+err.message;
+      showStatus('extract-status','loading','<span class="spinner"></span>'+msg+' Trying next file...');
       setTimeout(function(){ processPage(idx+1, invoiceMeta); }, 1500);
     });
   });
@@ -2997,8 +3080,8 @@ function loadArchivedInvoice(inv) {
   el('pages-summary').style.display='none';
   el('extract-btn').disabled = true;
   el('extract-btn').textContent = 'Extract All with Claude';
-  el('upload-area').querySelector('.upload-text').textContent = 'Tap to select invoice photos';
-  el('upload-area').querySelector('.upload-hint').textContent = 'Select one or multiple pages at once';
+  el('upload-area').querySelector('.upload-text').textContent = 'Tap to select invoice photos or PDFs';
+  el('upload-area').querySelector('.upload-hint').textContent = 'Photos or a PDF invoice — one or multiple files';
   currentInvoice = {
     vendor: inv.vendor,
     invoice_number: inv.invoice_number,
@@ -3076,7 +3159,7 @@ function manualPull(){
     // build 35 \u2014 the message matches what the page actually gave us; the
     // "Still needed" line under the rows tracks the rest live.
     showStatus('man-status','success', res.title
-      ? '\u2713 Pulled. Check the row, then add the quantity \u2014 under One Size for clips, bags, and brushes.'
+      ? '\u2713 Pulled. Check the row, then type the quantity (tap Sized XS\u2013L first if it\u2019s sized apparel).'
       : '\u2713 Pulled what the page offered (photos). The line above shows what still needs typing.');
     toast(((res.images||[]).length) + ' photo(s) pulled \u00b7 ' + colors.length + ' row(s) added');
   })
@@ -3130,6 +3213,29 @@ function manualFormChanged(){
   if (ok && wasHidden) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+/* build 38 — quantity only by default. Accessories (most manual buys) are
+   one size, so each row opens with a single Quantity box (it IS the One
+   Size quantity underneath — nothing else changes downstream). "Sized
+   XS–L" flips the row to the apparel grid. Switching modes clears the
+   other mode's numbers so a hidden quantity can never sneak into a push.
+   All field class names are unchanged — the Pull fills rows exactly as
+   before. */
+function manualSizeMode(btn, mode){
+  var row = btn.closest('.man-row');
+  if (!row) return;
+  var os = row.querySelector('.man-qty-os'), sized = row.querySelector('.man-qty-sized');
+  var bOs = row.querySelector('.man-mode-os'), bSized = row.querySelector('.man-mode-sized');
+  if (mode === 'os') {
+    os.style.display = 'flex'; sized.style.display = 'none';
+    ['XS','S','M','L'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
+    bOs.classList.add('man-mode-on'); bSized.classList.remove('man-mode-on');
+  } else {
+    os.style.display = 'none'; sized.style.display = 'flex';
+    row.querySelector('.man-sz-OS').value = '';
+    bSized.classList.add('man-mode-on'); bOs.classList.remove('man-mode-on');
+  }
+  manualFormChanged();
+}
 function manualAddRow(){
   var row = document.createElement('div');
   row.className = 'man-row';
@@ -3143,12 +3249,20 @@ function manualAddRow(){
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
       '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="number" step="0.01" class="field-input man-retail"/></div>' +
     '</div>' +
-    '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      ['XS','S','M','L','OS'].map(function(sz){
-        var lbl = sz === 'OS' ? 'One Size' : sz;   // build 35 — nobody knew what "OS" meant
-        return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+lbl+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
+    '<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">' +
+      '<label class="sp-l" style="margin:0;">Sizing</label>' +
+      '<button type="button" class="btn btn-outline man-mode-btn man-mode-os man-mode-on" onclick="manualSizeMode(this,\'os\')">One size</button>' +
+      '<button type="button" class="btn btn-outline man-mode-btn man-mode-sized" onclick="manualSizeMode(this,\'sized\')">Sized XS&#8211;L</button>' +
+    '</div>' +
+    '<div class="man-qty-os" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
+      '<div style="flex:1;"><label class="sp-l">Quantity</label><input type="number" min="0" class="field-input man-sz-OS" style="text-align:center;"/></div>' +
+      '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
+    '</div>' +
+    '<div class="man-qty-sized" style="display:none;gap:6px;margin-top:6px;align-items:flex-end;">' +
+      ['XS','S','M','L'].map(function(sz){
+        return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
-      '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.parentNode.parentNode.remove();manualFormChanged();">&#10005;</button>' +
+      '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
       '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="number" step="0.01" class="field-input man-cost"/></div>' +
