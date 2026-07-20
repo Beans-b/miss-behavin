@@ -935,9 +935,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div id="fixch-status" class="status"></div>
 
       <div class="section-title" style="margin-top:18px;">One-size products</div>
-      <button class="btn btn-outline" id="fixos-btn" onclick="fixOsSizes()">Remove size picker from one-size products</button>
-      <div class="field-hint">Products whose only variant is One Size (clips, bags, cases) stop showing a size dropdown online. Scans first and shows the list before changing anything; prices, inventory, SKUs, and barcodes are untouched. Needs worker v37.</div>
+      <button class="btn btn-outline" id="fixos-btn" onclick="fixOsSizes()">Remove size picker from single-size products</button>
+      <div class="field-hint">Products with only one variant stop showing a size dropdown online. True One Size products fix automatically; products hiding behind a single fake size (a lone "S" &#8212; the old Emi Jay intakes) are listed with checkboxes so you confirm each one. No variant is deleted, no inventory moves; prices, SKUs, and barcodes are untouched. Needs worker v38.</div>
       <div id="fixos-status" class="status"></div>
+      <div id="fixos-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
     </div>
   </div>
 
@@ -1080,7 +1081,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 39</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 40</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2687,33 +2688,74 @@ function fixAllChannels() {
   .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Failed — tap again.')); });
 }
 
-/* build 38 — remove the size picker from one-size products (worker v37).
-   Two steps by design: a dry-run scan lists what would change, a modal
-   confirms, and only then does the apply run. The worker re-reads every
+/* build 40 — two-tier size sweep (worker v38). The dry run now returns
+   exact One Size matches (fixed automatically) AND "suspect" products —
+   one variant hiding behind a single fake size like "S" (the pre-One-Size
+   Emi Jay intakes). Suspects render as a checkbox list, checked by
+   default; apply sends only the approved ids. The worker re-reads every
    product after changing it and only counts it fixed when Shopify itself
    reports the picker is gone. */
 function fixOsSizes() {
   var btn = el('fixos-btn');
   btn.disabled = true;
+  el('fixos-review').style.display = 'none';
   showStatus('fixos-status','loading','<span class="spinner"></span>Scanning products&#8230;');
   api('fix_os_options', { dry_run: true })
   .then(function(r) {
     btn.disabled = false;
     if (r.error) { showStatus('fixos-status','error', esc(r.error)); return; }
-    if (!r.count) { showStatus('fixos-status','success','✓ Nothing to fix — no one-size product shows a size picker.'); return; }
+    var total = (r.count || 0) + (r.suspect_count || 0);
+    if (!total) { showStatus('fixos-status','success','✓ Nothing to fix — no single-size product shows a size picker.'); return; }
     el('fixos-status').style.display = 'none';
-    var names = (r.products || []).slice(0, 6).join(' · ') + (r.count > 6 ? ' · +' + (r.count - 6) + ' more' : '');
-    showModal('Remove the size picker from ' + r.count + ' product' + (r.count === 1 ? '' : 's') + '?',
-      names + ' — only the One Size dropdown goes away. Prices, inventory, SKUs, and barcodes are untouched.',
-      function() { closeModal(); fixOsApply(); });
+    _fixosRenderReview(r);
   })
   .catch(function(e) { btn.disabled = false; showStatus('fixos-status','error', esc(e.message || 'Scan failed — tap again.')); });
 }
+function _fixosRenderReview(r) {
+  var box = el('fixos-review');
+  var h = '';
+  if (r.count) {
+    var names = (r.products || []).join(' · ') + (r.count > (r.products || []).length ? ' · +' + (r.count - r.products.length) + ' more' : '');
+    h += '<div class="sp-l" style="margin:0 0 4px;">One Size — fixed automatically (' + r.count + ')</div>' +
+         '<div style="font-size:12px;color:#444;margin-bottom:12px;">' + esc(names) + '</div>';
+  }
+  if (r.suspect_count) {
+    h += '<div class="sp-l" style="margin:0 0 4px;">Hiding behind a single fake size — confirm each (' + r.suspect_count + ')</div>' +
+         '<div style="font-size:12px;color:#666;margin-bottom:6px;">One variant, one size like &#8220;S&#8221; — almost always an accessory from before One Size existed. Untick anything that is a REAL sized garment you stock in one size.</div>';
+    (r.suspects || []).forEach(function(s){
+      h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+             '<input type="checkbox" class="fixos-ck" checked value="' + esc(s.id) + '"/>' +
+             '<span style="flex:1;">' + esc(s.title) + '</span>' +
+             '<span style="color:#999;font-size:11px;white-space:nowrap;">' + esc(s.vendor || '') + ' · Size: ' + esc(s.value) + '</span>' +
+           '</label>';
+    });
+    if (r.suspect_count > (r.suspects || []).length) {
+      h += '<div style="font-size:11px;color:#999;margin-top:4px;">+' + (r.suspect_count - r.suspects.length) + ' more not shown — run the scan again after this batch.</div>';
+    }
+  }
+  h += '<button type="button" class="btn btn-black" id="fixos-go" style="margin-top:12px;">Remove pickers from <span id="fixos-apply-n">0</span> product(s)</button>' +
+       '<button type="button" class="btn btn-outline" id="fixos-cancel" style="margin-top:8px;">Cancel</button>';
+  box.innerHTML = h;
+  box.style.display = 'block';
+  box._exactCount = r.count || 0;
+  var upd = function(){
+    var n = box._exactCount + box.querySelectorAll('.fixos-ck:checked').length;
+    el('fixos-apply-n').textContent = n;
+    el('fixos-go').disabled = (n === 0);
+  };
+  Array.prototype.forEach.call(box.querySelectorAll('.fixos-ck'), function(ck){ ck.addEventListener('change', upd); });
+  el('fixos-go').onclick = fixOsApply;
+  el('fixos-cancel').onclick = function(){ box.style.display = 'none'; };
+  upd();
+}
 function fixOsApply() {
+  var box = el('fixos-review');
+  var ids = Array.prototype.map.call(box.querySelectorAll('.fixos-ck:checked'), function(ck){ return ck.value; });
   var btn = el('fixos-btn');
   btn.disabled = true;
+  box.style.display = 'none';
   showStatus('fixos-status','loading','<span class="spinner"></span>Removing size pickers&#8230; (30–60s)');
-  api('fix_os_options', {})
+  api('fix_os_options', { ids: ids })
   .then(function(r) {
     btn.disabled = false;
     if (r.error) { showStatus('fixos-status','error', esc(r.error)); return; }
