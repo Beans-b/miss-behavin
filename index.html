@@ -935,6 +935,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div id="fixch-status" class="status"></div>
       <div id="fixch-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
 
+      <div class="section-title" style="margin-top:18px;">Private label</div>
+      <button class="btn btn-outline" id="rcc-btn" onclick="rebrandCcScan()">Rebrand Cotton Candy &#8594; Miss Behavin'</button>
+      <div class="field-hint">Cotton Candy is our own private label &#8212; customers must never see that name. New intakes fix themselves automatically (worker v40); this cleans up EXISTING products: vendor, title, SEO title/description, description, and photo alt text all switch to Miss Behavin'. Scans and shows the list first; prices, inventory, SKUs, and barcodes are untouched. Needs worker v40.</div>
+      <div id="rcc-status" class="status"></div>
+      <div id="rcc-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
+
       <div class="section-title" style="margin-top:18px;">Barcodes</div>
       <button class="btn btn-outline" id="bcr-btn" onclick="barcodeReportRun()">Missing-barcode report</button>
       <div class="field-hint">Read-only: counts ACTIVE variants with an empty Barcode field, by brand &#8212; your progress tracker for the UPC backfill. Changes nothing. Needs worker v39.</div>
@@ -1088,7 +1094,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 41</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 42</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2744,6 +2750,74 @@ function fixChApply() {
     showStatus('fixch-status', (r.failed||[]).length ? 'error' : 'success', msg);
   })
   .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Failed — tap again.')); });
+}
+
+/* build 42 — rebrand Cotton Candy → Miss Behavin' (worker v40). Cotton
+   Candy is the store's private label; this fixes EXISTING products that
+   reached Shopify under that name. Scan lists matches with the fields hit
+   (checked by default — these are unambiguous); apply sends approved ids;
+   the worker verifies each product from the mutation response. */
+function rebrandCcScan() {
+  var btn = el('rcc-btn');
+  btn.disabled = true;
+  el('rcc-review').style.display = 'none';
+  showStatus('rcc-status','loading','<span class="spinner"></span>Scanning for Cotton Candy references&#8230;');
+  api('rebrand_cc', { dry_run: true })
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('rcc-status','error', esc(r.error)); return; }
+    if (!r.count) { showStatus('rcc-status','success','✓ No active product mentions Cotton Candy — nothing to rebrand.'); return; }
+    el('rcc-status').style.display = 'none';
+    _rccRenderReview(r);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('rcc-status','error', esc(e.message || 'Scan failed — tap again.')); });
+}
+function _rccRenderReview(r) {
+  var box = el('rcc-review');
+  var h = '<div class="sp-l" style="margin:0 0 4px;">Mentions Cotton Candy — becomes Miss Behavin&#8217; (' + r.count + ')</div>' +
+          '<div style="font-size:12px;color:#666;margin-bottom:6px;">Vendor, title, SEO, description, and photo alt text all switch. Untick anything that should stay as is.</div>';
+  (r.products || []).forEach(function(p){
+    h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+           '<input type="checkbox" class="rcc-ck" checked value="' + esc(p.id) + '"/>' +
+           '<span style="flex:1;">' + esc(p.title) + '</span>' +
+           '<span style="color:#999;font-size:11px;white-space:nowrap;">' + esc((p.hits || []).join(' · ')) + '</span>' +
+         '</label>';
+  });
+  if (r.count > (r.products || []).length) {
+    h += '<div style="font-size:11px;color:#999;margin-top:4px;">+' + (r.count - r.products.length) + ' more not shown — run again after this batch.</div>';
+  }
+  h += '<button type="button" class="btn btn-black" id="rcc-go" style="margin-top:12px;">Rebrand <span id="rcc-apply-n">0</span> product(s)</button>' +
+       '<button type="button" class="btn btn-outline" id="rcc-cancel" style="margin-top:8px;">Cancel</button>';
+  box.innerHTML = h;
+  box.style.display = 'block';
+  var upd = function(){
+    var n = box.querySelectorAll('.rcc-ck:checked').length;
+    el('rcc-apply-n').textContent = n;
+    el('rcc-go').disabled = (n === 0);
+  };
+  Array.prototype.forEach.call(box.querySelectorAll('.rcc-ck'), function(ck){ ck.addEventListener('change', upd); });
+  el('rcc-go').onclick = rebrandCcApply;
+  el('rcc-cancel').onclick = function(){ box.style.display = 'none'; };
+  upd();
+}
+function rebrandCcApply() {
+  var box = el('rcc-review');
+  var ids = Array.prototype.map.call(box.querySelectorAll('.rcc-ck:checked'), function(ck){ return ck.value; });
+  if (!ids.length) return;
+  var btn = el('rcc-btn');
+  btn.disabled = true;
+  box.style.display = 'none';
+  showStatus('rcc-status','loading','<span class="spinner"></span>Rebranding ' + ids.length + ' product(s)&#8230;');
+  api('rebrand_cc', { ids: ids })
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('rcc-status','error', esc(r.error)); return; }
+    var msg = '✓ ' + r.fixed + ' of ' + r.count + ' product' + (r.count === 1 ? '' : 's') + ' rebranded to Miss Behavin&#8217;.';
+    if ((r.notes || []).length) msg += ' Notes: ' + esc(r.notes.slice(0, 2).join(' · '));
+    if ((r.failed || []).length) msg += ' Failed: ' + esc(r.failed.slice(0, 3).join(' · '));
+    showStatus('rcc-status', (r.failed || []).length ? 'error' : 'success', msg);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('rcc-status','error', esc(e.message || 'Failed — tap again.')); });
 }
 
 /* build 41 — read-only missing-barcode report (worker v39): the UPC
