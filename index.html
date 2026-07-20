@@ -739,17 +739,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="center-sub">Upload an invoice or use Manual Entry above.<br>Past sheets live under Archive &#8212; tap one to reopen it.</div>
       </div>
 
-      <!-- build 37 — one-tap channels repair + diagnostic -->
-      <div class="section" style="border-bottom:none;">
-        <div class="section-title">Store Utilities</div>
-        <button class="btn btn-outline" id="fixch-btn" onclick="fixAllChannels()">Publish all products to every sales channel</button>
-        <div class="field-hint">Safety net: puts every active product on all sales channels &#8212; fixes any that were created on 0. Safe to run anytime.</div>
-        <div id="fixch-status" class="status"></div>
-        <!-- build 38 — one-size cleanup: no more "Size: One Size" dropdowns -->
-        <button class="btn btn-outline" id="fixos-btn" style="margin-top:10px;" onclick="fixOsSizes()">Remove size picker from one-size products</button>
-        <div class="field-hint">Products whose only variant is One Size (clips, bags, cases) stop showing a size dropdown online. Scans first and asks before changing anything; prices, inventory, SKUs, and barcodes are untouched. Needs worker v37.</div>
-        <div id="fixos-status" class="status"></div>
-      </div>
+      <!-- build 39 — Store Utilities moved OUT of the daily receiving screen
+           to their own admin menu card (Brian's call: repair buttons don't
+           belong where staff work every day). -->
     </div>
 
     <div id="ktab-archive" style="display:none;">
@@ -929,6 +921,26 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
   </div>
 
   <!-- SEO COPY GENERATOR (admin + employee) -->
+  <!-- STORE UTILITIES (admin) — build 39. Whole-catalog repair actions,
+       deliberately OUT of the LineSheet screen. Every action scans/confirms
+       before changing anything, and the worker refuses non-admin sessions. -->
+  <div id="view-utilities" style="display:none;">
+    <div class="section">
+      <div class="section-title">Store Utilities</div>
+      <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:14px;">These act on the <strong>whole catalog</strong>. Each one explains what it found and asks before changing anything &#8212; but if you are not sure what a button does, close this screen and ask Brian.</div>
+
+      <div class="section-title" style="margin-top:6px;">Sales channels</div>
+      <button class="btn btn-outline" id="fixch-btn" onclick="fixAllChannels()">Publish all products to every sales channel</button>
+      <div class="field-hint">Safety net: puts every active product on all sales channels &#8212; fixes any that were created on 0. Safe to run anytime.</div>
+      <div id="fixch-status" class="status"></div>
+
+      <div class="section-title" style="margin-top:18px;">One-size products</div>
+      <button class="btn btn-outline" id="fixos-btn" onclick="fixOsSizes()">Remove size picker from one-size products</button>
+      <div class="field-hint">Products whose only variant is One Size (clips, bags, cases) stop showing a size dropdown online. Scans first and shows the list before changing anything; prices, inventory, SKUs, and barcodes are untouched. Needs worker v37.</div>
+      <div id="fixos-status" class="status"></div>
+    </div>
+  </div>
+
   <div id="view-seocopy" style="display:none;">
     <div class="tab-bar">
       <button class="tab-btn active" id="scgtab-btn-generate" onclick="scgTab('generate')">Generate</button>
@@ -1068,7 +1080,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 38</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 39</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1325,9 +1337,10 @@ var MENU = [
   { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
   { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
+  { id:'utilities',  icon:'🧰', label:'Store Utilities', desc:'Whole-catalog repairs — channels, size pickers (admin)', roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
-var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','seocopy','settings'];
+var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','utilities','seocopy','settings'];
 
 function showMenu(){
   closeFcDetail(); closeShopifyReview(); socCloseComposer(); socHideGenBar(); editReset();
@@ -2131,11 +2144,27 @@ function finishItemUI(item, ok, retrying){
   if (ok) delete _rowByItem[item.key];
 }
 
-/* ── CAMERA SCANNER (ZXing — iOS Safari has no BarcodeDetector) ── */
+/* ── CAMERA SCANNER (ZXing — iOS Safari has no BarcodeDetector) ──
+   build 39 — the scanner is now reusable: openScanner(cb) routes the next
+   successful read to cb (used by the UPC fields); openScanner() with no
+   argument keeps the original Floor Count behavior. */
 var _zxingReader = null;
 var _zxingLoading = false;
+var _scanTarget = null;
 
-function openScanner(){
+/* build 39 — GTIN (UPC/EAN) validation, GS1 mod-10 check digit.
+   Accepts 8 / 12 / 13 / 14 digits after stripping spaces and hyphens. */
+function gtinDigits(s){ return String(s || '').replace(/[\s\-]/g, ''); }
+function isGtin(s){
+  var d = gtinDigits(s);
+  if (!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(d)) return false;
+  var sum = 0, w = 3;
+  for (var i = d.length - 2; i >= 0; i--) { sum += Number(d[i]) * w; w = (w === 3) ? 1 : 3; }
+  return (10 - (sum % 10)) % 10 === Number(d[d.length - 1]);
+}
+
+function openScanner(cb){
+  _scanTarget = (typeof cb === 'function') ? cb : null;
   var overlay = el('scan-overlay');
   overlay.style.display = 'flex';
   if (window.ZXing) { startZxing(); return; }
@@ -2161,9 +2190,10 @@ function startZxing(){
     var onScan = function(result, err){
       if (result) {
         var code = result.getText();
+        var target = _scanTarget || fcScanInput;   // build 39 — capture before closeScanner clears it
         closeScanner();
         if (navigator.vibrate) navigator.vibrate(80);
-        fcScanInput(code);
+        target(code);
       }
       // err fires constantly while searching — ignore
     };
@@ -2182,6 +2212,7 @@ function startZxing(){
 
 function closeScanner(){
   el('scan-overlay').style.display = 'none';
+  _scanTarget = null;   // build 39 — a cancelled scan never fires a stale callback
   if (_zxingReader) { try { _zxingReader.reset(); } catch(e){} _zxingReader = null; }
 }
 
@@ -3151,6 +3182,7 @@ function manualPull(){
         row.querySelector('.man-color').value.trim() ||
         row.querySelector('.man-retail').value ||
         row.querySelector('.man-cost').value ||
+        (row.querySelector('.man-upc') && row.querySelector('.man-upc').value.trim()) ||   // build 39
         ['XS','S','M','L','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
       if (!hasData) row.remove();
     });
@@ -3197,6 +3229,19 @@ function manualFormChanged(){
   });
   if (!rows.length) rowNeed = ['a style row'];
   var ok = rowOk && !missing.length;
+
+  // build 39 — live UPC validation per row (never blocks Review & publish;
+  // an invalid UPC just falls back to the generated SKU barcode at push)
+  Array.prototype.forEach.call(rows, function(row){
+    var hint = row.querySelector('.man-upc-hint');
+    var upcEl = row.querySelector('.man-upc');
+    if (!hint || !upcEl) return;
+    var val = gtinDigits(upcEl.value);
+    if (!val) { hint.style.display = 'none'; return; }
+    hint.style.display = 'block';
+    if (isGtin(val)) { hint.style.color = 'var(--success-fg, #5f7d69)'; hint.textContent = '✓ Valid UPC — this becomes the barcode.'; }
+    else { hint.style.color = 'var(--red, #b05a43)'; hint.textContent = 'Not a valid UPC/EAN — the generated SKU barcode will be used instead.'; }
+  });
 
   var hint = el('man-next');
   if (hint) {
@@ -3266,8 +3311,24 @@ function manualAddRow(){
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
       '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="number" step="0.01" class="field-input man-cost"/></div>' +
-    '</div>';
+    '</div>' +
+    // build 39 — real UPCs ride through to Shopify (fixes GSC "Invalid GTIN")
+    '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
+      '<div style="flex:1;"><label class="sp-l">UPC from packaging (optional &#8212; scan or type)</label><input type="text" inputmode="numeric" class="field-input man-upc" autocomplete="off"/></div>' +
+      '<button type="button" class="btn btn-outline" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera" onclick="manualScanUpc(this)">&#128247;</button>' +
+    '</div>' +
+    '<div class="man-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>';
   el('man-rows').appendChild(row);
+}
+
+/* build 39 — camera-scan a UPC into a manual row */
+function manualScanUpc(btn){
+  var row = btn.closest('.man-row');
+  if (!row) return;
+  openScanner(function(code){
+    row.querySelector('.man-upc').value = gtinDigits(code);
+    manualFormChanged();
+  });
 }
 function manualStart(){
   var vendor = el('man-vendor').value.trim();
@@ -3295,8 +3356,12 @@ function manualStart(){
     });
     if (!name || !(retail > 0) || !Object.keys(sizes).length){ bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
+    // build 39 — a valid typed/scanned UPC rides into the style and prefills
+    // the push card; invalid stays null (SKU barcode at push, never blocks)
+    var upcRaw = gtinDigits((row.querySelector('.man-upc') || {}).value || '');
     var s = { code: 'MAN-' + _stamp + '-' + (i+1), type: type, name: name, cost: cost,
-              colors: [{ color: color, sizes: sizes, total: units }], notes: null, barcode: null, fabric: null, fit: null };
+              colors: [{ color: color, sizes: sizes, total: units }], notes: null,
+              barcode: (upcRaw && isGtin(upcRaw)) ? upcRaw : null, fabric: null, fit: null };
     // build 33 — the price he entered IS the retail; it rides straight
     // through to the pricing card and the Shopify push.
     s._retail = '$' + retail.toFixed(2);
@@ -3554,6 +3619,22 @@ function _buildSpReview(inv) {
           '</div>';
       });
 
+      // build 39 — real UPCs flow to Shopify. Only single-variant cards get
+      // the field: a style-level UPC can never be copied across sizes
+      // (duplicate barcodes make POS scans ambiguous; per-size capture is a
+      // later phase). Multi-size styles keep SKU barcodes, unchanged.
+      var oneVariant = Object.keys(activeSizes).length === 1;
+      var upcHtml = oneVariant
+        ? '<div class="sp-upc-row" style="padding:0 14px 10px;">' +
+            '<label class="sp-l">UPC from packaging (optional — scan or type)</label>' +
+            '<div style="display:flex;gap:6px;">' +
+              '<input type="text" inputmode="numeric" class="field-input sp-upc" autocomplete="off"/>' +
+              '<button type="button" class="btn btn-outline sp-upc-scan" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera">&#128247;</button>' +
+            '</div>' +
+            '<div class="sp-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>' +
+          '</div>'
+        : '';
+
       var card = document.createElement('div');
       card.className = 'sp-card';
       card.setAttribute('data-state', 'idle');
@@ -3569,6 +3650,7 @@ function _buildSpReview(inv) {
           '<div class="sp-size-grid">' + sizeHtml + '</div>' +
           '<div class="sp-retail">$' + retail.toFixed(2) + '</div>' +
         '</div>' +
+        upcHtml +
         '<div class="sp-card-foot">' +
           '<button class="sp-push-btn">Push to Shopify</button>' +
         '</div>';
@@ -3576,11 +3658,13 @@ function _buildSpReview(inv) {
       var cd = {
         card: card, style: style, colorObj: colorObj,
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
-        retail: retail, state: 'idle', dupVariant: null
+        retail: retail, state: 'idle', dupVariant: null,
+        upcInput: null, upcHint: null
       };
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
+      _spWireUpc(cd);
       _spInitDetails(cd);
     });
   });
@@ -3593,6 +3677,53 @@ function _buildSpReview(inv) {
 
 function _spWireBtn(cd) {
   cd.card.querySelector('.sp-push-btn').onclick = function() { _spPushCard(cd); };
+}
+
+/* build 39 — UPC field wiring: prefill from the invoice extraction
+   (extractInvoice returns "barcode" digits when a UPC is printed on the
+   invoice, null otherwise — never invented), validate live with the GS1
+   check digit, camera-scan into the field, and flag a UPC that already
+   lives on another Shopify variant (fc_lookup searches barcodes). Invalid
+   or duplicate never blocks the push — worst case the SKU code is used,
+   exactly as before. */
+function _spWireUpc(cd) {
+  var input = cd.card.querySelector('.sp-upc');
+  if (!input) return;   // multi-size card — no UPC field by design
+  cd.upcInput = input;
+  cd.upcHint  = cd.card.querySelector('.sp-upc-hint');
+  if (cd.style.barcode) input.value = gtinDigits(cd.style.barcode);
+  input.addEventListener('input', function(){ _spUpcValidate(cd); });
+  cd.card.querySelector('.sp-upc-scan').onclick = function(){
+    openScanner(function(code){
+      input.value = gtinDigits(code);
+      _spUpcValidate(cd);
+    });
+  };
+  if (input.value) _spUpcValidate(cd);
+}
+function _spUpcValidate(cd) {
+  var hint = cd.upcHint, val = gtinDigits(cd.upcInput.value);
+  cd._upcCheckId = (cd._upcCheckId || 0) + 1;   // stale async lookups discard themselves
+  var myId = cd._upcCheckId;
+  if (!val) { hint.style.display = 'none'; return; }
+  if (!isGtin(val)) {
+    hint.style.display = 'block';
+    hint.style.color = 'var(--red, #b05a43)';
+    hint.textContent = 'Not a valid UPC/EAN — the SKU code will be used instead.';
+    return;
+  }
+  hint.style.display = 'block';
+  hint.style.color = 'var(--success-fg, #5f7d69)';
+  hint.textContent = '✓ Valid UPC — this becomes the barcode.';
+  api('fc_lookup', { code: val })
+  .then(function(res){
+    if (myId !== cd._upcCheckId) return;   // field changed since this lookup started
+    if (res && res.found) {
+      hint.style.color = 'var(--red, #b05a43)';
+      hint.textContent = '⚠ This UPC is already on a product in Shopify — pushing creates a second product with the same barcode. Check before pushing.';
+    }
+  })
+  .catch(function(){ /* lookup is best-effort; the valid message stands */ });
 }
 
 function _spSetState(cd, state, badgeText, btnText, btnExtra) {
@@ -3667,6 +3798,13 @@ function _spDoCreate(cd) {
   _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
 
   var sizeOrder = ['XS','S','M','L','OS'];
+  // build 39 — a valid UPC on a SINGLE-variant style becomes that variant's
+  // barcode (real GTINs fix the GSC "Invalid GTIN" errors and feed Merchant
+  // Center properly). Multi-size styles keep barcode = sku: one style-level
+  // UPC must never be copied across sizes (ambiguous POS scans). An invalid
+  // UPC falls back to the SKU code — it never blocks the push.
+  var upcVal = cd.upcInput ? gtinDigits(cd.upcInput.value) : '';
+  var useUpc = !!(upcVal && isGtin(upcVal) && Object.keys(cd.activeSizes).length === 1);
   var variants  = [];
   sizeOrder.forEach(function(sz) {
     var qty = cd.activeSizes[sz];
@@ -3676,7 +3814,7 @@ function _spDoCreate(cd) {
       size: sz,
       price: cd.retail.toFixed(2),
       sku: sku,
-      barcode: sku,   // every variant gets a scannable barcode value
+      barcode: useUpc ? upcVal : sku,   // every variant gets a scannable barcode value
       quantity: qty
     });
   });
