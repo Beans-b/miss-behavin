@@ -987,8 +987,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
     </div>
     <div id="scgtab-products" style="display:none;">
-      <div class="edit-posts-note">Products added by hand in Shopify admin skip LineSheet, so they arrive with no SEO. This lists active products missing an SEO title &#8212; tap one, review the generated copy, then Apply. Apply fills ONLY empty fields (SEO title, meta, category) and never touches titles, prices, tags, or anything a person already set. Products intaken through LineSheet never appear here.</div>
+      <div class="edit-posts-note">The list below shows active products missing an SEO title (hand-added in admin, skipped LineSheet). To reach ANY product &#8212; including ones that already have SEO &#8212; search by name or handle. Tap a product and the app reads its photo to write attribute-rich image alt (silhouette, neckline, cutouts &#8212; what actually ranks), plus SEO title, meta, and category. Apply fills empty SEO fields only and never touches titles, prices, tags, or inventory. Image alt is written to the photo; flip Overwrite alt to replace existing alt.</div>
       <div style="padding:0 24px;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <input id="scg-prod-search" type="text" placeholder="Search any product by name or handle&#8230;" style="flex:1;padding:10px 12px;border:1px solid var(--border,#ddd);border-radius:8px;font-size:14px;" onkeydown="if(event.key==='Enter'){event.preventDefault();scgSearchProducts();}">
+          <button class="btn btn-outline" style="width:auto;padding:10px 16px;margin:0;" onclick="scgSearchProducts()">Search</button>
+        </div>
         <div id="scg-prod-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
         <div id="scg-prod-out" style="padding-bottom:24px;"></div>
       </div>
@@ -1099,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 43</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 44</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -5641,19 +5645,43 @@ function scgLoadProducts(){
     }).join('');
   }).catch(function(){ el('scg-prod-list').innerHTML = '<div class="fc-empty">Scan failed \u2014 try again.</div>'; });
 }
+function scgSearchProducts(){
+  var term = ((el('scg-prod-search')&&el('scg-prod-search').value)||'').trim();
+  if (!term){ scgLoadProducts(); return; }
+  el('scg-prod-out').innerHTML = '';
+  el('scg-prod-list').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Searching\u2026</div>';
+  api('seo_product_search', { q: term }).then(function(r){
+    var rows = (r && r.products) || [];
+    if (!rows.length){ el('scg-prod-list').innerHTML = '<div class="fc-empty">No product matched \u201c'+esc(term)+'\u201d.</div>'; return; }
+    el('scg-prod-list').innerHTML = rows.map(function(x){
+      var bits = [x.vendor||'no vendor'];
+      if (x.status && x.status !== 'ACTIVE') bits.push(x.status.toLowerCase());
+      if (!x.has_image) bits.push('no photo');
+      bits.push(x.missing);
+      return '<button class="menu-item" onclick="scgFixProduct(\''+x.id.replace(/'/g,'')+'\')"><div><div class="menu-item-label">'+esc(x.title)+'</div><div class="menu-item-desc">'+esc(bits.join(' \u00b7 '))+'</div></div><div class="menu-item-arrow">&#8250;</div></button>';
+    }).join('');
+  }).catch(function(){ el('scg-prod-list').innerHTML = '<div class="fc-empty">Search failed \u2014 try again.</div>'; });
+}
 function scgFixProduct(id){
   el('scg-prod-out').innerHTML = '<div class="fc-empty"><span class="spinner"></span> Writing copy from this product\u2019s own data\u2026</div>';
   api('seo_product_fix', { id: id }).then(function(r){
     if (!r || !r.ok){ el('scg-prod-out').innerHTML = '<div class="fc-empty">'+esc((r && r.error) || 'Failed \u2014 tap it again.')+'</div>'; return; }
     scgFixData = r;
     var h = '<div style="margin-top:12px;font-weight:700;font-size:13px;">'+esc(r.title)+'</div>';
+    h += '<div style="margin-top:4px;font-size:12px;color:var(--gray-text,#777);">'+
+         (r.used_vision ? '&#10003; Image alt written from the product photo \u2014 visible silhouette, neckline, and details.'
+                        : 'No photo on this product \u2014 image alt uses the name and color only.')+'</div>';
     (r.warnings||[]).forEach(function(w){ h += '<div style="margin-top:8px;padding:10px 12px;border-radius:8px;font-size:13px;background:#fdecec;border:1px solid #f2c1c1;">&#9888; '+esc(w)+'</div>'; });
     h += scgField('SEO page title', 'Apply writes this if the field is empty', r.fields.seo_title, scgCount((r.fields.seo_title||'').length,1,60,'chars'));
     h += scgField('Meta description', 'Apply writes this if the field is empty', r.fields.seo_description, scgCount((r.fields.seo_description||'').length,100,155,'chars'));
     h += scgField('Category', 'Apply sets this if no category is chosen', r.fields.product_category, '');
-    h += scgField('Image alt', 'Copy by hand: Product \u2192 Media \u2192 alt text (Apply does not write media)', r.fields.image_alt, r.fields.image_alt?scgCount(r.fields.image_alt.length,1,110,'chars'):'');
+    h += scgField('Image alt', 'Apply writes this to the product photo\u2019s alt text', r.fields.image_alt, r.fields.image_alt?scgCount(r.fields.image_alt.length,1,110,'chars'):'');
     h += scgField('Body description', 'Optional \u2014 copy by hand only if you want to replace the supplier text', r.fields.body_description, '');
-    h += '<button class="btn btn-black" style="margin-top:14px;" onclick="scgApplyProduct()">Apply to product (fills empty fields only)</button>' +
+    var curAlt = (r.current && r.current.image_alt) || '';
+    h += '<label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;font-size:13px;cursor:pointer;">'+
+         '<input type="checkbox" id="scg-ow-alt" style="width:auto;margin:2px 0 0 0;flex-shrink:0;"'+(curAlt?'':' disabled')+'>'+
+         '<span>Overwrite existing image alt'+(curAlt?(' <span style="color:var(--gray-text,#777);">(currently: \u201c'+esc(curAlt)+'\u201d)</span>'):' <span style="color:var(--gray-text,#777);">(none set \u2014 the new alt is written either way)</span>')+'</span></label>';
+    h += '<button class="btn btn-black" style="margin-top:12px;" onclick="scgApplyProduct()">Apply to product</button>' +
          '<div id="scg-prod-apply-status" class="status" style="margin-top:10px;"></div>';
     el('scg-prod-out').innerHTML = h;
   }).catch(function(e){ el('scg-prod-out').innerHTML = '<div class="fc-empty">'+esc(e.message||'Failed \u2014 tap it again.')+'</div>'; });
@@ -5661,7 +5689,7 @@ function scgFixProduct(id){
 function scgApplyProduct(){
   if (!scgFixData) return;
   showStatus('scg-prod-apply-status','loading','Applying\u2026');
-  api('seo_product_apply', { id: scgFixData.id, seo_title: scgFixData.fields.seo_title, seo_description: scgFixData.fields.seo_description, product_category: scgFixData.fields.product_category })
+  api('seo_product_apply', { id: scgFixData.id, seo_title: scgFixData.fields.seo_title, seo_description: scgFixData.fields.seo_description, product_category: scgFixData.fields.product_category, image_alt: scgFixData.fields.image_alt, media_image_id: scgFixData.media_image_id || '', overwrite_alt: !!(el('scg-ow-alt') && el('scg-ow-alt').checked) })
   .then(function(r){
     if (!r || !r.ok){ showStatus('scg-prod-apply-status','error', (r && r.error) || 'Apply failed.'); return; }
     var msg = (r.written && r.written.length) ? ('Wrote: ' + r.written.join(', ') + '.') : (r.note || 'Nothing to write.');
