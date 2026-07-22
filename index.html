@@ -3364,7 +3364,46 @@ function loadArchivedInvoice(inv) {
 /* ── MANUAL ENTRY (no invoice) — builds the SAME invoice object photo
    extraction produces and feeds the SAME review pipeline. One row per
    style+color; OS = One Size for accessories. ── */
-var _manTypes = ['Accessory','Top','Blouse','Dress','Romper','Jumpsuit','Sweater','Bottom','Skirt','Shorts','Shoe'];
+/* build 48 — Type picker is now a SINGLE SOURCE OF TRUTH. To add a type, add ONE line here:
+   key = what shows in the searchable picker; shopify = Shopify product_type;
+   tag = smart-collection tag. The picker rebuilds from these keys automatically
+   (no second list to edit), and product types already live in the store are
+   merged in at runtime so the field mirrors Shopify. */
+var _typeMap = {
+  'Accessory':{ shopify: 'Accessories', tag: 'accessories' },
+  'Top':      { shopify: 'Tops',        tag: 'top' },
+  'Blouse':   { shopify: 'Tops',        tag: 'top' },
+  'Dress':    { shopify: 'Dresses',     tag: 'dress' },
+  'Romper':   { shopify: 'Rompers',     tag: 'dress' },
+  'Jumpsuit': { shopify: 'Rompers',     tag: 'dress' },
+  'Sweater':  { shopify: 'Sweaters',    tag: 'sweater' },
+  'Bottom':   { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Skirt':    { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Shorts':   { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Swim':     { shopify: 'Swimwear',    tag: 'swimwear' },
+  'Shoe':     { shopify: 'Shoes',       tag: 'shoes' }
+};
+var _liveShopifyTypes = [];        // product types already in the store (runtime)
+var _shopifyTypesLoaded = false;
+function manTypeSuggestions(){
+  var keys = Object.keys(_typeMap);
+  var extra = _liveShopifyTypes.filter(function(t){ return t && keys.indexOf(t) === -1; });
+  return keys.concat(extra);
+}
+function ensureManTypeDatalist(){
+  var dl = el('man-type-list');
+  if (!dl){ dl = document.createElement('datalist'); dl.id = 'man-type-list'; document.body.appendChild(dl); }
+  dl.innerHTML = manTypeSuggestions().map(function(t){ return '<option value="'+esc(t)+'"></option>'; }).join('');
+}
+// Merge the store's existing product types into the picker. Fails open — a
+// fetch error (or an older Worker without the endpoint) just leaves the
+// curated list above, so the field still works before the Worker is updated.
+function ensureShopifyTypes(cb){
+  if (_shopifyTypesLoaded){ if (cb) cb(); return; }
+  api('shopify_get_types', {})
+    .then(function(res){ if (res && res.types) _liveShopifyTypes = res.types; _shopifyTypesLoaded = true; ensureManTypeDatalist(); if (cb) cb(); })
+    .catch(function(){ _shopifyTypesLoaded = true; if (cb) cb(); });
+}
 var _manImages = {};
 var _manPullN = 0;
 function manualPull(){
@@ -3518,13 +3557,15 @@ function manualSizeMode(btn, mode){
   manualFormChanged();
 }
 function manualAddRow(){
+  ensureManTypeDatalist();   // curated types available immediately
+  ensureShopifyTypes();      // merge in the store's live types (once, async)
   var row = document.createElement('div');
   row.className = 'man-row';
   row.style.cssText = 'border-top:1px solid var(--gray-mid);padding-top:10px;margin-top:10px;';
   row.innerHTML =
     '<div style="display:flex;gap:8px;">' +
       '<div style="flex:2;"><label class="sp-l">Style name</label><input type="text" class="field-input man-name"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Type</label><select class="field-input man-type">' + _manTypes.map(function(t){ return '<option>'+t+'</option>'; }).join('') + '</select></div>' +
+      '<div style="flex:1;"><label class="sp-l">Type</label><input type="text" class="field-input man-type" list="man-type-list" autocomplete="off" placeholder="Search or type…"/></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
@@ -4055,22 +4096,12 @@ function _spDoCreate(cd) {
     });
   });
 
-  // Invoice type → Shopify product_type + collection tag (unchanged)
-  var _typeMap = {
-    'Dress':    { shopify: 'Dresses',   tag: 'dress' },
-    'Romper':   { shopify: 'Rompers',   tag: 'dress' },
-    'Jumpsuit': { shopify: 'Rompers',   tag: 'dress' },
-    'Top':      { shopify: 'Tops',      tag: 'top' },
-    'Blouse':   { shopify: 'Tops',      tag: 'top' },
-    'Sweater':  { shopify: 'Sweaters',  tag: 'sweater' },
-    'Bottom':   { shopify: 'Bottoms',   tag: 'bottoms' },
-    'Skirt':    { shopify: 'Bottoms',   tag: 'bottoms' },
-    'Shorts':   { shopify: 'Bottoms',   tag: 'bottoms' },
-    'Shoe':     { shopify: 'Shoes',     tag: 'shoes' },
-    'Accessory':{ shopify: 'Accessories', tag: 'accessories' }
-  };
-  var rawType     = cd.style.type || 'Apparel';
-  var typeEntry   = _typeMap[rawType] || { shopify: rawType + 's', tag: rawType.toLowerCase() };
+  // build 48 — Invoice type → Shopify product_type + collection tag. _typeMap is now the
+  // global single source of truth (defined with the Type picker up top). An
+  // unmapped free-text or live-Shopify value passes through verbatim, so it
+  // publishes the exact product_type the store already uses (no pluralizing).
+  var rawType     = cd.style.type || 'Accessory';
+  var typeEntry   = _typeMap[rawType] || { shopify: rawType, tag: rawType.toLowerCase() };
 
   var product = {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
