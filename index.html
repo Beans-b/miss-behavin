@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 48</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 49</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1359,6 +1359,7 @@ var MENU = [
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
   { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
   { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
+  { id:'seocommand', icon:'📊', label:'SEO Command Center', desc:'SEO/AEO dashboard — audit, levers, rankings, live sync', roles:['admin','employee'], url:'commandcenter.html' },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'utilities',  icon:'🧰', label:'Store Utilities', desc:'Whole-catalog repairs — channels, size pickers (admin)', roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
@@ -1378,7 +1379,7 @@ function showMenu(){
     b.innerHTML = '<div class="menu-item-icon">'+m.icon+'</div>'+
       '<div><div class="menu-item-label">'+m.label+'</div><div class="menu-item-desc">'+m.desc+'</div></div>'+
       '<div class="menu-item-arrow">&#8250;</div>';
-    b.onclick = function(){ openView(m.id, m.label); };
+    b.onclick = m.url ? function(){ window.location.href = m.url; } : function(){ openView(m.id, m.label); };
     list.appendChild(b);
   });
   editCheckDue();
