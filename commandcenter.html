@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miss Behavin' — SEO / AEO / GEO Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F3EEE6; --surface-3:#EDE6DA;
+  --ink:#2A1E28; --ink-soft:#6A5C64; --ink-faint:#9A8E94;
+  --line:#E4DACE; --line-strong:#D6C8B6;
+  --brass:#B08D57; --brass-deep:#8F6E3C;
+  --plum:#7A4E68; --plum-soft:#F1E5EC; --plum-ink:#5C3650;
+  --blue:#557B97; --blue-soft:#E7EEF2;
+  --done:#4E7A5E; --done-soft:#E4EFE7;
+  --prog:#B47C22; --prog-soft:#F6EBD6;
+  --pend:#8A7F88; --pend-soft:#ECE7EA;
+  --block:#B4553F; --block-soft:#F6E3DD;
+  --monitor:#557B97; --monitor-soft:#E7EEF2;
+  --radius:14px; --radius-sm:9px;
+  --shadow:0 1px 2px rgba(42,30,40,.04), 0 8px 24px -12px rgba(42,30,40,.14);
+  --shadow-sm:0 1px 2px rgba(42,30,40,.05);
+  --maxw:1180px;
+  --sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1A141A; --surface:#231C23; --surface-2:#2B222B; --surface-3:#332833;
+    --ink:#F4ECF0; --ink-soft:#BCAEB7; --ink-faint:#8A7C86;
+    --line:#3A2F39; --line-strong:#4A3C48;
+    --brass:#C9A567; --brass-deep:#E0BE85;
+    --plum:#CE8DB2; --plum-soft:#3A2836; --plum-ink:#E7C4DA;
+    --blue:#84AAC6; --blue-soft:#26333C;
+    --done:#7FB894; --done-soft:#23342A;
+    --prog:#D6A24E; --prog-soft:#3A2F1E;
+    --pend:#A99DA5; --pend-soft:#2E262E;
+    --block:#DB7C63; --block-soft:#3A231C;
+    --monitor:#84AAC6; --monitor-soft:#26333C;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.5);
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+a{color:var(--blue); text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono); font-size:10.5px; font-weight:500; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--brass-deep)}
+:focus-visible{outline:2.5px solid var(--plum); outline-offset:2px; border-radius:4px}
+
+/* ============ MASTHEAD ============ */
+.masthead{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 90%, transparent);
+  backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+.mast-inner{max-width:var(--maxw); margin:0 auto; padding:12px 20px;
+  display:flex; align-items:center; gap:18px; justify-content:space-between}
+.brandblock{display:flex; align-items:center; gap:14px; min-width:0}
+.crest{width:44px; height:44px; flex:none; border-radius:50%; display:grid; place-items:center;
+  background:radial-gradient(circle at 30% 25%, #fff2, transparent 60%), var(--plum);
+  border:1.5px solid var(--brass); box-shadow:var(--shadow-sm)}
+.crest span{font-family:var(--serif); font-weight:600; font-style:italic; color:#fff; font-size:22px; line-height:1}
+.wordmark{min-width:0}
+.wordmark h1{font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.05; letter-spacing:-.02em}
+.wordmark h1 em{font-style:italic; color:var(--plum)}
+.wordmark .sub{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.mast-right{display:flex; align-items:center; gap:16px; flex:none}
+.daychip{text-align:right; line-height:1}
+.daychip .d{font-family:var(--mono); font-weight:600; font-size:15px; color:var(--ink)}
+.daychip .l{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-top:3px}
+.ring{width:46px; height:46px; flex:none}
+.ring text{font-family:var(--mono); font-weight:600}
+.backapp{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); text-decoration:none; border:1px solid var(--line-strong); border-radius:100px; padding:6px 11px; white-space:nowrap; transition:.14s}
+.backapp:hover{border-color:var(--plum); color:var(--plum); text-decoration:none}
+.livebar{display:inline-flex; align-items:center; gap:6px; margin-top:16px; font-family:var(--mono); font-size:11px; letter-spacing:.02em; color:var(--ink-soft); background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:7px 14px; box-shadow:var(--shadow-sm); cursor:pointer}
+.livebar.ok{border-color:color-mix(in srgb,var(--done) 35%,transparent); color:var(--done)}
+.livebar .livecount{color:var(--ink-soft)}
+
+/* ============ GUARDRAIL BAR ============ */
+.grbar{background:var(--plum-ink); color:#F6EAF1}
+@media (prefers-color-scheme: dark){ .grbar{background:#2A1A26} }
+.grbar-inner{max-width:var(--maxw); margin:0 auto; padding:7px 20px; display:flex; gap:10px; align-items:center;
+  font-size:12px; overflow-x:auto; white-space:nowrap; scrollbar-width:none}
+.grbar-inner::-webkit-scrollbar{display:none}
+.grbar b{color:var(--brass); font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; flex:none}
+.grbar .g{opacity:.92; flex:none; padding-right:6px; border-right:1px solid #ffffff22; margin-right:2px}
+.grbar .g:last-child{border-right:none}
+
+/* ============ LAYOUT ============ */
+.wrap{max-width:var(--maxw); margin:0 auto; padding:26px 20px 80px}
+.hero{margin:6px 0 26px}
+.hero .eyebrow{margin-bottom:10px}
+.hero h2{font-family:var(--serif); font-weight:500; font-size:clamp(26px,4.6vw,42px); line-height:1.08; letter-spacing:-.025em; max-width:20ch}
+.hero h2 em{font-style:italic; color:var(--plum)}
+.hero p{color:var(--ink-soft); max-width:60ch; margin:14px 0 0; font-size:15.5px}
+.hero .northstar{margin-top:18px; display:inline-flex; align-items:center; gap:10px; padding:9px 15px;
+  border:1px solid var(--line-strong); border-radius:100px; background:var(--surface); box-shadow:var(--shadow-sm)}
+.hero .northstar .star{color:var(--brass); font-size:15px}
+.hero .northstar span{font-size:13px}
+.hero .northstar b{color:var(--ink)}
+
+/* ============ BASELINE TILES ============ */
+.section-head{display:flex; align-items:baseline; gap:12px; margin:34px 0 14px; flex-wrap:wrap}
+.section-head h3{font-family:var(--serif); font-size:21px; font-weight:600}
+.section-head .hint{color:var(--ink-faint); font-size:12.5px}
+.tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
+.tile .k{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.tile .v{font-family:var(--serif); font-size:27px; font-weight:600; margin:7px 0 2px; letter-spacing:-.02em}
+.tile .v small{font-size:14px; color:var(--ink-soft); font-family:var(--sans); font-weight:500}
+.tile .c{font-size:11.5px; color:var(--ink-soft)}
+.tile.accent{background:linear-gradient(160deg, var(--plum-soft), var(--surface)); border-color:var(--line-strong)}
+
+/* ============ WORKSTREAM PROGRESS ============ */
+.streams{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.stream{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm);
+  cursor:pointer; transition:transform .12s ease, box-shadow .12s ease, border-color .12s}
+.stream:hover{transform:translateY(-2px); box-shadow:var(--shadow); border-color:var(--line-strong)}
+.stream .top{display:flex; justify-content:space-between; align-items:center; gap:10px}
+.stream .nm{font-weight:600; font-size:14.5px; display:flex; align-items:center; gap:9px}
+.stream .dot{width:10px; height:10px; border-radius:3px; flex:none}
+.stream .frac{font-family:var(--mono); font-size:12px; color:var(--ink-soft)}
+.bar{height:7px; border-radius:100px; background:var(--surface-3); margin-top:12px; overflow:hidden; display:flex}
+.bar i{height:100%; display:block}
+.bar i.d{background:var(--done)} .bar i.p{background:var(--prog)} .bar i.m{background:var(--monitor)}
+.stream .meta{margin-top:9px; font-size:11.5px; color:var(--ink-faint); font-family:var(--mono)}
+
+/* ============ TABS ============ */
+.tabs{position:sticky; top:57px; z-index:40; display:flex; gap:4px; margin:32px 0 18px; padding:5px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:100px; box-shadow:var(--shadow-sm);
+  overflow-x:auto; scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none; border:none; background:transparent; color:var(--ink-soft); font-family:var(--sans);
+  font-weight:600; font-size:13.5px; padding:9px 17px; border-radius:100px; cursor:pointer; white-space:nowrap; transition:.15s}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface); color:var(--plum); box-shadow:var(--shadow-sm)}
+.tab .n{font-family:var(--mono); font-size:11px; opacity:.7; margin-left:5px}
+.panel{display:none; animation:fade .3s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+
+/* ============ TRACKER ============ */
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px}
+.search{flex:1; min-width:180px; position:relative}
+.search input{width:100%; padding:10px 14px 10px 36px; border:1px solid var(--line-strong); border-radius:100px;
+  background:var(--surface); color:var(--ink); font-family:var(--sans); font-size:14px}
+.search svg{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--ink-faint)}
+.chips{display:flex; gap:6px; flex-wrap:wrap}
+.chip{border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); font-family:var(--mono);
+  font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:7px 12px; border-radius:100px; cursor:pointer; transition:.14s}
+.chip:hover{border-color:var(--plum); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--plum); border-color:var(--plum); color:#fff}
+.chip.st[aria-pressed="true"]{background:var(--ink); border-color:var(--ink)}
+
+.tasklist{display:flex; flex-direction:column; gap:9px}
+.task{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm);
+  overflow:hidden; transition:border-color .12s}
+.task:hover{border-color:var(--line-strong)}
+.task-row{display:flex; gap:13px; padding:14px 16px; align-items:flex-start; cursor:pointer}
+.pill{flex:none; font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  padding:5px 9px; border-radius:100px; cursor:pointer; user-select:none; border:1px solid transparent; white-space:nowrap; transition:.12s; min-width:92px; text-align:center}
+.pill:hover{filter:brightness(.97); transform:translateY(-1px)}
+.pill.done{background:var(--done-soft); color:var(--done); border-color:color-mix(in srgb,var(--done) 30%,transparent)}
+.pill.prog{background:var(--prog-soft); color:var(--prog); border-color:color-mix(in srgb,var(--prog) 30%,transparent)}
+.pill.pend{background:var(--pend-soft); color:var(--pend); border-color:color-mix(in srgb,var(--pend) 30%,transparent)}
+.pill.block{background:var(--block-soft); color:var(--block); border-color:color-mix(in srgb,var(--block) 30%,transparent)}
+.pill.monitor{background:var(--monitor-soft); color:var(--monitor); border-color:color-mix(in srgb,var(--monitor) 30%,transparent)}
+.task-main{flex:1; min-width:0}
+.task-title{font-weight:600; font-size:14.5px; line-height:1.35}
+.task-tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; align-items:center}
+.wtag{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);
+  display:inline-flex; align-items:center; gap:5px}
+.wtag .dot{width:8px; height:8px; border-radius:2.5px}
+.owner{font-size:11px; color:var(--ink-faint); font-family:var(--mono)}
+.expand{flex:none; color:var(--ink-faint); transition:transform .2s; margin-top:2px}
+.task.open .expand{transform:rotate(90deg)}
+.task-note{max-height:0; overflow:hidden; transition:max-height .28s ease}
+.task.open .task-note{max-height:400px}
+.task-note-in{padding:0 16px 15px 16px; border-top:1px dashed var(--line); margin:0 0 0 0; color:var(--ink-soft); font-size:13.5px}
+.task-note-in .lbl{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--brass-deep); display:block; margin:13px 0 5px}
+.task-note-in code{font-family:var(--mono); font-size:12px; background:var(--surface-2); padding:1px 5px; border-radius:4px}
+.empty{text-align:center; padding:44px; color:var(--ink-faint); font-size:14px}
+
+/* ============ SOV BOARD ============ */
+.sov-intro{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; margin-bottom:16px; box-shadow:var(--shadow-sm)}
+.sov-intro p{margin:0; color:var(--ink-soft); font-size:13.5px}
+.sov-stats{display:flex; gap:22px; margin-top:14px; flex-wrap:wrap}
+.sov-stat .n{font-family:var(--serif); font-size:26px; font-weight:600; color:var(--plum)}
+.sov-stat .l{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.sov-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); background:var(--surface)}
+table.sov{border-collapse:collapse; width:100%; min-width:640px}
+table.sov th,table.sov td{padding:0; text-align:center}
+table.sov thead th{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft);
+  padding:12px 8px; border-bottom:1px solid var(--line-strong); position:sticky; top:0; background:var(--surface); z-index:2}
+table.sov thead th.q{text-align:left; padding-left:16px; min-width:230px}
+table.sov tbody td.q{text-align:left; padding:6px 16px; border-bottom:1px solid var(--line); font-size:13px; font-weight:500; color:var(--ink)}
+table.sov tbody td.q .qi{font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin-right:8px}
+table.sov tbody td.q [contenteditable]{outline:none; border-bottom:1px dotted transparent; min-width:60px; display:inline-block}
+table.sov tbody td.q [contenteditable]:focus{border-bottom-color:var(--plum)}
+table.sov tbody td.cell{border-bottom:1px solid var(--line); border-left:1px solid var(--line)}
+.sovcell{width:100%; height:100%; min-height:40px; border:none; background:transparent; cursor:pointer; font-family:var(--mono);
+  font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); padding:11px 6px; transition:.12s}
+.sovcell:hover{background:var(--surface-2)}
+.sovcell.mention{background:var(--prog-soft); color:var(--prog)}
+.sovcell.cited{background:var(--done-soft); color:var(--done)}
+tr.locked td.q{color:var(--brass-deep)}
+tr.locked td.q .qi{color:var(--brass)}
+.sov-note{font-size:12px; color:var(--ink-faint); margin-top:12px; font-family:var(--mono)}
+
+/* ============ SCHEDULE ============ */
+.cadences{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin-bottom:26px}
+.cad{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm)}
+.cad h4{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass-deep); margin-bottom:12px;
+  display:flex; align-items:center; gap:8px}
+.cad h4 .freq{margin-left:auto; color:var(--plum); background:var(--plum-soft); padding:3px 8px; border-radius:100px; font-size:9.5px}
+.cad ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+.cad li{font-size:13px; display:flex; gap:9px; align-items:flex-start; color:var(--ink)}
+.cad li::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--brass); margin-top:7px; flex:none}
+.cad li .when{display:block; font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-top:1px}
+
+.timeline{position:relative; margin:8px 0 0; padding:4px 0}
+.tl-track{position:absolute; left:14px; top:18px; bottom:18px; width:2px; background:var(--line-strong)}
+.milestone{position:relative; padding:0 0 22px 44px; }
+.milestone:last-child{padding-bottom:4px}
+.milestone .node{position:absolute; left:6px; top:2px; width:18px; height:18px; border-radius:50%; background:var(--surface);
+  border:2.5px solid var(--line-strong); z-index:1}
+.milestone.done .node{border-color:var(--done); background:var(--done)}
+.milestone.now .node{border-color:var(--plum); background:var(--plum); box-shadow:0 0 0 5px var(--plum-soft)}
+.milestone .mday{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint)}
+.milestone .mtitle{font-weight:600; font-size:14.5px; margin-top:2px}
+.milestone.now .mtitle{color:var(--plum)}
+.milestone .mdesc{font-size:12.5px; color:var(--ink-soft); margin-top:3px}
+
+/* ============ PLAYBOOKS ============ */
+.pbs{display:flex; flex-direction:column; gap:10px}
+.pb{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden}
+.pb summary{list-style:none; cursor:pointer; padding:16px 18px; display:flex; align-items:center; gap:13px; font-weight:600; font-size:15px}
+.pb summary::-webkit-details-marker{display:none}
+.pb summary .num{font-family:var(--mono); font-size:12px; color:#fff; background:var(--plum); width:26px; height:26px; border-radius:7px; display:grid; place-items:center; flex:none}
+.pb summary .chev{margin-left:auto; color:var(--ink-faint); transition:transform .2s}
+.pb[open] summary .chev{transform:rotate(180deg)}
+.pb .body{padding:2px 18px 18px 57px; color:var(--ink-soft); font-size:13.5px}
+.pb .body p{margin:0 0 10px}
+.pb .body ol,.pb .body ul{margin:0 0 10px; padding-left:18px}
+.pb .body li{margin:5px 0}
+.pb .body code{font-family:var(--mono); font-size:12px; background:var(--surface-2); padding:1px 5px; border-radius:4px; color:var(--ink)}
+.pb .body strong{color:var(--ink)}
+.pb .body .callout{border-left:2.5px solid var(--brass); padding:3px 0 3px 13px; margin:10px 0; color:var(--ink)}
+
+/* ============ REFERENCE ============ */
+.ref-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px}
+.ref-card{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm)}
+.ref-card h4{font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass-deep); margin-bottom:12px}
+.ref-card .row{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); font-size:13px}
+.ref-card .row:last-child{border-bottom:none}
+.ref-card .row .k{color:var(--ink-soft)}
+.ref-card .row .v{text-align:right; font-family:var(--mono); font-size:12px; word-break:break-all}
+.gr-list{list-style:none; margin:0; padding:0}
+.gr-list li{font-size:13px; padding:8px 0 8px 22px; position:relative; border-bottom:1px dashed var(--line); color:var(--ink)}
+.gr-list li:last-child{border-bottom:none}
+.gr-list li::before{content:"✕"; position:absolute; left:0; top:8px; color:var(--block); font-size:11px; font-weight:700}
+.gr-list li.ok::before{content:"✓"; color:var(--done)}
+
+/* ============ FOOTER ============ */
+.foot{max-width:var(--maxw); margin:40px auto 0; padding:22px 20px; border-top:1px solid var(--line);
+  display:flex; gap:16px; flex-wrap:wrap; align-items:center; justify-content:space-between}
+.foot .note{font-size:11.5px; color:var(--ink-faint); max-width:62ch; line-height:1.5}
+.actions{display:flex; gap:8px; flex-wrap:wrap}
+.btn{font-family:var(--sans); font-weight:600; font-size:12.5px; padding:9px 15px; border-radius:100px; cursor:pointer;
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); transition:.14s; display:inline-flex; align-items:center; gap:7px}
+.btn:hover{border-color:var(--plum); color:var(--plum)}
+.btn.primary{background:var(--plum); border-color:var(--plum); color:#fff}
+.btn.primary:hover{filter:brightness(1.06); color:#fff}
+
+.toast{position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(120%); background:var(--ink); color:var(--bg);
+  padding:11px 20px; border-radius:100px; font-size:13px; font-weight:500; box-shadow:var(--shadow); z-index:100; transition:transform .3s ease}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media (max-width:640px){
+  .wrap{padding:20px 15px 70px}
+  .mast-inner{padding:10px 15px; gap:10px}
+  .wordmark .sub{display:none}
+  .daychip .l{display:none}
+  .tabs{top:55px}
+  .task-row{padding:12px 13px; gap:10px}
+  .pill{min-width:84px}
+  .foot{flex-direction:column; align-items:flex-start}
+}
+@media print{
+  .masthead,.tabs,.toolbar,.actions,.grbar,.stream:hover{position:static; box-shadow:none}
+  .panel{display:block !important} .task-note{max-height:none !important}
+  body{background:#fff}
+}
+
+/* ============ GOALS ============ */
+.goals{display:flex; flex-direction:column; gap:10px}
+.goal{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
+.goal .g-top{display:flex; justify-content:space-between; gap:12px; align-items:baseline}
+.goal .g-name{font-weight:600; font-size:14.5px}
+.goal .g-name .badge-note{margin-left:8px}
+.goal .g-src{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); white-space:nowrap}
+.goal .g-nums{display:flex; gap:26px; margin:12px 0 10px; flex-wrap:wrap}
+.goal .g-num{display:flex; flex-direction:column; gap:3px}
+.goal .g-num .l{font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.goal .g-num .v{font-family:var(--serif); font-size:21px; font-weight:600; letter-spacing:-.01em}
+.goal .g-num .v[contenteditable]{outline:none; border-bottom:1px dotted var(--line-strong); min-width:32px; display:inline-block}
+.goal .g-num .v[contenteditable]:focus{border-bottom-color:var(--plum)}
+.goal .g-num.cur .v{color:var(--plum)}
+.goal .g-num.tgt .v{color:var(--done)}
+.goal .g-num.strf .v{color:var(--ink-faint); font-size:16px}
+.goal .g-bar{height:8px; border-radius:100px; background:var(--surface-3); overflow:hidden; position:relative}
+.goal .g-bar i{display:block; height:100%; background:linear-gradient(90deg,var(--plum),var(--brass)); border-radius:100px; transition:width .3s ease}
+.goal .g-foot{display:flex; justify-content:space-between; margin-top:8px; font-size:11.5px; color:var(--ink-soft)}
+.goal .g-pct{font-family:var(--mono); font-weight:600; color:var(--ink)}
+.badge-note{display:inline-block; font-family:var(--mono); font-size:9px; letter-spacing:.05em; text-transform:uppercase; color:var(--brass-deep); background:var(--surface-2); padding:2px 7px; border-radius:100px; border:1px solid var(--line); vertical-align:middle}
+
+/* ============ KEYWORDS ============ */
+.kw-summary{display:flex; gap:26px; flex-wrap:wrap; margin-top:14px}
+.kw-summary .n{font-family:var(--serif); font-size:25px; font-weight:600; color:var(--plum)}
+.kw-summary .l{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+table.kw{border-collapse:collapse; width:100%; min-width:880px}
+table.kw thead th{font-family:var(--mono); font-size:9.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); text-align:left;
+  padding:11px 10px; border-bottom:1px solid var(--line-strong); position:sticky; top:0; background:var(--surface); white-space:nowrap; z-index:2}
+table.kw tbody td{padding:9px 10px; border-bottom:1px solid var(--line); font-size:12.5px; vertical-align:middle}
+table.kw td.kw-term{font-weight:600; min-width:210px}
+table.kw td [contenteditable]{outline:none; min-width:24px; display:inline-block; border-bottom:1px dotted transparent; border-radius:2px}
+table.kw td [contenteditable]:hover{border-bottom-color:var(--line-strong)}
+table.kw td [contenteditable]:focus{border-bottom-color:var(--plum); background:var(--surface-2)}
+.itag{font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:3px 7px; border-radius:100px; white-space:nowrap}
+.itag.brand{background:var(--plum-soft); color:var(--plum-ink)}
+.itag.local{background:var(--blue-soft); color:var(--blue)}
+.itag.info{background:var(--surface-3); color:var(--ink-soft)}
+.itag.comm{background:var(--prog-soft); color:var(--prog)}
+.kw-stat{font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:4px 9px; border-radius:100px; cursor:pointer; border:1px solid transparent; white-space:nowrap; user-select:none}
+.kw-stat.none{background:var(--pend-soft); color:var(--pend)}
+.kw-stat.rank{background:var(--surface-3); color:var(--ink)}
+.kw-stat.top{background:var(--done-soft); color:var(--done); border-color:color-mix(in srgb,var(--done) 30%,transparent)}
+.kw-stat.cited{background:var(--done-soft); color:var(--done); border-color:color-mix(in srgb,var(--done) 30%,transparent)}
+.kw-stat.opt{background:var(--prog-soft); color:var(--prog)}
+tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass-deep); font-weight:600; padding:8px 10px}
+.kw-vol{font-family:var(--mono); color:var(--ink-soft)}
+
+/* ============ TOOLBOX ============ */
+.tool-map{display:flex; flex-direction:column; gap:9px}
+.tool-row{display:grid; grid-template-columns:1.35fr 1.65fr 116px; gap:16px; align-items:center; background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow-sm)}
+.tool-row .cap{font-weight:600; font-size:13.5px}
+.tool-row .cap .who{display:block; font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin-top:4px; letter-spacing:0; font-weight:400}
+.tool-row .feeds{font-size:12.5px; color:var(--ink-soft); line-height:1.45}
+.tool-row .feeds b{color:var(--ink); font-weight:600}
+.cover{font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; padding:6px 8px; border-radius:8px; text-align:center}
+.cover.in{background:var(--done-soft); color:var(--done)}
+.cover.partial{background:var(--prog-soft); color:var(--prog)}
+.cover.data{background:var(--monitor-soft); color:var(--monitor)}
+@media (max-width:640px){ .tool-row{grid-template-columns:1fr; gap:9px} .tool-row .cover{justify-self:start} }
+
+/* ============ LEVERS ============ */
+.levers{display:flex; flex-direction:column; gap:12px}
+.lever{background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--brass); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm)}
+.lever .lv-top{display:flex; align-items:center; gap:12px}
+.lever .lv-num{font-family:var(--mono); font-weight:600; font-size:13px; color:#fff; background:var(--plum); width:30px; height:30px; border-radius:8px; display:grid; place-items:center; flex:none}
+.lever .lv-name{font-family:var(--serif); font-size:17px; font-weight:600; flex:1; letter-spacing:-.01em}
+.lever .lv-what{color:var(--ink-soft); font-size:13px; margin:11px 0 12px}
+.lever .lv-row{display:flex; gap:12px; font-size:12.5px; padding:8px 0; border-top:1px dashed var(--line)}
+.lever .lv-row .k{font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass-deep); flex:none; width:56px; padding-top:2px}
+.lever .lv-row .v{color:var(--ink)}
+.lever .lv-owner{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-top:11px}
+
+/* ============ AUDIT ============ */
+.audit-verdict{background:linear-gradient(160deg,var(--plum-soft),var(--surface)); border:1px solid var(--line-strong); border-left:3px solid var(--plum); border-radius:var(--radius); padding:16px 18px; font-size:13.5px; color:var(--ink); margin-bottom:18px}
+.scorecard{display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:10px; margin-bottom:8px}
+.scard{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 14px; box-shadow:var(--shadow-sm)}
+.scard .l{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint)}
+.scard .v{font-weight:600; font-size:14px; margin-top:5px; line-height:1.25}
+.scard.crit .v{color:var(--block)} .scard.high .v{color:var(--prog)} .scard.med .v{color:var(--brass-deep)} .scard.ok .v{color:var(--done)}
+.abaseline{background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:4px 16px; margin-bottom:8px}
+.abaseline .br{display:flex; gap:14px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:12.5px}
+.abaseline .br:last-child{border-bottom:none}
+.abaseline .br .k{flex:none; width:150px; font-family:var(--mono); font-size:10px; letter-spacing:.03em; color:var(--ink-faint); padding-top:2px}
+.abaseline .br .v{color:var(--ink)}
+.afind{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:15px 17px; margin-bottom:10px}
+.afind.crit{border-left:3px solid var(--block)} .afind.high{border-left:3px solid var(--prog)} .afind.med{border-left:3px solid var(--brass)}
+.afind .ah{display:flex; gap:10px; align-items:baseline; justify-content:space-between}
+.afind .at{font-weight:600; font-size:14.5px; flex:1}
+.sevb{font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:3px 8px; border-radius:100px; color:#fff; flex:none}
+.sevb.crit{background:var(--block)} .sevb.high{background:var(--prog)} .sevb.med{background:var(--brass-deep)}
+.afind .ad{color:var(--ink-soft); font-size:13px; margin:9px 0 11px}
+.afind .akv{display:grid; grid-template-columns:74px 1fr; gap:5px 12px; font-size:12.5px}
+.afind .akv .k{font-family:var(--mono); font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--brass-deep); padding-top:2px}
+.afind .akv .v b{color:var(--done)}
+.alow{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:4px 18px; margin-bottom:8px}
+.alow ul{margin:0; padding:0}
+.alow li{font-size:12.5px; color:var(--ink-soft); padding:9px 0; border-bottom:1px dashed var(--line); list-style:none}
+.alow li:last-child{border-bottom:none}
+.ablk{background:var(--block-soft); border:1px solid color-mix(in srgb,var(--block) 25%,transparent); border-radius:var(--radius); padding:4px 18px}
+.ablk .br{display:flex; gap:14px; padding:9px 0; border-bottom:1px dashed color-mix(in srgb,var(--block) 22%,transparent); font-size:12.5px}
+.ablk .br:last-child{border-bottom:none}
+.ablk .br .k{flex:none; width:150px; font-weight:600; color:var(--block)}
+.ablk .br .v{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="mast-inner">
+    <div class="brandblock">
+      <div class="crest"><span>M</span></div>
+      <div class="wordmark">
+        <h1>Miss <em>Behavin'</em></h1>
+        <div class="sub">SEO · AEO · GEO Command Center</div>
+      </div>
+    </div>
+    <div class="mast-right">
+      <a href="/" class="backapp" aria-label="Back to LineSheet app">‹ App</a>
+      <div class="daychip">
+        <div class="d" id="dayNum">Day —</div>
+        <div class="l" id="dayDate">of 90</div>
+      </div>
+      <svg class="ring" viewBox="0 0 46 46" id="progRing">
+        <circle cx="23" cy="23" r="19" fill="none" stroke="var(--surface-3)" stroke-width="5"/>
+        <circle cx="23" cy="23" r="19" fill="none" stroke="var(--plum)" stroke-width="5" stroke-linecap="round"
+          id="ringFill" transform="rotate(-90 23 23)" stroke-dasharray="119.4" stroke-dashoffset="119.4"/>
+        <text x="23" y="27" text-anchor="middle" font-size="12" fill="var(--ink)" id="ringPct">0%</text>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- ============ GUARDRAIL BAR ============ -->
+<div class="grbar">
+  <div class="grbar-inner">
+    <b>Guardrails</b>
+    <span class="g">Never touch titles · handles · tags · prices · variants · SKUs · barcodes · inventory (POS depends)</span>
+    <span class="g">SEO via Search-listing fields only · fill-empty, never overwrite</span>
+    <span class="g">Live theme "Copy of Horizon WORKING" 173357793316 · keep theme.liquid 39–40</span>
+    <span class="g">Rolla's + Gorjana FROZEN</span>
+    <span class="g">Never "literally" · minimal hyphens · no fabricated metrics</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="eyebrow">Santa Barbara boutique · est. 2007 · going national</div>
+    <h2>Every SEO, AEO and GEO lever for <em>shopmissbehavin.com</em>, tracked in one place.</h2>
+    <p>A living command center for the Stage 4 program: what's shipped, what's queued, the cadence that keeps it moving, and the recipes to execute each technique. Reconciled against the uploaded master plan — Stages 1 to 4, the citation-levers tracker (7/16), and the outreach kit (7/18). Goal: national online sales; local is a hygiene line. Live-audited Jul 23 — see the Audit tab.</p>
+    <div class="northstar">
+      <span class="star">✦</span>
+      <span>North star: <b>the most-cited women's boutique in AI shopping answers in the US</b> — measured by the weekly share-of-voice log.</span>
+    </div>
+  </div>
+
+  <div class="livebar" id="livebar" title="Tap to refresh"><span id="livemsg">Connecting to your store…</span> <span class="livecount" id="livecount"></span></div>
+
+  <!-- ============ BASELINES ============ -->
+  <div class="section-head">
+    <h3>Day 0 starting line</h3>
+    <span class="hint">Baselines recorded Jul 10–14, 2026. The numbers every gain is measured against.</span>
+  </div>
+  <div class="tiles">
+    <div class="tile accent"><div class="k">Online revenue share</div><div class="v">0.15<small>%</small></div><div class="c">Online $45 vs POS $30.9K, last 30d — pure upside</div></div>
+    <div class="tile"><div class="k">Online orders · 30d</div><div class="v">3 <small>/ $345</small></div><div class="c">TTM 50 / $3,582 · June 2026 = 0 online</div></div>
+    <div class="tile"><div class="k">GA4 · week 1</div><div class="v">185 <small>sessions</small></div><div class="c">147 users · organic 37.8% · 4 AI-assistant (ChatGPT) · 1 purchase ($150 GC)</div></div>
+    <div class="tile"><div class="k">Email subscribers</div><div class="v">2,433</div><div class="c">10.4% of ~23.4K customers · A/B viable</div></div>
+    <div class="tile"><div class="k">Out-of-CA share</div><div class="v">69<small>%</small></div><div class="c">of TTM online orders — the national thesis</div></div>
+    <div class="tile"><div class="k">AI share-of-voice</div><div class="v">1<small>/16</small></div><div class="c">Baseline 7/15: Rolla's cited in Google AIO only — the zero point</div></div>
+  </div>
+
+  <!-- ============ WORKSTREAM PROGRESS ============ -->
+  <div class="section-head">
+    <h3>Workstreams</h3>
+    <span class="hint">Tap a card to filter the tracker. Bars show done / in-progress / monitoring.</span>
+  </div>
+  <div class="streams" id="streams"></div>
+
+  <!-- ============ TABS ============ -->
+  <div class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-tab="tracker" aria-selected="true">Tracker <span class="n" id="tabCountTracker"></span></button>
+    <button class="tab" role="tab" data-tab="levers" aria-selected="false">Levers</button>
+    <button class="tab" role="tab" data-tab="audit" aria-selected="false">Audit</button>
+    <button class="tab" role="tab" data-tab="goals" aria-selected="false">Goals</button>
+    <button class="tab" role="tab" data-tab="keywords" aria-selected="false">Keywords <span class="n" id="tabCountKw"></span></button>
+    <button class="tab" role="tab" data-tab="sov" aria-selected="false">Share of Voice</button>
+    <button class="tab" role="tab" data-tab="schedule" aria-selected="false">Schedule</button>
+    <button class="tab" role="tab" data-tab="playbooks" aria-selected="false">Playbooks</button>
+    <button class="tab" role="tab" data-tab="toolbox" aria-selected="false">Toolbox</button>
+    <button class="tab" role="tab" data-tab="reference" aria-selected="false">Reference</button>
+  </div>
+
+  <!-- ============ PANEL: TRACKER ============ -->
+  <section class="panel on" id="panel-tracker" role="tabpanel">
+    <div class="toolbar">
+      <label class="search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="Search techniques, tasks, notes…" aria-label="Search tasks">
+      </label>
+      <div class="chips" id="statusChips">
+        <button class="chip st" data-status="all" aria-pressed="true">All</button>
+        <button class="chip st" data-status="pend" aria-pressed="false">To do</button>
+        <button class="chip st" data-status="prog" aria-pressed="false">In progress</button>
+        <button class="chip st" data-status="done" aria-pressed="false">Done</button>
+        <button class="chip st" data-status="block" aria-pressed="false">Blocked</button>
+        <button class="chip st" data-status="monitor" aria-pressed="false">Monitoring</button>
+      </div>
+    </div>
+    <div class="chips" id="streamChips" style="margin-bottom:16px"></div>
+    <div class="tasklist" id="tasklist"></div>
+  </section>
+
+  <!-- ============ PANEL: SOV ============ -->
+  <section class="panel" id="panel-sov" role="tabpanel">
+    <div class="sov-intro">
+      <p><strong>The scoreboard for the north star.</strong> The national query panel run in four answer engines, incognito / logged-out, then scored. Tap a cell to cycle <span class="mono">— → mention → cited</span>. Query text is editable — reconcile against your <code>baseline_sov_2026-07.md</code>. Directional, not a precise rank: AI answers are non-deterministic, so treat each citation as one reading.</p>
+      <div class="sov-stats">
+        <div class="sov-stat"><div class="n" id="sovCited">0%</div><div class="l">Citation rate</div></div>
+        <div class="sov-stat"><div class="n" id="sovMention">0%</div><div class="l">Mention rate</div></div>
+        <div class="sov-stat"><div class="n" id="sovCells">0 / 0</div><div class="l">Cited cells</div></div>
+      </div>
+    </div>
+    <div class="sov-scroll">
+      <table class="sov" id="sovTable">
+        <thead><tr>
+          <th class="q">Shopper query</th>
+          <th>Google AIO</th><th>ChatGPT</th><th>Perplexity</th><th>Gemini</th>
+        </tr></thead>
+        <tbody id="sovBody"></tbody>
+      </table>
+    </div>
+    <p class="sov-note">Cadence: monthly (scheduled task <code>missb-sov-monthly-panel</code>). Append every run to <code>missb_sov_scores_log.csv</code> — never overwrite. Baseline 7/15: cited 1 of 16 non-branded (Rolla's, Google AIO only). The two style-name slots rotate monthly as inventory turns; the rest stay locked.</p>
+  </section>
+
+  <!-- ============ PANEL: SCHEDULE ============ -->
+  <section class="panel" id="panel-schedule" role="tabpanel">
+    <div class="section-head"><h3>Recurring cadence</h3><span class="hint">The rhythm that keeps the program compounding. Live reminders can be set as scheduled tasks.</span></div>
+    <div class="cadences" id="cadences"></div>
+    <div class="section-head"><h3>90-day milestones</h3><span class="hint">Day 0 = Jul 10, 2026. Live marker moves with today.</span></div>
+    <div class="timeline" id="timeline"><div class="tl-track"></div></div>
+  </section>
+
+  <!-- ============ PANEL: PLAYBOOKS ============ -->
+  <section class="panel" id="panel-playbooks" role="tabpanel">
+    <div class="section-head"><h3>Implementation playbooks</h3><span class="hint">How to actually execute each technique. Grounded in the current strategy.</span></div>
+    <div class="pbs" id="playbooks"></div>
+  </section>
+
+  <!-- ============ PANEL: REFERENCE ============ -->
+  <section class="panel" id="panel-reference" role="tabpanel">
+    <div class="section-head"><h3>Infrastructure &amp; access</h3></div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Storefront &amp; store</h4>
+        <div class="row"><span class="k">Storefront</span><a class="v" href="https://www.shopmissbehavin.com" target="_blank" rel="noopener">shopmissbehavin.com</a></div>
+        <div class="row"><span class="k">Admin</span><span class="v">store/miss-behavin-2</span></div>
+        <div class="row"><span class="k">Live theme</span><span class="v">Copy of Horizon WORKING · 173357793316</span></div>
+        <div class="row"><span class="k">NAP</span><span class="v">322 Paseo Nuevo, SB 93101 · 805-968-2840</span></div>
+        <div class="row"><span class="k">Owner</span><span class="v">Kelly · Hello@shopmissbehavin.com</span></div>
+      </div>
+      <div class="ref-card">
+        <h4>Tools &amp; apps</h4>
+        <div class="row"><span class="k">LineSheet app</span><a class="v" href="https://linesheet.theclearstack.com" target="_blank" rel="noopener">linesheet.theclearstack.com</a></div>
+        <div class="row"><span class="k">LineSheet worker</span><span class="v">linesheet-api · v49</span></div>
+        <div class="row"><span class="k">Category Tool</span><span class="v">category-api.workers.dev</span></div>
+        <div class="row"><span class="k">Repo</span><span class="v">Beans-b/miss-behavin (main)</span></div>
+        <div class="row"><span class="k">Supabase</span><span class="v">miss-behavin (inactive)</span></div>
+      </div>
+      <div class="ref-card">
+        <h4>Measurement</h4>
+        <div class="row"><span class="k">GA4</span><span class="v">Miss Behavin Web · since ~7/12</span></div>
+        <div class="row"><span class="k">Search Console</span><span class="v">gen-AI report: not rolled out — recheck weekly</span></div>
+        <div class="row"><span class="k">Bing Webmaster</span><span class="v">5/5 indexed · ChatGPT gate open</span></div>
+        <div class="row"><span class="k">SoV log</span><span class="v">missb_sov_scores_log.csv (append)</span></div>
+      </div>
+      <div class="ref-card">
+        <h4>Working docs (desktop)</h4>
+        <div class="row"><span class="k">Folder</span><span class="v">Desktop/miss-behavin</span></div>
+        <div class="row"><span class="k">Strategy</span><span class="v">missb_stage4_master_plan_v3</span></div>
+        <div class="row"><span class="k">Queue</span><span class="v">missb_current_tasks / master_todo</span></div>
+        <div class="row"><span class="k">SoV runbook</span><span class="v">missb_baseline_sov_runbook</span></div>
+        <div class="row"><span class="k">Citation find</span><span class="v">missb_rollas_citation_teardown</span></div>
+      </div>
+    </div>
+
+    <div class="section-head"><h3>Hard guardrails</h3><span class="hint">Violating the top group breaks POS. Non-negotiable.</span></div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Never change</h4>
+        <ul class="gr-list">
+          <li>Product titles (tied to in-store POS tags)</li>
+          <li>Handles, SKUs, barcodes, variant IDs</li>
+          <li>Prices, tags, inventory, locations</li>
+          <li>theme.liquid lines 39–40 on the live theme</li>
+          <li>Rolla's + Gorjana content until the stocking decision</li>
+        </ul>
+      </div>
+      <div class="ref-card">
+        <h4>Safe to do</h4>
+        <ul class="gr-list">
+          <li class="ok">Search-engine-listing fields (page title + meta)</li>
+          <li class="ok">Product category, descriptions, image alt + filename</li>
+          <li class="ok">Fill-empty only — never overwrite existing SEO</li>
+          <li class="ok">Theme work on the draft; publish only on approval</li>
+          <li class="ok">Hidden blog drafts — never auto-publish</li>
+        </ul>
+      </div>
+      <div class="ref-card">
+        <h4>Writing rules</h4>
+        <ul class="gr-list">
+          <li>The word "literally" — cut it entirely</li>
+          <li>Minimal hyphens in anything published</li>
+          <li>Fabricated metrics or citations — placeholders instead</li>
+          <li class="ok">Plain confident language, lead with the point</li>
+          <li class="ok">Every post: ≥1 concrete number + ≥1 quotable staff line</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL: LEVERS ============ -->
+  <section class="panel" id="panel-levers" role="tabpanel">
+    <div class="section-head"><h3>Citation levers — the operating spine</h3><span class="hint">Everything the program builds serves one of these five. The core find: how crowded a brand's "where to buy" field is decides the citation, not page copy.</span></div>
+    <div class="levers" id="levers"></div>
+  </section>
+
+  <!-- ============ PANEL: AUDIT ============ -->
+  <section class="panel" id="panel-audit" role="tabpanel">
+    <div class="section-head"><h3>Live site audit</h3><span class="hint">shopmissbehavin.com · Jul 23, 2026 · seo-toolkit live fetches. A point-in-time snapshot — re-run after fixes to prove lift.</span></div>
+    <div class="audit-verdict" id="auditVerdict"></div>
+    <div class="scorecard" id="auditScores"></div>
+    <div class="section-head"><h3 style="font-size:17px">Baseline captured</h3><span class="hint">So lift is provable later.</span></div>
+    <div class="abaseline" id="auditBaseline"></div>
+    <div class="section-head"><h3 style="font-size:17px">Findings</h3><span class="hint">Ranked by impact. Each carries fix, owner, KPI, and baseline → target.</span></div>
+    <div id="auditFindings"></div>
+    <div class="section-head"><h3 style="font-size:17px">Low / watch</h3></div>
+    <div class="alow" id="auditLow"></div>
+    <div class="section-head"><h3 style="font-size:17px">Blocked — needs data or access</h3><span class="hint">No guessing. Each has an unblock path.</span></div>
+    <div class="ablk" id="auditBlocked"></div>
+  </section>
+
+  <!-- ============ PANEL: GOALS ============ -->
+  <section class="panel" id="panel-goals" role="tabpanel">
+    <div class="section-head"><h3>Benchmarks &amp; goals</h3><span class="hint">Day 0 baseline → today → 90-day target. Tap a "now" number to update it. Targets are proposals — the ones marked need your sign-off.</span></div>
+    <div class="goals" id="goals"></div>
+  </section>
+
+  <!-- ============ PANEL: KEYWORDS ============ -->
+  <section class="panel" id="panel-keywords" role="tabpanel">
+    <div class="sov-intro">
+      <p><strong>Position tracker + keyword universe</strong>, in the shape the paid tools use (Ahrefs / Semrush / Nightwatch): term, intent, mapped page, volume, difficulty, current rank or AI-cited status, target, priority. Every cell is editable. Volume &amp; difficulty need a keyword export (Ahrefs / Semrush / Moz) or GSC — shown as <span class="badge-note">export</span> until you paste one. Rank comes from Search Console or a manual check.</p>
+      <div class="kw-summary">
+        <div><div class="n" id="kwTotal">0</div><div class="l">Tracked</div></div>
+        <div><div class="n" id="kwTop">0</div><div class="l">In top 10</div></div>
+        <div><div class="n" id="kwCited">0</div><div class="l">AI-cited</div></div>
+        <div><div class="n" id="kwP1">0</div><div class="l">Priority 1</div></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="chips" id="kwClusterChips"></div>
+      <button class="btn" id="kwAdd">+ Add keyword</button>
+    </div>
+    <div class="sov-scroll">
+      <table class="kw" id="kwTable">
+        <thead><tr>
+          <th>Keyword</th><th>Intent</th><th>Mapped page</th><th>Vol</th><th>KD</th><th>Rank / AI</th><th>Target</th><th>Pri</th><th>SERP / AI feature</th>
+        </tr></thead>
+        <tbody id="kwBody"></tbody>
+      </table>
+    </div>
+    <p class="sov-note">Wire in later: Search Console (clicks, impressions, position, the query gap) · a dated Ahrefs / Semrush / Moz export (volume + difficulty) · manual incognito checks for AI Overviews and ChatGPT. No paid tool is load-bearing.</p>
+  </section>
+
+  <!-- ============ PANEL: TOOLBOX ============ -->
+  <section class="panel" id="panel-toolbox" role="tabpanel">
+    <div class="section-head"><h3>Tool parity &amp; data sources</h3><span class="hint">What the leading SEO and AI-visibility tools do, what covers it here, and what data feeds it. Researched Jul 2026.</span></div>
+    <div class="tool-map" id="toolMap"></div>
+    <div class="section-head"><h3>The free stack</h3><span class="hint">Miss Behavin' runs no paid SEO tool. These feed the trackers above at zero cost.</span></div>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Data &amp; rankings</h4>
+        <div class="row"><span class="k">Google Search Console</span><span class="v">clicks · impressions · position · query gap</span></div>
+        <div class="row"><span class="k">Bing Webmaster</span><span class="v">indexation · AI performance report</span></div>
+        <div class="row"><span class="k">GA4</span><span class="v">sessions · conversions · AI Assistant channel</span></div>
+        <div class="row"><span class="k">Google Trends</span><span class="v">demand direction · seasonality</span></div>
+      </div>
+      <div class="ref-card">
+        <h4>Keywords &amp; audit</h4>
+        <div class="row"><span class="k">SE Ranking / Semrush free</span><span class="v">volume + difficulty samples</span></div>
+        <div class="row"><span class="k">Keyword Planner</span><span class="v">volume ranges · related terms</span></div>
+        <div class="row"><span class="k">Rich Results Test</span><span class="v">schema validation</span></div>
+        <div class="row"><span class="k">PageSpeed Insights</span><span class="v">Core Web Vitals field data</span></div>
+      </div>
+      <div class="ref-card">
+        <h4>AI visibility (manual)</h4>
+        <div class="row"><span class="k">ChatGPT (search on)</span><span class="v">incognito citation checks</span></div>
+        <div class="row"><span class="k">Perplexity</span><span class="v">cited sources + position</span></div>
+        <div class="row"><span class="k">Google AI Overviews</span><span class="v">logged-out AIO citations</span></div>
+        <div class="row"><span class="k">Gemini</span><span class="v">answer + source list</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="foot">
+    <div class="note" id="footNote">
+      Reconciled against the uploaded Stage 1 to 4 master plan, the citation-levers tracker (7/16), the Lever-2 outreach kit (7/18), and the Jul 23 live-site audit. Goals and Keywords are modeled on the leading SEO and AI-visibility tools (Jul 2026 research). Feed live numbers from Search Console, GA4, a keyword export, and manual AI checks. State lives in memory: use Save snapshot to keep your edits.
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnPrint">Print / PDF</button>
+      <button class="btn" id="btnMd">Copy as Markdown</button>
+      <button class="btn primary" id="btnJson">Save snapshot</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ APP GATE — this page lives behind the LineSheet login ============ */
+(function(){ try{ var s=JSON.parse(localStorage.getItem('mb_session')||'null'); if(!s||!s.token){ location.replace('/'); } }catch(e){} })();
+
+/* ============ DATA ============ */
+const PLAN_START = new Date(2026,6,10); // Jul 10 2026, Day 0
+const STREAMS = [
+  {id:'tech',   name:'Technical & Indexation', color:'#557B97'},
+  {id:'schema', name:'Structured Data',        color:'#7A4E68'},
+  {id:'content',name:'Content & Blog',         color:'#B08D57'},
+  {id:'catalog',name:'Product & Catalog',      color:'#4E7A5E'},
+  {id:'offsite',name:'Off-site & Citations',   color:'#B4553F'},
+  {id:'measure',name:'Measurement & SoV',      color:'#B47C22'},
+  {id:'email',  name:'Email & CRM',            color:'#8A7F88'},
+];
+const STREAM = Object.fromEntries(STREAMS.map(s=>[s.id,s]));
+// status: done | prog | pend | block | monitor
+const TASKS = [
+  // TECHNICAL
+  {s:'tech', st:'done',    t:'Homepage title = two anchor brands, ≤60 chars', o:'Brian', n:'Live-verified 7/14: "Miss Behavin\' | Women\'s Boutique: Free People, Motel Rocks" (58 chars). Old double-suffix bug was the field spelled without the apostrophe, so the theme\'s contains-check missed.'},
+  {s:'tech', st:'done',    t:'robots.txt allows AI search crawlers', o:'Brian', n:'PerplexityBot / Perplexity-User confirmed allowed; OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Googlebot in scope. Training bots (GPTBot, ClaudeBot, Google-Extended) are a separate business choice and do not affect citations.'},
+  {s:'tech', st:'done',    t:'Bing indexation — ChatGPT index gate', o:'Brian', n:'Spot check 5/5 indexed. Bing index is necessary (not sufficient) for ChatGPT with search. Flagged issues were stale cache; live meta verified.'},
+  {s:'tech', st:'done',    t:'GA4 install + "Miss Behavin Web" stream', o:'Brian', n:'Collecting since ~7/12. Note: online orders show inflated/odd because gift cards count at redemption, not purchase.'},
+  {s:'tech', st:'monitor', t:'GSC verified + generative-AI report', o:'Brian', n:'Report not yet rolled out to the property (Jun 3 2026 gradual rollout + impression threshold unmet). Day 0 = "not rolled out." Recheck weekly. No AI-controls toggle exists; default = included.'},
+  {s:'tech', st:'prog',    t:'Fill-empty search-listing meta, in batches', o:'Brian', n:'Product + collection page titles / meta descriptions via the search-engine-listing fields only. Fill-empty, never overwrite. 10 at a time; titles never touched (POS tags).'},
+  {s:'tech', st:'pend',    t:'Sitemap lists only live canonical URLs', o:'Brian', n:'Verify no soft-404s or dead handles in sitemap.xml; every page self-canonical.'},
+  {s:'tech', st:'pend',    t:'Core Web Vitals field check', o:'Brian', n:'PageSpeed Insights mobile + desktop; read CrUX in GSC. Targets: LCP <2.5s, INP <200ms, CLS <0.1 at 75th pct.'},
+  // SCHEMA — Jul 23 live audit found ZERO JSON-LD on home/collection/product (contradicts the 7/16 "live" claim)
+  {s:'schema', st:'pend', t:'Organization + WebSite JSON-LD sitewide', o:'Brian', n:'CRITICAL. The 7/23 live audit found zero application/ld+json across home, /collections/dresses, and /products/keiko-dress-blue — no Org/WebSite/LocalBusiness anywhere. The 7/16 tracker claimed this live; trust the live fetch. Verify with Rich Results Test (an app could inject client-side), then add the entity anchor + sameAs (Yelp, IG, FB, Apple Maps, GBP).'},
+  {s:'schema', st:'pend', t:'LocalBusiness / ClothingStore (Visit + sitewide)', o:'Brian', n:'CRITICAL. Not on the live site (7/23). NAP character-identical: 322 Paseo Nuevo, Santa Barbara CA 93101, 805-968-2840, 11–7 daily; sameAs the profiles. Fix the stale 6551 Trigo Rd records too (see Off-site).'},
+  {s:'schema', st:'pend', t:'Product + Offer + AggregateRating schema', o:'Brian', n:'CRITICAL. No Product/Offer JSON-LD on product pages (7/23) — no ecommerce rich results. Add price + availability to all products; AggregateRating attaches once native reviews exist. Never fabricate ratings.'},
+  {s:'schema', st:'pend', t:'BreadcrumbList on collections + products', o:'Brian', n:'Absent on the live site (7/23). Add to collections and products.'},
+  {s:'schema', st:'prog', t:'Validate all schema on the rendered page', o:'Brian', n:'Run Google Rich Results Test on home, a collection, a product, and the Visit page. The audit read server HTML; confirm nothing is injected client-side before treating "zero" as final. Target 4 of 4 passing.'},
+  {s:'schema', st:'pend', t:'FAQPage — visible Q&A', o:'Brian', n:'Google rich-result is retired; the value is AEO + entity, and the visible Q&A text is the real asset. Add markup only if it costs nothing extra.'},
+  {s:'schema', st:'pend', t:'ChatGPT default-inclusion / agentic test (Day 14)', o:'Brian', n:'Confirm the store is eligible for ChatGPT shopping surfaces; robots already exposes the agent endpoints. Pairs with the ChatGPT merchant feed.'},
+  // CONTENT
+  {s:'content', st:'done', t:'Blog "The Edit" live (1 post)', o:'Brian', n:'The Edit module drafts an SEO/AEO post and saves a HIDDEN Shopify article (isPublished:false) for review. Blog live, 1 post. Note: articleCreate needs the write_content scope — added, but the offline token must be re-minted via OAuth to carry it. Byline still open; news vs the-edit handle to settle.'},
+  {s:'content', st:'block', t:'Reconcile blog byline (module hardcodes "Sophie")', o:'Kelly', n:'Must decide the byline BEFORE post 1 publishes. Blocked on Kelly.'},
+  {s:'content', st:'prog', t:'Apply §3B post rule to every draft', o:'Brian', n:'Every post: 40–60 word answer under a question-phrased H2, ≥1 concrete number, ≥1 quotable staff line (Princeton KDD 2024 top tactics), ≥2 inbound internal links same day.'},
+  {s:'content', st:'pend', t:'Post 1 — Motel Rocks US stockist hub', o:'Brian', n:'HARD-GATED behind the SoV baseline. Uses the Rolla\'s/Motel copy recipe. Ship to hidden draft first.'},
+  {s:'content', st:'pend', t:'Post 2 — Free People vs Motel Rocks comparison', o:'Brian', n:'Comparison intent; both brands are winnable open-field queries.'},
+  {s:'content', st:'pend', t:'Festival pillar + Stagecoach + Coachella 2027 guides', o:'Brian', n:'Publish evergreen NOW to compound for 2027 season. Q9 "festival outfit ideas" is a live SoV query.'},
+  {s:'content', st:'done', t:'Vendor copy recipe + SEO Copy Generator tool', o:'Brian', n:'The SEO/AEO/GEO Copy Generator is live (linesheet.theclearstack.com): research a brand, it classifies HEAD vs FANOUT lane and writes every paste-ready field plus a rank-log row. Same recipe that got Rolla\'s cited.'},
+  // CATALOG
+  {s:'catalog', st:'done', t:'Catalog-wide Category field set', o:'Brian', n:'Category Tool ran across ~470 products; 150 writes, 0 failures; verified persisted (379 already correct). Routes all category collections.'},
+  {s:'catalog', st:'done', t:'5 category collections migrated to Category field', o:'Brian', n:'Tops, Dresses+Rompers, Bottoms, Sweaters, Swimwear now route on the standard Category field, not legacy type/tag rules.'},
+  {s:'catalog', st:'done', t:'Vendor normalization at intake + SEO prompts', o:'Brian', n:'Worker v18 normalizes 15 vendors at both prompts. Canonical field spelling "Lucy In The Sky" (capital In The) — 18 historical online orders.'},
+  {s:'catalog', st:'done', t:'Per-image alt + filename (vision)', o:'Brian', n:'Shipped v47: reads all photos, unique alt per view {front, side, back, on-model, detail} + descriptive filename via fileUpdate (needs write_files scope, granted).'},
+  {s:'catalog', st:'prog', t:'v48 garment-noun lock', o:'Claude+Brian', n:'Worker-only edit: feed product category as the AUTHORITATIVE garment noun, forbid vision from renaming the garment; neutral "piece" fallback. Fixes skirt→"romper"/"skort" misfires. Frontend stays build 47.'},
+  {s:'catalog', st:'prog', t:'Fix SEO not attaching on manual Review & Publish', o:'Claude+Brian', n:'The review screen IS wired to attach SEO (_spGenSeo → generate_seo → _spDoCreate). It\'s a runtime failure or parity gap, not a missing feature. Two suspects: (1) generate_seo erroring silently, (2) pushing before the async SEO finishes. Diagnose which, then fix.'},
+  {s:'catalog', st:'prog', t:'Build 6 vendor collection pages (0 of 6)', o:'Brian', n:'Matisse, Baggu, Lucy in the Sky (anchors) + Emi Jay, Wildflower Cases, A Shop of Things (trial). Copy drafted 7/16; none built in Shopify yet. Target all 6 live by ~Day 30, 2/week, invoice order. These are the Lever-3 hubs the stockist and off-site levers point at.'},
+  {s:'catalog', st:'pend', t:'Data fix: Coral Crush + Red Hot miscategorized', o:'Brian', n:'Both are skirts/skort filed as Shorts. Fix the category in Shopify, then re-run the image tool so the garment noun comes out right.'},
+  {s:'catalog', st:'pend', t:'LineSheet: stamp Category + fit_notes on push', o:'Brian', n:'Auto-stamp standard Category and brand-default fit_notes at intake so new products land correct.'},
+  // OFFSITE
+  {s:'offsite', st:'block', t:'Perplexity merchant feed', o:'Brian', n:'BLOCKED — the formal feed needs the LineSheet C1 product feed + Kelly sign-off; email taz@perplexity.ai to unblock. Baseline Shopify discovery already live. (Free application at perplexity.ai/merchants can go in now; the ranked feed waits on C1.)'},
+  {s:'offsite', st:'block', t:'Google Business Profile — confirm access + add Brian', o:'Kelly', n:'GBP looks already claimed. Task is confirm access + add Brian as Manager (starts verification clock). 20-min session with Kelly. The LOCAL citation slot depends on a verified GBP.'},
+  {s:'offsite', st:'done', t:'Rolla\'s citation win — captured as template', o:'Brian', n:'Q6 Rolla\'s CITED 2nd in Google AIO, above Free People & Anthropologie. Proves field density > page copy. Use as the TEMPLATE — do NOT over-build (Rolla\'s may be discontinued; frozen).'},
+  {s:'offsite', st:'pend', t:'Chase Baggu — page + GBP + stockist-list request', o:'Brian', n:'Boutique-friendly field + local SB layer already showing. Strong Baggu page + verified GBP + a stockist-list request to info@baggu.com is winnable.'},
+  {s:'offsite', st:'pend', t:'Reviews mechanism (Judge.me, native first)', o:'Brian', n:'Reviews are among the strongest product-page AEO signals and are absent. Native capture first; ask Kelly before any paid app.'},
+  {s:'offsite', st:'pend', t:'Marketplace channel (Amazon / Etsy)', o:'Kelly', n:'The one uncovered surface (real Alexa-shopping lever). Named a Day 60 decision with Kelly — deferred, not dropped.'},
+  {s:'offsite', st:'pend', t:'YouTube presence', o:'Brian', n:'Deliberate defer to Day 60 revisit. Voice/wearable surfaces converge on indexes already covered.'},
+  // MEASURE
+  {s:'measure', st:'prog', t:'SoV baseline run — HARD GATE before blog post 1', o:'Brian', n:'15–18 queries × 4 engines per the runbook. Parked mid-run: 9/18 in Google AIO (all misses except Q6 Rolla\'s cited). Finish all engines, then compile baseline_sov_2026-07.md as the pre-blog, pre-feed snapshot.'},
+  {s:'measure', st:'done', t:'SoV panel locked (queries × 4 engines)', o:'Brian', n:'Engines: Google AI Overview, ChatGPT (search on), Perplexity, Gemini. Run incognito / logged-out for the neutral shopper view. Panel LOCKED — don\'t change queries mid-program.'},
+  {s:'measure', st:'done', t:'Day 0 baselines recorded', o:'Brian', n:'Sessions 1,324/30d (~19% likely bot) · online orders 3/$345 · subs 2,433 · non-CA 69% · GSC 209 clicks/7.36K impr/pos 8.3 · POS $30.9K vs online $45. All in plan §8.'},
+  {s:'measure', st:'monitor', t:'Bing Webmaster AI performance report', o:'Brian', n:'Watch the AI performance report as ChatGPT citations begin. Index gate already open.'},
+  {s:'measure', st:'prog', t:'Backfill SEO sweep', o:'Brian', n:'Weekly until LineSheet C1 (product feed) ships, monthly after. backfill_seo.py not in folder — regenerate at Day 21.'},
+  // EMAIL
+  {s:'email', st:'done', t:'Welcome flow (3 emails) built + on', o:'Brian', n:'Shopify Flow: Email 1 "Your 10% is here" → wait 3d → Email 2 → wait 7d → Email 3. Sends to eligible subscribers only.'},
+  {s:'email', st:'pend', t:'Dedupe Flow automations', o:'Brian', n:'2× Abandoned cart + 2× Abandoned checkout are all active — dedupe to one each.'},
+  {s:'email', st:'pend', t:'Consolidate ESP to Shopify Email', o:'Brian', n:'Reinstall Shopify Email (free) at first send; verify then uninstall Omnisend + Mailchimp Legacy.'},
+  // RECONCILED FROM MASTER PLAN (Lever-driven)
+  {s:'offsite', st:'pend', t:'NAP hygiene — kill the old 6551 Trigo Rd address', o:'Brian', n:'Old/incorrect address still surfaces on some records. 322 Paseo Nuevo is the ONLY correct address. Fix Yelp, Facebook, BBB, Downtown SB, Nicelocal, Atly BEFORE Lever-2 outreach — a wrong address undercuts every mention you earn.'},
+  {s:'offsite', st:'pend', t:'Lever 2 — off-site "stocked at" outreach', o:'Brian', n:'Highest-leverage, mostly ungated lever and NOT STARTED. Kit ready (7/18): stocked-at email + DM templates, roundup pitch, target list. Matisse retailer application now (ungated); Baggu email once its page is live; Reddit + roundup research pass this week.'},
+  {s:'offsite', st:'pend', t:'Native reviews (Judge.me) + request cadence', o:'Brian', n:'Among the strongest citation signals, absent today. On-site first: widget on product pages + aggregate rating on vendor collection pages; automated ask 5 to 7 days post-delivery, one day-14 reminder. Verify current Judge.me pricing; Kelly OK on budget.'},
+  {s:'offsite', st:'pend', t:'Stockist / locator submissions (Lever 1)', o:'Brian', n:'Matisse retailer application is ungated (page live). Baggu (info@baggu.com), Emi Jay, Wildflower gated on their collection pages going live. LITS: resolve the Faire entity question first. Skip Motel/FP/Gorjana — no boutique-friendly directory.'},
+  {s:'measure', st:'pend', t:'GMC free listings + GA4 non-CA report (Day 21)', o:'Brian', n:'Google Merchant Center via the Google & YouTube app; approval quality gated on GTINs (LineSheet C1 captures UPCs at intake). Build the GA4 non-CA sessions report — the national-share metric.'},
+  {s:'measure', st:'pend', t:'ChatGPT merchant application + feed', o:'Brian', n:'Apply at chatgpt.com/merchants (verification, then SFTP JSONL/CSV feed ranked by feed quality). Apply early; feed after the catalog is clean. Bing already 5/5 indexed (necessary for ChatGPT search).'},
+  {s:'tech', st:'pend', t:'Collection pages: clean H1 + meta + intro (top 8)', o:'Brian', n:'7/23 audit: /collections/dresses has no meta, a "Collection: Dresses + Rompers" H1 prefix STILL live (contradicts the Horizon-fixed assumption — verify post-migration), a 32-char title, and no intro copy. Fix the top 8: unique meta, clean H1, intent title, 40–60 word intro. Search-listing fields only.'},
+  {s:'content', st:'pend', t:'Expand Our Story (E-E-A-T + AboutPage schema)', o:'Brian', n:'7/23 audit: ~40 words, no founder, no author. Expand to 300+ words with the founder name, the 2007 origin, what makes the buy distinct, a named author, and AboutPage/Organization schema. I can draft in your voice.'},
+];
+
+const CADENCES = [
+  {h:'Weekly · Monday', freq:'wk', items:[
+    {t:'Run the AI share-of-voice panel', w:'Log to missb_sov_scores_log.csv — append'},
+    {t:'Recheck GSC generative-AI report', w:'Until it rolls out to the property'},
+  ]},
+  {h:'Weekly · Friday', freq:'wk', items:[
+    {t:'Backfill SEO sweep', w:'Fill-empty product/collection meta'},
+    {t:'Bing Webmaster AI report', w:'Watch ChatGPT citation onset'},
+  ]},
+  {h:'Twice weekly · Tue + Thu', freq:'2×/wk', items:[
+    {t:'Publish a blog draft', w:'§3B rule · hidden draft · Kelly seed'},
+  ]},
+  {h:'Monthly · 1st', freq:'mo', items:[
+    {t:'Full SoV panel, all engines', w:'Directional trend vs baseline'},
+    {t:'Backfill sweep (post-C1)', w:'Switches weekly→monthly once C1 ships'},
+  ]},
+  {h:'Monthly · 15th', freq:'mo', items:[
+    {t:'Technical re-audit', w:'robots, sitemap, canonicals, CWV, schema validity'},
+  ]},
+  {h:'Quarterly', freq:'qtr', items:[
+    {t:'Schema validation sweep', w:'Rich Results Test all templates'},
+    {t:'Crawler / robots re-verify', w:'AI user-agents still Allow'},
+  ]},
+];
+
+const MILESTONES = [
+  {day:0,  date:'Jul 10', title:'Baseline set', desc:'Day 0 metrics + locked SoV panel. The line every gain is measured against.'},
+  {day:10, date:'Jul 20', title:'Week 1 close', desc:'Homepage title, crawler policy, vendor normalization, GA4/Bing/GSC checks.'},
+  {day:21, date:'~Jul 31', title:'Backfill regenerate', desc:'Rebuild backfill_seo.py; sweep cadence weekly→monthly if C1 has shipped.'},
+  {day:60, date:'~Sep 8', title:'Marketplace + YouTube call', desc:'Kelly decision on Amazon/Etsy channel and YouTube — the uncovered surfaces.'},
+  {day:90, date:'~Oct 8', title:'Stage 4 review', desc:'SoV trend, citation share, branded demand. Re-plan the next quarter.'},
+];
+
+const SOV_QUERIES = [
+  {t:'where to buy Motel Rocks online (US)', locked:false},
+  {t:'Motel Rocks online stockists', locked:false},
+  {t:"where to buy Rolla's Jeans US", locked:true, hit:{0:'cited'}},
+  {t:'online boutiques that carry Free People', locked:false},
+  {t:'where to buy Gorjana online', locked:false},
+  {t:"best small online boutiques women's clothing", locked:false},
+  {t:'[current style name #1 — rotate monthly]', locked:true},
+  {t:'[current style name #2 — rotate monthly]', locked:true},
+  {t:'chiffon maxi dress under $100 in stock', locked:false},
+  {t:'boutique denim shorts', locked:false},
+  {t:'where to find sold out Free People styles', locked:false},
+  {t:'matching sets boutique online', locked:false},
+  {t:'boutique swimwear online', locked:false},
+  {t:"new arrivals women's boutique dresses", locked:false},
+  {t:'sites like Princess Polly but small boutique', locked:false},
+  {t:'miss behavin', locked:false},
+  {t:'miss behavin santa barbara', locked:false},
+  {t:'where to buy Baggu bags online', locked:false},
+];
+const ENGINES = ['Google AIO','ChatGPT','Perplexity','Gemini'];
+
+/* ============ STATE ============ */
+const STATUS_ORDER = ['pend','prog','done','block','monitor'];
+const STATUS_LABEL = {pend:'To do', prog:'In progress', done:'Done', block:'Blocked', monitor:'Monitoring'};
+let filterStream = 'all', filterStatus = 'all', searchTerm = '';
+TASKS.forEach((t,i)=>t.id=i);
+// SoV cell state: sov[q][e] in {0,'mention','cited'}
+const SOV = SOV_QUERIES.map(q=>{
+  const row=[0,0,0,0];
+  if(q.hit) Object.entries(q.hit).forEach(([e,v])=>row[+e]=v);
+  return row;
+});
+
+/* ============ RENDER: STREAMS ============ */
+function streamStats(sid){
+  const list = TASKS.filter(t=>t.s===sid);
+  const done = list.filter(t=>t.st==='done').length;
+  const prog = list.filter(t=>t.st==='prog').length;
+  const mon  = list.filter(t=>t.st==='monitor').length;
+  return {total:list.length, done, prog, mon};
+}
+function renderStreams(){
+  const el = document.getElementById('streams'); el.innerHTML='';
+  STREAMS.forEach(s=>{
+    const st = streamStats(s.id); if(!st.total) return;
+    const pd = st.done/st.total*100, pp = st.prog/st.total*100, pm = st.mon/st.total*100;
+    const card = document.createElement('div');
+    card.className='stream'; card.tabIndex=0; card.setAttribute('role','button');
+    card.setAttribute('aria-pressed', filterStream===s.id);
+    card.innerHTML = `
+      <div class="top">
+        <div class="nm"><span class="dot" style="background:${s.color}"></span>${s.name}</div>
+        <div class="frac">${st.done}/${st.total}</div>
+      </div>
+      <div class="bar"><i class="d" style="width:${pd}%"></i><i class="p" style="width:${pp}%"></i><i class="m" style="width:${pm}%"></i></div>
+      <div class="meta">${Math.round(pd)}% done${st.prog?` · ${st.prog} in progress`:''}${st.mon?` · ${st.mon} monitoring`:''}</div>`;
+    card.onclick = ()=>{ filterStream = (filterStream===s.id?'all':s.id); syncFilters(); renderTasks(); renderStreams(); document.getElementById('tabs').scrollIntoView({block:'nearest'}); };
+    card.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault(); card.click();} };
+    if(filterStream===s.id) card.style.borderColor=s.color;
+    el.appendChild(card);
+  });
+}
+
+/* ============ RENDER: STREAM CHIPS ============ */
+function renderStreamChips(){
+  const el = document.getElementById('streamChips'); el.innerHTML='';
+  const all = document.createElement('button');
+  all.className='chip'; all.setAttribute('aria-pressed', filterStream==='all'); all.textContent='All streams';
+  all.onclick=()=>{filterStream='all'; syncFilters(); renderTasks(); renderStreams();};
+  el.appendChild(all);
+  STREAMS.forEach(s=>{
+    const c=document.createElement('button'); c.className='chip';
+    c.setAttribute('aria-pressed', filterStream===s.id); c.textContent=s.name;
+    c.onclick=()=>{filterStream=(filterStream===s.id?'all':s.id); syncFilters(); renderTasks(); renderStreams();};
+    el.appendChild(c);
+  });
+}
+function syncFilters(){
+  document.querySelectorAll('#streamChips .chip').forEach(c=>{
+    const isAll=c.textContent==='All streams';
+    const s=STREAMS.find(x=>x.name===c.textContent);
+    c.setAttribute('aria-pressed', isAll? filterStream==='all' : (s&&filterStream===s.id));
+  });
+}
+
+/* ============ RENDER: TASKS ============ */
+function renderTasks(){
+  const el = document.getElementById('tasklist'); el.innerHTML='';
+  let list = TASKS.slice();
+  if(filterStream!=='all') list=list.filter(t=>t.s===filterStream);
+  if(filterStatus!=='all') list=list.filter(t=>t.st===filterStatus);
+  if(searchTerm){ const q=searchTerm.toLowerCase(); list=list.filter(t=>(t.t+' '+t.n+' '+STREAM[t.s].name+' '+t.o).toLowerCase().includes(q)); }
+  document.getElementById('tabCountTracker').textContent = list.length;
+  if(!list.length){ el.innerHTML='<div class="empty">No techniques match these filters.</div>'; return; }
+  // order: prog, block, pend, monitor, done
+  const rank={prog:0,block:1,pend:2,monitor:3,done:4};
+  list.sort((a,b)=> rank[a.st]-rank[b.st] || a.s.localeCompare(b.s));
+  list.forEach(t=>{
+    const s=STREAM[t.s];
+    const card=document.createElement('div'); card.className='task'; card.dataset.id=t.id;
+    card.innerHTML=`
+      <div class="task-row">
+        <button class="pill ${t.st}" title="Tap to change status" aria-label="Status: ${STATUS_LABEL[t.st]}. Tap to change.">${STATUS_LABEL[t.st]}</button>
+        <div class="task-main">
+          <div class="task-title">${esc(t.t)}</div>
+          <div class="task-tags">
+            <span class="wtag"><span class="dot" style="background:${s.color}"></span>${s.name}</span>
+            <span class="owner">${esc(t.o)}</span>
+          </div>
+        </div>
+        <svg class="expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}</div></div>`;
+    const pill=card.querySelector('.pill');
+    pill.onclick=e=>{ e.stopPropagation(); cycleStatus(t.id); };
+    card.querySelector('.task-row').onclick=()=>card.classList.toggle('open');
+    el.appendChild(card);
+  });
+}
+function cycleStatus(id){
+  const t=TASKS.find(x=>x.id===id);
+  const i=STATUS_ORDER.indexOf(t.st);
+  t.st=STATUS_ORDER[(i+1)%STATUS_ORDER.length];
+  renderTasks(); renderStreams(); updateProgress();
+  toast(`"${t.t.slice(0,32)}${t.t.length>32?'…':''}" → ${STATUS_LABEL[t.st]}`);
+}
+
+/* ============ PROGRESS RING ============ */
+function updateProgress(){
+  const done=TASKS.filter(t=>t.st==='done').length;
+  const pct=Math.round(done/TASKS.length*100);
+  const circ=2*Math.PI*19;
+  document.getElementById('ringFill').setAttribute('stroke-dasharray', circ);
+  document.getElementById('ringFill').setAttribute('stroke-dashoffset', circ*(1-pct/100));
+  document.getElementById('ringPct').textContent=pct+'%';
+}
+
+/* ============ DAY COUNTER ============ */
+function updateDay(){
+  const now=new Date();
+  const day=Math.floor((now - PLAN_START)/86400000);
+  const d=document.getElementById('dayNum');
+  if(day<0){ d.textContent='Pre-launch'; }
+  else { d.textContent='Day '+day; }
+  document.getElementById('dayDate').textContent='of 90';
+  return day;
+}
+
+/* ============ SOV ============ */
+function renderSov(){
+  const body=document.getElementById('sovBody'); body.innerHTML='';
+  SOV_QUERIES.forEach((q,qi)=>{
+    const tr=document.createElement('tr'); if(q.locked) tr.className='locked';
+    const qd=document.createElement('td'); qd.className='q';
+    qd.innerHTML=`<span class="qi">Q${qi+1}</span><span contenteditable="true" spellcheck="false">${esc(q.t)}</span>`;
+    qd.querySelector('[contenteditable]').addEventListener('input',e=>{ q.t=e.target.textContent; });
+    tr.appendChild(qd);
+    ENGINES.forEach((_,ei)=>{
+      const td=document.createElement('td'); td.className='cell';
+      const b=document.createElement('button'); b.className='sovcell';
+      setCell(b, SOV[qi][ei]);
+      b.onclick=()=>{ const cur=SOV[qi][ei]; const next=cur===0?'mention':cur==='mention'?'cited':0; SOV[qi][ei]=next; setCell(b,next); updateSovStats(); };
+      td.appendChild(b); tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  updateSovStats();
+}
+function setCell(b,v){ b.className='sovcell'+(v?' '+v:''); b.textContent = v==='cited'?'Cited':v==='mention'?'Mention':'—'; }
+function updateSovStats(){
+  let cited=0,ment=0,total=0;
+  SOV.forEach(r=>r.forEach(v=>{ total++; if(v==='cited')cited++; else if(v==='mention')ment++; }));
+  document.getElementById('sovCited').textContent=Math.round(cited/total*100)+'%';
+  document.getElementById('sovMention').textContent=Math.round((cited+ment)/total*100)+'%';
+  document.getElementById('sovCells').textContent=cited+' / '+total;
+}
+
+/* ============ CADENCE + TIMELINE ============ */
+function renderCadences(){
+  const el=document.getElementById('cadences'); el.innerHTML='';
+  const FREQ={wk:'Weekly','2×/wk':'2×/wk',mo:'Monthly',qtr:'Quarterly'};
+  CADENCES.forEach(c=>{
+    const card=document.createElement('div'); card.className='cad';
+    card.innerHTML=`<h4>${esc(c.h)}<span class="freq">${FREQ[c.freq]||c.freq}</span></h4>
+      <ul>${c.items.map(i=>`<li><div>${esc(i.t)}<span class="when">${esc(i.w)}</span></div></li>`).join('')}</ul>`;
+    el.appendChild(card);
+  });
+}
+function renderTimeline(day){
+  const el=document.getElementById('timeline');
+  el.querySelectorAll('.milestone').forEach(n=>n.remove());
+  MILESTONES.forEach((m,i)=>{
+    const next=MILESTONES[i+1];
+    const isDone = day>=m.day && (!next || day<next.day) ? false : day>=m.day;
+    const isNow = day>=m.day && (!next || day<next.day);
+    const div=document.createElement('div');
+    div.className='milestone'+(day>m.day&&!isNow?' done':'')+(isNow?' now':'');
+    if(day>=m.day && !isNow) div.className='milestone done';
+    if(isNow) div.className='milestone now';
+    div.innerHTML=`<div class="node"></div>
+      <div class="mday">Day ${m.day} · ${m.date}${isNow?' · now':''}</div>
+      <div class="mtitle">${esc(m.title)}</div>
+      <div class="mdesc">${esc(m.desc)}</div>`;
+    el.appendChild(div);
+  });
+}
+
+/* ============ PLAYBOOKS ============ */
+const PLAYBOOKS=[
+  {n:1,t:'AI crawler & robots.txt policy',b:`
+    <p>Answer engines can only cite what they can fetch. The goal: exactly one group per user-agent, AI search crawlers explicitly allowed.</p>
+    <ul>
+      <li><strong>Allow</strong> the search crawlers: <code>OAI-SearchBot</code>, <code>ChatGPT-User</code>, <code>PerplexityBot</code>, <code>Perplexity-User</code>, <code>Claude-SearchBot</code>, <code>Googlebot</code>.</li>
+      <li><strong>Training bots</strong> (<code>GPTBot</code>, <code>ClaudeBot</code>, <code>Google-Extended</code>, <code>CCBot</code>) are a separate business choice and do not affect citations.</li>
+      <li>Watch for host-injected managed blocks that create a second, contradictory group for the same bot.</li>
+    </ul>
+    <div class="callout">Bing indexation is necessary (not sufficient) for ChatGPT-with-search. Miss Behavin' is 5/5 indexed — that gate is open.</div>`},
+  {n:2,t:'Schema rollout order',b:`
+    <p>Structured data is one of the few levers that measurably improves how ChatGPT and Perplexity parse a page. Ship in this order:</p>
+    <ol>
+      <li><strong>Validate first</strong> — Rich Results Test on the draft; the Horizon theme already emits some JSON-LD. Kill duplicates before adding.</li>
+      <li><strong>Organization + WebSite</strong> sitewide — entity anchor with <code>sameAs</code>.</li>
+      <li><strong>BreadcrumbList</strong> — mirrors the locked taxonomy.</li>
+      <li><strong>Product + Offer</strong> — add <code>AggregateRating</code> only once real reviews exist.</li>
+      <li><strong>FAQPage</strong> with visible answers · <strong>LocalBusiness/ClothingStore</strong> on the Visit page (NAP identical).</li>
+    </ol>`},
+  {n:3,t:'Blog post recipe (The Edit)',b:`
+    <p>Every post is built to be quoted by an answer engine, not just read.</p>
+    <ul>
+      <li>Question-phrased <strong>H2</strong>, then a <strong>40–60 word direct answer</strong> right under it.</li>
+      <li>At least <strong>one concrete number</strong> and <strong>one quotable staff line</strong> (Kelly's first-hand seed).</li>
+      <li><strong>≥2 internal links</strong> added the same day the post goes live.</li>
+      <li>Ship to a <strong>hidden draft</strong> — never auto-publish. Reconcile the byline before post 1.</li>
+    </ul>
+    <div class="callout">Post 1 (Motel US stockist hub) is hard-gated behind the SoV baseline. Don't publish until the pre-blog snapshot is logged.</div>`},
+  {n:4,t:'Citation strategy — field density',b:`
+    <p>The key finding from the Rolla's teardown: <strong>field density decides AI citations, not page prose</strong>. Two slots to win per brand:</p>
+    <ul>
+      <li><strong>ONLINE</strong> — an optimized, indexed collection page + a clean brand field on products.</li>
+      <li><strong>LOCAL</strong> — the brand's official stockist directory + a verified Google Business Profile.</li>
+    </ul>
+    <p>Rolla's got cited 2nd (above Free People &amp; Anthropologie) on this recipe. Next targets: build <code>/collections/matisse</code> (currently 404) and chase Baggu (page + GBP + a stockist-list request to <code>info@baggu.com</code>).</p>
+    <div class="callout">Rolla's + Gorjana are FROZEN — use Rolla's as the proven template, don't over-build it.</div>`},
+  {n:5,t:'Share-of-voice runbook',b:`
+    <p>The measurement that defines the north star. Directional, not precise — AI answers are non-deterministic.</p>
+    <ol>
+      <li>Run the locked query panel in all four engines: <strong>Google AIO, ChatGPT (search on), Perplexity, Gemini</strong>.</li>
+      <li>Always <strong>incognito / logged-out</strong> — the neutral shopper view, never personalized.</li>
+      <li>Score each cell: mentioned / cited / position / entity-correct, plus which competitor domains appear.</li>
+      <li><strong>Append</strong> to <code>missb_sov_scores_log.csv</code> — never overwrite. Weekly during ramp, monthly after.</li>
+    </ol>`},
+  {n:6,t:'LineSheet worker deploy protocol',b:`
+    <p>The live worker source exists <strong>only in Cloudflare</strong> — local files can be stale. Never paste blind.</p>
+    <ol>
+      <li>Check the live deploy tag first (Ctrl+F <code>deploy_check</code>; it toggles off).</li>
+      <li>Full-file replacement only from a fresh copy-out or the verified canonical <code>worker-vNN.js</code>.</li>
+      <li><code>node --check</code> before delivery; bump the deploy tag every edit.</li>
+      <li>Deploy: paste into the worker's Edit code. Frontend: commit <code>index.html</code> to <code>Beans-b/miss-behavin</code> main (Cloudflare Pages redeploys; Retry on internal error).</li>
+      <li>Verify with the Matisse test invoice → expect vendor "Matisse".</li>
+    </ol>`},
+];
+function renderPlaybooks(){
+  const el=document.getElementById('playbooks'); el.innerHTML='';
+  PLAYBOOKS.forEach(p=>{
+    const d=document.createElement('details'); d.className='pb';
+    d.innerHTML=`<summary><span class="num">${p.n}</span>${esc(p.t)}
+      <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary>
+      <div class="body">${p.b}</div>`;
+    el.appendChild(d);
+  });
+}
+
+/* ============ TABS ============ */
+function initTabs(){
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+      tab.setAttribute('aria-selected','true');
+      document.getElementById('panel-'+tab.dataset.tab).classList.add('on');
+    };
+  });
+}
+
+/* ============ EXPORT ============ */
+function snapshot(){
+  return {
+    generated:new Date().toISOString(),
+    day:updateDay(),
+    tasks:TASKS.map(t=>({stream:STREAM[t.s].name, status:STATUS_LABEL[t.st], task:t.t, owner:t.o})),
+    goals:GOALS.map(g=>({metric:g.name, baseline:g.base, now:g.now, target:g.target, stretch:g.stretch, pct:Math.round(goalPct(g)*100), source:g.src})),
+    keywords:KEYWORDS.map(k=>({keyword:k.term, cluster:KW_CLUSTERS[k.cl], intent:INTENT_LABEL[k.intent]||k.intent, page:k.page, volume:k.vol, difficulty:k.kd, rank:k.rank, target:k.target, priority:k.pri, feature:k.feat})),
+    sov:SOV_QUERIES.map((q,i)=>({query:q.t, google:SOV[i][0]||'—', chatgpt:SOV[i][1]||'—', perplexity:SOV[i][2]||'—', gemini:SOV[i][3]||'—'})),
+  };
+}
+function toMarkdown(){
+  const s=snapshot(); let m=`# Miss Behavin' — SEO/AEO/GEO snapshot\n\n_${s.generated} · Day ${s.day} of 90_\n\n`;
+  STREAMS.forEach(st=>{
+    const rows=TASKS.filter(t=>t.s===st.id); if(!rows.length) return;
+    m+=`## ${st.name}\n\n`;
+    rows.forEach(t=>{ m+=`- [${t.st==='done'?'x':' '}] **${STATUS_LABEL[t.st]}** — ${t.t}${t.o?` _(${t.o})_`:''}\n`; });
+    m+=`\n`;
+  });
+  m+=`## Benchmarks & goals\n\n| Metric | Day 0 | Now | Target | Stretch | % |\n|---|---|---|---|---|---|\n`;
+  s.goals.forEach(g=>{ m+=`| ${g.metric} | ${g.baseline} | ${g.now} | ${g.target} | ${g.stretch} | ${g.pct}% |\n`; });
+  m+=`\n## Keyword tracker\n\n| Keyword | Cluster | Intent | Page | Vol | KD | Rank/AI | Target | Pri |\n|---|---|---|---|---|---|---|---|---|\n`;
+  s.keywords.forEach(k=>{ m+=`| ${k.keyword} | ${k.cluster} | ${k.intent} | ${k.page} | ${k.volume} | ${k.difficulty} | ${k.rank} | ${k.target} | ${k.priority} |\n`; });
+  m+=`\n## Share of voice\n\n| Query | Google | ChatGPT | Perplexity | Gemini |\n|---|---|---|---|---|\n`;
+  s.sov.forEach(r=>{ m+=`| ${r.query} | ${r.google} | ${r.chatgpt} | ${r.perplexity} | ${r.gemini} |\n`; });
+  return m;
+}
+function download(name,content,type){
+  const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
+}
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ============ LEVERS ============ */
+const LEVERS=[
+  {n:0, name:'SoV baseline — the gate', status:'done', what:'The fixed query panel across 4 engines; the zero point movement is measured against.', state:'Captured 7/15 (baseline_sov_2026-07.md). Cited 1 of 16 non-branded — Rolla\'s, Google AIO only.', next:'Next full run 1st of month. Watch Baggu, Matisse, coastal-cowgirl, the Gemini namesake fix.', owner:'Brian runs · Claude compiles'},
+  {n:1, name:'Brand stockist / locator listings', status:'pend', what:'The brand\'s own site lists Miss Behavin\' as a stockist — the strongest signal, but only for brands with a directory that accept a small online retailer.', state:'Not started. Eligible: Baggu, Emi Jay, Wildflower, Matisse (verify). Skip Motel/FP/Gorjana. LITS: resolve Faire first.', next:'Matisse retailer application now (ungated); Baggu email once its page is live.', owner:'Brian · gated on vendor pages'},
+  {n:2, name:'Off-site authority', status:'pend', what:'Third parties name us: designer "stocked at" links, Reddit/Quora, roundups, reviews. Moves AI citations more than any on-page tweak.', state:'NOT STARTED — the biggest ungated gap. Outreach kit ready (7/18): templates + target list.', next:'NAP hygiene first (old 6551 Trigo Rd still surfacing), Yelp claim, reviews app, stocked-at emails, Reddit/roundup research pass.', owner:'Brian + Kelly · mostly ungated'},
+  {n:3, name:'On-site retrievable hubs', status:'prog', what:'The collection pages, occasion hubs, and blog posts the index retrieves. Necessary, not sufficient — no page, nothing to cite.', state:'13 category collections live · brand pages live · blog "The Edit" live (1 post). Schema NOT live (see Lever 4 / Audit). Six new vendor pages: 0 of 6 built (copy drafted 7/16).', next:'Fix schema first, then build the 6 vendor pages 2/week by ~Day 30; blog posts 1 and 2.', owner:'Brian builds · Claude drafts'},
+  {n:4, name:'Feed + entity signals', status:'prog', what:'Merchant Center, Perplexity/ChatGPT feeds, Organization schema, GBP, consistent NAP — the plumbing that makes 1 to 3 legible.', state:'Schema NOT confirmed — the 7/23 live audit found zero JSON-LD on home/collection/product (critical; verify via Rich Results Test). Perplexity feed BLOCKED (LineSheet C1 + Kelly). GBP on hold (Kelly). GMC/GA4 = Day 21. NAP cleanup owed.', next:'Ship schema; GMC + GA4 session; resolve GBP + Perplexity; make NAP identical everywhere.', owner:'Brian · Kelly gates'},
+];
+function renderLevers(){
+  const el=document.getElementById('levers'); el.innerHTML='';
+  LEVERS.forEach(l=>{
+    const div=document.createElement('div'); div.className='lever';
+    div.innerHTML=`<div class="lv-top"><div class="lv-num">${l.n}</div><div class="lv-name">${esc(l.name)}</div>
+      <span class="pill ${l.status}">${STATUS_LABEL[l.status]}</span></div>
+      <div class="lv-what">${esc(l.what)}</div>
+      <div class="lv-row"><span class="k">Status</span><span class="v">${esc(l.state)}</span></div>
+      <div class="lv-row"><span class="k">Next</span><span class="v">${esc(l.next)}</span></div>
+      <div class="lv-owner">${esc(l.owner)}</div>`;
+    el.appendChild(div);
+  });
+}
+
+/* ============ AUDIT ============ */
+const AUDIT={
+  bottomLine:'Fundamentals are healthy — server-rendered, crawlable, self-canonical, a clean Shopify robots.txt that allows the AI crawlers, a strong homepage title/meta, and a strong off-site entity footprint (Yelp 38 reviews, Atly, Apple Maps, Downtown SB, Paseo Nuevo). One big structural hole: zero structured data on every page type. Fix schema first — it is the highest-leverage change on the site.',
+  scores:[
+    {k:'Technical', v:'Good foundation', c:'ok'},
+    {k:'Schema', v:'Critical — none', c:'crit'},
+    {k:'Content / GEO', v:'Needs work', c:'high'},
+    {k:'Local', v:'Strong off-site, weak on-site', c:'med'},
+    {k:'Off-site', v:'Fair', c:'med'},
+  ],
+  baseline:[
+    ['Traffic','~940 sessions/mo · GA4 wk Jul 10–16: 185 sessions, 147 users, 1 purchase ($150 gift card)'],
+    ['Channels (GA4 wk1)','Organic 37.8% (70) · Direct 33% · Unassigned 24% (attribution issue) · AI Assistant 4 (ChatGPT)'],
+    ['Search Console','Linked 2026-07-18; data still maturing'],
+    ['"best boutiques in santa barbara"','Miss Behavin\' NOT in top results — Yelp, Wanderlog, Scout Guide, Visit SB own it'],
+    ['"miss behavin santa barbara"','Strong branded footprint (Yelp, Atly, Apple Maps, IG, Downtown SB, FB, BBB). No Google Maps/GBP panel surfaced'],
+    ['"where to buy motel rocks in santa barbara"','Absent — SERP swamped by hotels/motels (name collision). Winnable, unsolved locally'],
+  ],
+  findings:[
+    {sev:'crit', t:'Zero structured data across the whole site', d:'Home, /collections/dresses, and /products/keiko-dress-blue all returned no application/ld+json — no Organization, WebSite, LocalBusiness, Product, Offer, AggregateRating, or BreadcrumbList. This contradicts the 7/16 tracker\'s "schema live"; trust the live fetch, and verify with Rich Results Test in case an app injects client-side.', fix:'Add Organization + WebSite + LocalBusiness sitewide (sameAs to Yelp/IG/FB/Apple Maps), Product + Offer on all products, BreadcrumbList on collections/products. Theme code or a schema app; validate on the rendered page.', owner:'Brian', kpi:'Page types passing Rich Results Test', bt:'0 of 4 → 4 of 4', win:'This week — it unblocks the rest'},
+    {sev:'high', t:'Business entity not declared on-site + GBP appears unclaimed', d:'The off-site entity is strong, but the site never self-declares it, and no Google Maps/GBP panel surfaced for the brand query (Apple Maps did). GBP is the single highest local lever.', fix:'Publish LocalBusiness schema (NAP + hours + sameAs). Claim/verify GBP (Women\'s clothing store), NAP exact.', owner:'Brian + Kelly (GBP claimant)', kpi:'LocalBusiness schema live; GBP claimed', bt:'Neither → both', win:'Start GBP now (verification lag)'},
+    {sev:'high', t:'No native reviews or ratings on-site', d:'Cards show price but no star ratings or review count, and no AggregateRating schema. 38 reviews exist on Yelp; nothing captured natively.', fix:'Add a review app that renders on product pages and emits AggregateRating; post-purchase request flow, steady not bursty.', owner:'Brian', kpi:'Review app live; % of top products with a native review', bt:'0 → app live in 30d, top 20 seeded', win:''},
+    {sev:'high', t:'Collection pages: no meta, "Collection:" H1 prefix, no intro copy', d:'/collections/dresses has no meta description, an H1 of "Collection: Dresses + Rompers" (the prefix is STILL live — contradicts the Horizon-fixed assumption), a 32-char title, and no category copy.', fix:'Top 8 collections: unique meta, clean H1 (drop the prefix), intent title, 40–60 word intro. Search-listing fields only.', owner:'Brian (I draft, you paste)', kpi:'Collections with clean H1 + unique meta + intro', bt:'0 of 8 → 8 of 8', win:''},
+    {sev:'high', t:'Absent from local "best boutiques" roundups that feed AI', d:'The roundup query is owned by Yelp, Wanderlog, Scout Guide, Visit SB, hotel blogs — the exact sources AI Overviews/ChatGPT/Perplexity quote. Nothing to cite on discovery queries.', fix:'Get listed/updated in local roundups + directories; confirm Paseo Nuevo + Downtown SB current.', owner:'Brian', kpi:'Quality roundup/directory placements', bt:'Not in lists → +5 placements', win:''},
+    {sev:'med', t:'Our Story page is thin (~40 words, no owner, no story)', d:'Establishes "Est. 2007" but names no founder, tells no story, no author signal — an E-E-A-T gap and a missed home for the entity narrative + schema.', fix:'Expand to 300+ words: founder name, 2007 origin, what makes the buy distinct, named author. Attach AboutPage/Organization schema.', owner:'Brian (I can draft in your voice)', kpi:'Word count + named founder + author + schema', bt:'~40 words, anonymous → 300+, attributed', win:''},
+    {sev:'med', t:'Thin product copy + missing image alt text', d:'Product copy is one sentence plus materials; product images carry no descriptive alt text (checked keiko-dress-blue). The vision alt tool is built (v47) but not yet rolled out across the catalog.', fix:'Run the alt tool across bestsellers + linked collection images ({title} in {color}), 10 at a time; richer copy on top sellers.', owner:'Brian', kpi:'% of top sellers with alt + expanded copy', bt:'0% → top 20 done', win:''},
+    {sev:'med', t:'No BOFU "colony" pages for brand-intent queries', d:'"where to buy motel rocks in santa barbara" returns only hotels/motels — a name collision no competitor has solved. A dedicated stockist page is winnable and hard for AI to answer without you.', fix:'Publish stockist pages for the anchor brands: question-phrased H2s, 40–60 word answers, LocalBusiness + Breadcrumb schema, links to the live collection.', owner:'Brian', kpi:'Colony pages live + cited over time', bt:'0 → first colony page live', win:''},
+  ],
+  low:[
+    'llms.txt absent — low priority by design (~97% get zero AI requests). No action.',
+    'Country/Region selector without hreflang — Shopify Markets can spawn localized duplicate URLs; confirm they stay out of the index.',
+    'Emoji in the About H2; verify og:image is served over https (a prior http note may already be resolved post-migration).',
+  ],
+  blocked:[
+    ['Core Web Vitals field data','Not measured (no PSI/CrUX access). Unblock: a PageSpeed Insights API key, or GSC\'s CWV report once data matures.'],
+    ['Organic keyword baseline','GSC linked 7/18, still maturing. Unblock: pull GSC Performance in early August (~16 days of data).'],
+    ['GA4 attribution','24% Unassigned + lost purchase attribution. Unblock: root-cause the pixel install after the Jul 22 migration.'],
+    ['Live sitemap re-parse','Server returned it gzipped; the fetch tool could not decode (tool limit, not a site defect). Stage 1 verified it healthy. Unblock: confirm in GSC → Sitemaps.'],
+  ],
+};
+function renderAudit(){
+  document.getElementById('auditVerdict').innerHTML='<b>Bottom line:</b> '+esc(AUDIT.bottomLine);
+  const sc=document.getElementById('auditScores'); sc.innerHTML='';
+  AUDIT.scores.forEach(s=>{ const d=document.createElement('div'); d.className='scard '+s.c; d.innerHTML=`<div class="l">${esc(s.k)}</div><div class="v">${esc(s.v)}</div>`; sc.appendChild(d); });
+  const bl=document.getElementById('auditBaseline'); bl.innerHTML='';
+  AUDIT.baseline.forEach(r=>{ const d=document.createElement('div'); d.className='br'; d.innerHTML=`<div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div>`; bl.appendChild(d); });
+  const fe=document.getElementById('auditFindings'); fe.innerHTML='';
+  const SEV={crit:'Critical',high:'High',med:'Medium'};
+  AUDIT.findings.forEach(f=>{
+    const d=document.createElement('div'); d.className='afind '+f.sev;
+    d.innerHTML=`<div class="ah"><div class="at">${esc(f.t)}</div><span class="sevb ${f.sev}">${SEV[f.sev]}</span></div>
+      <div class="ad">${esc(f.d)}</div>
+      <div class="akv"><div class="k">Fix</div><div class="v">${esc(f.fix)}</div>
+      <div class="k">Owner</div><div class="v">${esc(f.owner)}</div>
+      <div class="k">KPI</div><div class="v">${esc(f.kpi)}</div>
+      <div class="k">Base→Tgt</div><div class="v"><b>${esc(f.bt)}</b>${f.win?' · '+esc(f.win):''}</div></div>`;
+    fe.appendChild(d);
+  });
+  document.getElementById('auditLow').innerHTML='<ul>'+AUDIT.low.map(x=>`<li>${esc(x)}</li>`).join('')+'</ul>';
+  const bk=document.getElementById('auditBlocked'); bk.innerHTML='';
+  AUDIT.blocked.forEach(r=>{ const d=document.createElement('div'); d.className='br'; d.innerHTML=`<div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div>`; bk.appendChild(d); });
+}
+
+/* ============ GOALS ============ */
+const GOALS=[
+  {name:'AI SoV — queries cited (of 16)', unit:'', base:1, now:1, target:4, stretch:8, src:'Weekly SoV log', dir:'up', note:'baseline 1/16 · Rolla\'s, Google only'},
+  {name:'Brand-stockist citations won', unit:'', base:1, now:1, target:5, stretch:8, src:'SoV log + manual', dir:'up'},
+  {name:'Monthly sessions', unit:'', base:940, now:940, target:2500, stretch:3500, src:'Shopify / GA4', dir:'up', confirm:true, note:'target = estimate'},
+  {name:'Non-CA session share', unit:'%', base:0, now:0, target:60, stretch:70, src:'GA4 region report', dir:'up', note:'baseline BLOCKED — needs GA4'},
+  {name:'Online orders / mo', unit:'', base:3, now:3, target:6, stretch:12, src:'Shopify', dir:'up', confirm:true, note:'2× Day 0'},
+  {name:'Vendor collection pages live (of 6)', unit:'', base:0, now:0, target:6, stretch:6, src:'Shopify', dir:'up'},
+  {name:'Blog posts live', unit:'', base:1, now:1, target:6, stretch:12, src:'The Edit', dir:'up'},
+  {name:'Merchant feed surfaces live (of 3)', unit:'', base:0, now:0, target:3, stretch:3, src:'GMC · ChatGPT · Perplexity', dir:'up'},
+  {name:'Merchant catalog approved', unit:'%', base:0, now:0, target:80, stretch:95, src:'Merchant Center', dir:'up', confirm:true},
+  {name:'Product reviews collected', unit:'', base:0, now:0, target:20, stretch:50, src:'Judge.me / native', dir:'up'},
+  {name:'Email subscribers', unit:'', base:2433, now:2433, target:2833, stretch:3200, src:'Shopify', dir:'up', note:'+400 by day 90'},
+  {name:'AI mention rate (any engine)', unit:'%', base:6, now:6, target:35, stretch:50, src:'Weekly SoV log', dir:'up', note:'est'},
+];
+function goalPct(g){
+  let p; if(g.dir==='down') p=(g.base-g.now)/((g.base-g.target)||1); else p=(g.now-g.base)/((g.target-g.base)||1);
+  return Math.max(0, Math.min(1, p));
+}
+function fmtNum(n){ if(n>=1000) return n.toLocaleString('en-US'); return (Math.round(n*10)/10).toString(); }
+function goalVal(g,n){ return (g.unit==='$'?'$':'')+fmtNum(n)+(g.unit==='%'?'%':''); }
+function renderGoals(){
+  const el=document.getElementById('goals'); el.innerHTML='';
+  GOALS.forEach((g,i)=>{
+    const pct=Math.round(goalPct(g)*100);
+    const div=document.createElement('div'); div.className='goal';
+    div.innerHTML=`
+      <div class="g-top">
+        <div class="g-name">${esc(g.name)}${g.confirm?' <span class="badge-note">confirm target</span>':''}${g.note?` <span class="badge-note">${esc(g.note)}</span>`:''}</div>
+        <div class="g-src">${esc(g.src)}</div>
+      </div>
+      <div class="g-nums">
+        <div class="g-num"><span class="l">Day 0</span><span class="v">${goalVal(g,g.base)}</span></div>
+        <div class="g-num cur"><span class="l">Now</span><span class="v" contenteditable="true" data-i="${i}" spellcheck="false">${goalVal(g,g.now)}</span></div>
+        <div class="g-num tgt"><span class="l">90-day target</span><span class="v">${goalVal(g,g.target)}</span></div>
+        <div class="g-num strf"><span class="l">Stretch</span><span class="v">${goalVal(g,g.stretch)}</span></div>
+      </div>
+      <div class="g-bar"><i style="width:${pct}%"></i></div>
+      <div class="g-foot"><span>${g.dir==='down'?'Lower is better':'Progress to target'}</span><span class="g-pct">${pct}%</span></div>`;
+    const ed=div.querySelector('[contenteditable]');
+    ed.addEventListener('blur',e=>{
+      const num=parseFloat(e.target.textContent.replace(/[^0-9.\-]/g,''));
+      if(!isNaN(num)){ g.now=num; }
+      renderGoals();
+    });
+    ed.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+    el.appendChild(div);
+  });
+}
+
+/* ============ KEYWORDS ============ */
+const KW_CLUSTERS=['Branded / entity','Brand stockist (online)','Style-name & category long-tail','Local hygiene'];
+const KEYWORDS=[
+  {term:'miss behavin', intent:'brand', page:'/', vol:'—', kd:'—', rank:'1-3', target:'1', pri:'1', feat:'Branded (owned)', cl:0},
+  {term:'miss behavin santa barbara', intent:'brand', page:'/', vol:'—', kd:'—', rank:'—', target:'Top 3', pri:'2', feat:'Entity check', cl:0},
+  {term:'shop miss behavin online', intent:'brand', page:'/', vol:'—', kd:'—', rank:'—', target:'1', pri:'3', feat:'Branded', cl:0},
+  {term:'where to buy Motel Rocks online US', intent:'comm', page:'/collections/motel-rocks', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'1', feat:'Thin field — winnable', cl:1},
+  {term:"where to buy Rolla's Jeans US", intent:'comm', page:'/collections/rollas', vol:'—', kd:'—', rank:'Cited', target:'Cite', pri:'1', feat:'CITED (Google) · frozen', cl:1},
+  {term:'online boutiques that carry Free People', intent:'comm', page:'/collections/free-people', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'1', feat:'Multi-brand angle', cl:1},
+  {term:'where to buy Baggu bags online', intent:'comm', page:'/collections/baggu (0/6)', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'1', feat:'Build page → Lever-1 email', cl:1},
+  {term:'Matisse boutique stockist', intent:'comm', page:'/collections/matisse (0/6)', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'1', feat:'Crowded field', cl:1},
+  {term:'where to buy Lucy in the Sky', intent:'comm', page:'/collections/lucy-in-the-sky (0/6)', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'2', feat:'Resolve Faire first', cl:1},
+  {term:'Emi Jay stockist', intent:'comm', page:'/collections/emi-jay (0/6)', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'2', feat:'Public locator', cl:1},
+  {term:'Wildflower Cases stockist', intent:'comm', page:'/collections/wildflower (0/6)', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'2', feat:'Lists 100s of stockists', cl:1},
+  {term:'where to buy Gorjana online', intent:'comm', page:'/collections/gorjana', vol:'—', kd:'—', rank:'—', target:'—', pri:'3', feat:'FROZEN', cl:1},
+  {term:'[current style name #1]', intent:'comm', page:'product page', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'1', feat:'Rotate monthly · few stockists', cl:2},
+  {term:'chiffon maxi dress under $100 in stock', intent:'comm', page:'/collections/dresses', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'2', feat:'In-stock long-tail', cl:2},
+  {term:'boutique denim shorts', intent:'comm', page:'/collections/shorts', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'2', feat:'Category', cl:2},
+  {term:'matching sets boutique online', intent:'comm', page:'/collections/matching-sets', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'2', feat:'Co-ords', cl:2},
+  {term:'boutique swimwear online', intent:'comm', page:'/collections/swimwear', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'2', feat:'Seasonal', cl:2},
+  {term:'where to find sold out Free People styles', intent:'info', page:'/collections/free-people', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'2', feat:'Small-run asset', cl:2},
+  {term:'sites like Princess Polly but small boutique', intent:'comm', page:'/', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'3', feat:'Alternative intent', cl:2},
+  {term:"women's boutique santa barbara", intent:'local', page:'/', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'3', feat:'Hygiene only', cl:3},
+  {term:'best boutiques in santa barbara', intent:'local', page:'/', vol:'—', kd:'—', rank:'—', target:'Mention', pri:'3', feat:'Roundup / outreach', cl:3},
+  {term:'where to buy Motel Rocks in Santa Barbara', intent:'local', page:'/collections/motel-rocks', vol:'—', kd:'—', rank:'—', target:'Cite', pri:'3', feat:'Hygiene', cl:3},
+];
+let kwFilter=-1;
+const INTENT_LABEL={brand:'Brand',local:'Local',info:'Info',comm:'Commercial'};
+function rankStat(r){
+  const t=(r||'').toString().toLowerCase();
+  if(t.includes('cite')) return 'cited';
+  const num=parseInt(t,10);
+  if(!isNaN(num)&&num<=10) return 'top';
+  if(t==='—'||t===''||t==='—') return 'none';
+  return 'rank';
+}
+function renderKeywords(){
+  const body=document.getElementById('kwBody'); body.innerHTML='';
+  KW_CLUSTERS.forEach((cl,ci)=>{
+    if(kwFilter!==-1 && kwFilter!==ci) return;
+    const rows=KEYWORDS.filter(k=>k.cl===ci); if(!rows.length) return;
+    const head=document.createElement('tr'); head.className='kw-clusterhead';
+    head.innerHTML=`<td colspan="9">${esc(cl)} · ${rows.length}</td>`; body.appendChild(head);
+    rows.forEach(k=>{
+      const idx=KEYWORDS.indexOf(k);
+      const tr=document.createElement('tr');
+      const st=rankStat(k.rank);
+      tr.innerHTML=`
+        <td class="kw-term"><span contenteditable="true" spellcheck="false" data-f="term" data-i="${idx}">${esc(k.term)}</span></td>
+        <td><span class="itag ${k.intent}">${INTENT_LABEL[k.intent]||k.intent}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="page" data-i="${idx}" class="kw-vol">${esc(k.page)}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="vol" data-i="${idx}" class="kw-vol">${esc(k.vol)}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="kd" data-i="${idx}" class="kw-vol">${esc(k.kd)}</span></td>
+        <td><span class="kw-stat ${st}" data-i="${idx}" title="Tap to cycle">${esc(k.rank||'—')}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="target" data-i="${idx}" class="kw-vol">${esc(k.target)}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="pri" data-i="${idx}">${esc(k.pri)}</span></td>
+        <td><span contenteditable="true" spellcheck="false" data-f="feat" data-i="${idx}" class="kw-vol">${esc(k.feat)}</span></td>`;
+      tr.querySelectorAll('[contenteditable]').forEach(c=>{
+        c.addEventListener('blur',e=>{ KEYWORDS[+e.target.dataset.i][e.target.dataset.f]=e.target.textContent.trim(); updateKwStats(); });
+        c.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); e.target.blur();} });
+      });
+      const stat=tr.querySelector('.kw-stat');
+      stat.addEventListener('click',()=>{
+        const cur=(k.rank||'—').toString();
+        const cycle=['—','Ranking','Top 10','Cited','Optimizing'];
+        let ni=cycle.findIndex(x=>x.toLowerCase()===cur.toLowerCase());
+        k.rank=cycle[(ni+1)%cycle.length]; renderKeywords();
+      });
+      body.appendChild(tr);
+    });
+  });
+  updateKwStats();
+}
+function updateKwStats(){
+  document.getElementById('kwTotal').textContent=KEYWORDS.length;
+  document.getElementById('kwTop').textContent=KEYWORDS.filter(k=>rankStat(k.rank)==='top').length;
+  document.getElementById('kwCited').textContent=KEYWORDS.filter(k=>rankStat(k.rank)==='cited').length;
+  document.getElementById('kwP1').textContent=KEYWORDS.filter(k=>String(k.pri).trim()==='1').length;
+  const tc=document.getElementById('tabCountKw'); if(tc) tc.textContent=KEYWORDS.length;
+}
+function renderKwChips(){
+  const el=document.getElementById('kwClusterChips'); el.innerHTML='';
+  const all=document.createElement('button'); all.className='chip'; all.setAttribute('aria-pressed',kwFilter===-1); all.textContent='All clusters';
+  all.onclick=()=>{kwFilter=-1; renderKwChips(); renderKeywords();}; el.appendChild(all);
+  KW_CLUSTERS.forEach((c,i)=>{
+    const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed',kwFilter===i); b.textContent=c;
+    b.onclick=()=>{kwFilter=(kwFilter===i?-1:i); renderKwChips(); renderKeywords();}; el.appendChild(b);
+  });
+}
+
+/* ============ TOOLBOX ============ */
+const TOOLBOX=[
+  {cap:'Keyword research', who:'Ahrefs · Semrush · Moz', cover:'data', feeds:'<b>Keywords tab.</b> Volume, difficulty, intent, parent topic — paste a dated Ahrefs / Semrush / Moz export, or start from Search Console + Keyword Planner.'},
+  {cap:'Rank / position tracking', who:'AccuRanker · Nightwatch · Wincher', cover:'data', feeds:'<b>Keywords tab.</b> Enter current rank per term from Search Console or a manual incognito check; the status cell cycles ranking → top 10 → cited.'},
+  {cap:'Visibility / share-of-voice score', who:'Semrush · Ahrefs', cover:'partial', feeds:'<b>Goals + SoV board.</b> Composite of tracked-keyword positions and AI citations, updated when you refresh the numbers.'},
+  {cap:'SERP feature tracking', who:'Semrush · Nightwatch', cover:'partial', feeds:'<b>Keywords tab.</b> The SERP / AI feature column flags AIO, local pack, featured snippet, shopping per term.'},
+  {cap:'Site / technical audit', who:'Semrush · Ahrefs · Sitebulb · Screaming Frog', cover:'in', feeds:'<b>Tracker (Technical).</b> Crawl, robots, canonicals, CWV, schema validity — plus the monthly re-audit cadence.'},
+  {cap:'AI visibility / citation tracking', who:'Profound · Peec AI · Otterly · Ahrefs Brand Radar', cover:'in', feeds:'<b>Share of Voice board.</b> 18 shopper queries × 4 engines, cited / mentioned / miss, competitor domains. This is the north-star metric.'},
+  {cap:'Backlinks / referring domains', who:'Ahrefs · Semrush · Moz', cover:'data', feeds:'<b>Off-site workstream.</b> No live backlink API — track the brand-stockist directory citations you earn (Rolla\'s, Baggu, Motel).'},
+  {cap:'Competitor gap analysis', who:'Semrush · Ahrefs', cover:'partial', feeds:'<b>SoV + Keywords.</b> Log which competitor domains appear in each AI answer and which clusters they own.'},
+  {cap:'Goals / targets', who:'Semrush · Moz', cover:'in', feeds:'<b>Goals tab.</b> Baseline → now → 90-day target with progress, editable inline.'},
+  {cap:'Scheduled reports & alerts', who:'All major tools', cover:'partial', feeds:'<b>Schedule + Save snapshot.</b> Recurring reminders (pending your OK) prompt each run; snapshot exports the state to JSON / Markdown.'},
+];
+function renderToolbox(){
+  const el=document.getElementById('toolMap'); el.innerHTML='';
+  const CL={in:'Covered',partial:'Partial',data:'Needs data'};
+  TOOLBOX.forEach(t=>{
+    const row=document.createElement('div'); row.className='tool-row';
+    row.innerHTML=`<div class="cap">${esc(t.cap)}<span class="who">${esc(t.who)}</span></div>
+      <div class="feeds">${t.feeds}</div>
+      <div class="cover ${t.cover}">${CL[t.cover]}</div>`;
+    el.appendChild(row);
+  });
+}
+
+/* ============ PERSISTENCE + LIVE SYNC ============ */
+/* Browser save is instant and works offline. When the LineSheet session is present
+   (opened from the app), state also syncs to the worker's D1 so every device and
+   staff member shares it, and the live product count is pulled from Shopify.
+   Every localStorage call is guarded, so this is a safe no-op inside a Claude artifact. */
+var LS_KEY='mb_seocmd_v1';
+var WORKER='https://linesheet-api.brianburge.workers.dev', STORE='miss-behavin';
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+function mbToken(){ try{ var s=JSON.parse(localStorage.getItem('mb_session')||'null'); return s&&s.token?s.token:null; }catch(e){ return null; } }
+function wapi(action, body){
+  var tk=mbToken(); if(!tk) return Promise.reject(new Error('no session'));
+  return fetch(WORKER+'?action='+action+'&store_id='+STORE, {
+    method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+tk},
+    body: JSON.stringify(body||{})
+  }).then(function(r){ return r.json(); });
+}
+function getState(){
+  return {
+    v:1,
+    tasks: TASKS.map(function(t){ return t.st; }),
+    sov: SOV,
+    goals: GOALS.map(function(g){ return g.now; }),
+    kw: KEYWORDS.map(function(k){ return {rank:k.rank,target:k.target,pri:k.pri,vol:k.vol,kd:k.kd,feat:k.feat,term:k.term,page:k.page}; })
+  };
+}
+function applyState(s){
+  if(!s) return;
+  try{
+    if(Array.isArray(s.tasks) && s.tasks.length===TASKS.length) TASKS.forEach(function(t,i){ if(s.tasks[i]) t.st=s.tasks[i]; });
+    if(Array.isArray(s.sov) && s.sov.length===SOV.length) s.sov.forEach(function(r,i){ if(Array.isArray(r)) SOV[i]=r; });
+    if(Array.isArray(s.goals) && s.goals.length===GOALS.length) GOALS.forEach(function(g,i){ if(typeof s.goals[i]==='number') g.now=s.goals[i]; });
+    if(Array.isArray(s.kw) && s.kw.length===KEYWORDS.length) KEYWORDS.forEach(function(k,i){ if(s.kw[i]) Object.assign(k, s.kw[i]); });
+  }catch(e){}
+}
+function persist(){ lsSet(LS_KEY, JSON.stringify(getState())); }
+function loadState(){ var raw=lsGet(LS_KEY); if(raw){ try{ applyState(JSON.parse(raw)); }catch(e){} } }
+function reRender(){ renderStreams(); renderTasks(); renderSov(); renderGoals(); renderKeywords(); updateProgress(); }
+function setSync(txt, cls){ var b=document.getElementById('livebar'); var m=document.getElementById('livemsg'); if(b) b.className='livebar '+(cls||''); if(m) m.textContent=txt; }
+var _syncBusy=false;
+function syncDown(){
+  return wapi('seocmd_load').then(function(r){
+    if(r && r.data){ applyState(r.data); reRender(); persist(); setSync('● Synced to your store account', 'ok'); }
+    else { setSync('● Synced — first save will publish this device', 'ok'); }
+  }).catch(function(){ setSync('● Offline — saving to this device only', ''); });
+}
+function syncUp(){
+  if(_syncBusy || !mbToken()) return; _syncBusy=true;
+  wapi('seocmd_save', {data: getState()}).then(function(){ _syncBusy=false; }).catch(function(){ _syncBusy=false; });
+}
+function liveStats(){
+  wapi('seocmd_stats').then(function(r){
+    var el=document.getElementById('livecount');
+    if(el && r && r.data && typeof r.data.product_count==='number'){ el.textContent='· '+r.data.product_count.toLocaleString('en-US')+' active products (live)'; }
+  }).catch(function(){});
+}
+
+/* ============ INIT ============ */
+function init(){
+  loadState();
+  renderStreams(); renderStreamChips(); renderTasks(); renderSov();
+  renderCadences(); renderPlaybooks();
+  renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox();
+  const day=updateDay(); renderTimeline(day); updateProgress();
+  initTabs();
+  document.getElementById('kwAdd').onclick=()=>{
+    const cl = kwFilter===-1?2:kwFilter;
+    KEYWORDS.push({term:'new keyword', intent:'comm', page:'/', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'2', feat:'', cl});
+    renderKeywords();
+    toast('Keyword row added — edit it inline');
+  };
+  document.getElementById('search').addEventListener('input',e=>{ searchTerm=e.target.value; renderTasks(); });
+  document.querySelectorAll('#statusChips .chip').forEach(c=>{
+    c.onclick=()=>{
+      document.querySelectorAll('#statusChips .chip').forEach(x=>x.setAttribute('aria-pressed','false'));
+      c.setAttribute('aria-pressed','true'); filterStatus=c.dataset.status; renderTasks();
+    };
+  });
+  document.getElementById('btnPrint').onclick=()=>window.print();
+  document.getElementById('btnMd').onclick=async()=>{ try{ await navigator.clipboard.writeText(toMarkdown()); toast('Markdown snapshot copied'); }catch(e){ download('missbehavin-seo-snapshot.md',toMarkdown(),'text/markdown'); toast('Downloaded Markdown snapshot'); } };
+  document.getElementById('btnJson').onclick=()=>{ download('missbehavin-seo-snapshot-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(snapshot(),null,2),'application/json'); toast('Snapshot saved'); };
+  setInterval(persist, 4000);
+  window.addEventListener('beforeunload', persist);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) persist(); });
+  // Live sync to the LineSheet worker (D1) + live store stats when signed in via the app
+  if(mbToken()){
+    setSync('● Syncing…','');
+    syncDown().then(liveStats);
+    setInterval(syncUp, 20000);
+    document.addEventListener('visibilitychange', function(){ if(document.hidden){ syncUp(); } else { liveStats(); } });
+    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats); };
+  } else {
+    setSync('● This device only — open from the LineSheet app to sync','');
+  }
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
