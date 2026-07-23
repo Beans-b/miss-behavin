@@ -10,9 +10,9 @@
 <style>
 /* ============ TOKENS ============ */
 :root{
-  --bg:#FAF7F2; --surface:#FFFFFF; --surface-2:#F3EEE6; --surface-3:#EDE6DA;
-  --ink:#2A1E28; --ink-soft:#6A5C64; --ink-faint:#9A8E94;
-  --line:#E4DACE; --line-strong:#D6C8B6;
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F5F6F8; --surface-3:#EBEDF0;
+  --ink:#20242B; --ink-soft:#5A6472; --ink-faint:#94A0AF;
+  --line:#E7EAEE; --line-strong:#D5DAE0;
   --brass:#B08D57; --brass-deep:#8F6E3C;
   --plum:#7A4E68; --plum-soft:#F1E5EC; --plum-ink:#5C3650;
   --blue:#557B97; --blue-soft:#E7EEF2;
@@ -409,6 +409,47 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
 .ablk .br:last-child{border-bottom:none}
 .ablk .br .k{flex:none; width:150px; font-weight:600; color:var(--block)}
 .ablk .br .v{color:var(--ink)}
+
+/* ============ APP HEAD + OVERVIEW ============ */
+.apphead{display:flex; justify-content:space-between; align-items:flex-end; gap:16px 20px; flex-wrap:wrap; margin:4px 0 22px}
+.apphead-title{font-family:var(--serif); font-size:23px; font-weight:600; letter-spacing:-.02em; margin-top:6px}
+.apphead-title span{color:var(--ink-faint); font-weight:400; font-family:var(--sans); font-size:16px}
+.apphead .livebar{margin-top:0}
+.ov-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:12px; margin-bottom:26px}
+.ov-kpi{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
+.ov-kpi .k{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.ov-kpi .v{font-family:var(--serif); font-size:30px; font-weight:600; letter-spacing:-.02em; margin:7px 0 2px; line-height:1}
+.ov-kpi .v small{font-size:15px; color:var(--ink-soft); font-family:var(--sans); font-weight:500}
+.ov-kpi .c{font-size:11.5px; color:var(--ink-soft)}
+.ov-kpi.alert .v{color:var(--block)} .ov-kpi.prog .v{color:var(--prog)} .ov-kpi.good .v{color:var(--done)} .ov-kpi.accent .v{color:var(--plum)}
+.ov-kpi .meter{height:6px; border-radius:100px; background:var(--surface-3); margin-top:11px; overflow:hidden}
+.ov-kpi .meter i{display:block; height:100%; background:linear-gradient(90deg,var(--plum),var(--brass))}
+.ov-grid{display:grid; grid-template-columns:1.12fr .88fr; gap:14px 26px; align-items:start}
+@media (max-width:820px){ .ov-grid{grid-template-columns:1fr} }
+.ov-lever{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--brass); border-radius:var(--radius-sm); padding:11px 14px; margin-bottom:8px; box-shadow:var(--shadow-sm)}
+.ov-lever .n{font-family:var(--mono); font-weight:600; font-size:11px; color:#fff; background:var(--plum); width:22px; height:22px; border-radius:6px; display:grid; place-items:center; flex:none}
+.ov-lever .nm{font-weight:600; font-size:13px; flex:1}
+.ov-pri{display:flex; gap:11px; align-items:flex-start; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:11px 14px; margin-bottom:8px; box-shadow:var(--shadow-sm)}
+.ov-pri .tag{flex:none; font-family:var(--mono); font-size:8.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:4px 8px; border-radius:100px; margin-top:1px; white-space:nowrap}
+.ov-pri .tag.block,.ov-pri .tag.crit{background:var(--block-soft); color:var(--block)}
+.ov-pri .tag.high,.ov-pri .tag.prog{background:var(--prog-soft); color:var(--prog)}
+.ov-pri .txt{font-size:13px; font-weight:500; line-height:1.35}
+.ov-pri .meta{font-family:var(--mono); font-size:10px; color:var(--ink-faint); margin-top:3px}
+.ov-sched{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:4px 16px; margin-bottom:8px; box-shadow:var(--shadow-sm)}
+.ov-sched .row{display:flex; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:12.5px}
+.ov-sched .row:last-child{border-bottom:none}
+.ov-sched .row .w{flex:none; width:88px; font-family:var(--mono); font-size:9.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--brass-deep); padding-top:2px}
+.ov-guard{background:var(--plum-soft); border:1px solid var(--line); border-radius:var(--radius); padding:4px 16px}
+.ov-guard .row{font-size:12px; padding:9px 0 9px 20px; position:relative; border-bottom:1px dashed var(--line); color:var(--ink)}
+.ov-guard .row:last-child{border-bottom:none}
+.ov-guard .row::before{content:"✕"; position:absolute; left:0; top:9px; color:var(--block); font-size:10px; font-weight:700}
+.ov-goals{display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:10px; margin-bottom:8px}
+.ov-goal{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm); padding:13px 15px; box-shadow:var(--shadow-sm)}
+.ov-goal .nm{font-size:12.5px; font-weight:600}
+.ov-goal .nums{font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin:6px 0 9px}
+.ov-goal .nums b{color:var(--plum)}
+.ov-goal .meter{height:6px; border-radius:100px; background:var(--surface-3); overflow:hidden}
+.ov-goal .meter i{display:block; height:100%; background:linear-gradient(90deg,var(--plum),var(--brass))}
 </style>
 </head>
 <body>
@@ -439,57 +480,20 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   </div>
 </header>
 
-<!-- ============ GUARDRAIL BAR ============ -->
-<div class="grbar">
-  <div class="grbar-inner">
-    <b>Guardrails</b>
-    <span class="g">Never touch titles · handles · tags · prices · variants · SKUs · barcodes · inventory (POS depends)</span>
-    <span class="g">SEO via Search-listing fields only · fill-empty, never overwrite</span>
-    <span class="g">Live theme "Copy of Horizon WORKING" 173357793316 · keep theme.liquid 39–40</span>
-    <span class="g">Rolla's + Gorjana FROZEN</span>
-    <span class="g">Never "literally" · minimal hyphens · no fabricated metrics</span>
-  </div>
-</div>
-
 <div class="wrap">
 
-  <!-- ============ HERO ============ -->
-  <div class="hero">
-    <div class="eyebrow">Santa Barbara boutique · est. 2007 · going national</div>
-    <h2>Every SEO, AEO and GEO lever for <em>shopmissbehavin.com</em>, tracked in one place.</h2>
-    <p>A living command center for the Stage 4 program: what's shipped, what's queued, the cadence that keeps it moving, and the recipes to execute each technique. Reconciled against the uploaded master plan — Stages 1 to 4, the citation-levers tracker (7/16), and the outreach kit (7/18). Goal: national online sales; local is a hygiene line. Live-audited Jul 23 — see the Audit tab.</p>
-    <div class="northstar">
-      <span class="star">✦</span>
-      <span>North star: <b>the most-cited women's boutique in AI shopping answers in the US</b> — measured by the weekly share-of-voice log.</span>
+  <div class="apphead">
+    <div class="apphead-l">
+      <div class="eyebrow">SEO · AEO · GEO · Program control</div>
+      <h2 class="apphead-title">shopmissbehavin.com <span>· national growth</span></h2>
     </div>
+    <div class="livebar" id="livebar" title="Tap to refresh"><span id="livemsg">Connecting to your store…</span> <span class="livecount" id="livecount"></span></div>
   </div>
-
-  <div class="livebar" id="livebar" title="Tap to refresh"><span id="livemsg">Connecting to your store…</span> <span class="livecount" id="livecount"></span></div>
-
-  <!-- ============ BASELINES ============ -->
-  <div class="section-head">
-    <h3>Day 0 starting line</h3>
-    <span class="hint">Baselines recorded Jul 10–14, 2026. The numbers every gain is measured against.</span>
-  </div>
-  <div class="tiles">
-    <div class="tile accent"><div class="k">Online revenue share</div><div class="v">0.15<small>%</small></div><div class="c">Online $45 vs POS $30.9K, last 30d — pure upside</div></div>
-    <div class="tile"><div class="k">Online orders · 30d</div><div class="v">3 <small>/ $345</small></div><div class="c">TTM 50 / $3,582 · June 2026 = 0 online</div></div>
-    <div class="tile"><div class="k">GA4 · week 1</div><div class="v">185 <small>sessions</small></div><div class="c">147 users · organic 37.8% · 4 AI-assistant (ChatGPT) · 1 purchase ($150 GC)</div></div>
-    <div class="tile"><div class="k">Email subscribers</div><div class="v">2,433</div><div class="c">10.4% of ~23.4K customers · A/B viable</div></div>
-    <div class="tile"><div class="k">Out-of-CA share</div><div class="v">69<small>%</small></div><div class="c">of TTM online orders — the national thesis</div></div>
-    <div class="tile"><div class="k">AI share-of-voice</div><div class="v">1<small>/16</small></div><div class="c">Baseline 7/15: Rolla's cited in Google AIO only — the zero point</div></div>
-  </div>
-
-  <!-- ============ WORKSTREAM PROGRESS ============ -->
-  <div class="section-head">
-    <h3>Workstreams</h3>
-    <span class="hint">Tap a card to filter the tracker. Bars show done / in-progress / monitoring.</span>
-  </div>
-  <div class="streams" id="streams"></div>
 
   <!-- ============ TABS ============ -->
   <div class="tabs" role="tablist" id="tabs">
-    <button class="tab" role="tab" data-tab="tracker" aria-selected="true">Tracker <span class="n" id="tabCountTracker"></span></button>
+    <button class="tab" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" data-tab="tracker" aria-selected="false">Tracker <span class="n" id="tabCountTracker"></span></button>
     <button class="tab" role="tab" data-tab="levers" aria-selected="false">Levers</button>
     <button class="tab" role="tab" data-tab="audit" aria-selected="false">Audit</button>
     <button class="tab" role="tab" data-tab="goals" aria-selected="false">Goals</button>
@@ -501,8 +505,40 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <button class="tab" role="tab" data-tab="reference" aria-selected="false">Reference</button>
   </div>
 
+  <!-- ============ PANEL: OVERVIEW ============ -->
+  <section class="panel on" id="panel-overview" role="tabpanel">
+    <div class="ov-kpis" id="ovKpis"></div>
+    <div class="ov-grid">
+      <div class="ov-col">
+        <div class="section-head"><h3>Workstreams</h3><span class="hint">Tap a card to open it filtered in the tracker.</span></div>
+        <div class="streams" id="streams"></div>
+        <div class="section-head"><h3>Needs attention</h3><span class="hint">Blocked work, critical findings, and what's in flight.</span></div>
+        <div id="ovPriorities"></div>
+      </div>
+      <div class="ov-col">
+        <div class="section-head"><h3>Citation levers</h3></div>
+        <div id="ovLevers"></div>
+        <div class="section-head"><h3>This week &amp; next</h3></div>
+        <div id="ovSchedule"></div>
+        <div class="section-head"><h3>Guardrails</h3><span class="hint">Non-negotiable.</span></div>
+        <div class="ov-guard" id="ovGuard"></div>
+      </div>
+    </div>
+    <div class="section-head"><h3>Goals</h3><span class="hint">Baseline → now → 90-day target.</span></div>
+    <div class="ov-goals" id="ovGoals"></div>
+    <div class="section-head"><h3>Day 0 starting line</h3><span class="hint">Baselines recorded Jul 10–14, 2026.</span></div>
+    <div class="tiles">
+      <div class="tile accent"><div class="k">Online revenue share</div><div class="v">0.15<small>%</small></div><div class="c">Online $45 vs POS $30.9K, last 30d — pure upside</div></div>
+      <div class="tile"><div class="k">Online orders · 30d</div><div class="v">3 <small>/ $345</small></div><div class="c">TTM 50 / $3,582 · June 2026 = 0 online</div></div>
+      <div class="tile"><div class="k">GA4 · week 1</div><div class="v">185 <small>sessions</small></div><div class="c">147 users · organic 37.8% · 4 AI-assistant (ChatGPT) · 1 purchase ($150 GC)</div></div>
+      <div class="tile"><div class="k">Email subscribers</div><div class="v">2,433</div><div class="c">10.4% of ~23.4K customers · A/B viable</div></div>
+      <div class="tile"><div class="k">Out-of-CA share</div><div class="v">69<small>%</small></div><div class="c">of TTM online orders — the national thesis</div></div>
+      <div class="tile"><div class="k">AI share-of-voice</div><div class="v">1<small>/16</small></div><div class="c">Baseline 7/15: Rolla's cited in Google AIO only — the zero point</div></div>
+    </div>
+  </section>
+
   <!-- ============ PANEL: TRACKER ============ -->
-  <section class="panel on" id="panel-tracker" role="tabpanel">
+  <section class="panel" id="panel-tracker" role="tabpanel">
     <div class="toolbar">
       <label class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -899,7 +935,7 @@ function renderStreams(){
       </div>
       <div class="bar"><i class="d" style="width:${pd}%"></i><i class="p" style="width:${pp}%"></i><i class="m" style="width:${pm}%"></i></div>
       <div class="meta">${Math.round(pd)}% done${st.prog?` · ${st.prog} in progress`:''}${st.mon?` · ${st.mon} monitoring`:''}</div>`;
-    card.onclick = ()=>{ filterStream = (filterStream===s.id?'all':s.id); syncFilters(); renderTasks(); renderStreams(); document.getElementById('tabs').scrollIntoView({block:'nearest'}); };
+    card.onclick = ()=>{ filterStream = s.id; syncFilters(); renderTasks(); renderStreams(); goTab('tracker'); };
     card.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault(); card.click();} };
     if(filterStream===s.id) card.style.borderColor=s.color;
     el.appendChild(card);
@@ -1117,13 +1153,8 @@ function renderPlaybooks(){
 
 /* ============ TABS ============ */
 function initTabs(){
-  document.querySelectorAll('.tab').forEach(tab=>{
-    tab.onclick=()=>{
-      document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
-      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-      tab.setAttribute('aria-selected','true');
-      document.getElementById('panel-'+tab.dataset.tab).classList.add('on');
-    };
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.onclick=function(){ goTab(tab.dataset.tab); };
   });
 }
 
@@ -1448,7 +1479,7 @@ function applyState(s){
 }
 function persist(){ lsSet(LS_KEY, JSON.stringify(getState())); }
 function loadState(){ var raw=lsGet(LS_KEY); if(raw){ try{ applyState(JSON.parse(raw)); }catch(e){} } }
-function reRender(){ renderStreams(); renderTasks(); renderSov(); renderGoals(); renderKeywords(); updateProgress(); }
+function reRender(){ renderStreams(); renderTasks(); renderSov(); renderGoals(); renderKeywords(); updateProgress(); renderOverview(); }
 function setSync(txt, cls){ var b=document.getElementById('livebar'); var m=document.getElementById('livemsg'); if(b) b.className='livebar '+(cls||''); if(m) m.textContent=txt; }
 var _syncBusy=false;
 function syncDown(){
@@ -1463,9 +1494,94 @@ function syncUp(){
 }
 function liveStats(){
   wapi('seocmd_stats').then(function(r){
-    var el=document.getElementById('livecount');
-    if(el && r && r.data && typeof r.data.product_count==='number'){ el.textContent='· '+r.data.product_count.toLocaleString('en-US')+' active products (live)'; }
+    if(r && r.data && typeof r.data.product_count==='number'){
+      LIVE_PRODUCTS=r.data.product_count;
+      var el=document.getElementById('livecount'); if(el) el.textContent='· '+LIVE_PRODUCTS.toLocaleString('en-US')+' active products (live)';
+      var ovp=document.getElementById('panel-overview'); if(ovp && ovp.classList.contains('on')) renderOverview();
+    }
   }).catch(function(){});
+}
+
+/* ============ OVERVIEW (executive / PM dashboard) ============ */
+var LIVE_PRODUCTS=null;
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', t.dataset.tab===name?'true':'false'); });
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.id==='panel-'+name); });
+  if(name==='overview') renderOverview();
+  window.scrollTo(0,0);
+}
+function renderOverview(){
+  var done=TASKS.filter(function(t){return t.st==='done';}).length, total=TASKS.length;
+  var prog=TASKS.filter(function(t){return t.st==='prog';}).length;
+  var block=TASKS.filter(function(t){return t.st==='block';}).length;
+  var pct=Math.round(done/total*100);
+  var day=updateDay(); var left=Math.max(0,90-day);
+  var sc=0, stc=0; SOV.forEach(function(r){ r.forEach(function(v){ stc++; if(v==='cited') sc++; }); });
+  var kp=document.getElementById('ovKpis');
+  if(kp){
+    kp.innerHTML='';
+    var items=[
+      {k:'Program progress', v:pct+'<small>%</small>', c:done+' of '+total+' techniques done', cls:'accent', meter:pct},
+      {k:'In progress', v:prog, c:'active right now', cls:'prog'},
+      {k:'Needs attention', v:block, c:block?'blocked — clear first':'nothing blocked', cls:block?'alert':'good'},
+      {k:'Timeline', v:'Day '+day, c:left+' of 90 days left', cls:''},
+      {k:'AI share-of-voice', v:sc+'<small> / '+stc+'</small>', c:'cited cells · the north star', cls:''},
+      {k:'Live catalog', v:(LIVE_PRODUCTS!=null?LIVE_PRODUCTS.toLocaleString('en-US'):'—'), c:'active products · live from Shopify', cls:'good'}
+    ];
+    items.forEach(function(it){
+      var d=document.createElement('div'); d.className='ov-kpi '+(it.cls||'');
+      d.innerHTML='<div class="k">'+esc(it.k)+'</div><div class="v">'+it.v+'</div><div class="c">'+esc(it.c)+'</div>'+(it.meter!=null?'<div class="meter"><i style="width:'+it.meter+'%"></i></div>':'');
+      kp.appendChild(d);
+    });
+  }
+  var lv=document.getElementById('ovLevers');
+  if(lv){
+    lv.innerHTML='';
+    LEVERS.forEach(function(l){
+      var d=document.createElement('div'); d.className='ov-lever';
+      d.innerHTML='<div class="n">'+l.n+'</div><div class="nm">'+esc(l.name)+'</div><span class="pill '+l.status+'">'+STATUS_LABEL[l.status]+'</span>';
+      lv.appendChild(d);
+    });
+  }
+  var pr=document.getElementById('ovPriorities');
+  if(pr){
+    pr.innerHTML=''; var rows=[];
+    TASKS.filter(function(t){return t.st==='block';}).forEach(function(t){ rows.push({sev:'block', label:'Blocked', txt:t.t, meta:STREAM[t.s].name}); });
+    AUDIT.findings.filter(function(f){return f.sev==='crit'||f.sev==='high';}).forEach(function(f){ rows.push({sev:f.sev, label:f.sev==='crit'?'Critical':'High', txt:f.t, meta:'Live audit'}); });
+    TASKS.filter(function(t){return t.st==='prog';}).slice(0,6).forEach(function(t){ rows.push({sev:'prog', label:'In progress', txt:t.t, meta:STREAM[t.s].name}); });
+    if(!rows.length){ pr.innerHTML='<div class="empty">Nothing flagged.</div>'; }
+    rows.slice(0,16).forEach(function(r){
+      var d=document.createElement('div'); d.className='ov-pri';
+      d.innerHTML='<span class="tag '+r.sev+'">'+r.label+'</span><div><div class="txt">'+esc(r.txt)+'</div><div class="meta">'+esc(r.meta)+'</div></div>';
+      pr.appendChild(d);
+    });
+  }
+  var sch=document.getElementById('ovSchedule');
+  if(sch){
+    var next=null; for(var i=0;i<MILESTONES.length;i++){ if(MILESTONES[i].day>=day){ next=MILESTONES[i]; break; } }
+    var wk=[]; CADENCES.forEach(function(c){ if(c.freq==='wk'||c.freq==='2×/wk'){ c.items.forEach(function(it){ wk.push([c.h.replace('Weekly · ','').replace('Twice weekly · ',''), it.t]); }); } });
+    var html='';
+    if(next) html+='<div class="ov-sched"><div class="row"><span class="w">Next up</span><span>Day '+next.day+' · '+esc(next.date)+' — '+esc(next.title)+'</span></div></div>';
+    html+='<div class="ov-sched">';
+    wk.slice(0,5).forEach(function(w){ html+='<div class="row"><span class="w">'+esc(w[0])+'</span><span>'+esc(w[1])+'</span></div>'; });
+    html+='</div>';
+    sch.innerHTML=html;
+  }
+  var gd=document.getElementById('ovGuard');
+  if(gd){
+    var g=['Never touch titles, handles, tags, prices, variants, SKUs, barcodes, or inventory (POS depends)','SEO via Search-listing fields only — fill-empty, never overwrite','Live theme "Copy of Horizon WORKING" 173357793316 — keep theme.liquid 39–40','Rolla\'s + Gorjana FROZEN','Never the word "literally" · minimal hyphens · no fabricated metrics'];
+    gd.innerHTML=g.map(function(x){ return '<div class="row">'+esc(x)+'</div>'; }).join('');
+  }
+  var go=document.getElementById('ovGoals');
+  if(go){
+    go.innerHTML='';
+    GOALS.slice(0,6).forEach(function(gl){
+      var p=Math.round(goalPct(gl)*100);
+      var d=document.createElement('div'); d.className='ov-goal';
+      d.innerHTML='<div class="nm">'+esc(gl.name)+'</div><div class="nums">'+esc(goalVal(gl,gl.base))+' → <b>'+esc(goalVal(gl,gl.now))+'</b> → '+esc(goalVal(gl,gl.target))+' · '+p+'%</div><div class="meter"><i style="width:'+p+'%"></i></div>';
+      go.appendChild(d);
+    });
+  }
 }
 
 /* ============ INIT ============ */
@@ -1473,7 +1589,7 @@ function init(){
   loadState();
   renderStreams(); renderStreamChips(); renderTasks(); renderSov();
   renderCadences(); renderPlaybooks();
-  renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox();
+  renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox(); renderOverview();
   const day=updateDay(); renderTimeline(day); updateProgress();
   initTabs();
   document.getElementById('kwAdd').onclick=()=>{
