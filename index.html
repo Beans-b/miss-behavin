@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 51</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 56</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2431,7 +2431,8 @@ function sbArchiveInvoice(inv, cb) {
     invoice_date: inv.invoice_date || inv.date || '',
     status: 'live',
     published: true,
-    styles: inv.styles || []
+    styles: inv.styles || [],
+    files: inv.files || []   // v56 — carry the scanned-page R2 keys into the archive
   };
   api('archive', record)
   .then(function(res){ if(cb) cb(!res.error); })
@@ -2445,6 +2446,9 @@ function sbLoadArchive(cb) {
     rows.forEach(function(inv) {
       if (typeof inv.styles === 'string') {
         try { inv.styles = JSON.parse(inv.styles); } catch(e) { inv.styles = []; }
+      }
+      if (typeof inv.files === 'string') {   // v56 — scanned-page keys
+        try { inv.files = JSON.parse(inv.files); } catch(e) { inv.files = []; }
       }
     });
     cb(rows);
@@ -2498,6 +2502,15 @@ function renderKelCards(inv) {
   var container = el('kel-cards');
   container.innerHTML = '';
 
+  // v56 — link to the scanned invoice for this sheet, when we have it stored.
+  var scanLinks = invoiceScanLinksHtml(inv.files);
+  if (scanLinks) {
+    var sl = document.createElement('div');
+    sl.style.cssText = 'padding:10px 0 4px;font-size:13px;';
+    sl.innerHTML = '📄 ' + scanLinks;
+    container.appendChild(sl);
+  }
+
   var groups = {};
   (inv.styles||[]).forEach(function(s) {
     var t = s.type||'Other'; if(!groups[t]) groups[t]=[];groups[t].push(s);
@@ -2534,7 +2547,7 @@ function buildKelCard(style) {
   card.innerHTML =
     '<div class="p-card-header">'+
       '<div class="p-code-wrap"><div class="p-code">'+esc(style.code)+'</div><div class="p-type">'+esc(style.type)+'</div></div>'+
-      '<input class="p-name-input" type="text" value="'+esc(style.name||'')+'" placeholder="Style name"/>'+
+      '<input class="p-name-input" type="text" value="'+esc(style.printed_name||style.name||'')+'" placeholder="Style name"/>'+
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
     '<div class="p-card-body">'+
@@ -3087,12 +3100,50 @@ function handleFiles(e) {
   el('upload-area').querySelector('.upload-hint').textContent = 'Tap to change selection';
 }
 
+// v56 — the actual scanned pages, held so we can save them to R2 after
+// extraction and keep them viewable from the review screen + Archive.
+var pendingScans = [];
+
 function extractAllPages() {
   if (selectedFiles.length === 0) return;
   allExtractedStyles = [];
+  pendingScans = [];
   el('extract-btn').disabled = true;
   showStatus('extract-status','loading','<span class="spinner"></span>Processing file 1 of ' + selectedFiles.length + '...');
   processPage(0, {});
+}
+
+// v56 — upload every scanned page to R2 (store_invoice_file). If the bucket
+// isn't bound the worker returns { skipped:true } and we just get no files —
+// the app keeps working, there's simply nothing to view yet. Sequential to be
+// gentle on the worker; scans are small (compressed JPEG / one PDF).
+function storeScannedFiles(invoiceMeta, done) {
+  var out = [];
+  var invNum = (invoiceMeta && invoiceMeta.invoice_number) || '';
+  function next(i) {
+    if (i >= pendingScans.length) { done(out); return; }
+    var f = pendingScans[i];
+    api('store_invoice_file', { image: f.b64, media_type: f.mime, invoice_number: invNum, page: f.page, name: f.name })
+    .then(function(res){
+      if (res && res.key) out.push({ key: res.key, type: res.type, name: res.name });
+      next(i+1);
+    })
+    .catch(function(){ next(i+1); });
+  }
+  next(0);
+}
+
+// v56 — a viewable link (or list of page links) for a set of stored scans.
+// Uses ?token= so it opens straight in a browser tab. Returns '' if none.
+function invoiceScanLinksHtml(files) {
+  if (!files || !files.length) return '';
+  var links = files.map(function(f, i){
+    var href = PROXY_URL + '?action=get_invoice_file&store_id=' + encodeURIComponent(STORE_ID) +
+               '&key=' + encodeURIComponent(f.key) + '&token=' + encodeURIComponent(SESSION.token);
+    var label = files.length > 1 ? ('Page ' + (i+1)) : 'View scanned invoice';
+    return '<a href="' + href + '" target="_blank" rel="noopener" class="arch-link" style="text-decoration:underline;">' + esc(label) + '</a>';
+  });
+  return links.join(files.length > 1 ? ' · ' : '');
 }
 
 function compressImage(file, cb) {
@@ -3132,10 +3183,14 @@ function processPage(idx, invoiceMeta) {
       return;
     }
     currentInvoice = Object.assign({}, invoiceMeta, {styles: allExtractedStyles});
-    renderKelCards(currentInvoice);
-    showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
-    el('extract-btn').disabled = false;
-    el('pricing-section').scrollIntoView({behavior:'smooth'});
+    showStatus('extract-status','loading','<span class="spinner"></span>Saving the scanned invoice...');
+    storeScannedFiles(invoiceMeta, function(files){
+      currentInvoice.files = files;
+      renderKelCards(currentInvoice);
+      showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
+      el('extract-btn').disabled = false;
+      el('pricing-section').scrollIntoView({behavior:'smooth'});
+    });
     return;
   }
 
@@ -3158,6 +3213,8 @@ function processPage(idx, invoiceMeta) {
       el('extract-btn').disabled = false;
       return;
     }
+    // v56 — keep this page's bytes so we can save it to R2 after extraction.
+    pendingScans.push({ b64: b64, mime: mime, name: file.name, page: idx });
     showStatus('extract-status','loading','<span class="spinner"></span>' + (pdf
       ? 'Sending the PDF to Claude — every page reads in one pass (up to 2 minutes)...'
       : 'Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...'));
@@ -3309,13 +3366,19 @@ function renderArchiveList(invoices, liveNum) {
         '<button class="arch-link arch-unpub">Unpublish</button>'
       : '<span class="status-pill draft">Saved</span>'+
         '<button class="delete-btn">&#128465;</button>';
+    // v56 — a link to the stored scan for this archived sheet (if any).
+    var archScan = invoiceScanLinksHtml(inv.files);
     item.innerHTML =
       '<div class="archive-item-info">'+
         '<div class="archive-file-name">'+esc(fileName)+'</div>'+
         '<div class="archive-meta">'+esc(metaBits.join(' · '))+'</div>'+
+        (archScan ? '<div class="archive-scan" style="font-size:12px;margin-top:3px;">📄 '+archScan+'</div>' : '')+
       '</div>'+
       '<div class="archive-right">'+rightHtml+'</div>';
     item.querySelector('.archive-item-info').addEventListener('click', function() { loadArchivedInvoice(inv); });
+    // the scan link opens in a new tab — don't also reopen the sheet
+    var _scanBox = item.querySelector('.archive-scan');
+    if (_scanBox) _scanBox.addEventListener('click', function(e){ e.stopPropagation(); });
     if (isLive) {
       item.querySelector('.arch-copy').addEventListener('click', function(e) { e.stopPropagation(); copyLink(); });
       item.querySelector('.arch-unpub').addEventListener('click', function(e) {
@@ -3354,7 +3417,8 @@ function loadArchivedInvoice(inv) {
     vendor: inv.vendor,
     invoice_number: inv.invoice_number,
     invoice_date: inv.invoice_date,
-    styles: (inv.styles||[]).map(function(s){ return Object.assign({colors:[]}, s); })
+    styles: (inv.styles||[]).map(function(s){ return Object.assign({colors:[]}, s); }),
+    files: inv.files || []   // v56 — keep the scanned-invoice link on reopen
   };
   kelTab('invoice');
   renderKelCards(currentInvoice);
@@ -3904,7 +3968,7 @@ function _buildSpReview(inv) {
       var oneVariant = Object.keys(activeSizes).length === 1;
       var upcHtml = oneVariant
         ? '<div class="sp-upc-row" style="padding:0 14px 10px;">' +
-            '<label class="sp-l">UPC from packaging (optional — scan or type)</label>' +
+            '<label class="sp-l">UPC / GTIN from packaging (optional — scan or type)</label>' +
             '<div style="display:flex;gap:6px;">' +
               '<input type="text" inputmode="numeric" class="field-input sp-upc" autocomplete="off"/>' +
               '<button type="button" class="btn btn-outline sp-upc-scan" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera">&#128247;</button>' +
@@ -3912,6 +3976,15 @@ function _buildSpReview(inv) {
             '<div class="sp-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>' +
           '</div>'
         : '';
+
+      // v56 — vendor SKU / item number from the invoice, on EVERY card. Saved
+      // to a custom.vendor_sku metafield; it never touches the variant SKU that
+      // POS scans depend on. Prefilled from the invoice when one was printed.
+      var vskuHtml =
+        '<div class="sp-vsku-row" style="padding:0 14px 10px;">' +
+          '<label class="sp-l">Vendor SKU / item # (optional — kept as a record)</label>' +
+          '<input type="text" class="field-input sp-vsku" autocomplete="off"/>' +
+        '</div>';
 
       var card = document.createElement('div');
       card.className = 'sp-card';
@@ -3929,6 +4002,7 @@ function _buildSpReview(inv) {
           '<div class="sp-retail">$' + retail.toFixed(2) + '</div>' +
         '</div>' +
         upcHtml +
+        vskuHtml +
         '<div class="sp-card-foot">' +
           '<button class="sp-push-btn">Push to Shopify</button>' +
         '</div>';
@@ -3937,12 +4011,15 @@ function _buildSpReview(inv) {
         card: card, style: style, colorObj: colorObj,
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
         retail: retail, state: 'idle', dupVariant: null,
-        upcInput: null, upcHint: null
+        upcInput: null, upcHint: null, vskuInput: null
       };
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
       _spWireUpc(cd);
+      // v56 — vendor SKU field (all cards), prefilled from the invoice.
+      cd.vskuInput = cd.card.querySelector('.sp-vsku');
+      if (cd.vskuInput && cd.style.sku) cd.vskuInput.value = cd.style.sku;
       _spInitDetails(cd);
     });
   });
@@ -4120,7 +4197,9 @@ function _spDoCreate(cd) {
     body_description: cd.els ? cd.els.bodyd.value.trim() : '',
     product_category: cd.els ? cd.els.cat.value.trim() : '',
     image_alt: cd.els ? cd.els.alt.value.trim() : '',
-    images: _spChosenImages(cd)
+    images: _spChosenImages(cd),
+    // v56 — vendor SKU rides to a custom.vendor_sku metafield (never the variant SKU)
+    vendor_sku: (cd.vskuInput ? cd.vskuInput.value.trim() : '') || (cd.style.sku || '')
   };
 
   // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
