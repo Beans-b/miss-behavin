@@ -806,7 +806,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-black" id="cat-preview-btn" onclick="catPreview()" style="flex:1;">Preview</button>
         <button class="btn" id="cat-apply-btn" onclick="catApply()" disabled style="flex:1;background:var(--success-fg);color:#fff;">Apply</button>
       </div>
-      <div style="font-size:12px;color:var(--gray-text);line-height:1.6;margin-top:10px;">Preview changes nothing. It reads every product and proposes a category from the title. Apply writes the <b>Category field only</b> &#8212; never titles, SKUs, variants, inventory, or prices. Rows already correct are skipped.</div>
+      <div style="font-size:12px;color:var(--gray-text);line-height:1.6;margin-top:10px;">Preview changes nothing. It reads every product and proposes a category from the title. Apply writes the <b>Category field</b> plus the <b>Google feed fields</b> &#8212; gender (Female), age group (Adult), and color (read from each product's title) &#8212; on your active products. It never touches titles, SKUs, variants, inventory, or prices. Categories already correct are skipped; the Google fields are set on every active product.</div>
       <div class="status" id="cat-status" style="text-align:left;"></div>
     </div>
     <div style="background:#fff3cd;border-left:3px solid #c8900a;color:#7a5800;padding:10px 12px;font-size:12px;line-height:1.55;margin:10px 24px;display:none;" id="cat-warn">
@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 49</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 51</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4397,8 +4397,8 @@ function catPreview(){
       var matched = CAT_ROWS.filter(function(r){return r.gid && !r.same;}).length;
       var already = CAT_ROWS.filter(function(r){return r.same;}).length;
       var none = CAT_ROWS.filter(function(r){return !r.gid;}).length;
-      el('cat-summary').innerHTML = '<b>'+matched+'</b> to update &#183; <b>'+already+'</b> already correct &#183; <b>'+none+'</b> need attention';
-      el('cat-apply-btn').disabled = matched === 0;
+      el('cat-summary').innerHTML = '<b>'+matched+'</b> to update &#183; <b>'+already+'</b> already correct &#183; <b>'+none+'</b> need attention<br><span style="color:var(--gray-text);">Apply also sets Gender = Female, Age = Adult, and Color (from each title) on all active products.</span>';
+      el('cat-apply-btn').disabled = CAT_ROWS.length === 0;
       el('cat-warn').style.display = vendorFilter ? 'none' : 'block';
       showStatus('cat-status','success','Preview ready. Review, then Apply.');
     });
@@ -4417,19 +4417,43 @@ function catRenderTable(){
 }
 
 function catApply(){
-  if(!confirm('Write categories now? Category field only, rows marked "will set" only.')) return;
+  if(!confirm('Write now? Sets the Category field AND the Google feed fields (gender = Female, age = Adult, color from each title) on your active products. Never titles, SKUs, variants, inventory, or prices.')) return;
   el('cat-apply-btn').disabled = true; el('cat-preview-btn').disabled = true;
   var todo = CAT_ROWS.filter(function(r){ return r.gid && !r.same; });
   var ok=0, fail=0, i=0;
 
-  function next(){
-    if (i >= todo.length) {
-      showStatus('cat-status','success','Done. Updated ' + ok + ', failed ' + fail + '.');
-      el('cat-preview-btn').disabled = false;
-      return;
+  // Phase 2 — Google feed fields (gender / age group / color) over ALL active
+  // products. Every product needs these regardless of whether its category
+  // changed, so this runs even when no category rows were updated. Resumable:
+  // google_attrs_run pages via cursor; we loop until hasNextPage is false.
+  function gaPhase(){
+    catStatus('<span class="spinner"></span>Categories done (' + ok + ' set). Setting Google feed fields...');
+    catLog('--- Google feed fields: gender / age group / color ---');
+    var gaN=0, gaUnknown=0, cursor=null;
+    function gaNext(){
+      var body = { limit: 25 };
+      if (cursor) body.cursor = cursor;
+      api('google_attrs_run', body)
+      .then(function(res){
+        gaN += res.summary.processed;
+        gaUnknown += (res.summary.color_unknown ? res.summary.color_unknown.length : 0);
+        catStatus('<span class="spinner"></span>Google feed fields ' + gaN + '...');
+        if (res.hasNextPage) { cursor = res.cursor; setTimeout(gaNext, 250); }
+        else {
+          catLog('Google fields set on ' + gaN + ' products; ' + gaUnknown + ' had no readable color.');
+          showStatus('cat-status','success','Done. Categories: ' + ok + ' set / ' + fail + ' failed. Google feed fields on ' + gaN + ' products (' + gaUnknown + ' need a color check).');
+          el('cat-preview-btn').disabled = false;
+        }
+      })
+      .catch(function(e){ catLog('Google fields FAIL: ' + e.message); showStatus('cat-status','error','Google fields error: ' + e.message); el('cat-preview-btn').disabled = false; });
     }
+    gaNext();
+  }
+
+  function next(){
+    if (i >= todo.length) { gaPhase(); return; }
     var r = todo[i]; i++;
-    catStatus('<span class="spinner"></span>Applying ' + i + ' / ' + todo.length + '...');
+    catStatus('<span class="spinner"></span>Applying category ' + i + ' / ' + todo.length + '...');
     api('shopify_set_category', { id: r.id, categoryId: r.gid })
     .then(function(res){
       if (res.error) throw new Error(res.error);
