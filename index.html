@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 57</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 58</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4055,10 +4055,14 @@ function _buildSpReview(inv) {
       // v57 — audit line: who is adding this and when (written to Shopify as
       // custom.added_by / custom.added_at when pushed).
       var _now = new Date();
+      var _h = _now.getHours(), _m = _now.getMinutes();
+      var _ap = _h >= 12 ? 'PM' : 'AM';
+      var _h12 = ((_h % 12) || 12);
+      var _time = _h12 + ':' + (_m < 10 ? '0' + _m : _m) + ' ' + _ap;
       var addedHtml =
         '<div class="sp-added-row" style="padding:0 14px 10px;font-size:11px;color:var(--gray-text);">' +
           'Added by ' + esc((SESSION && SESSION.name) || 'app') + ' · ' +
-          (_now.getMonth()+1) + '/' + _now.getDate() + '/' + _now.getFullYear() +
+          (_now.getMonth()+1) + '/' + _now.getDate() + '/' + _now.getFullYear() + ' ' + _time +
         '</div>';
 
       var card = document.createElement('div');
@@ -5357,7 +5361,10 @@ function _spFetchVendor(cd){
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;   // v57 — pass a saved/entered site if we have one
   cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
   cd.els.fetchBtn.disabled = true;
-  var req = { vendor: vendor, styleCode: cd.style.code };
+  var req = { vendor: vendor, styleCode: cd.style.code,
+    color: cd.colorObj.color || '',                                 // v58 — filter images to this colorway
+    name: cd.style.printed_name || cd.style.name || cd.style.code   // v58 — name fallback if code doesn't match
+  };
   if (dom) req.domain = dom;
   api('fetch_vendor_details', req)
   .then(function(res){
@@ -5398,12 +5405,13 @@ function _spUseCandidate(cd, cand){
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;
   cd.els.fetchStatus.textContent = 'Loading details…';
   if (cand.handle){
-    var dreq = { vendor: vendor, handle: cand.handle };
+    var dreq = { vendor: vendor, handle: cand.handle, color: cd.colorObj.color || '' };   // v58 — colorway filter
     if (dom) dreq.domain = dom;
     api('fetch_vendor_details', dreq)
     .then(function(res){
       if (res.error) throw new Error(res.error);
       cd.images = res.images || cand.images || [];
+      cd.imagesAll = res.images_all || cd.images;   // v58 — the full colorway set, for the show-all toggle
       cd.fabric = res.fabric || null; cd.fit = res.fit || null;
       _spRenderImages(cd);
       cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
@@ -5412,7 +5420,7 @@ function _spUseCandidate(cd, cand){
     })
     .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
   } else {
-    cd.images = cand.images || []; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
+    cd.images = cand.images || []; cd.imagesAll = cd.images; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
   }
 }
 function _spRenderImages(cd){
@@ -5423,6 +5431,20 @@ function _spRenderImages(cd){
     im.onclick = function(){ var on = im.dataset.on === '1'; im.dataset.on = on ? '0' : '1'; im.className = 'sp-img' + (on ? ' off' : ' on'); };
     cd.els.images.appendChild(im);
   });
+  // v58 — when we filtered to one colorway, offer a toggle to see every color.
+  var all = cd.imagesAll || cd.images || [];
+  if (all.length > (cd.images || []).length) {
+    var t = document.createElement('button');
+    t.type = 'button'; t.className = 'sp-l';
+    t.style.cssText = 'background:none;border:none;color:var(--gray-text);text-decoration:underline;cursor:pointer;padding:6px 0;font-size:12px;';
+    t.textContent = cd._showingAll ? 'Show only ' + (cd.colorObj.color || 'this color') + ' (' + (cd._colorImages ? cd._colorImages.length : 0) + ')' : 'Show all colors (' + all.length + ')';
+    t.onclick = function(){
+      if (!cd._showingAll) { cd._colorImages = cd.images; cd.images = all; cd._showingAll = true; }
+      else { cd.images = cd._colorImages || cd.images; cd._showingAll = false; }
+      _spRenderImages(cd);
+    };
+    cd.els.images.appendChild(t);
+  }
 }
 function _spChosenImages(cd){
   var out = [];
