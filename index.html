@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 56</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 57</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3284,27 +3284,35 @@ function loadArchive() {
         list.innerHTML = '<div class="archive-empty">No invoices archived yet.</div>';
         return;
       }
-      var vendors = {};
+      // v57 — group vendor tabs CASE-INSENSITIVELY so "COTTON CANDY LA" and
+      // "Cotton Candy LA" share one tab. The display name is the nicest-cased
+      // version seen (prefer a mixed-case spelling over an ALL-CAPS one).
+      var vendors = {};        // key: lowercased vendor -> array of invoices
+      var vendorDisplay = {};  // key: lowercased vendor -> display label
       invoices.forEach(function(inv) {
-        var v = inv.vendor || 'Unknown';
-        if (!vendors[v]) vendors[v] = [];
-        vendors[v].push(inv);
+        var raw = (inv.vendor || 'Unknown').trim();
+        var key = raw.toLowerCase();
+        if (!vendors[key]) { vendors[key] = []; vendorDisplay[key] = raw; }
+        else if (vendorDisplay[key] === vendorDisplay[key].toUpperCase() && raw !== raw.toUpperCase()) {
+          vendorDisplay[key] = raw; // upgrade an ALL-CAPS label to a mixed-case one
+        }
+        vendors[key].push(inv);
       });
 
-      var vendorNames = Object.keys(vendors);
+      var vendorKeys = Object.keys(vendors);
       tabBar.innerHTML = '';
-      vendorNames.forEach(function(v, i) {
+      vendorKeys.forEach(function(k, i) {
         var btn = document.createElement('button');
         btn.className = 'vendor-tab' + (i === 0 ? ' active' : '');
-        btn.textContent = v;
+        btn.textContent = vendorDisplay[k];
         btn.onclick = function() {
           document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});
           btn.classList.add('active');
-          renderArchiveList(vendors[v], liveNum);
+          renderArchiveList(vendors[k], liveNum);
         };
         tabBar.appendChild(btn);
       });
-      renderArchiveList(vendors[vendorNames[0]], liveNum);
+      renderArchiveList(vendors[vendorKeys[0]], liveNum);
     });
   });
 }
@@ -3335,9 +3343,18 @@ function renderArchiveList(invoices, liveNum) {
     // build 31 — date logged: invoice date if the sheet has one, otherwise
     // the archive row's created_at (manual sheets before build 31 stored no date).
     var when = inv.invoice_date || inv.date || '';
+    var hadPrintedDate = !!when;
     if (!when && inv.created_at) {
       var dt = new Date(inv.created_at);
       if (!isNaN(dt.getTime())) when = (dt.getMonth()+1)+'/'+dt.getDate()+'/'+dt.getFullYear();
+    }
+    // v57 — "scanned on" = when the sheet was actually scanned into the app
+    // (created_at), shown separately from the invoice's PRINTED date so the two
+    // are never confused (the 7/20 Cotton Candy mix-up).
+    var scannedOn = '';
+    if (inv.created_at) {
+      var sdt = new Date(inv.created_at);
+      if (!isNaN(sdt.getTime())) scannedOn = (sdt.getMonth()+1)+'/'+sdt.getDate()+'/'+sdt.getFullYear();
     }
 
     // build 31 — say what's actually in the sheet, not just a count
@@ -3354,7 +3371,10 @@ function renderArchiveList(invoices, liveNum) {
       },0);
     },0);
     var metaBits = [];
-    if (when) metaBits.push(when);
+    if (when) metaBits.push(hadPrintedDate ? 'invoice ' + when : when);
+    // show scanned date only when it adds info (a printed invoice date exists,
+    // so `when` isn't already the scan date)
+    if (scannedOn && hadPrintedDate) metaBits.push('scanned ' + scannedOn);
     metaBits.push((inv.styles||[]).length + (((inv.styles||[]).length===1)?' style':' styles'));
     if (namesTxt) metaBits.push(namesTxt);
     // build 33 — sheets entered without wholesale costs show units instead of a misleading $0.00
@@ -3781,6 +3801,15 @@ function loadSampleInvoice() {
 /* ── NAME REGENERATION (proxied) ── */
 var _nameHistory = {};
 var _shopifyExistingNames = [];
+// v57 — the FULL raw Shopify titles (with color suffix), for the name-based
+// duplicate guard on push. The SKU check only catches same-code re-scans; this
+// catches a product with the same NAME living under a different style code.
+var _shopifyExistingTitlesRaw = [];
+// Normalize a title so "Butter Me Up Lace Cami - Cherry" and
+// "Butter Me Up Lace Cami: Cherry" compare equal (separators -> space).
+function _normTitleKey(s) {
+  return String(s || '').toLowerCase().replace(/[:–—\-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
 
 // Load active Shopify product names ONCE (lazy, on first regenerate), cached for
 // the session, so name suggestions cross-check live products everywhere — not
@@ -3791,6 +3820,7 @@ function ensureShopifyNames(cb) {
   api('shopify_get_titles', {})
   .then(function(res) {
     if (res && res.titles) {
+      _shopifyExistingTitlesRaw = res.titles.slice();   // v57 — full titles for name-dup guard
       _shopifyExistingNames = res.titles.map(function(t) {
         return t.replace(/\s*-\s*[^-]+$/, '').trim();   // strip "- Color" suffix
       }).filter(function(n) { return n.length > 0; });
@@ -3907,6 +3937,7 @@ function openShopifyReview() {
   api('shopify_get_titles', {})
   .then(function(res) {
     if (res.titles) {
+      _shopifyExistingTitlesRaw = res.titles.slice();   // v57 — full titles for name-dup guard
       // Strip color suffix ("Iris Top - Navy" → "Iris Top"), keep base names
       _shopifyExistingNames = res.titles.map(function(t) {
         return t.replace(/\s*-\s*[^-]+$/, '').trim();
@@ -3914,7 +3945,42 @@ function openShopifyReview() {
     }
   })
   .catch(function() { _shopifyExistingNames = []; })
-  .finally(function() { _buildSpReview(inv); });
+  .finally(function() { _buildSpReview(inv); _spAutoCheckLive(); });
+}
+
+// v57 — on (re)open, quietly check each card's SKU against Shopify and mark the
+// ones already live, so reopening a saved invoice shows at a glance what's been
+// pushed and what's left — without tapping through each card. Sequential to be
+// gentle on the API; a failed check just leaves that card as Ready.
+function _spAutoCheckLive() {
+  var i = 0;
+  var found = 0;
+  el('sp-count').textContent = 'Checking what’s already live…';
+  function next() {
+    if (i >= _spCards.length) {
+      el('sp-count').textContent = found > 0
+        ? (found + ' already in Shopify · ' + (_spCards.length - found) + ' to push')
+        : (_spCards.length + ' product' + (_spCards.length === 1 ? '' : 's') + ' to push');
+      return;
+    }
+    var cd = _spCards[i++];
+    if (['success','added','skipped','pushing','restocking','duplicate'].indexOf(cd.state) >= 0) { next(); return; }
+    var sizes = ['XS','S','M','L','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+    var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
+    if (!checkSize) { next(); return; }
+    api('shopify_check_sku', { sku: cd.baseSku + '-' + checkSize })
+    .then(function(res) {
+      if (res && res.exists) {
+        cd.dupVariant = res.variant;
+        cd.nameDup = null;
+        found++;
+        _spSetState(cd, 'duplicate', '✓ Already in Shopify', 'Already in Shopify — Decide', 'sp-btn-warning');
+      }
+    })
+    .catch(function() {})
+    .finally(function() { next(); });
+  }
+  next();
 }
 
 function closeShopifyReview() {
@@ -3986,6 +4052,15 @@ function _buildSpReview(inv) {
           '<input type="text" class="field-input sp-vsku" autocomplete="off"/>' +
         '</div>';
 
+      // v57 — audit line: who is adding this and when (written to Shopify as
+      // custom.added_by / custom.added_at when pushed).
+      var _now = new Date();
+      var addedHtml =
+        '<div class="sp-added-row" style="padding:0 14px 10px;font-size:11px;color:var(--gray-text);">' +
+          'Added by ' + esc((SESSION && SESSION.name) || 'app') + ' · ' +
+          (_now.getMonth()+1) + '/' + _now.getDate() + '/' + _now.getFullYear() +
+        '</div>';
+
       var card = document.createElement('div');
       card.className = 'sp-card';
       card.setAttribute('data-state', 'idle');
@@ -4003,6 +4078,7 @@ function _buildSpReview(inv) {
         '</div>' +
         upcHtml +
         vskuHtml +
+        addedHtml +
         '<div class="sp-card-foot">' +
           '<button class="sp-push-btn">Push to Shopify</button>' +
         '</div>';
@@ -4105,7 +4181,7 @@ function _spSetState(cd, state, badgeText, btnText, btnExtra) {
   if (state === 'idle' || state === 'error') {
     btn.onclick = function() { _spPushCard(cd); };
   } else if (state === 'duplicate') {
-    btn.onclick = function() { showDupModal(cd); };
+    btn.onclick = function() { cd.nameDup ? _spNameDupModal(cd, cd.nameDup) : showDupModal(cd); };
   }
 
   _spUpdateProgress();
@@ -4122,6 +4198,7 @@ function _spUpdateProgress() {
 }
 
 function _spPushCard(cd) {
+  cd.nameDup = null;   // v57 — reset the name-duplicate flag on each attempt
   _spSetState(cd, 'checking', 'Checking…', 'Checking…');
 
   var oldErr = cd.card.querySelector('.sp-error-detail');
@@ -4139,6 +4216,23 @@ function _spPushCard(cd) {
       cd.dupVariant = res.variant;
       _spSetState(cd, 'duplicate', '⚠ In Shopify', '⚠ Already in Shopify — Decide', 'sp-btn-warning');
       showDupModal(cd);
+      return;
+    }
+    // v57 — NAME guard: the SKU didn't match, but a product with the SAME NAME
+    // may already exist under a different style code (the "Butter Me Up Lace
+    // Cami" duplicate). Compare the title we're about to create against every
+    // live Shopify title, separators normalized. If it matches, stop and let
+    // the user decide instead of silently creating a duplicate.
+    var wantTitle = (cd.style.name || cd.style.code) +
+      ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : '');
+    var wantKey = _normTitleKey(wantTitle);
+    var hit = null;
+    for (var i = 0; i < _shopifyExistingTitlesRaw.length; i++) {
+      if (_normTitleKey(_shopifyExistingTitlesRaw[i]) === wantKey) { hit = _shopifyExistingTitlesRaw[i]; break; }
+    }
+    if (hit) {
+      _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
+      _spNameDupModal(cd, hit);
       return;
     }
     _spDoCreate(cd);
@@ -4199,7 +4293,9 @@ function _spDoCreate(cd) {
     image_alt: cd.els ? cd.els.alt.value.trim() : '',
     images: _spChosenImages(cd),
     // v56 — vendor SKU rides to a custom.vendor_sku metafield (never the variant SKU)
-    vendor_sku: (cd.vskuInput ? cd.vskuInput.value.trim() : '') || (cd.style.sku || '')
+    vendor_sku: (cd.vskuInput ? cd.vskuInput.value.trim() : '') || (cd.style.sku || ''),
+    // v57 — fabric from invoice/vendor -> custom.fabric (+ standard shopify.fabric once seeded)
+    fabric: cd.style.fabric || cd.style.vendor_fabric || ''
   };
 
   // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
@@ -4278,6 +4374,22 @@ function closeDupModal() {
   var d = el('dup-modal');
   if (d) d.classList.remove('open');
   _activeDup = null;
+}
+
+// v57 — name-based duplicate: the SKU didn't match but the title already exists
+// in Shopify under a different code. "Add inventory" can't apply (no matching
+// SKU), so the choice is Create-anyway or leave it flagged (closing the modal
+// keeps the card in the ⚠ duplicate state so nothing is created silently).
+function _spNameDupModal(cd, existingTitle) {
+  cd.nameDup = existingTitle;
+  showModal(
+    'Already in Shopify?',
+    'A product named "' + existingTitle + '" is already in Shopify (under a different SKU/code). ' +
+    'Create this as a separate product anyway? Close this box to leave it flagged and not create it.',
+    function() { closeModal(); _spDoCreate(cd); },
+    true,
+    'Create anyway'
+  );
 }
 
 function dupDecision(choice) {
@@ -5129,6 +5241,15 @@ function _spInitDetails(cd){
   wrap.innerHTML =
     '<button type="button" class="sp-fetch-btn">&#8595; Get images &amp; fabric from ' + esc((currentInvoice && currentInvoice.vendor) || 'vendor') + '</button>' +
     '<div class="sp-fetch-status"></div>' +
+    // v57 — vendor-site registry: appears when the brand has no known website.
+    // Paste it once, it saves for this brand and every future scanned product.
+    '<div class="sp-vsite" style="display:none;margin-top:6px;">' +
+      '<label class="sp-l">Vendor website — paste once, saved for ' + esc((currentInvoice && currentInvoice.vendor) || 'this brand') + '</label>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<input class="field-input sp-vsite-input" placeholder="e.g. shakeyourbonbon.com" autocomplete="off"/>' +
+        '<button type="button" class="btn btn-black sp-vsite-save" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use &amp; save</button>' +
+      '</div>' +
+    '</div>' +
     '<div class="sp-images"></div>' +
     '<label class="sp-l">SEO title</label><input class="sp-seo-title" maxlength="60"/>' +
     '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
@@ -5143,6 +5264,9 @@ function _spInitDetails(cd){
   cd.els = {
     fetchBtn: wrap.querySelector('.sp-fetch-btn'),
     fetchStatus: wrap.querySelector('.sp-fetch-status'),
+    vsite: wrap.querySelector('.sp-vsite'),
+    vsiteInput: wrap.querySelector('.sp-vsite-input'),
+    vsiteSave: wrap.querySelector('.sp-vsite-save'),
     images: wrap.querySelector('.sp-images'),
     title: wrap.querySelector('.sp-seo-title'),
     desc: wrap.querySelector('.sp-seo-desc'),
@@ -5167,6 +5291,23 @@ function _spInitDetails(cd){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
   });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
+  // v57 — save the pasted vendor website, then immediately retry the fetch.
+  cd.els.vsiteSave.onclick = function(){
+    var vendor = (currentInvoice && currentInvoice.vendor) || '';
+    var dom = (cd.els.vsiteInput.value || '').trim();
+    if (!dom || dom.indexOf('.') < 0) { cd.els.fetchStatus.textContent = 'Enter a valid website, e.g. brand.com'; return; }
+    cd.els.vsiteSave.disabled = true;
+    cd.els.fetchStatus.textContent = 'Saving ' + vendor + ' website…';
+    api('vendor_site_save', { vendor: vendor, domain: dom })
+    .then(function(res){
+      cd.els.vsiteSave.disabled = false;
+      if (res.error) { cd.els.fetchStatus.textContent = res.error; return; }
+      _vendorDomains[_vendorKey(vendor)] = res.domain || dom;   // cache for every card this session
+      cd.els.vsite.style.display = 'none';
+      _spFetchVendor(cd);   // retry now that the site is known
+    })
+    .catch(function(e){ cd.els.vsiteSave.disabled = false; cd.els.fetchStatus.textContent = 'Save failed: ' + e.message; });
+  };
   _spSeoEnqueue(cd);
 }
 function _spSeoEnqueue(cd){ _spSeoQ.push(cd); _spSeoPump(); }
@@ -5205,13 +5346,23 @@ function _spGenSeo(cd, done){
   })
   .catch(function(e){ cd.els.title.placeholder = ''; cd.els.fetchStatus.textContent = 'SEO copy: ' + e.message; if (done) done(); });
 }
+// v57 — session cache of vendor->website so all cards for a brand reuse a
+// just-entered site without another save round-trip. Persistence lives in D1
+// (the worker looks it up), this is only an in-memory fast path.
+var _vendorDomains = {};
+function _vendorKey(v){ return String(v || '').toLowerCase().trim(); }
+
 function _spFetchVendor(cd){
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  var dom = _vendorDomains[_vendorKey(vendor)] || undefined;   // v57 — pass a saved/entered site if we have one
   cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
   cd.els.fetchBtn.disabled = true;
-  api('fetch_vendor_details', { vendor: vendor, styleCode: cd.style.code })
+  var req = { vendor: vendor, styleCode: cd.style.code };
+  if (dom) req.domain = dom;
+  api('fetch_vendor_details', req)
   .then(function(res){
     if (res.error) throw new Error(res.error);
+    if (cd.els.vsite) cd.els.vsite.style.display = 'none';   // known now
     var cands = res.candidates || [];
     if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; return; }
     var want = String(cd.colorObj.color || '').toLowerCase();
@@ -5219,7 +5370,16 @@ function _spFetchVendor(cd){
     if (!pick) { _spCandidatePicker(cd, cands); return; }
     _spUseCandidate(cd, pick);
   })
-  .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
+  .catch(function(e){
+    cd.els.fetchBtn.disabled = false;
+    // v57 — no known website for this brand? Reveal the paste-once field.
+    if (/unknown vendor|VENDOR_SITES|pass a domain/i.test(e.message || '')) {
+      cd.els.fetchStatus.textContent = 'No website on file for ' + vendor + '. Paste it once below and it saves for this brand.';
+      if (cd.els.vsite) cd.els.vsite.style.display = 'block';
+    } else {
+      cd.els.fetchStatus.textContent = e.message;
+    }
+  });
 }
 function _spCandidatePicker(cd, cands){
   cd.els.fetchStatus.textContent = 'Pick the match:';
@@ -5235,9 +5395,12 @@ function _spCandidatePicker(cd, cands){
 }
 function _spUseCandidate(cd, cand){
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  var dom = _vendorDomains[_vendorKey(vendor)] || undefined;
   cd.els.fetchStatus.textContent = 'Loading details…';
   if (cand.handle){
-    api('fetch_vendor_details', { vendor: vendor, handle: cand.handle })
+    var dreq = { vendor: vendor, handle: cand.handle };
+    if (dom) dreq.domain = dom;
+    api('fetch_vendor_details', dreq)
     .then(function(res){
       if (res.error) throw new Error(res.error);
       cd.images = res.images || cand.images || [];
