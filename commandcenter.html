@@ -465,6 +465,13 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
 .ov-start-row .why{font-size:11.5px; color:var(--ink-soft); margin-top:1px}
 .ov-start-row.done{opacity:.55}
 .ov-start-row.done .lbl{text-decoration:line-through}
+.ov-start-row .ov-grip{flex:none; cursor:grab; color:var(--ink-faint); font-size:14px; line-height:1; padding:2px 2px; user-select:none; -webkit-user-select:none}
+.ov-start-row .ov-grip:active{cursor:grabbing}
+.ov-start-row.dragging{opacity:.45}
+.ov-start-row.drop-above{box-shadow:inset 0 3px 0 0 var(--plum)}
+.ov-start-row.drop-below{box-shadow:inset 0 -3px 0 0 var(--plum)}
+.ov-reset{background:none; border:0; color:var(--ink-faint); font-family:var(--mono); font-size:10px; letter-spacing:.04em; cursor:pointer; text-decoration:underline; padding:0; margin-left:8px}
+.ov-reset:hover{color:var(--plum)}
 .ov-grid{display:grid; grid-template-columns:1.12fr .88fr; gap:14px 26px; align-items:start}
 @media (max-width:820px){ .ov-grid{grid-template-columns:1fr} }
 .ov-lever{display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--brass); border-radius:var(--radius-sm); padding:11px 14px; margin-bottom:8px; box-shadow:var(--shadow-sm)}
@@ -547,7 +554,7 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   <!-- ============ PANEL: OVERVIEW ============ -->
   <section class="panel on" id="panel-overview" role="tabpanel">
     <div class="ov-kpis" id="ovKpis"></div>
-    <div class="section-head"><h3>Start here</h3><span class="hint">Your priority order — work top to bottom. Tap a row to open it in the tracker.</span></div>
+    <div class="section-head"><h3>Start here</h3><span class="hint">Your priority order — drag the handle to reorder (saved automatically). Tap a row to open it in the tracker.<button type="button" class="ov-reset" id="ovResetOrder" onclick="resetPriorityOrder()">reset order</button></span></div>
     <div class="ov-start" id="ovStart"></div>
     <div class="ov-grid">
       <div class="ov-col">
@@ -808,8 +815,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26e -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26e</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt &middot; +11 style/occasion &amp; feed tasks (7/26)</div>
+    <!-- deploy_check: CC-2026.07.26f -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26f</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt &middot; +11 style/occasion &amp; feed tasks (7/26) &middot; drag-to-reorder Start Here</div>
   </div>
 </div>
 
@@ -1756,32 +1763,76 @@ function overviewDrill(go){
   if(typeof go.filter !== 'undefined') setTrackerFilter(go.filter);
   if(go.tab) goTab(go.tab);
 }
+// DEFAULT priority order (seed). The Start Here list is drag-reorderable and the order is
+// saved per-browser in localStorage (key mb_cc_priority_order); "reset order" clears it back to this.
+// Add a row here to introduce a new Start Here item; existing saved orders keep working and
+// append anything new at the bottom automatically (see orderedPriority()).
 var PRIORITY=[
   {match:'SoV baseline',            label:'Finish the SoV baseline run',            why:'Your before picture, and it gates blog content'},
   {match:'NAP hygiene',             label:'Kill the old Trigo Rd address',          why:'A wrong address confuses Google and AI about who you are'},
   {match:'Dedup entity',            label:'Finish the schema dedup',                why:'Clear the duplicate Organization block and warnings'},
+  {match:'Feed-complete audit',     label:'Run the feed-complete audit',            why:'Cheap unlock; GMC, Pinterest, TikTok and ChatGPT feed all wait on it'},
   {match:'Lever 2',                 label:'Lever 2 off-site "stocked at" outreach', why:'Highest payoff, barely started: 10 to 15 designer links'},
   {match:'Native reviews',          label:'Turn on native reviews',                 why:'Among the strongest citation signals; currently at zero'},
-  {match:'Build 6 vendor',          label:'Build the 6 vendor collection pages',    why:'Lever 3 hubs; copy already drafted, 2 per week'},
+  {match:'GMC free listings',       label:'GMC free listings + GA4 non-CA report',  why:'National discovery and your national-share metric; unblocked by the feed audit'},
+  {match:'cross-brand STYLE',       label:'Build cross-brand style + occasion collections', why:'Where a "cute jeans" shopper lands, not a brand page'},
   {match:'Collection pages: clean', label:'Clean the top 8 collection pages',        why:'Quick on-site wins: H1, meta, and a short intro'},
-  {match:'Expand Our Story',        label:'Expand the Our Story page',              why:'Your entity anchor, the page only you can own'},
+  {match:'Build 6 vendor',          label:'Build the 6 vendor collection pages',    why:'Lever 3 hubs; copy already drafted, 2 per week'},
+  {match:'Pinterest',               label:'Pinterest — reclaim, verify, product pins', why:'A style and occasion discovery feed for exactly this audience'},
   {match:'Post 1',                  label:'Blog Post 1: Motel Rocks stockist hub',  why:'Unlocks the content engine once the baseline is logged'},
-  {match:'GMC free listings',       label:'GMC free listings + GA4 non-CA report',  why:'National discovery and your national-share metric'}
+  {match:'Expand Our Story',        label:'Expand the Our Story page',              why:'Your entity anchor, the page only you can own'}
 ];
+/* ---- Start Here priority order: drag-reorderable, saved per-browser in localStorage ---- */
+var PRIORITY_LS_KEY='mb_cc_priority_order';
+var _dragKey=null;
+function loadPriorityOrder(){
+  try{ var raw=localStorage.getItem(PRIORITY_LS_KEY); if(!raw) return null; var a=JSON.parse(raw); return Array.isArray(a)?a:null; }catch(e){ return null; }
+}
+function savePriorityOrder(keys){ try{ localStorage.setItem(PRIORITY_LS_KEY, JSON.stringify(keys)); }catch(e){} }
+function orderedPriority(){
+  var saved=loadPriorityOrder();
+  if(!saved) return PRIORITY.slice();
+  var byKey={}; PRIORITY.forEach(function(p){ byKey[p.match]=p; });
+  var out=[];
+  saved.forEach(function(k){ if(byKey[k]){ out.push(byKey[k]); delete byKey[k]; } });   // saved order first
+  PRIORITY.forEach(function(p){ if(byKey[p.match]) out.push(p); });                       // then any new-in-code items, appended
+  return out;
+}
+function reorderPriority(fromKey, toKey, before){
+  var list=orderedPriority().map(function(p){ return p.match; });
+  var fi=list.indexOf(fromKey); if(fi<0) return;
+  list.splice(fi,1);
+  var ti=list.indexOf(toKey);
+  if(ti<0){ list.push(fromKey); } else { list.splice(before?ti:ti+1, 0, fromKey); }
+  savePriorityOrder(list);
+  renderStartHere();
+}
+function resetPriorityOrder(){
+  try{ localStorage.removeItem(PRIORITY_LS_KEY); }catch(e){}
+  renderStartHere();
+  if(typeof toast==='function'){ toast('Priority order reset to default'); }
+}
 function renderStartHere(){
   var el=document.getElementById('ovStart'); if(!el) return;
   el.innerHTML='';
-  PRIORITY.forEach(function(p,i){
+  orderedPriority().forEach(function(p,i){
     var t=TASKS.find(function(x){ return (x.t||'').toLowerCase().indexOf(p.match.toLowerCase())>-1; });
     var st=t?t.st:'pend';
     var d=document.createElement('div'); d.className='ov-start-row'+(st==='done'?' done':'');
+    d.setAttribute('draggable','true');
+    d.dataset.key=p.match;
     if(t){ d.setAttribute('role','button'); d.setAttribute('tabindex','0'); }
-    d.innerHTML='<span class="n">'+(i+1)+'</span><div class="mid"><div class="lbl">'+esc(p.label)+'</div><div class="why">'+esc(p.why)+'</div></div><span class="pill '+st+'">'+STATUS_LABEL[st]+'</span>';
+    d.innerHTML='<span class="ov-grip" title="Drag to reorder" aria-hidden="true">&#9783;</span><span class="n">'+(i+1)+'</span><div class="mid"><div class="lbl">'+esc(p.label)+'</div><div class="why">'+esc(p.why)+'</div></div><span class="pill '+st+'">'+STATUS_LABEL[st]+'</span>';
     if(t){
       var open=function(){ var s=document.getElementById('search'); if(s){ s.value=t.t; searchTerm=t.t; } setTrackerFilter('all'); goTab('tracker'); };
-      d.addEventListener('click', open);
+      d.addEventListener('click', function(ev){ if(ev.target && ev.target.classList.contains('ov-grip')) return; open(); });
       d.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
     }
+    d.addEventListener('dragstart', function(ev){ _dragKey=p.match; d.classList.add('dragging'); try{ ev.dataTransfer.effectAllowed='move'; ev.dataTransfer.setData('text/plain', p.match); }catch(_){} });
+    d.addEventListener('dragend', function(){ _dragKey=null; d.classList.remove('dragging'); Array.prototype.forEach.call(el.children, function(c){ c.classList.remove('drop-above','drop-below'); }); });
+    d.addEventListener('dragover', function(ev){ ev.preventDefault(); try{ ev.dataTransfer.dropEffect='move'; }catch(_){} var r=d.getBoundingClientRect(); var before=(ev.clientY - r.top) < r.height/2; d.classList.toggle('drop-above', before); d.classList.toggle('drop-below', !before); });
+    d.addEventListener('dragleave', function(){ d.classList.remove('drop-above','drop-below'); });
+    d.addEventListener('drop', function(ev){ ev.preventDefault(); var r=d.getBoundingClientRect(); var before=(ev.clientY - r.top) < r.height/2; d.classList.remove('drop-above','drop-below'); var from=_dragKey, to=p.match; if(!from || from===to) return; reorderPriority(from, to, before); });
     el.appendChild(d);
   });
 }
