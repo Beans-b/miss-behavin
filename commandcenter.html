@@ -68,12 +68,12 @@ h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
   display:flex; align-items:center; gap:18px; justify-content:space-between}
 .brandblock{display:flex; align-items:center; gap:14px; min-width:0}
 .crest{width:44px; height:44px; flex:none; border-radius:50%; display:grid; place-items:center;
-  background:radial-gradient(circle at 30% 25%, #fff2, transparent 60%), var(--plum);
-  border:1.5px solid var(--brass); box-shadow:var(--shadow-sm)}
+  background:#000;
+  border:1.5px solid #000; box-shadow:var(--shadow-sm)}
 .crest span{font-family:var(--serif); font-weight:600; font-style:italic; color:#fff; font-size:22px; line-height:1}
 .wordmark{min-width:0}
-.wordmark h1{font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.05; letter-spacing:-.02em}
-.wordmark h1 em{font-style:italic; color:var(--plum)}
+.wordmark h1{font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.05; letter-spacing:-.02em; color:#000}
+.wordmark h1 em{font-style:italic; color:#D62828}
 .wordmark .sub{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase;
   color:var(--ink-soft); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .mast-right{display:flex; align-items:center; gap:16px; flex:none}
@@ -117,7 +117,7 @@ h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
 .section-head .hint{color:var(--ink-faint); font-size:12.5px}
 .section-head.collapsible{cursor:pointer}
 .section-head.collapsible:hover h3{color:var(--plum)}
-.section-head .sh-toggle{margin-left:auto; color:var(--ink-faint); font-size:15px; line-height:1; transition:transform .15s ease; align-self:center}
+.section-head .sh-toggle{margin-left:auto; color:var(--ink-faint); font-size:22px; line-height:1; transition:transform .15s ease; align-self:center}
 .section-head.collapsed .sh-toggle{transform:rotate(-90deg)}
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
 .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
@@ -522,10 +522,7 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
 <div class="wrap">
 
   <div class="apphead">
-    <div class="apphead-l">
-      <div class="eyebrow">SEO · AEO · GEO · Program control</div>
-      <h2 class="apphead-title">shopmissbehavin.com <span>· national growth</span></h2>
-    </div>
+    <div class="apphead-l"></div>
     <div class="livebar" id="livebar" title="Tap to refresh"><span id="livemsg">Connecting to your store…</span> <span class="livecount" id="livecount"></span></div>
   </div>
 
@@ -809,8 +806,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Create Prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26a</b> &middot; collapsible Overview sections + Guardrails card removed</div>
+    <!-- deploy_check: CC-2026.07.26b -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26b</b> &middot; collapsible sections, Guardrails removed, black/red logo, header line trimmed</div>
   </div>
 </div>
 
