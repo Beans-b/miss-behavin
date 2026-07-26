@@ -791,15 +791,16 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   <!-- ============ FOOTER ============ -->
   <div class="foot">
     <div class="note" id="footNote">
-      Reconciled against the uploaded Stage 1 to 4 master plan, the citation-levers tracker (7/16), the Lever-2 outreach kit (7/18), and the Jul 23 live-site audit. Goals and Keywords are modeled on the leading SEO and AI-visibility tools (Jul 2026 research). Feed live numbers from Search Console, GA4, a keyword export, and manual AI checks. State lives in memory: use Save snapshot to keep your edits.
+      Reconciled against the uploaded Stage 1 to 4 master plan, the citation-levers tracker (7/16), the Lever-2 outreach kit (7/18), and the Jul 23 live-site audit. Goals and Keywords are modeled on the leading SEO and AI-visibility tools (Jul 2026 research). Feed live numbers from Search Console, GA4, a keyword export, and manual AI checks. State auto-saves to your store account. Use <b>Copy chat starter</b> to hand the current state to a new Claude chat; <b>Save snapshot</b> exports raw JSON only if you want a file backup.
     </div>
     <div class="actions">
       <button class="btn" id="btnPrint">Print / PDF</button>
       <button class="btn" id="btnMd">Copy as Markdown</button>
-      <button class="btn primary" id="btnJson">Save snapshot</button>
+      <button class="btn" id="btnJson">Save snapshot</button>
+      <button class="btn primary" id="btnStarter">Copy chat starter</button>
     </div>
     <!-- deploy_check: CC-2026.07.25a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.25b</b> &middot; Start-here list + clickable cards + pick-the-status menu</div>
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.25c</b> &middot; chat-starter export + Start-here list + clickable cards + status menu</div>
   </div>
 </div>
 
@@ -1296,6 +1297,41 @@ function toMarkdown(){
   s.sov.forEach(r=>{ m+=`| ${r.query} | ${r.google} | ${r.chatgpt} | ${r.perplexity} | ${r.gemini} |\n`; });
   return m;
 }
+// A paste-ready starter for a fresh Claude chat: business context, the files to
+// trust, the hard guardrails, the priority order (live status), and the full
+// board WITH each task's context note — then a "Today's task" line to fill in.
+function toChatStarter(){
+  var s=snapshot();
+  var L=[];
+  L.push("# Miss Behavin' — SEO / AEO / GEO working session");
+  L.push("_Live snapshot from the Command Center · "+s.generated.slice(0,10)+" · Day "+s.day+" of 90_");
+  L.push("");
+  L.push("## How to use this");
+  L.push("You are my execution partner on Miss Behavin's SEO/AEO/GEO program. This is a snapshot from my Command Center dashboard. Read it, then help me finish the ONE task I name under \"Today's task\" at the bottom. Ask before anything that changes the live store or site.");
+  L.push("");
+  L.push("## Business");
+  L.push("Miss Behavin', women's boutique, 322 Paseo Nuevo, Santa Barbara CA 93101, since 2007. Owner Kelly; I'm Brian (I execute and deploy). Storefront shopmissbehavin.com; Shopify store miss-behavin-2. Stage 4 goal is national online sales through SEO/AEO/GEO. North star: the most-cited women's boutique in AI shopping answers, tracked by a weekly share-of-voice panel.");
+  L.push("");
+  L.push("## Reference files (use these; ignore the older loose files on my Desktop)");
+  L.push("- This Claude Project holds the current canonical docs — read from it first.");
+  L.push("- Key files: 0_START_HERE, 0_ROADMAP_corrected, 0_ENV_SHOPIFY_NOTES (Shopify Spring '26 admin paths — read before any admin steps), missb_START_HERE_priority_order, the Lever-2 outreach kit.");
+  L.push("- Live dashboard: linesheet.theclearstack.com/commandcenter");
+  L.push("");
+  L.push("## Guardrails (hard)");
+  L.push("- Never change product titles, handles, tags, prices, variants, SKUs, barcodes, or inventory. SEO happens only in search-listing fields, descriptions, metafields, and theme sections; fill empty, never overwrite.");
+  L.push("- Worker/app edits: the live source lives only in Cloudflare — back it up, run node --check, bump the deploy_check tag. commandcenter.html deploys at the ROOT of the Beans-b/miss-behavin repo (a GitHub upload triggers Cloudflare Pages).");
+  L.push("- Style: give me a direct recommendation and why (not a menu), step-by-step, plain language, no fabricated metrics, never the word \"literally\", minimal hyphens.");
+  L.push("");
+  L.push("## Priority order (work top to bottom)");
+  PRIORITY.forEach(function(p,i){ var t=TASKS.find(function(x){ return (x.t||'').toLowerCase().indexOf(p.match.toLowerCase())>-1; }); var st=t?STATUS_LABEL[t.st]:'To do'; L.push((i+1)+". ["+st+"] "+p.label+" — "+p.why); });
+  L.push("");
+  L.push("## Full board (status + the brief for each task)");
+  STREAMS.forEach(function(sm){ var rows=TASKS.filter(function(t){ return t.s===sm.id; }); if(!rows.length) return; L.push(""); L.push("### "+sm.name); rows.forEach(function(t){ L.push("- ["+(t.st==='done'?'x':' ')+"] **"+STATUS_LABEL[t.st]+"** — "+t.t+(t.o?" _("+t.o+")_":"")); if(t.n) L.push("  - context: "+t.n); }); });
+  L.push("");
+  L.push("## Today's task");
+  L.push("> Replace this line with the one task from the board above you want to finish. Its \"context\" line is the brief. If it names a file, point me to that file.");
+  return L.join("\n");
+}
 function download(name,content,type){
   const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
@@ -1768,6 +1804,7 @@ function init(){
   document.getElementById('btnPrint').onclick=()=>window.print();
   document.getElementById('btnMd').onclick=async()=>{ try{ await navigator.clipboard.writeText(toMarkdown()); toast('Markdown snapshot copied'); }catch(e){ download('missbehavin-seo-snapshot.md',toMarkdown(),'text/markdown'); toast('Downloaded Markdown snapshot'); } };
   document.getElementById('btnJson').onclick=()=>{ download('missbehavin-seo-snapshot-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(snapshot(),null,2),'application/json'); toast('Snapshot saved'); };
+  document.getElementById('btnStarter').onclick=async()=>{ try{ await navigator.clipboard.writeText(toChatStarter()); toast('Chat starter copied — paste into a new chat in this project'); }catch(e){ download('missbehavin-chat-starter.md',toChatStarter(),'text/markdown'); toast('Downloaded chat starter'); } };
   setInterval(persist, 4000);
   window.addEventListener('beforeunload', persist);
   document.addEventListener('visibilitychange', function(){ if(document.hidden) persist(); });
