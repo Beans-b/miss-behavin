@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 58</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 59</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3543,7 +3543,7 @@ function manualPull(){
         row.querySelector('.man-retail').value ||
         row.querySelector('.man-cost').value ||
         (row.querySelector('.man-upc') && row.querySelector('.man-upc').value.trim()) ||   // build 39
-        ['XS','S','M','L','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
+        ['XS','S','M','L','XL','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
       if (!hasData) row.remove();
     });
     el('man-url').value = '';
@@ -3582,7 +3582,7 @@ function manualFormChanged(){
     var need = [];
     if (!row.querySelector('.man-name').value.trim()) need.push('style name');
     if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
-    var qty = ['XS','S','M','L','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
+    var qty = ['XS','S','M','L','XL','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
     if (!(qty > 0)) need.push('a quantity');
     if (!need.length) { rowOk = true; }
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
@@ -3632,7 +3632,7 @@ function manualSizeMode(btn, mode){
   var bOs = row.querySelector('.man-mode-os'), bSized = row.querySelector('.man-mode-sized');
   if (mode === 'os') {
     os.style.display = 'flex'; sized.style.display = 'none';
-    ['XS','S','M','L'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
+    ['XS','S','M','L','XL'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
     bOs.classList.add('man-mode-on'); bSized.classList.remove('man-mode-on');
   } else {
     os.style.display = 'none'; sized.style.display = 'flex';
@@ -3666,7 +3666,7 @@ function manualAddRow(){
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
     '<div class="man-qty-sized" style="display:none;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      ['XS','S','M','L'].map(function(sz){
+      ['XS','S','M','L','XL'].map(function(sz){
         return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
@@ -3712,7 +3712,7 @@ function manualStart(){
     var retail = parseFloat(row.querySelector('.man-retail').value);
     var cost = parseFloat(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
-    ['XS','S','M','L','OS'].forEach(function(sz){
+    ['XS','S','M','L','XL','OS'].forEach(function(sz){
       var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
       if (q > 0) sizes[sz] = q;
     });
@@ -3965,7 +3965,7 @@ function _spAutoCheckLive() {
     }
     var cd = _spCards[i++];
     if (['success','added','skipped','pushing','restocking','duplicate'].indexOf(cd.state) >= 0) { next(); return; }
-    var sizes = ['XS','S','M','L','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+    var sizes = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
     var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
     if (!checkSize) { next(); return; }
     api('shopify_check_sku', { sku: cd.baseSku + '-' + checkSize })
@@ -4009,30 +4009,34 @@ function _buildSpReview(inv) {
       var slug    = _spColorSlug(colorObj.color);
       var baseSku = style.code + '-' + slug;
 
-      var sizeOrder = ['XS', 'S', 'M', 'L', 'OS']; // OS = One Size (accessories)
+      // build 59 — gather quantities across all apparel sizes (incl. XL) + OS.
+      var gatherOrder = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
       var activeSizes = {};
-      sizeOrder.forEach(function(sz) {
+      gatherOrder.forEach(function(sz) {
         var q = (colorObj.sizes || {})[sz] || 0;
         if (q > 0) activeSizes[sz] = q;
       });
       if (!Object.keys(activeSizes).length) return;
 
+      // build 59 — an OS quantity means one-size (accessory). Everything else is
+      // apparel and shows the FULL XS,S,M,L,XL run (0s included) so what you see
+      // matches what gets created — no more "missing XS" surprises.
+      var isOneSize = !!activeSizes['OS'];
+      var displaySizes = isOneSize ? ['OS'] : ['XS', 'S', 'M', 'L', 'XL'];
       var sizeHtml = '';
-      sizeOrder.forEach(function(sz) {
-        if (!activeSizes[sz]) return;
+      displaySizes.forEach(function(sz) {
+        var q = activeSizes[sz] || 0;
         sizeHtml +=
-          '<div class="sp-size-cell">' +
+          '<div class="sp-size-cell"' + (q === 0 ? ' style="opacity:.45;"' : '') + '>' +
             '<div class="sp-sz-label">' + sz + '</div>' +
-            '<div class="sp-sz-qty">' + activeSizes[sz] + '</div>' +
+            '<div class="sp-sz-qty">' + q + '</div>' +
           '</div>';
       });
 
-      // build 39 — real UPCs flow to Shopify. Only single-variant cards get
-      // the field: a style-level UPC can never be copied across sizes
-      // (duplicate barcodes make POS scans ambiguous; per-size capture is a
-      // later phase). Multi-size styles keep SKU barcodes, unchanged.
-      var oneVariant = Object.keys(activeSizes).length === 1;
-      var upcHtml = oneVariant
+      // build 39/59 — real UPCs flow to Shopify. Only ONE-SIZE cards get the
+      // field: a style-level UPC can never be copied across apparel sizes
+      // (duplicate barcodes make POS scans ambiguous).
+      var upcHtml = isOneSize
         ? '<div class="sp-upc-row" style="padding:0 14px 10px;">' +
             '<label class="sp-l">UPC / GTIN from packaging (optional — scan or type)</label>' +
             '<div style="display:flex;gap:6px;">' +
@@ -4209,7 +4213,7 @@ function _spPushCard(cd) {
   if (oldErr) oldErr.remove();
 
   // Canonical SKU to check: prefer S, fall back to first active size
-  var sizes     = ['XS','S','M','L','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+  var sizes     = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
   var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
   var checkSku  = cd.baseSku + '-' + checkSize;
 
@@ -4250,27 +4254,33 @@ function _spPushCard(cd) {
 function _spDoCreate(cd) {
   _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
 
-  var sizeOrder = ['XS','S','M','L','OS'];
-  // build 39 — a valid UPC on a SINGLE-variant style becomes that variant's
-  // barcode (real GTINs fix the GSC "Invalid GTIN" errors and feed Merchant
-  // Center properly). Multi-size styles keep barcode = sku: one style-level
-  // UPC must never be copied across sizes (ambiguous POS scans). An invalid
-  // UPC falls back to the SKU code — it never blocks the push.
+  // build 59 — SIZE INTEGRITY. Apparel is ALWAYS created with the full
+  // XS,S,M,L,XL run (sizes not on the invoice get 0 stock) so every product has
+  // an identical variant structure and inventory can never shift into the wrong
+  // size when a missing size is restocked later. True one-size items (OS —
+  // accessories) still create a single variant. isOneSize keys off an explicit
+  // OS quantity, so a lone "S" on an invoice is treated as apparel, not one-size.
+  var APPAREL_SIZES = ['XS','S','M','L','XL'];
+  var isOneSize = !!cd.activeSizes['OS'];
   var upcVal = cd.upcInput ? gtinDigits(cd.upcInput.value) : '';
-  var useUpc = !!(upcVal && isGtin(upcVal) && Object.keys(cd.activeSizes).length === 1);
+  var useUpc = !!(upcVal && isGtin(upcVal) && isOneSize);   // UPC → barcode only on one-size items
   var variants  = [];
-  sizeOrder.forEach(function(sz) {
-    var qty = cd.activeSizes[sz];
-    if (!qty) return;
-    var sku = cd.baseSku + '-' + sz;
+  if (isOneSize) {
+    var osSku = cd.baseSku + '-OS';
     variants.push({
-      size: sz,
-      price: cd.retail.toFixed(2),
-      sku: sku,
-      barcode: useUpc ? upcVal : sku,   // every variant gets a scannable barcode value
-      quantity: qty
+      size: 'OS', price: cd.retail.toFixed(2), sku: osSku,
+      barcode: useUpc ? upcVal : osSku, quantity: cd.activeSizes['OS'] || 0
     });
-  });
+  } else {
+    APPAREL_SIZES.forEach(function(sz) {
+      var sku = cd.baseSku + '-' + sz;
+      variants.push({
+        size: sz, price: cd.retail.toFixed(2), sku: sku,
+        barcode: sku,                       // every variant gets a scannable barcode value
+        quantity: cd.activeSizes[sz] || 0   // 0 for sizes not on the invoice — the variant still exists
+      });
+    });
+  }
 
   // build 48 — Invoice type → Shopify product_type + collection tag. _typeMap is now the
   // global single source of truth (defined with the Type picker up top). An
@@ -4286,8 +4296,14 @@ function _spDoCreate(cd) {
     title: (cd.style.name || cd.style.code) + ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : ''),
     vendor: (currentInvoice && currentInvoice.vendor) || "Miss Behavin'",
     product_type: typeEntry.shopify,
-    tags: [cd.colorObj.color, typeEntry.tag].filter(function(x){ return x && x !== 'Default'; }),
-    sizes: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }),
+    // build 59 — color + type here; the editable Tags field adds the style name
+    // and AI feature tags (lace, boy short…). Worker also ensures color/type/
+    // brand/fabric. All merged + deduped server-side.
+    tags: [cd.colorObj.color, typeEntry.tag]
+      .concat((cd.els && cd.els.tags ? cd.els.tags.value.split(',') : []))
+      .map(function(t){ return String(t || '').trim(); })
+      .filter(function(x){ return x && x !== 'Default'; }),
+    sizes: isOneSize ? ['OS'] : APPAREL_SIZES,   // build 59 — full apparel run, OS for one-size
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
     seo_title: cd.els ? cd.els.title.value.trim() : '',
@@ -4306,7 +4322,9 @@ function _spDoCreate(cd) {
   api('shopify_create_product', { product: product, collectionNames: ['New Arrivals'] })
   .then(function(res) {
     if (res.error) throw new Error(res.error);
+    cd.productGid = res.product_gid || null;   // v59 — remember it so images can be added after
     _spSetState(cd, 'success', '✓ Live', '✓ Live in Shopify', 'sp-btn-success');
+    if (cd.els) _spRenderImages(cd);           // refresh so the "add images to live product" button appears
 
     if (res.warnings && res.warnings.length) {
       _spShowErrorDetail(cd, 'Note: ' + res.warnings.join(' · '), 'color:var(--gray-text);');
@@ -5263,7 +5281,10 @@ function _spInitDetails(cd){
         ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Shorts','Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear','Jewelry','Bags','Accessories','Shoes']
           .map(function(c){ return '<option>'+c+'</option>'; }).join('') + '</select></div>' +
       '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
-    '</div>';
+    '</div>' +
+    // v59 — editable Tags (color, type, brand, fabric auto-added by the worker;
+    // this field carries the style name + AI feature tags like "lace"). Comma-separated.
+    '<label class="sp-l">Tags (comma-separated)</label><input class="sp-seo-tags" placeholder="lace, boy short, Butter Me Up…"/>';
   cd.card.insertBefore(wrap, cd.card.querySelector('.sp-card-foot'));
   cd.els = {
     fetchBtn: wrap.querySelector('.sp-fetch-btn'),
@@ -5276,7 +5297,8 @@ function _spInitDetails(cd){
     desc: wrap.querySelector('.sp-seo-desc'),
     bodyd: wrap.querySelector('.sp-seo-body'),
     cat: wrap.querySelector('.sp-seo-cat'),
-    alt: wrap.querySelector('.sp-seo-alt')
+    alt: wrap.querySelector('.sp-seo-alt'),
+    tags: wrap.querySelector('.sp-seo-tags')
   };
   cd.images = []; cd.userEdited = false;
   // v32 — manual-entry styles pulled from a vendor page arrive with photos:
@@ -5291,7 +5313,7 @@ function _spInitDetails(cd){
     _spRenderImages(cd);
     if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page' + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
   }
-  ['title','desc','bodyd','cat','alt'].forEach(function(k){
+  ['title','desc','bodyd','cat','alt','tags'].forEach(function(k){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
   });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
@@ -5346,6 +5368,17 @@ function _spGenSeo(cd, done){
     cd.els.bodyd.value = j.body_description || '';
     cd.els.cat.value   = j.product_category || '';
     cd.els.alt.value   = j.image_alt || '';
+    // v59 — prefill Tags with the style name + AI feature tags (color, type,
+    // brand, fabric are added automatically by the worker at push). Deduped.
+    if (cd.els.tags) {
+      var _seen = {}, _tags = [];
+      [cd.style.printed_name || cd.style.name].concat(j.tags || []).forEach(function(t){
+        var v = String(t || '').trim();
+        var k = v.toLowerCase();
+        if (v && !_seen[k]) { _seen[k] = 1; _tags.push(v); }
+      });
+      cd.els.tags.value = _tags.join(', ');
+    }
     if (done) done();
   })
   .catch(function(e){ cd.els.title.placeholder = ''; cd.els.fetchStatus.textContent = 'SEO copy: ' + e.message; if (done) done(); });
@@ -5445,6 +5478,38 @@ function _spRenderImages(cd){
     };
     cd.els.images.appendChild(t);
   }
+  // v59 — if this product is already LIVE (pushed, or already in Shopify) show a
+  // button to attach the currently-selected images without re-pushing. Solves
+  // "I forgot to add images before I hit push."
+  var liveId = _spLiveProductId(cd);
+  if (liveId && (cd.images || []).length) {
+    var ab = document.createElement('button');
+    ab.type = 'button'; ab.className = 'btn btn-black';
+    ab.style.cssText = 'width:100%;margin-top:8px;';
+    ab.textContent = '＋ Add selected images to the live product';
+    ab.onclick = function(){ _spAddImagesToLive(cd, ab); };
+    cd.els.images.appendChild(ab);
+  }
+}
+// v59 — the live product's GID: set on push (cd.productGid) or, for an item
+// already in Shopify, read off the duplicate variant's product.
+function _spLiveProductId(cd){
+  return cd.productGid || (cd.dupVariant && cd.dupVariant.product && cd.dupVariant.product.id) || null;
+}
+function _spAddImagesToLive(cd, btn){
+  var pid = _spLiveProductId(cd);
+  if (!pid){ cd.els.fetchStatus.textContent = 'Push this product first, then add images.'; return; }
+  var imgs = _spChosenImages(cd);
+  if (!imgs.length){ cd.els.fetchStatus.textContent = 'Tap the photos you want (they turn on), then add.'; return; }
+  if (btn) btn.disabled = true;
+  cd.els.fetchStatus.textContent = 'Adding ' + imgs.length + ' image(s) to the live product…';
+  api('shopify_add_images', { product_gid: pid, images: imgs, alt: (cd.els.alt && cd.els.alt.value) || '' })
+  .then(function(res){
+    if (btn) btn.disabled = false;
+    if (res.error) throw new Error(res.error);
+    cd.els.fetchStatus.textContent = '✓ Added ' + (res.added || imgs.length) + ' image(s) to the live product.';
+  })
+  .catch(function(e){ if (btn) btn.disabled = false; cd.els.fetchStatus.textContent = 'Add images failed: ' + e.message; });
 }
 function _spChosenImages(cd){
   var out = [];
