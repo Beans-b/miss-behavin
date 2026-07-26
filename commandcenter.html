@@ -189,6 +189,15 @@ button.pill::after{content:'\25BE'; margin-left:5px; font-size:9px; opacity:.55}
 .status-menu .sdot.done{background:var(--done)} .status-menu .sdot.prog{background:var(--prog)} .status-menu .sdot.pend{background:var(--pend)} .status-menu .sdot.block{background:var(--block)} .status-menu .sdot.monitor{background:var(--monitor)}
 .status-menu .slabel{flex:1}
 .status-menu .scur{font-size:9.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em}
+.prompt-ov{position:fixed; inset:0; z-index:300; background:rgba(35,32,42,.45); display:flex; align-items:center; justify-content:center; padding:24px}
+.prompt-modal{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:0 24px 60px rgba(35,32,42,.35); width:min(760px,100%); max-height:86vh; display:flex; flex-direction:column; padding:20px}
+.prompt-head{display:flex; align-items:center; justify-content:space-between}
+.prompt-head h3{margin:0; font-size:16px}
+.prompt-x{background:none; border:0; font-size:22px; line-height:1; color:var(--ink-soft); cursor:pointer}
+.prompt-sub{font-size:12.5px; color:var(--ink-soft); margin:6px 0 12px}
+.prompt-ta{flex:1; min-height:320px; width:100%; resize:vertical; font-family:var(--mono); font-size:12px; line-height:1.5; color:var(--ink); background:#faf9fb; border:1px solid var(--line); border-radius:10px; padding:12px; white-space:pre; overflow:auto}
+.prompt-actions{display:flex; align-items:center; gap:10px; margin-top:12px}
+.prompt-note{font-size:12px; color:var(--done); font-weight:600}
 .task-main{flex:1; min-width:0}
 .task-title{font-weight:600; font-size:14.5px; line-height:1.35}
 .task-tags{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; align-items:center}
@@ -791,16 +800,15 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   <!-- ============ FOOTER ============ -->
   <div class="foot">
     <div class="note" id="footNote">
-      Reconciled against the uploaded Stage 1 to 4 master plan, the citation-levers tracker (7/16), the Lever-2 outreach kit (7/18), and the Jul 23 live-site audit. Goals and Keywords are modeled on the leading SEO and AI-visibility tools (Jul 2026 research). Feed live numbers from Search Console, GA4, a keyword export, and manual AI checks. State auto-saves to your store account. Use <b>Copy chat starter</b> to hand the current state to a new Claude chat; <b>Save snapshot</b> exports raw JSON only if you want a file backup.
+      Reconciled against the uploaded Stage 1 to 4 master plan, the citation-levers tracker (7/16), the Lever-2 outreach kit (7/18), and the Jul 23 live-site audit. Goals and Keywords are modeled on the leading SEO and AI-visibility tools (Jul 2026 research). Feed live numbers from Search Console, GA4, a keyword export, and manual AI checks. State auto-saves to your store account. Use <b>Create Prompt</b> to generate a paste-ready prompt for a new Claude chat.
     </div>
     <div class="actions">
       <button class="btn" id="btnPrint">Print / PDF</button>
       <button class="btn" id="btnMd">Copy as Markdown</button>
-      <button class="btn" id="btnJson">Save snapshot</button>
-      <button class="btn primary" id="btnStarter">Copy chat starter</button>
+      <button class="btn primary" id="btnStarter">Create Prompt</button>
     </div>
     <!-- deploy_check: CC-2026.07.25a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.25c</b> &middot; chat-starter export + Start-here list + clickable cards + status menu</div>
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.25e</b> &middot; citation program wired (schema verified, IndexNow, ChatGPT playbook, 90-day refresh) + Create Prompt modal + Start-here list + status menu</div>
   </div>
 </div>
 
@@ -833,13 +841,15 @@ const TASKS = [
   {s:'tech', st:'prog',    t:'Fill-empty search-listing meta, in batches', o:'Brian', n:'Product + collection page titles / meta descriptions via the search-engine-listing fields only. Fill-empty, never overwrite. 10 at a time; titles never touched (POS tags).'},
   {s:'tech', st:'pend',    t:'Sitemap lists only live canonical URLs', o:'Brian', n:'Verify no soft-404s or dead handles in sitemap.xml; every page self-canonical.'},
   {s:'tech', st:'pend',    t:'Core Web Vitals field check', o:'Brian', n:'PageSpeed Insights mobile + desktop; read CrUX in GSC. Targets: LCP <2.5s, INP <200ms, CLS <0.1 at 75th pct.'},
-  // SCHEMA — CORRECTED 7/23 (later same day): "zero JSON-LD" was a FALSE NEGATIVE. Schema is injected client-side via JS; Rich Results Test on /products/coco-top = 9 valid items. Refine, don't rebuild.
-  {s:'schema', st:'done', t:'Organization + WebSite JSON-LD (present, sitewide)', o:'Brian', n:'PRESENT & valid — injected client-side via JavaScript, so server-side fetches read empty (that was the 7/23 AM "zero JSON-LD" false negative). Rich Results Test on /products/coco-top (7/23) = 9 valid items incl. Organization. Do NOT add a second sitewide block — see the dedup task (Organization x2).'},
-  {s:'schema', st:'done', t:'LocalBusiness / ClothingStore (present)', o:'Brian', n:'PRESENT in the rendered schema (2 Local businesses detected 7/23). NAP: 322 Paseo Nuevo, Santa Barbara CA 93101, 805-968-2840. Remaining = verify sameAs/NAP completeness in the injected markup and resolve the 2x duplication (see dedup task). Do NOT add a duplicate block.'},
+  {s:'tech', st:'pend',    t:'IndexNow — ping Bing same-day (ChatGPT ~40% Bing)', o:'Brian', n:'Not set up (verified 7/25: no IndexNow key referenced). Install a free IndexNow app in Shopify so drops/edits ping Bing on publish. Acceptance: the key file resolves at the domain root (https://www.shopmissbehavin.com/<key>.txt) and Bing Webmaster IndexNow report shows submissions. Steps in 0_INDEXNOW_SETUP_2026-07-25.md.'},
+  // SCHEMA — RE-VERIFIED 7/25 against raw SERVER HTML (JS off = what AI crawlers see). Schema is SERVER-RENDERED, not client-only. Present on home/collection/product/blog. #1 critical fix is done; remaining work is enrichment.
+  {s:'schema', st:'done', t:'Organization + WebSite JSON-LD (server-rendered, sitewide)', o:'Brian', n:'PRESENT & server-rendered — verified 7/25 by raw fetch (JS off): Organization + WebSite (SearchAction) in the initial HTML on every page type, so AI crawlers and Bing read it. Supersedes the 7/23 notes (the "client-side injected" theory was wrong; the 7/23 AM "zero JSON-LD" was a stale/partial read). Do NOT add a second sitewide block — see the dedup task (Organization x2).'},
+  {s:'schema', st:'done', t:'LocalBusiness / ClothingStore (server-rendered)', o:'Brian', n:'PRESENT & server-rendered (verified 7/25). NAP correct in schema: 322 Paseo Nuevo, Santa Barbara CA 93101, +1-805-968-2840 (no stale 6551/Trigo). Gap: sameAs has only IG/FB/TikTok — enrich (see sameAs task). Resolve the 2x Organization duplication (see dedup task).'},
   {s:'schema', st:'done', t:'Product + Offer schema (present)', o:'Brian', n:'PRESENT — Rich Results Test 7/23: Product x1 + Merchant listings x4 valid (non-critical warnings only). Ecommerce rich results are live. AggregateRating attaches once native reviews exist (see Off-site). Never fabricate ratings.'},
   {s:'schema', st:'done', t:'BreadcrumbList (present)', o:'Brian', n:'Validates on the live product page as part of the 9 rendered items. No action unless the dedup check surfaces an issue.'},
   {s:'schema', st:'done', t:'Rich Results Test — rendered validation (done)', o:'Brian', n:'DONE 7/23: /products/coco-top returns 9 valid items (Product x1, Merchant x4, LocalBusiness x2, Organization x2). Rendered evidence supersedes the server-fetch false negative. Re-run per template on the quarterly cadence.'},
   {s:'schema', st:'prog', t:'Dedup entity + clear non-critical schema warnings', o:'Brian', n:'The only open schema work, and it is refinement not build. Confirm whether Organization x2 / LocalBusiness x2 means the entity is emitted twice (theme + app) and de-duplicate. Clear non-critical Merchant-listing warnings (recommended image / shipping / return fields). First identify WHICH app or theme injects the JSON-LD so edits land in the right place.'},
+  {s:'schema', st:'pend', t:'Enrich sameAs + add foundingDate 2007', o:'Brian', n:'Server schema sameAs has only IG/FB/TikTok. Add Yelp, YouTube, Pinterest, GBP/Maps, and Wikidata (once created) so engines resolve one entity; add "foundingDate":"2007". Drop-in snippet in 0_SCHEMA_VERIFIED_2026-07-25.md. Theme snippet edit only, label rollback.'},
   {s:'schema', st:'pend', t:'FAQPage — visible Q&A (optional)', o:'Brian', n:'Google rich-result is retired; the value is AEO + entity, and the visible Q&A text is the real asset. Add markup only if it costs nothing extra.'},
   {s:'schema', st:'pend', t:'ChatGPT default-inclusion / agentic test (Day 14)', o:'Brian', n:'Confirm the store is eligible for ChatGPT shopping surfaces; robots already exposes the agent endpoints. Pairs with the ChatGPT merchant feed.'},
   // CONTENT
@@ -847,7 +857,8 @@ const TASKS = [
   {s:'content', st:'block', t:'Reconcile blog byline (module hardcodes "Sophie")', o:'Kelly', n:'Must decide the byline BEFORE post 1 publishes. Blocked on Kelly.'},
   {s:'content', st:'prog', t:'Apply §3B post rule to every draft', o:'Brian', n:'Every post: 40–60 word answer under a question-phrased H2, ≥1 concrete number, ≥1 quotable staff line (Princeton KDD 2024 top tactics), ≥2 inbound internal links same day.'},
   {s:'content', st:'pend', t:'Post 1 — Motel Rocks US stockist hub', o:'Brian', n:'HARD-GATED behind the SoV baseline. Uses the Rolla\'s/Motel copy recipe. Ship to hidden draft first.'},
-  {s:'content', st:'pend', t:'Post 2 — Free People vs Motel Rocks comparison', o:'Brian', n:'Comparison intent; both brands are winnable open-field queries.'},
+  {s:'content', st:'prog', t:'Post 2 — Free People vs Motel Rocks comparison', o:'Brian', n:'DRAFT READY (the-vibe_free-people-vs-motel-rocks_DRAFT.md): 58-word answer capsule, question H2s, FP-vs-MR table, FAQ, visible date + author. Fill the [CONFIRM] fit cells (first-hand fit = what gets quoted) + byline, publish to hidden draft. Comparison intent; both brands winnable open-field.'},
+  {s:'content', st:'pend', t:'90-day refresh cadence on top ~20 pages', o:'Brian', n:'76% of ChatGPT citations come from content updated within 30 days; pages >6 months stale lose eligibility. Put the top ~20 pages (hubs, vendor pages, top collections) on a 90-day refresh with a visible "last updated" date; keep the blog on a weekly cadence. Tracked in Schedule.'},
   {s:'content', st:'pend', t:'Festival pillar + Stagecoach + Coachella 2027 guides', o:'Brian', n:'Publish evergreen NOW to compound for 2027 season. Q9 "festival outfit ideas" is a live SoV query.'},
   {s:'content', st:'done', t:'Vendor copy recipe + SEO Copy Generator tool', o:'Brian', n:'The SEO/AEO/GEO Copy Generator is live (linesheet.theclearstack.com): research a brand, it classifies HEAD vs FANOUT lane and writes every paste-ready field plus a rank-log row. Same recipe that got Rolla\'s cited.'},
   // CATALOG
@@ -887,6 +898,8 @@ const TASKS = [
   {s:'measure', st:'pend', t:'ChatGPT merchant application + feed', o:'Brian', n:'Apply at chatgpt.com/merchants (verification, then SFTP JSONL/CSV feed ranked by feed quality). Apply early; feed after the catalog is clean. Bing already 5/5 indexed (necessary for ChatGPT search).'},
   {s:'tech', st:'pend', t:'Collection pages: clean H1 + meta + intro (top 8)', o:'Brian', n:'7/23 audit: /collections/dresses has no meta, a "Collection: Dresses + Rompers" H1 prefix STILL live (contradicts the Horizon-fixed assumption — verify post-migration), a 32-char title, and no intro copy. Fix the top 8: unique meta, clean H1, intent title, 40–60 word intro. Search-listing fields only.'},
   {s:'content', st:'pend', t:'Expand Our Story (E-E-A-T + AboutPage schema)', o:'Brian', n:'7/23 audit: ~40 words, no founder, no author. Expand to 300+ words with the founder name, the 2007 origin, what makes the buy distinct, a named author, and AboutPage/Organization schema. I can draft in your voice.'},
+  {s:'offsite', st:'pend', t:'Wikidata item + consistent sameAs', o:'Brian', n:'A boutique won\'t clear Wikipedia notability, but a Wikidata item + identical sameAs across every profile builds the entity ChatGPT reasons over. Do Wikidata, skip Wikipedia. Feeds the schema sameAs task.'},
+  {s:'offsite', st:'pend', t:'Google Preferred Sources ask', o:'Brian', n:'Google lets users mark sites as Preferred Sources (badges them in AI answers, trending toward a ranking signal). Ask the email list + regulars to add shopmissbehavin.com. Near-zero cost, compounding.'},
 ];
 
 const CADENCES = [
@@ -907,6 +920,10 @@ const CADENCES = [
   ]},
   {h:'Monthly · 15th', freq:'mo', items:[
     {t:'Technical re-audit', w:'robots, sitemap, canonicals, CWV, schema validity'},
+  ]},
+  {h:'Every 90 days · content refresh', freq:'90d', items:[
+    {t:'Refresh top ~20 pages', w:'Hubs, vendor pages, top collections — update copy + bump the visible "last updated" date. 76% of ChatGPT citations are content updated <30d; >6mo stale loses eligibility.'},
+    {t:'Re-run the ChatGPT-citation playbook check', w:'sameAs current, IndexNow pinging, freshness dates visible, new roundups pitched'},
   ]},
   {h:'Quarterly', freq:'qtr', items:[
     {t:'Schema validation sweep', w:'Rich Results Test all templates'},
@@ -1242,7 +1259,20 @@ const PLAYBOOKS=[
       <li>Score each cell: mentioned / cited / position / entity-correct, plus which competitor domains appear.</li>
       <li><strong>Append</strong> to <code>missb_sov_scores_log.csv</code> — never overwrite. Weekly during ramp, monthly after.</li>
     </ol>`},
-  {n:6,t:'LineSheet worker deploy protocol',b:`
+  {n:6,t:'ChatGPT citation playbook (2026-07-24 research)',b:`
+    <p>To be <strong>cited</strong> by ChatGPT a page must be in the retrieval pool (~40% of live answers come through Bing) and match the subquestions ChatGPT fans out into. Whether it <strong>recommends the brand at all</strong> is driven mostly by off-site mentions — which correlate ~3x more with AI citation than backlinks. Two jobs: be the rankable answer page, and be the widely-mentioned brand.</p>
+    <p>The 7 plays, in priority order (folded into the Levers):</p>
+    <ol>
+      <li><strong>Off-site brand mentions</strong> (Lever 2) — roundups, review profiles, YouTube, Reddit/Quora, Wikidata. Strongest lever, still the biggest gap.</li>
+      <li><strong>Own answer-hub pages</strong> (Lever 3) — 40–60 word answer capsule up top (~44% of citations come from the first 30% of a page), question H2s, a comparison table (tables extract ~81% vs ~23% for prose), FAQ text, visible date + author.</li>
+      <li><strong>Bing indexation + IndexNow</strong> (Lever 4) — same-day pings to the channel ChatGPT retrieves from.</li>
+      <li><strong>Freshness cadence</strong> — 90-day refresh on top ~20 pages; visible "last updated" date. See Schedule.</li>
+      <li><strong>Fan-out titles + clean URLs</strong> — titles that match the subquestions, readable slugs. Mostly done on the blog.</li>
+      <li><strong>Entity + schema</strong> — Organization + LocalBusiness with full sameAs, NAP identical everywhere, visible FAQ text.</li>
+      <li><strong>Google Preferred Sources</strong> — ask the audience to mark the site. Low effort, compounding.</li>
+    </ol>
+    <div class="callout">Skip: llms.txt (Google ignores it for Search/AI), keyword stuffing (correlates with FEWER citations), chasing a Wikipedia article (use Wikidata instead). Measure citation SHARE via the 18-query SoV panel, not rankings. Source: Ahrefs retrieval + 75k-brand studies, SE Ranking 1.3M-citation freshness data — see 0_CHATGPT_CITATIONS_2026-07-24.md.</div>`},
+  {n:7,t:'LineSheet worker deploy protocol',b:`
     <p>The live worker source exists <strong>only in Cloudflare</strong> — local files can be stale. Never paste blind.</p>
     <ol>
       <li>Check the live deploy tag first (Ctrl+F <code>deploy_check</code>; it toggles off).</li>
@@ -1332,6 +1362,24 @@ function toChatStarter(){
   L.push("> Replace this line with the one task from the board above you want to finish. Its \"context\" line is the brief. If it names a file, point me to that file.");
   return L.join("\n");
 }
+function _promptEsc(e){ if(e.key==='Escape') closePromptModal(); }
+function closePromptModal(){ var ov=document.getElementById('promptOv'); if(ov) ov.remove(); document.removeEventListener('keydown', _promptEsc, true); }
+function openPromptModal(){
+  closePromptModal();
+  var ov=document.createElement('div'); ov.className='prompt-ov'; ov.id='promptOv';
+  var m=document.createElement('div'); m.className='prompt-modal';
+  m.innerHTML='<div class="prompt-head"><h3>New-chat prompt</h3><button class="prompt-x" id="promptClose" aria-label="Close">&times;</button></div>'+
+    '<p class="prompt-sub">This is your paste-ready prompt, built from the live board. Fill in the "Today\'s task" line at the bottom, copy it, and paste into a new Claude chat in this project.</p>'+
+    '<textarea class="prompt-ta" id="promptTa" spellcheck="false"></textarea>'+
+    '<div class="prompt-actions"><button class="btn primary" id="promptCopy">Copy to clipboard</button><button class="btn" id="promptClose2">Close</button><span class="prompt-note" id="promptNote"></span></div>';
+  ov.appendChild(m); document.body.appendChild(ov);
+  var ta=document.getElementById('promptTa'); ta.value=toChatStarter();
+  document.getElementById('promptCopy').onclick=async function(){ ta.focus(); ta.select(); var ok=false; try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){ try{ ok=document.execCommand('copy'); }catch(_){} } document.getElementById('promptNote').textContent=ok?'Copied to clipboard':'Press Ctrl+C to copy'; };
+  document.getElementById('promptClose').onclick=closePromptModal;
+  document.getElementById('promptClose2').onclick=closePromptModal;
+  ov.addEventListener('click', function(e){ if(e.target===ov) closePromptModal(); });
+  document.addEventListener('keydown', _promptEsc, true);
+}
 function download(name,content,type){
   const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url);
@@ -1344,8 +1392,8 @@ const LEVERS=[
   {n:0, name:'SoV baseline — the gate', status:'done', what:'The fixed query panel across 4 engines; the zero point movement is measured against.', state:'Captured 7/15 (baseline_sov_2026-07.md). Cited 1 of 16 non-branded — Rolla\'s, Google AIO only.', next:'Next full run 1st of month. Watch Baggu, Matisse, coastal-cowgirl, the Gemini namesake fix.', owner:'Brian runs · Claude compiles'},
   {n:1, name:'Brand stockist / locator listings', status:'pend', what:'The brand\'s own site lists Miss Behavin\' as a stockist — the strongest signal, but only for brands with a directory that accept a small online retailer.', state:'Not started. Eligible: Baggu, Emi Jay, Wildflower, Matisse (verify). Skip Motel/FP/Gorjana. LITS: resolve Faire first.', next:'Matisse retailer application now (ungated); Baggu email once its page is live.', owner:'Brian · gated on vendor pages'},
   {n:2, name:'Off-site authority', status:'pend', what:'Third parties name us: designer "stocked at" links, Reddit/Quora, roundups, reviews. Moves AI citations more than any on-page tweak.', state:'NOT STARTED — the biggest ungated gap. Outreach kit ready (7/18): templates + target list.', next:'NAP hygiene first (old 6551 Trigo Rd still surfacing), Yelp claim, reviews app, stocked-at emails, Reddit/roundup research pass.', owner:'Brian + Kelly · mostly ungated'},
-  {n:3, name:'On-site retrievable hubs', status:'prog', what:'The collection pages, occasion hubs, and blog posts the index retrieves. Necessary, not sufficient — no page, nothing to cite.', state:'13 category collections live · brand pages live · blog "The Edit" live (1 post). Schema present/valid (JS-injected — see Lever 4 / Audit). Six new vendor pages: 0 of 6 built (copy drafted 7/16).', next:'Build the 6 vendor pages 2/week by ~Day 30; clean the top-8 collection H1/meta/intro; blog posts 1 and 2.', owner:'Brian builds · Claude drafts'},
-  {n:4, name:'Feed + entity signals', status:'prog', what:'Merchant Center, Perplexity/ChatGPT feeds, Organization schema, GBP, consistent NAP — the plumbing that makes 1 to 3 legible.', state:'Schema present & valid (JS-injected; Rich Results Test 7/23 = 9 items) — refinement only (dedup Organization/LocalBusiness x2). Perplexity feed BLOCKED (LineSheet C1 + Kelly). GBP on hold (Kelly). GMC/GA4 = Day 21. NAP cleanup owed.', next:'Dedup schema + identify the injecting app; GMC + GA4 session; resolve GBP + Perplexity; make NAP identical everywhere.', owner:'Brian · Kelly gates'},
+  {n:3, name:'On-site retrievable hubs', status:'prog', what:'The collection pages, occasion hubs, and blog posts the index retrieves. Necessary, not sufficient — no page, nothing to cite.', state:'13 category collections live · brand pages live · blog "The Vibe" live (2 posts). Schema present & valid, SERVER-RENDERED (verified 7/25 — see Lever 4). Six new vendor pages: 0 of 6 built (copy drafted 7/16). FP-vs-MR comparison post drafted, ready to publish.', next:'Publish the FP-vs-MR draft (fill [CONFIRM] fit + byline); build the 6 vendor pages 2/week; clean the top-8 collection H1/meta/intro; front-load a 40–60 word answer capsule + a table on every hub; keep readable slugs.', owner:'Brian builds · Claude drafts'},
+  {n:4, name:'Feed + entity signals', status:'prog', what:'Merchant Center, Perplexity/ChatGPT feeds, Organization schema, GBP, consistent NAP, Bing/IndexNow — the plumbing that makes 1 to 3 legible.', state:'Schema present & valid and SERVER-RENDERED (verified 7/25 by raw fetch — the earlier "JS-injected" read was wrong); NAP correct in schema. Refinement only: dedup Organization x2, enrich sameAs (IG/FB/TikTok → + Yelp/YouTube/Pinterest/GBP/Wikidata), add foundingDate. IndexNow NOT set up. Perplexity feed BLOCKED (C1 + Kelly). GBP on hold (Kelly). GMC/GA4 = Day 21.', next:'Install IndexNow (Bing = ~40% of ChatGPT retrieval); enrich sameAs + foundingDate; dedup schema; create Wikidata item; ask regulars for Google Preferred Sources; GMC + GA4; resolve GBP + Perplexity; NAP identical everywhere.', owner:'Brian · Kelly gates'},
 ];
 function renderLevers(){
   const el=document.getElementById('levers'); el.innerHTML='';
@@ -1803,8 +1851,7 @@ function init(){
   });
   document.getElementById('btnPrint').onclick=()=>window.print();
   document.getElementById('btnMd').onclick=async()=>{ try{ await navigator.clipboard.writeText(toMarkdown()); toast('Markdown snapshot copied'); }catch(e){ download('missbehavin-seo-snapshot.md',toMarkdown(),'text/markdown'); toast('Downloaded Markdown snapshot'); } };
-  document.getElementById('btnJson').onclick=()=>{ download('missbehavin-seo-snapshot-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(snapshot(),null,2),'application/json'); toast('Snapshot saved'); };
-  document.getElementById('btnStarter').onclick=async()=>{ try{ await navigator.clipboard.writeText(toChatStarter()); toast('Chat starter copied — paste into a new chat in this project'); }catch(e){ download('missbehavin-chat-starter.md',toChatStarter(),'text/markdown'); toast('Downloaded chat starter'); } };
+  document.getElementById('btnStarter').onclick=openPromptModal;
   setInterval(persist, 4000);
   window.addEventListener('beforeunload', persist);
   document.addEventListener('visibilitychange', function(){ if(document.hidden) persist(); });
