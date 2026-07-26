@@ -119,6 +119,9 @@ h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
 .section-head.collapsible:hover h3{color:var(--plum)}
 .section-head .sh-toggle{margin-left:auto; color:var(--ink-faint); font-size:22px; line-height:1; transition:transform .15s ease; align-self:center}
 .section-head.collapsed .sh-toggle{transform:rotate(-90deg)}
+.task-actions{margin-top:12px}
+.mkprompt{font-family:var(--sans); font-size:12px; font-weight:600; padding:6px 12px; border-radius:8px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); cursor:pointer; transition:border-color .12s, color .12s}
+.mkprompt:hover{border-color:var(--plum); color:var(--plum)}
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
 .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
 .tile .k{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
@@ -806,8 +809,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Create Prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26b -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26b</b> &middot; collapsible sections, Guardrails removed, black/red logo, header line trimmed</div>
+    <!-- deploy_check: CC-2026.07.26c -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26c</b> &middot; per-task Create Prompt (task-specific) + Overview Create Prompt (whole program)</div>
   </div>
 </div>
 
@@ -1051,9 +1054,11 @@ function renderTasks(){
         </div>
         <svg class="expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </div>
-      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}</div></div>`;
+      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}<div class="task-actions"><button type="button" class="mkprompt">✦ Create prompt for this task</button></div></div></div>`;
     const pill=card.querySelector('.pill');
     pill.onclick=e=>{ e.stopPropagation(); openStatusMenu(pill, t.id); };
+    const mk=card.querySelector('.mkprompt');
+    if(mk) mk.onclick=e=>{ e.stopPropagation(); openPromptModal(taskChatStarter(t), 'Prompt: '+t.t); };
     card.querySelector('.task-row').onclick=()=>card.classList.toggle('open');
     el.appendChild(card);
   });
@@ -1363,16 +1368,39 @@ function toChatStarter(){
 }
 function _promptEsc(e){ if(e.key==='Escape') closePromptModal(); }
 function closePromptModal(){ var ov=document.getElementById('promptOv'); if(ov) ov.remove(); document.removeEventListener('keydown', _promptEsc, true); }
-function openPromptModal(){
+function taskChatStarter(t){
+  var s=snapshot();
+  var L=[];
+  L.push("# Miss Behavin' — one task");
+  L.push("_From the Command Center · "+s.generated.slice(0,10)+" · Day "+s.day+" of 90_");
+  L.push("");
+  L.push("You are my execution partner on Miss Behavin's SEO/AEO/GEO program (shopmissbehavin.com — a Santa Barbara women's boutique going national online). I'm Brian; I execute and deploy. Help me finish the ONE task below, and nothing else. Ask before anything that changes the live store or site.");
+  L.push("");
+  L.push("## Business");
+  L.push("Miss Behavin', women's boutique, 322 Paseo Nuevo, Santa Barbara CA 93101, since 2007. Owner Kelly; I execute. Shopify store miss-behavin-2. Stage 4 goal: national online sales via SEO/AEO/GEO.");
+  L.push("");
+  L.push("## The task");
+  L.push("- **"+t.t+"**  ·  stream: "+STREAM[t.s].name+"  ·  status: "+STATUS_LABEL[t.st]+(t.o?("  ·  owner: "+t.o):""));
+  if(t.n) L.push("- Context: "+t.n);
+  L.push("");
+  L.push("## What I need");
+  L.push("Give me a direct recommendation and the exact step-by-step to complete this one task. If you need information I haven't given, ask me first. Stay scoped to this task only.");
+  L.push("");
+  L.push("## Guardrails (hard)");
+  L.push("- Never change product titles, handles, tags, prices, variants, SKUs, barcodes, or inventory. SEO only in search-listing fields, descriptions, metafields, and theme sections; fill empty, never overwrite.");
+  L.push("- Style: direct recommendation and why (not a menu), step-by-step, plain language, no fabricated metrics, never the word \"literally\", minimal hyphens.");
+  return L.join("\n");
+}
+function openPromptModal(text, heading){
   closePromptModal();
   var ov=document.createElement('div'); ov.className='prompt-ov'; ov.id='promptOv';
   var m=document.createElement('div'); m.className='prompt-modal';
-  m.innerHTML='<div class="prompt-head"><h3>New-chat prompt</h3><button class="prompt-x" id="promptClose" aria-label="Close">&times;</button></div>'+
-    '<p class="prompt-sub">This is your paste-ready prompt, built from the live board. Fill in the "Today\'s task" line at the bottom, copy it, and paste into a new Claude chat in this project.</p>'+
+  m.innerHTML='<div class="prompt-head"><h3>'+esc(heading||'New-chat prompt')+'</h3><button class="prompt-x" id="promptClose" aria-label="Close">&times;</button></div>'+
+    '<p class="prompt-sub">Paste-ready prompt built from the live board. Copy it and paste into a new Claude chat in this project.</p>'+
     '<textarea class="prompt-ta" id="promptTa" spellcheck="false"></textarea>'+
     '<div class="prompt-actions"><button class="btn primary" id="promptCopy">Copy to clipboard</button><button class="btn" id="promptClose2">Close</button><span class="prompt-note" id="promptNote"></span></div>';
   ov.appendChild(m); document.body.appendChild(ov);
-  var ta=document.getElementById('promptTa'); ta.value=toChatStarter();
+  var ta=document.getElementById('promptTa'); ta.value=text||toChatStarter();
   document.getElementById('promptCopy').onclick=async function(){ ta.focus(); ta.select(); var ok=false; try{ await navigator.clipboard.writeText(ta.value); ok=true; }catch(e){ try{ ok=document.execCommand('copy'); }catch(_){} } document.getElementById('promptNote').textContent=ok?'Copied to clipboard':'Press Ctrl+C to copy'; };
   document.getElementById('promptClose').onclick=closePromptModal;
   document.getElementById('promptClose2').onclick=closePromptModal;
@@ -1872,7 +1900,7 @@ function init(){
   });
   document.getElementById('btnPrint').onclick=()=>window.print();
   document.getElementById('btnMd').onclick=async()=>{ try{ await navigator.clipboard.writeText(toMarkdown()); toast('Markdown snapshot copied'); }catch(e){ download('missbehavin-seo-snapshot.md',toMarkdown(),'text/markdown'); toast('Downloaded Markdown snapshot'); } };
-  document.getElementById('btnStarter').onclick=openPromptModal;
+  document.getElementById('btnStarter').onclick=function(){ openPromptModal(); };
   setInterval(persist, 4000);
   window.addEventListener('beforeunload', persist);
   document.addEventListener('visibilitychange', function(){ if(document.hidden) persist(); });
