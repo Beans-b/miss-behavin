@@ -119,8 +119,7 @@ h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
 .section-head.collapsible:hover h3{color:var(--plum)}
 .section-head .sh-toggle{margin-left:auto; color:var(--ink-faint); font-size:22px; line-height:1; transition:transform .15s ease; align-self:center}
 .section-head.collapsed .sh-toggle{transform:rotate(-90deg)}
-.task-actions{margin-top:12px}
-.mkprompt{font-family:var(--sans); font-size:12px; font-weight:600; padding:6px 12px; border-radius:8px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); cursor:pointer; transition:border-color .12s, color .12s}
+.mkprompt{font-family:var(--sans); font-size:11.5px; font-weight:600; padding:5px 10px; border-radius:8px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-soft); cursor:pointer; white-space:nowrap; flex:none; align-self:center; transition:border-color .12s, color .12s}
 .mkprompt:hover{border-color:var(--plum); color:var(--plum)}
 .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px}
 .tile{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:15px 16px; box-shadow:var(--shadow-sm)}
@@ -807,10 +806,10 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <div class="actions">
       <button class="btn" id="btnPrint">Print / PDF</button>
       <button class="btn" id="btnMd">Copy as Markdown</button>
-      <button class="btn primary" id="btnStarter">Create Prompt</button>
+      <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26c -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26c</b> &middot; per-task Create Prompt (task-specific) + Overview Create Prompt (whole program)</div>
+    <!-- deploy_check: CC-2026.07.26d -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26d</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt</div>
   </div>
 </div>
 
@@ -1052,9 +1051,10 @@ function renderTasks(){
             <span class="owner">${esc(t.o)}</span>
           </div>
         </div>
+        <button type="button" class="mkprompt" title="Create a prompt to complete just this task">✦ Prompt</button>
         <svg class="expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </div>
-      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}<div class="task-actions"><button type="button" class="mkprompt">✦ Create prompt for this task</button></div></div></div>`;
+      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}</div></div>`;
     const pill=card.querySelector('.pill');
     pill.onclick=e=>{ e.stopPropagation(); openStatusMenu(pill, t.id); };
     const mk=card.querySelector('.mkprompt');
