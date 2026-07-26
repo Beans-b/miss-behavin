@@ -815,8 +815,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26f -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26f</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt &middot; +11 style/occasion &amp; feed tasks (7/26) &middot; drag-to-reorder Start Here</div>
+    <!-- deploy_check: CC-2026.07.26g -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26g</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt &middot; +11 style/occasion &amp; feed tasks (7/26) &middot; Start Here order now syncs across devices (D1)</div>
   </div>
 </div>
 
@@ -1763,8 +1763,10 @@ function overviewDrill(go){
   if(typeof go.filter !== 'undefined') setTrackerFilter(go.filter);
   if(go.tab) goTab(go.tab);
 }
-// DEFAULT priority order (seed). The Start Here list is drag-reorderable and the order is
-// saved per-browser in localStorage (key mb_cc_priority_order); "reset order" clears it back to this.
+// DEFAULT priority order (seed). The Start Here list is drag-reorderable. The order syncs to D1
+// (shared across every device/staffer, source of truth) via the seocmd_priority endpoint when
+// signed in through the app; localStorage (key mb_cc_priority_order) is the offline/artifact
+// fallback and a local cache. "reset order" clears both back to this default for everyone.
 // Add a row here to introduce a new Start Here item; existing saved orders keep working and
 // append anything new at the bottom automatically (see orderedPriority()).
 var PRIORITY=[
@@ -1788,7 +1790,31 @@ var _dragKey=null;
 function loadPriorityOrder(){
   try{ var raw=localStorage.getItem(PRIORITY_LS_KEY); if(!raw) return null; var a=JSON.parse(raw); return Array.isArray(a)?a:null; }catch(e){ return null; }
 }
-function savePriorityOrder(keys){ try{ localStorage.setItem(PRIORITY_LS_KEY, JSON.stringify(keys)); }catch(e){} }
+function savePriorityOrder(keys){
+  try{ localStorage.setItem(PRIORITY_LS_KEY, JSON.stringify(keys)); }catch(e){}   // local cache / offline fallback
+  pushPriorityOrder(keys);                                                        // shared source of truth (D1)
+}
+// Push the current order up to D1 (best-effort; no-op offline or inside a Claude artifact,
+// where localStorage alone carries it). Pass null to clear the shared row. Mirrors patchTask().
+function pushPriorityOrder(keys){
+  if(typeof wapi!=='function' || !mbToken()) return;
+  wapi('seocmd_priority', {order:(keys===null?null:(keys||[])), actor:mbName()}).catch(function(){});
+}
+// Pull the shared order from D1 on load. D1 wins over the local cache (single source of truth,
+// same rule as task status). If D1 has nothing yet but THIS device has a saved order, seed the
+// shared copy from it. No-op offline / in an artifact.
+function syncPriorityDown(){
+  if(typeof wapi!=='function' || !mbToken()) return Promise.resolve();
+  return wapi('seocmd_priority', {}).then(function(r){
+    if(r && r.data && Array.isArray(r.data.order) && r.data.order.length){
+      try{ localStorage.setItem(PRIORITY_LS_KEY, JSON.stringify(r.data.order)); }catch(e){}
+      renderStartHere();
+    } else {
+      var local=loadPriorityOrder();
+      if(local && local.length) pushPriorityOrder(local);   // seed the shared order from this device
+    }
+  }).catch(function(){});
+}
 function orderedPriority(){
   var saved=loadPriorityOrder();
   if(!saved) return PRIORITY.slice();
@@ -1809,6 +1835,7 @@ function reorderPriority(fromKey, toKey, before){
 }
 function resetPriorityOrder(){
   try{ localStorage.removeItem(PRIORITY_LS_KEY); }catch(e){}
+  pushPriorityOrder(null);   // clear the shared row too, so every device falls back to the default
   renderStartHere();
   if(typeof toast==='function'){ toast('Priority order reset to default'); }
 }
@@ -1971,6 +1998,7 @@ function init(){
   if(mbToken()){
     setSync('● Syncing…','');
     syncDown().then(liveStats);
+    syncPriorityDown();
     setInterval(syncUp, 20000);
     document.addEventListener('visibilitychange', function(){ if(document.hidden){ syncUp(); } else { liveStats(); } });
     var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats); };
