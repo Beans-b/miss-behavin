@@ -301,7 +301,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .cm-fbtn{background:#fff;border:none;border-right:1px solid #ccc;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-text,#666);}
 .cm-fbtn:last-child{border-right:none;}
 .cm-fbtn.active{background:var(--black);color:#fff;}
-.cm-delete{width:100%;margin-top:8px;}
+.cm-delete,.cm-undo{width:100%;margin-top:8px;}
+.cm-view{display:block;width:100%;margin-top:8px;text-align:center;text-decoration:none;box-sizing:border-box;}
+.cm-title.cm-link{color:inherit;text-decoration:none;cursor:pointer;}
+.cm-title.cm-link:hover{text-decoration:underline;}
 .cm-print{margin-left:auto;padding:6px 10px;font-size:12px;}
 .cm-progress{height:8px;background:#eee;border-radius:6px;margin-top:8px;overflow:hidden;}
 .cm-progress-fill{height:100%;background:var(--success-fg,#2e7d32);width:0;transition:width .3s;}
@@ -1112,7 +1115,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 60</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 61</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1761,32 +1764,77 @@ function cmRenderCard(p){
   var card = document.createElement('div');
   card.className = 'cm-card';
   card.dataset.pid = p.id;
-  var img = p.image
+  // Shopify admin link — title and image both open the product in a new tab.
+  var au = p.adminUrl || '';
+  var imgInner = p.image
     ? '<img class="cm-img" loading="lazy" src="'+esc(p.image)+'" alt=""/>'
     : '<div class="cm-img cm-noimg">&#128087;</div>';
+  var img = au
+    ? '<a href="'+esc(au)+'" target="_blank" rel="noopener" title="View on Shopify">'+imgInner+'</a>'
+    : imgInner;
+  var titleHtml = au
+    ? '<a class="cm-title cm-link" href="'+esc(au)+'" target="_blank" rel="noopener">'+esc(p.title)+'</a>'
+    : '<div class="cm-title">'+esc(p.title)+'</div>';
   var badge = p.countedOn
     ? '<span class="cm-badge done">&#10003; counted '+esc(p.countedOn)+(p.countedBy?(' by '+esc(p.countedBy)):'')+'</span>'
     : '<span class="cm-badge todo">Not counted</span>';
   var btnLabel = cmBlind ? 'Submit count' : 'Mark counted &#10003;';
+  var isAdmin = SESSION && SESSION.role === 'admin';
+  var viewBtn = au ? '<a class="btn btn-outline cm-view" href="'+esc(au)+'" target="_blank" rel="noopener">View on Shopify &#8599;</a>' : '';
   // Admin-only: on items that are NOT counted, offer a hard-delete from Shopify.
-  var canDelete = SESSION && SESSION.role === 'admin' && !p.countedOn;
-  var delBtn = canDelete
+  var delBtn = (isAdmin && !p.countedOn)
     ? '<button class="btn btn-danger cm-delete">Delete from Shopify</button>'
+    : '';
+  // Admin-only: undo a counted stamp (hidden until the item is counted).
+  var undoBtn = isAdmin
+    ? '<button class="btn btn-outline cm-undo" style="'+(p.countedOn?'':'display:none;')+'">Undo counted</button>'
     : '';
   card.innerHTML =
     '<div class="cm-head">'+img+
-      '<div class="cm-meta"><div class="cm-title">'+esc(p.title)+'</div>'+
+      '<div class="cm-meta">'+titleHtml+
         '<div class="cm-vendor">'+esc(p.vendor||'')+'</div>'+badge+'</div>'+
     '</div>'+
     '<div class="cm-sizes"></div>'+
     '<button class="btn btn-primary cm-verify">'+btnLabel+'</button>'+
-    delBtn;
+    viewBtn + delBtn + undoBtn;
   var sizes = card.querySelector('.cm-sizes');
   (p.variants || []).forEach(function(v){ sizes.appendChild(cmSizeRow(p, v)); });
   card.querySelector('.cm-verify').onclick = function(){ if (cmBlind) cmSubmit(p, card); else cmVerify(p, card); };
   var db = card.querySelector('.cm-delete');
   if (db) db.onclick = function(){ cmDelete(p, card); };
+  var ub = card.querySelector('.cm-undo');
+  if (ub) ub.onclick = function(){ cmUndo(p, card); };
   el('cm-feed').appendChild(card);
+}
+
+// Admin: undo a counted stamp (mis-tap fix). Clears the Shopify metafields and
+// flips the card back to "Not counted". Removes the card from the Counted view.
+function cmUndo(p, card){
+  if (!confirm('Undo counted for “' + p.title + '”?\n\nIt goes back to Not counted for this date.')) return;
+  var ub = card.querySelector('.cm-undo');
+  if (ub) { ub.disabled = true; ub.textContent = 'Undoing…'; }
+  api('fc_unmark_counted', { productId: p.id, title: p.title, prev: p.countedOn || '' })
+  .then(function(res){
+    if (res && res.error) throw new Error(res.error);
+    p.countedOn = null; p.countedBy = null;
+    toast('Undone: ' + p.title);
+    cmLoadProgress();
+    if (cmFilter === 'counted' && !cmSearchMode) {
+      card.style.transition = 'opacity .3s'; card.style.opacity = '0';
+      setTimeout(function(){ card.remove(); if (!el('cm-feed').children.length) cmFetch(); }, 300);
+      return;
+    }
+    var badge = card.querySelector('.cm-badge');
+    if (badge) { badge.className = 'cm-badge todo'; badge.textContent = 'Not counted'; }
+    card.classList.remove('cm-counted');
+    var vb = card.querySelector('.cm-verify');
+    if (vb) { vb.classList.remove('done'); vb.disabled = false; vb.innerHTML = cmBlind ? 'Submit count' : 'Mark counted &#10003;'; }
+    if (ub) { ub.disabled = false; ub.textContent = 'Undo counted'; ub.style.display = 'none'; }
+  })
+  .catch(function(e){
+    if (ub) { ub.disabled = false; ub.textContent = 'Undo counted'; }
+    toast('Undo failed: ' + e.message);
+  });
 }
 
 
@@ -1885,6 +1933,10 @@ function cmVerify(p, card){
     card.classList.add('cm-counted');
     var badge = card.querySelector('.cm-badge');
     if (badge) { badge.className = 'cm-badge done'; badge.innerHTML = '✓ counted ' + esc(el('cm-date').value); }
+    p.countedOn = el('cm-date').value;
+    var ub = card.querySelector('.cm-undo');
+    var db = card.querySelector('.cm-delete');
+    if (db) db.style.display = 'none';
     if (cmFilter === 'remaining' && !cmSearchMode) {
       setTimeout(function(){
         card.style.transition = 'opacity .35s'; card.style.opacity = '0';
@@ -1892,6 +1944,7 @@ function cmVerify(p, card){
       }, 700);
     } else {
       btn.textContent = 'Counted ✓ (mark again)';
+      if (ub) ub.style.display = '';
     }
   })
   .catch(function(e){
