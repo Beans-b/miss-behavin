@@ -376,6 +376,14 @@ table.kw td [contenteditable]:focus{border-bottom-color:var(--plum); background:
 .kw-stat.top{background:var(--done-soft); color:var(--done); border-color:color-mix(in srgb,var(--done) 30%,transparent)}
 .kw-stat.cited{background:var(--done-soft); color:var(--done); border-color:color-mix(in srgb,var(--done) 30%,transparent)}
 .kw-stat.opt{background:var(--prog-soft); color:var(--prog)}
+/* v61 — live GSC rank badge shown under the manual pill */
+.kw-gsc{margin-top:4px; font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.03em; color:var(--muted); white-space:nowrap; display:flex; align-items:center; gap:5px}
+.kw-gsc .pos{color:var(--ink)}
+.kw-gsc .dl-up{color:var(--done)}
+.kw-gsc .dl-dn{color:var(--pend)}
+.kw-gsc .tag{font-size:8px; letter-spacing:.08em; text-transform:uppercase; opacity:.7}
+#kwGsc.btn.busy{opacity:.6; pointer-events:none}
+#kwGscNote{font-size:10px; color:var(--muted); margin-left:2px; align-self:center}
 tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--brass-deep); font-weight:600; padding:8px 10px}
 .kw-vol{font-family:var(--mono); color:var(--ink-soft)}
 
@@ -763,6 +771,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <div class="toolbar">
       <div class="chips" id="kwClusterChips"></div>
       <button class="btn" id="kwAdd">+ Add keyword</button>
+      <button class="btn" id="kwGsc" title="Pull the last 28 days of positions from Google Search Console (admin)">↻ Refresh ranks (GSC)</button>
+      <span id="kwGscNote"></span>
     </div>
     <div class="sov-scroll">
       <table class="kw" id="kwTable">
@@ -1621,7 +1631,7 @@ function renderKeywords(){
         <td><span contenteditable="true" spellcheck="false" data-f="page" data-i="${idx}" class="kw-vol">${esc(k.page)}</span></td>
         <td><span contenteditable="true" spellcheck="false" data-f="vol" data-i="${idx}" class="kw-vol">${esc(k.vol)}</span></td>
         <td><span contenteditable="true" spellcheck="false" data-f="kd" data-i="${idx}" class="kw-vol">${esc(k.kd)}</span></td>
-        <td><span class="kw-stat ${st}" data-i="${idx}" title="Tap to cycle">${esc(k.rank||'—')}</span></td>
+        <td><span class="kw-stat ${st}" data-i="${idx}" title="Tap to cycle">${esc(k.rank||'—')}</span>${gscBadge(k)}</td>
         <td><span contenteditable="true" spellcheck="false" data-f="target" data-i="${idx}" class="kw-vol">${esc(k.target)}</span></td>
         <td><span contenteditable="true" spellcheck="false" data-f="pri" data-i="${idx}">${esc(k.pri)}</span></td>
         <td><span contenteditable="true" spellcheck="false" data-f="feat" data-i="${idx}" class="kw-vol">${esc(k.feat)}</span></td>`;
@@ -1656,6 +1666,58 @@ function renderKwChips(){
     const b=document.createElement('button'); b.className='chip'; b.setAttribute('aria-pressed',kwFilter===i); b.textContent=c;
     b.onclick=()=>{kwFilter=(kwFilter===i?-1:i); renderKwChips(); renderKeywords();}; el.appendChild(b);
   });
+}
+/* ============ v61 — live GSC ranks ============
+   Rank data is owned by the worker (D1 tables rank_history / rank_latest), never
+   the seo_command_state blob. On load we READ it (seocmd_ranks, cheap); the
+   button forces a fresh PULL from Search Console (seocmd_gsc, admin). Matches are
+   by the same normalized string the worker uses. k.gsc is display-only and is NOT
+   in getState(), so it never enters the synced blob and can't go stale there. */
+function rankNorm(s){ return String(s||'').toLowerCase().replace(/['’`]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+function gscBadge(k){
+  if(!k.gsc || k.gsc.pos==null) return '';
+  var g=k.gsc, r1=function(x){ return Math.round(x*10)/10; }, pos=r1(g.pos).toString(), dl='';
+  if(typeof g.delta==='number' && Math.abs(g.delta)>=0.1){
+    dl = g.delta>0
+      ? '<span class="dl-up" title="up '+r1(g.delta)+' vs last month">▲'+r1(g.delta)+'</span>'
+      : '<span class="dl-dn" title="down '+r1(-g.delta)+' vs last month">▼'+r1(-g.delta)+'</span>';
+  }
+  var ttl='GSC 28-day avg position'+(g.impr!=null?' · '+g.impr+' impressions':'')+(g.checked?' · updated '+g.checked.slice(0,10):'');
+  return '<div class="kw-gsc" title="'+esc(ttl)+'"><span class="tag">GSC</span><span class="pos">'+esc(pos)+'</span>'+dl+'</div>';
+}
+function applyGscRows(rows){
+  if(!Array.isArray(rows)) return 0;
+  var map={}; rows.forEach(function(r){ var n=r.keyword_norm||rankNorm(r.keyword||''); if(n) map[n]=r; });
+  var hits=0;
+  KEYWORDS.forEach(function(k){
+    var r=map[rankNorm(k.term)];
+    if(r && r.position!=null){
+      k.gsc={pos:r.position, status:r.status||'', delta:(typeof r.delta==='number'?r.delta:null), impr:(r.impressions!=null?r.impressions:null), checked:r.checked_at||r.period_end||''};
+      hits++;
+    }
+  });
+  return hits;
+}
+function overlayRanksFromGSC(){
+  if(!mbToken()) return Promise.resolve();
+  return wapi('seocmd_ranks').then(function(r){
+    if(r && Array.isArray(r.data)){
+      var n=applyGscRows(r.data); renderKeywords();
+      var el=document.getElementById('kwGscNote'); if(el) el.textContent = n?('Live GSC ranks · '+n+' matched'):'';
+    }
+  }).catch(function(){});
+}
+function refreshRanksGSC(){
+  var btn=document.getElementById('kwGsc'), note=document.getElementById('kwGscNote');
+  if(!mbToken()){ toast('Open from the LineSheet app to pull GSC ranks'); return; }
+  if(btn) btn.classList.add('busy'); if(note) note.textContent='Pulling from Search Console…';
+  wapi('seocmd_gsc', {keywords: KEYWORDS.map(function(k){ return k.term; })}).then(function(r){
+    if(btn) btn.classList.remove('busy');
+    if(!r || r.error){ if(note) note.textContent=''; toast((r&&r.error==='forbidden')?'Admin only — sign in as admin to pull ranks':('GSC: '+((r&&r.error)||'no response'))); return; }
+    var n=applyGscRows(r.coverage||[]); renderKeywords();
+    if(note) note.textContent=(r.period_start?('GSC '+r.period_start+' → '+r.period_end+' · '):'')+n+' matched';
+    toast('GSC ranks updated ('+n+' matched · '+(r.written||0)+' queries)');
+  }).catch(function(){ if(btn) btn.classList.remove('busy'); if(note) note.textContent=''; toast('GSC pull failed — check the worker / secret'); });
 }
 
 /* ============ TOOLBOX ============ */
@@ -1981,6 +2043,7 @@ function init(){
     renderKeywords();
     toast('Keyword row added — edit it inline');
   };
+  document.getElementById('kwGsc').onclick=refreshRanksGSC;
   document.getElementById('search').addEventListener('input',e=>{ searchTerm=e.target.value; renderTasks(); });
   document.querySelectorAll('#statusChips .chip').forEach(c=>{
     c.onclick=()=>{
@@ -1997,11 +2060,11 @@ function init(){
   // Live sync to the LineSheet worker (D1) + live store stats when signed in via the app
   if(mbToken()){
     setSync('● Syncing…','');
-    syncDown().then(liveStats);
+    syncDown().then(liveStats).then(overlayRanksFromGSC);
     syncPriorityDown();
     setInterval(syncUp, 20000);
     document.addEventListener('visibilitychange', function(){ if(document.hidden){ syncUp(); } else { liveStats(); } });
-    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats); };
+    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats).then(overlayRanksFromGSC); };
   } else {
     setSync('● This device only — open from the LineSheet app to sync','');
   }
