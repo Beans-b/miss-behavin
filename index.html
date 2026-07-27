@@ -1115,7 +1115,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 61</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 62</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3580,8 +3580,27 @@ var _liveShopifyTypes = [];        // product types already in the store (runtim
 var _shopifyTypesLoaded = false;
 function manTypeSuggestions(){
   var keys = Object.keys(_typeMap);
-  var extra = _liveShopifyTypes.filter(function(t){ return t && keys.indexOf(t) === -1; });
+  // dedup — a live store type that already equals a curated key OR its Shopify
+  // product_type ("Accessories" for "Accessory", "Tops" for "Top") is the SAME
+  // thing twice; hide it. Genuinely-new live types (Others, Set) stay.
+  var shopifyVals = keys.map(function(k){ return _typeMap[k].shopify; });
+  var extra = _liveShopifyTypes.filter(function(t){
+    return t && keys.indexOf(t) === -1 && shopifyVals.indexOf(t) === -1;
+  });
   return keys.concat(extra);
+}
+
+// build 62 — Type drives Sizing: an Accessory is quantity-only (One-size),
+// everything else is sized apparel. Fires as the Type field changes so the
+// row's mode flips automatically; the buttons still override manually.
+function manTypeChanged(inp){
+  var row = inp.closest('.man-row'); if (!row) return;
+  var t = String(inp.value || '').trim();
+  var isAcc = t === 'Accessory' || t === 'Accessories' ||
+              (_typeMap[t] && _typeMap[t].shopify === 'Accessories');
+  var btn = row.querySelector(isAcc ? '.man-mode-os' : '.man-mode-sized');
+  var already = btn && btn.classList.contains('man-mode-on');
+  if (btn && !already) manualSizeMode(btn, isAcc ? 'os' : 'sized');
 }
 function ensureManTypeDatalist(){
   var dl = el('man-type-list');
@@ -3691,7 +3710,11 @@ function manualFormChanged(){
     if (!row.querySelector('.man-name').value.trim()) need.push('style name');
     if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
     var qty = ['XS','S','M','L','XL','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
-    if (!(qty > 0)) need.push('a quantity');
+    if (!(qty > 0)) {
+      var _sizedEl = row.querySelector('.man-qty-sized');
+      var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
+      need.push(_sizedOn ? 'a size quantity (XS\u2013L)' : 'a quantity');
+    }
     if (!need.length) { rowOk = true; }
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
   });
@@ -3758,7 +3781,7 @@ function manualAddRow(){
   row.innerHTML =
     '<div style="display:flex;gap:8px;">' +
       '<div style="flex:2;"><label class="sp-l">Style name</label><input type="text" class="field-input man-name"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Type</label><input type="text" class="field-input man-type" list="man-type-list" autocomplete="off" placeholder="Search or type…"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Type</label><input type="text" class="field-input man-type" list="man-type-list" autocomplete="off" placeholder="Search or type…" oninput="manTypeChanged(this)"/></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
@@ -3766,7 +3789,7 @@ function manualAddRow(){
     '</div>' +
     '<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">' +
       '<label class="sp-l" style="margin:0;">Sizing</label>' +
-      '<button type="button" class="btn btn-outline man-mode-btn man-mode-os man-mode-on" onclick="manualSizeMode(this,\'os\')">One size</button>' +
+      '<button type="button" class="btn btn-outline man-mode-btn man-mode-os man-mode-on" onclick="manualSizeMode(this,\'os\')">Quantity</button>' +
       '<button type="button" class="btn btn-outline man-mode-btn man-mode-sized" onclick="manualSizeMode(this,\'sized\')">Sized XS&#8211;L</button>' +
     '</div>' +
     '<div class="man-qty-os" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
