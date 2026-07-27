@@ -806,7 +806,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-black" id="cat-preview-btn" onclick="catPreview()" style="flex:1;">Preview</button>
         <button class="btn" id="cat-apply-btn" onclick="catApply()" disabled style="flex:1;background:var(--success-fg);color:#fff;">Apply</button>
       </div>
-      <div style="font-size:12px;color:var(--gray-text);line-height:1.6;margin-top:10px;">Preview changes nothing. It reads every product and proposes a category from the title. Apply writes the <b>Category field</b> plus the <b>Google feed fields</b> &#8212; gender (Female), age group (Adult), and color (read from each product's title) &#8212; on your active products. It never touches titles, SKUs, variants, inventory, or prices. Categories already correct are skipped; the Google fields are set on every active product.</div>
+      <div style="font-size:12px;color:var(--gray-text);line-height:1.6;margin-top:10px;">Preview changes nothing. It reads every product and proposes a category from the title. Apply writes the <b>Category field only</b> &#8212; never titles, SKUs, variants, inventory, or prices. Rows already correct are skipped.</div>
       <div class="status" id="cat-status" style="text-align:left;"></div>
     </div>
     <div style="background:#fff3cd;border-left:3px solid #c8900a;color:#7a5800;padding:10px 12px;font-size:12px;line-height:1.55;margin:10px 24px;display:none;" id="cat-warn">
@@ -1103,7 +1103,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 59</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 47</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1359,7 +1359,6 @@ var MENU = [
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
   { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
   { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
-  { id:'seocommand', icon:'📊', label:'SEO Command Center', desc:'SEO/AEO dashboard — audit, levers, rankings, live sync', roles:['admin','employee'], url:'commandcenter.html' },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'utilities',  icon:'🧰', label:'Store Utilities', desc:'Whole-catalog repairs — channels, size pickers (admin)', roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
@@ -1379,7 +1378,7 @@ function showMenu(){
     b.innerHTML = '<div class="menu-item-icon">'+m.icon+'</div>'+
       '<div><div class="menu-item-label">'+m.label+'</div><div class="menu-item-desc">'+m.desc+'</div></div>'+
       '<div class="menu-item-arrow">&#8250;</div>';
-    b.onclick = m.url ? function(){ window.location.href = m.url; } : function(){ openView(m.id, m.label); };
+    b.onclick = function(){ openView(m.id, m.label); };
     list.appendChild(b);
   });
   editCheckDue();
@@ -2431,8 +2430,7 @@ function sbArchiveInvoice(inv, cb) {
     invoice_date: inv.invoice_date || inv.date || '',
     status: 'live',
     published: true,
-    styles: inv.styles || [],
-    files: inv.files || []   // v56 — carry the scanned-page R2 keys into the archive
+    styles: inv.styles || []
   };
   api('archive', record)
   .then(function(res){ if(cb) cb(!res.error); })
@@ -2446,9 +2444,6 @@ function sbLoadArchive(cb) {
     rows.forEach(function(inv) {
       if (typeof inv.styles === 'string') {
         try { inv.styles = JSON.parse(inv.styles); } catch(e) { inv.styles = []; }
-      }
-      if (typeof inv.files === 'string') {   // v56 — scanned-page keys
-        try { inv.files = JSON.parse(inv.files); } catch(e) { inv.files = []; }
       }
     });
     cb(rows);
@@ -2502,15 +2497,6 @@ function renderKelCards(inv) {
   var container = el('kel-cards');
   container.innerHTML = '';
 
-  // v56 — link to the scanned invoice for this sheet, when we have it stored.
-  var scanLinks = invoiceScanLinksHtml(inv.files);
-  if (scanLinks) {
-    var sl = document.createElement('div');
-    sl.style.cssText = 'padding:10px 0 4px;font-size:13px;';
-    sl.innerHTML = '📄 ' + scanLinks;
-    container.appendChild(sl);
-  }
-
   var groups = {};
   (inv.styles||[]).forEach(function(s) {
     var t = s.type||'Other'; if(!groups[t]) groups[t]=[];groups[t].push(s);
@@ -2547,7 +2533,7 @@ function buildKelCard(style) {
   card.innerHTML =
     '<div class="p-card-header">'+
       '<div class="p-code-wrap"><div class="p-code">'+esc(style.code)+'</div><div class="p-type">'+esc(style.type)+'</div></div>'+
-      '<input class="p-name-input" type="text" value="'+esc(style.printed_name||style.name||'')+'" placeholder="Style name"/>'+
+      '<input class="p-name-input" type="text" value="'+esc(style.name||'')+'" placeholder="Style name"/>'+
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
     '<div class="p-card-body">'+
@@ -3100,50 +3086,12 @@ function handleFiles(e) {
   el('upload-area').querySelector('.upload-hint').textContent = 'Tap to change selection';
 }
 
-// v56 — the actual scanned pages, held so we can save them to R2 after
-// extraction and keep them viewable from the review screen + Archive.
-var pendingScans = [];
-
 function extractAllPages() {
   if (selectedFiles.length === 0) return;
   allExtractedStyles = [];
-  pendingScans = [];
   el('extract-btn').disabled = true;
   showStatus('extract-status','loading','<span class="spinner"></span>Processing file 1 of ' + selectedFiles.length + '...');
   processPage(0, {});
-}
-
-// v56 — upload every scanned page to R2 (store_invoice_file). If the bucket
-// isn't bound the worker returns { skipped:true } and we just get no files —
-// the app keeps working, there's simply nothing to view yet. Sequential to be
-// gentle on the worker; scans are small (compressed JPEG / one PDF).
-function storeScannedFiles(invoiceMeta, done) {
-  var out = [];
-  var invNum = (invoiceMeta && invoiceMeta.invoice_number) || '';
-  function next(i) {
-    if (i >= pendingScans.length) { done(out); return; }
-    var f = pendingScans[i];
-    api('store_invoice_file', { image: f.b64, media_type: f.mime, invoice_number: invNum, page: f.page, name: f.name })
-    .then(function(res){
-      if (res && res.key) out.push({ key: res.key, type: res.type, name: res.name });
-      next(i+1);
-    })
-    .catch(function(){ next(i+1); });
-  }
-  next(0);
-}
-
-// v56 — a viewable link (or list of page links) for a set of stored scans.
-// Uses ?token= so it opens straight in a browser tab. Returns '' if none.
-function invoiceScanLinksHtml(files) {
-  if (!files || !files.length) return '';
-  var links = files.map(function(f, i){
-    var href = PROXY_URL + '?action=get_invoice_file&store_id=' + encodeURIComponent(STORE_ID) +
-               '&key=' + encodeURIComponent(f.key) + '&token=' + encodeURIComponent(SESSION.token);
-    var label = files.length > 1 ? ('Page ' + (i+1)) : 'View scanned invoice';
-    return '<a href="' + href + '" target="_blank" rel="noopener" class="arch-link" style="text-decoration:underline;">' + esc(label) + '</a>';
-  });
-  return links.join(files.length > 1 ? ' · ' : '');
 }
 
 function compressImage(file, cb) {
@@ -3183,14 +3131,10 @@ function processPage(idx, invoiceMeta) {
       return;
     }
     currentInvoice = Object.assign({}, invoiceMeta, {styles: allExtractedStyles});
-    showStatus('extract-status','loading','<span class="spinner"></span>Saving the scanned invoice...');
-    storeScannedFiles(invoiceMeta, function(files){
-      currentInvoice.files = files;
-      renderKelCards(currentInvoice);
-      showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
-      el('extract-btn').disabled = false;
-      el('pricing-section').scrollIntoView({behavior:'smooth'});
-    });
+    renderKelCards(currentInvoice);
+    showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
+    el('extract-btn').disabled = false;
+    el('pricing-section').scrollIntoView({behavior:'smooth'});
     return;
   }
 
@@ -3213,8 +3157,6 @@ function processPage(idx, invoiceMeta) {
       el('extract-btn').disabled = false;
       return;
     }
-    // v56 — keep this page's bytes so we can save it to R2 after extraction.
-    pendingScans.push({ b64: b64, mime: mime, name: file.name, page: idx });
     showStatus('extract-status','loading','<span class="spinner"></span>' + (pdf
       ? 'Sending the PDF to Claude — every page reads in one pass (up to 2 minutes)...'
       : 'Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...'));
@@ -3284,35 +3226,27 @@ function loadArchive() {
         list.innerHTML = '<div class="archive-empty">No invoices archived yet.</div>';
         return;
       }
-      // v57 — group vendor tabs CASE-INSENSITIVELY so "COTTON CANDY LA" and
-      // "Cotton Candy LA" share one tab. The display name is the nicest-cased
-      // version seen (prefer a mixed-case spelling over an ALL-CAPS one).
-      var vendors = {};        // key: lowercased vendor -> array of invoices
-      var vendorDisplay = {};  // key: lowercased vendor -> display label
+      var vendors = {};
       invoices.forEach(function(inv) {
-        var raw = (inv.vendor || 'Unknown').trim();
-        var key = raw.toLowerCase();
-        if (!vendors[key]) { vendors[key] = []; vendorDisplay[key] = raw; }
-        else if (vendorDisplay[key] === vendorDisplay[key].toUpperCase() && raw !== raw.toUpperCase()) {
-          vendorDisplay[key] = raw; // upgrade an ALL-CAPS label to a mixed-case one
-        }
-        vendors[key].push(inv);
+        var v = inv.vendor || 'Unknown';
+        if (!vendors[v]) vendors[v] = [];
+        vendors[v].push(inv);
       });
 
-      var vendorKeys = Object.keys(vendors);
+      var vendorNames = Object.keys(vendors);
       tabBar.innerHTML = '';
-      vendorKeys.forEach(function(k, i) {
+      vendorNames.forEach(function(v, i) {
         var btn = document.createElement('button');
         btn.className = 'vendor-tab' + (i === 0 ? ' active' : '');
-        btn.textContent = vendorDisplay[k];
+        btn.textContent = v;
         btn.onclick = function() {
           document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});
           btn.classList.add('active');
-          renderArchiveList(vendors[k], liveNum);
+          renderArchiveList(vendors[v], liveNum);
         };
         tabBar.appendChild(btn);
       });
-      renderArchiveList(vendors[vendorKeys[0]], liveNum);
+      renderArchiveList(vendors[vendorNames[0]], liveNum);
     });
   });
 }
@@ -3343,18 +3277,9 @@ function renderArchiveList(invoices, liveNum) {
     // build 31 — date logged: invoice date if the sheet has one, otherwise
     // the archive row's created_at (manual sheets before build 31 stored no date).
     var when = inv.invoice_date || inv.date || '';
-    var hadPrintedDate = !!when;
     if (!when && inv.created_at) {
       var dt = new Date(inv.created_at);
       if (!isNaN(dt.getTime())) when = (dt.getMonth()+1)+'/'+dt.getDate()+'/'+dt.getFullYear();
-    }
-    // v57 — "scanned on" = when the sheet was actually scanned into the app
-    // (created_at), shown separately from the invoice's PRINTED date so the two
-    // are never confused (the 7/20 Cotton Candy mix-up).
-    var scannedOn = '';
-    if (inv.created_at) {
-      var sdt = new Date(inv.created_at);
-      if (!isNaN(sdt.getTime())) scannedOn = (sdt.getMonth()+1)+'/'+sdt.getDate()+'/'+sdt.getFullYear();
     }
 
     // build 31 — say what's actually in the sheet, not just a count
@@ -3371,10 +3296,7 @@ function renderArchiveList(invoices, liveNum) {
       },0);
     },0);
     var metaBits = [];
-    if (when) metaBits.push(hadPrintedDate ? 'invoice ' + when : when);
-    // show scanned date only when it adds info (a printed invoice date exists,
-    // so `when` isn't already the scan date)
-    if (scannedOn && hadPrintedDate) metaBits.push('scanned ' + scannedOn);
+    if (when) metaBits.push(when);
     metaBits.push((inv.styles||[]).length + (((inv.styles||[]).length===1)?' style':' styles'));
     if (namesTxt) metaBits.push(namesTxt);
     // build 33 — sheets entered without wholesale costs show units instead of a misleading $0.00
@@ -3386,19 +3308,13 @@ function renderArchiveList(invoices, liveNum) {
         '<button class="arch-link arch-unpub">Unpublish</button>'
       : '<span class="status-pill draft">Saved</span>'+
         '<button class="delete-btn">&#128465;</button>';
-    // v56 — a link to the stored scan for this archived sheet (if any).
-    var archScan = invoiceScanLinksHtml(inv.files);
     item.innerHTML =
       '<div class="archive-item-info">'+
         '<div class="archive-file-name">'+esc(fileName)+'</div>'+
         '<div class="archive-meta">'+esc(metaBits.join(' · '))+'</div>'+
-        (archScan ? '<div class="archive-scan" style="font-size:12px;margin-top:3px;">📄 '+archScan+'</div>' : '')+
       '</div>'+
       '<div class="archive-right">'+rightHtml+'</div>';
     item.querySelector('.archive-item-info').addEventListener('click', function() { loadArchivedInvoice(inv); });
-    // the scan link opens in a new tab — don't also reopen the sheet
-    var _scanBox = item.querySelector('.archive-scan');
-    if (_scanBox) _scanBox.addEventListener('click', function(e){ e.stopPropagation(); });
     if (isLive) {
       item.querySelector('.arch-copy').addEventListener('click', function(e) { e.stopPropagation(); copyLink(); });
       item.querySelector('.arch-unpub').addEventListener('click', function(e) {
@@ -3437,8 +3353,7 @@ function loadArchivedInvoice(inv) {
     vendor: inv.vendor,
     invoice_number: inv.invoice_number,
     invoice_date: inv.invoice_date,
-    styles: (inv.styles||[]).map(function(s){ return Object.assign({colors:[]}, s); }),
-    files: inv.files || []   // v56 — keep the scanned-invoice link on reopen
+    styles: (inv.styles||[]).map(function(s){ return Object.assign({colors:[]}, s); })
   };
   kelTab('invoice');
   renderKelCards(currentInvoice);
@@ -3449,46 +3364,7 @@ function loadArchivedInvoice(inv) {
 /* ── MANUAL ENTRY (no invoice) — builds the SAME invoice object photo
    extraction produces and feeds the SAME review pipeline. One row per
    style+color; OS = One Size for accessories. ── */
-/* build 48 — Type picker is now a SINGLE SOURCE OF TRUTH. To add a type, add ONE line here:
-   key = what shows in the searchable picker; shopify = Shopify product_type;
-   tag = smart-collection tag. The picker rebuilds from these keys automatically
-   (no second list to edit), and product types already live in the store are
-   merged in at runtime so the field mirrors Shopify. */
-var _typeMap = {
-  'Accessory':{ shopify: 'Accessories', tag: 'accessories' },
-  'Top':      { shopify: 'Tops',        tag: 'top' },
-  'Blouse':   { shopify: 'Tops',        tag: 'top' },
-  'Dress':    { shopify: 'Dresses',     tag: 'dress' },
-  'Romper':   { shopify: 'Rompers',     tag: 'dress' },
-  'Jumpsuit': { shopify: 'Rompers',     tag: 'dress' },
-  'Sweater':  { shopify: 'Sweaters',    tag: 'sweater' },
-  'Bottom':   { shopify: 'Bottoms',     tag: 'bottoms' },
-  'Skirt':    { shopify: 'Bottoms',     tag: 'bottoms' },
-  'Shorts':   { shopify: 'Bottoms',     tag: 'bottoms' },
-  'Swim':     { shopify: 'Swimwear',    tag: 'swimwear' },
-  'Shoe':     { shopify: 'Shoes',       tag: 'shoes' }
-};
-var _liveShopifyTypes = [];        // product types already in the store (runtime)
-var _shopifyTypesLoaded = false;
-function manTypeSuggestions(){
-  var keys = Object.keys(_typeMap);
-  var extra = _liveShopifyTypes.filter(function(t){ return t && keys.indexOf(t) === -1; });
-  return keys.concat(extra);
-}
-function ensureManTypeDatalist(){
-  var dl = el('man-type-list');
-  if (!dl){ dl = document.createElement('datalist'); dl.id = 'man-type-list'; document.body.appendChild(dl); }
-  dl.innerHTML = manTypeSuggestions().map(function(t){ return '<option value="'+esc(t)+'"></option>'; }).join('');
-}
-// Merge the store's existing product types into the picker. Fails open — a
-// fetch error (or an older Worker without the endpoint) just leaves the
-// curated list above, so the field still works before the Worker is updated.
-function ensureShopifyTypes(cb){
-  if (_shopifyTypesLoaded){ if (cb) cb(); return; }
-  api('shopify_get_types', {})
-    .then(function(res){ if (res && res.types) _liveShopifyTypes = res.types; _shopifyTypesLoaded = true; ensureManTypeDatalist(); if (cb) cb(); })
-    .catch(function(){ _shopifyTypesLoaded = true; if (cb) cb(); });
-}
+var _manTypes = ['Accessory','Top','Blouse','Dress','Romper','Jumpsuit','Sweater','Bottom','Skirt','Shorts','Shoe'];
 var _manImages = {};
 var _manPullN = 0;
 function manualPull(){
@@ -3543,7 +3419,7 @@ function manualPull(){
         row.querySelector('.man-retail').value ||
         row.querySelector('.man-cost').value ||
         (row.querySelector('.man-upc') && row.querySelector('.man-upc').value.trim()) ||   // build 39
-        ['XS','S','M','L','XL','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
+        ['XS','S','M','L','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
       if (!hasData) row.remove();
     });
     el('man-url').value = '';
@@ -3582,7 +3458,7 @@ function manualFormChanged(){
     var need = [];
     if (!row.querySelector('.man-name').value.trim()) need.push('style name');
     if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
-    var qty = ['XS','S','M','L','XL','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
+    var qty = ['XS','S','M','L','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
     if (!(qty > 0)) need.push('a quantity');
     if (!need.length) { rowOk = true; }
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
@@ -3632,7 +3508,7 @@ function manualSizeMode(btn, mode){
   var bOs = row.querySelector('.man-mode-os'), bSized = row.querySelector('.man-mode-sized');
   if (mode === 'os') {
     os.style.display = 'flex'; sized.style.display = 'none';
-    ['XS','S','M','L','XL'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
+    ['XS','S','M','L'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
     bOs.classList.add('man-mode-on'); bSized.classList.remove('man-mode-on');
   } else {
     os.style.display = 'none'; sized.style.display = 'flex';
@@ -3642,15 +3518,13 @@ function manualSizeMode(btn, mode){
   manualFormChanged();
 }
 function manualAddRow(){
-  ensureManTypeDatalist();   // curated types available immediately
-  ensureShopifyTypes();      // merge in the store's live types (once, async)
   var row = document.createElement('div');
   row.className = 'man-row';
   row.style.cssText = 'border-top:1px solid var(--gray-mid);padding-top:10px;margin-top:10px;';
   row.innerHTML =
     '<div style="display:flex;gap:8px;">' +
       '<div style="flex:2;"><label class="sp-l">Style name</label><input type="text" class="field-input man-name"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Type</label><input type="text" class="field-input man-type" list="man-type-list" autocomplete="off" placeholder="Search or type…"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Type</label><select class="field-input man-type">' + _manTypes.map(function(t){ return '<option>'+t+'</option>'; }).join('') + '</select></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
@@ -3666,7 +3540,7 @@ function manualAddRow(){
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
     '<div class="man-qty-sized" style="display:none;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      ['XS','S','M','L','XL'].map(function(sz){
+      ['XS','S','M','L'].map(function(sz){
         return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
@@ -3712,7 +3586,7 @@ function manualStart(){
     var retail = parseFloat(row.querySelector('.man-retail').value);
     var cost = parseFloat(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
-    ['XS','S','M','L','XL','OS'].forEach(function(sz){
+    ['XS','S','M','L','OS'].forEach(function(sz){
       var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
       if (q > 0) sizes[sz] = q;
     });
@@ -3801,15 +3675,6 @@ function loadSampleInvoice() {
 /* ── NAME REGENERATION (proxied) ── */
 var _nameHistory = {};
 var _shopifyExistingNames = [];
-// v57 — the FULL raw Shopify titles (with color suffix), for the name-based
-// duplicate guard on push. The SKU check only catches same-code re-scans; this
-// catches a product with the same NAME living under a different style code.
-var _shopifyExistingTitlesRaw = [];
-// Normalize a title so "Butter Me Up Lace Cami - Cherry" and
-// "Butter Me Up Lace Cami: Cherry" compare equal (separators -> space).
-function _normTitleKey(s) {
-  return String(s || '').toLowerCase().replace(/[:–—\-]/g, ' ').replace(/\s+/g, ' ').trim();
-}
 
 // Load active Shopify product names ONCE (lazy, on first regenerate), cached for
 // the session, so name suggestions cross-check live products everywhere — not
@@ -3820,7 +3685,6 @@ function ensureShopifyNames(cb) {
   api('shopify_get_titles', {})
   .then(function(res) {
     if (res && res.titles) {
-      _shopifyExistingTitlesRaw = res.titles.slice();   // v57 — full titles for name-dup guard
       _shopifyExistingNames = res.titles.map(function(t) {
         return t.replace(/\s*-\s*[^-]+$/, '').trim();   // strip "- Color" suffix
       }).filter(function(n) { return n.length > 0; });
@@ -3937,7 +3801,6 @@ function openShopifyReview() {
   api('shopify_get_titles', {})
   .then(function(res) {
     if (res.titles) {
-      _shopifyExistingTitlesRaw = res.titles.slice();   // v57 — full titles for name-dup guard
       // Strip color suffix ("Iris Top - Navy" → "Iris Top"), keep base names
       _shopifyExistingNames = res.titles.map(function(t) {
         return t.replace(/\s*-\s*[^-]+$/, '').trim();
@@ -3945,42 +3808,7 @@ function openShopifyReview() {
     }
   })
   .catch(function() { _shopifyExistingNames = []; })
-  .finally(function() { _buildSpReview(inv); _spAutoCheckLive(); });
-}
-
-// v57 — on (re)open, quietly check each card's SKU against Shopify and mark the
-// ones already live, so reopening a saved invoice shows at a glance what's been
-// pushed and what's left — without tapping through each card. Sequential to be
-// gentle on the API; a failed check just leaves that card as Ready.
-function _spAutoCheckLive() {
-  var i = 0;
-  var found = 0;
-  el('sp-count').textContent = 'Checking what’s already live…';
-  function next() {
-    if (i >= _spCards.length) {
-      el('sp-count').textContent = found > 0
-        ? (found + ' already in Shopify · ' + (_spCards.length - found) + ' to push')
-        : (_spCards.length + ' product' + (_spCards.length === 1 ? '' : 's') + ' to push');
-      return;
-    }
-    var cd = _spCards[i++];
-    if (['success','added','skipped','pushing','restocking','duplicate'].indexOf(cd.state) >= 0) { next(); return; }
-    var sizes = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
-    var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
-    if (!checkSize) { next(); return; }
-    api('shopify_check_sku', { sku: cd.baseSku + '-' + checkSize })
-    .then(function(res) {
-      if (res && res.exists) {
-        cd.dupVariant = res.variant;
-        cd.nameDup = null;
-        found++;
-        _spSetState(cd, 'duplicate', '✓ Already in Shopify', 'Already in Shopify — Decide', 'sp-btn-warning');
-      }
-    })
-    .catch(function() {})
-    .finally(function() { next(); });
-  }
-  next();
+  .finally(function() { _buildSpReview(inv); });
 }
 
 function closeShopifyReview() {
@@ -4009,36 +3837,32 @@ function _buildSpReview(inv) {
       var slug    = _spColorSlug(colorObj.color);
       var baseSku = style.code + '-' + slug;
 
-      // build 59 — gather quantities across all apparel sizes (incl. XL) + OS.
-      var gatherOrder = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
+      var sizeOrder = ['XS', 'S', 'M', 'L', 'OS']; // OS = One Size (accessories)
       var activeSizes = {};
-      gatherOrder.forEach(function(sz) {
+      sizeOrder.forEach(function(sz) {
         var q = (colorObj.sizes || {})[sz] || 0;
         if (q > 0) activeSizes[sz] = q;
       });
       if (!Object.keys(activeSizes).length) return;
 
-      // build 59 — an OS quantity means one-size (accessory). Everything else is
-      // apparel and shows the FULL XS,S,M,L,XL run (0s included) so what you see
-      // matches what gets created — no more "missing XS" surprises.
-      var isOneSize = !!activeSizes['OS'];
-      var displaySizes = isOneSize ? ['OS'] : ['XS', 'S', 'M', 'L', 'XL'];
       var sizeHtml = '';
-      displaySizes.forEach(function(sz) {
-        var q = activeSizes[sz] || 0;
+      sizeOrder.forEach(function(sz) {
+        if (!activeSizes[sz]) return;
         sizeHtml +=
-          '<div class="sp-size-cell"' + (q === 0 ? ' style="opacity:.45;"' : '') + '>' +
+          '<div class="sp-size-cell">' +
             '<div class="sp-sz-label">' + sz + '</div>' +
-            '<div class="sp-sz-qty">' + q + '</div>' +
+            '<div class="sp-sz-qty">' + activeSizes[sz] + '</div>' +
           '</div>';
       });
 
-      // build 39/59 — real UPCs flow to Shopify. Only ONE-SIZE cards get the
-      // field: a style-level UPC can never be copied across apparel sizes
-      // (duplicate barcodes make POS scans ambiguous).
-      var upcHtml = isOneSize
+      // build 39 — real UPCs flow to Shopify. Only single-variant cards get
+      // the field: a style-level UPC can never be copied across sizes
+      // (duplicate barcodes make POS scans ambiguous; per-size capture is a
+      // later phase). Multi-size styles keep SKU barcodes, unchanged.
+      var oneVariant = Object.keys(activeSizes).length === 1;
+      var upcHtml = oneVariant
         ? '<div class="sp-upc-row" style="padding:0 14px 10px;">' +
-            '<label class="sp-l">UPC / GTIN from packaging (optional — scan or type)</label>' +
+            '<label class="sp-l">UPC from packaging (optional — scan or type)</label>' +
             '<div style="display:flex;gap:6px;">' +
               '<input type="text" inputmode="numeric" class="field-input sp-upc" autocomplete="off"/>' +
               '<button type="button" class="btn btn-outline sp-upc-scan" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera">&#128247;</button>' +
@@ -4046,28 +3870,6 @@ function _buildSpReview(inv) {
             '<div class="sp-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>' +
           '</div>'
         : '';
-
-      // v56 — vendor SKU / item number from the invoice, on EVERY card. Saved
-      // to a custom.vendor_sku metafield; it never touches the variant SKU that
-      // POS scans depend on. Prefilled from the invoice when one was printed.
-      var vskuHtml =
-        '<div class="sp-vsku-row" style="padding:0 14px 10px;">' +
-          '<label class="sp-l">Vendor SKU / item # (optional — kept as a record)</label>' +
-          '<input type="text" class="field-input sp-vsku" autocomplete="off"/>' +
-        '</div>';
-
-      // v57 — audit line: who is adding this and when (written to Shopify as
-      // custom.added_by / custom.added_at when pushed).
-      var _now = new Date();
-      var _h = _now.getHours(), _m = _now.getMinutes();
-      var _ap = _h >= 12 ? 'PM' : 'AM';
-      var _h12 = ((_h % 12) || 12);
-      var _time = _h12 + ':' + (_m < 10 ? '0' + _m : _m) + ' ' + _ap;
-      var addedHtml =
-        '<div class="sp-added-row" style="padding:0 14px 10px;font-size:11px;color:var(--gray-text);">' +
-          'Added by ' + esc((SESSION && SESSION.name) || 'app') + ' · ' +
-          (_now.getMonth()+1) + '/' + _now.getDate() + '/' + _now.getFullYear() + ' ' + _time +
-        '</div>';
 
       var card = document.createElement('div');
       card.className = 'sp-card';
@@ -4085,8 +3887,6 @@ function _buildSpReview(inv) {
           '<div class="sp-retail">$' + retail.toFixed(2) + '</div>' +
         '</div>' +
         upcHtml +
-        vskuHtml +
-        addedHtml +
         '<div class="sp-card-foot">' +
           '<button class="sp-push-btn">Push to Shopify</button>' +
         '</div>';
@@ -4095,15 +3895,12 @@ function _buildSpReview(inv) {
         card: card, style: style, colorObj: colorObj,
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
         retail: retail, state: 'idle', dupVariant: null,
-        upcInput: null, upcHint: null, vskuInput: null
+        upcInput: null, upcHint: null
       };
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
       _spWireUpc(cd);
-      // v56 — vendor SKU field (all cards), prefilled from the invoice.
-      cd.vskuInput = cd.card.querySelector('.sp-vsku');
-      if (cd.vskuInput && cd.style.sku) cd.vskuInput.value = cd.style.sku;
       _spInitDetails(cd);
     });
   });
@@ -4189,7 +3986,7 @@ function _spSetState(cd, state, badgeText, btnText, btnExtra) {
   if (state === 'idle' || state === 'error') {
     btn.onclick = function() { _spPushCard(cd); };
   } else if (state === 'duplicate') {
-    btn.onclick = function() { cd.nameDup ? _spNameDupModal(cd, cd.nameDup) : showDupModal(cd); };
+    btn.onclick = function() { showDupModal(cd); };
   }
 
   _spUpdateProgress();
@@ -4206,14 +4003,13 @@ function _spUpdateProgress() {
 }
 
 function _spPushCard(cd) {
-  cd.nameDup = null;   // v57 — reset the name-duplicate flag on each attempt
   _spSetState(cd, 'checking', 'Checking…', 'Checking…');
 
   var oldErr = cd.card.querySelector('.sp-error-detail');
   if (oldErr) oldErr.remove();
 
   // Canonical SKU to check: prefer S, fall back to first active size
-  var sizes     = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+  var sizes     = ['XS','S','M','L','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
   var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
   var checkSku  = cd.baseSku + '-' + checkSize;
 
@@ -4224,23 +4020,6 @@ function _spPushCard(cd) {
       cd.dupVariant = res.variant;
       _spSetState(cd, 'duplicate', '⚠ In Shopify', '⚠ Already in Shopify — Decide', 'sp-btn-warning');
       showDupModal(cd);
-      return;
-    }
-    // v57 — NAME guard: the SKU didn't match, but a product with the SAME NAME
-    // may already exist under a different style code (the "Butter Me Up Lace
-    // Cami" duplicate). Compare the title we're about to create against every
-    // live Shopify title, separators normalized. If it matches, stop and let
-    // the user decide instead of silently creating a duplicate.
-    var wantTitle = (cd.style.name || cd.style.code) +
-      ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : '');
-    var wantKey = _normTitleKey(wantTitle);
-    var hit = null;
-    for (var i = 0; i < _shopifyExistingTitlesRaw.length; i++) {
-      if (_normTitleKey(_shopifyExistingTitlesRaw[i]) === wantKey) { hit = _shopifyExistingTitlesRaw[i]; break; }
-    }
-    if (hit) {
-      _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
-      _spNameDupModal(cd, hit);
       return;
     }
     _spDoCreate(cd);
@@ -4254,40 +4033,44 @@ function _spPushCard(cd) {
 function _spDoCreate(cd) {
   _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
 
-  // build 59 — SIZE INTEGRITY. Apparel is ALWAYS created with the full
-  // XS,S,M,L,XL run (sizes not on the invoice get 0 stock) so every product has
-  // an identical variant structure and inventory can never shift into the wrong
-  // size when a missing size is restocked later. True one-size items (OS —
-  // accessories) still create a single variant. isOneSize keys off an explicit
-  // OS quantity, so a lone "S" on an invoice is treated as apparel, not one-size.
-  var APPAREL_SIZES = ['XS','S','M','L','XL'];
-  var isOneSize = !!cd.activeSizes['OS'];
+  var sizeOrder = ['XS','S','M','L','OS'];
+  // build 39 — a valid UPC on a SINGLE-variant style becomes that variant's
+  // barcode (real GTINs fix the GSC "Invalid GTIN" errors and feed Merchant
+  // Center properly). Multi-size styles keep barcode = sku: one style-level
+  // UPC must never be copied across sizes (ambiguous POS scans). An invalid
+  // UPC falls back to the SKU code — it never blocks the push.
   var upcVal = cd.upcInput ? gtinDigits(cd.upcInput.value) : '';
-  var useUpc = !!(upcVal && isGtin(upcVal) && isOneSize);   // UPC → barcode only on one-size items
+  var useUpc = !!(upcVal && isGtin(upcVal) && Object.keys(cd.activeSizes).length === 1);
   var variants  = [];
-  if (isOneSize) {
-    var osSku = cd.baseSku + '-OS';
+  sizeOrder.forEach(function(sz) {
+    var qty = cd.activeSizes[sz];
+    if (!qty) return;
+    var sku = cd.baseSku + '-' + sz;
     variants.push({
-      size: 'OS', price: cd.retail.toFixed(2), sku: osSku,
-      barcode: useUpc ? upcVal : osSku, quantity: cd.activeSizes['OS'] || 0
+      size: sz,
+      price: cd.retail.toFixed(2),
+      sku: sku,
+      barcode: useUpc ? upcVal : sku,   // every variant gets a scannable barcode value
+      quantity: qty
     });
-  } else {
-    APPAREL_SIZES.forEach(function(sz) {
-      var sku = cd.baseSku + '-' + sz;
-      variants.push({
-        size: sz, price: cd.retail.toFixed(2), sku: sku,
-        barcode: sku,                       // every variant gets a scannable barcode value
-        quantity: cd.activeSizes[sz] || 0   // 0 for sizes not on the invoice — the variant still exists
-      });
-    });
-  }
+  });
 
-  // build 48 — Invoice type → Shopify product_type + collection tag. _typeMap is now the
-  // global single source of truth (defined with the Type picker up top). An
-  // unmapped free-text or live-Shopify value passes through verbatim, so it
-  // publishes the exact product_type the store already uses (no pluralizing).
-  var rawType     = cd.style.type || 'Accessory';
-  var typeEntry   = _typeMap[rawType] || { shopify: rawType, tag: rawType.toLowerCase() };
+  // Invoice type → Shopify product_type + collection tag (unchanged)
+  var _typeMap = {
+    'Dress':    { shopify: 'Dresses',   tag: 'dress' },
+    'Romper':   { shopify: 'Rompers',   tag: 'dress' },
+    'Jumpsuit': { shopify: 'Rompers',   tag: 'dress' },
+    'Top':      { shopify: 'Tops',      tag: 'top' },
+    'Blouse':   { shopify: 'Tops',      tag: 'top' },
+    'Sweater':  { shopify: 'Sweaters',  tag: 'sweater' },
+    'Bottom':   { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Skirt':    { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Shorts':   { shopify: 'Bottoms',   tag: 'bottoms' },
+    'Shoe':     { shopify: 'Shoes',     tag: 'shoes' },
+    'Accessory':{ shopify: 'Accessories', tag: 'accessories' }
+  };
+  var rawType     = cd.style.type || 'Apparel';
+  var typeEntry   = _typeMap[rawType] || { shopify: rawType + 's', tag: rawType.toLowerCase() };
 
   var product = {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
@@ -4296,14 +4079,8 @@ function _spDoCreate(cd) {
     title: (cd.style.name || cd.style.code) + ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : ''),
     vendor: (currentInvoice && currentInvoice.vendor) || "Miss Behavin'",
     product_type: typeEntry.shopify,
-    // build 59 — color + type here; the editable Tags field adds the style name
-    // and AI feature tags (lace, boy short…). Worker also ensures color/type/
-    // brand/fabric. All merged + deduped server-side.
-    tags: [cd.colorObj.color, typeEntry.tag]
-      .concat((cd.els && cd.els.tags ? cd.els.tags.value.split(',') : []))
-      .map(function(t){ return String(t || '').trim(); })
-      .filter(function(x){ return x && x !== 'Default'; }),
-    sizes: isOneSize ? ['OS'] : APPAREL_SIZES,   // build 59 — full apparel run, OS for one-size
+    tags: [cd.colorObj.color, typeEntry.tag].filter(function(x){ return x && x !== 'Default'; }),
+    sizes: sizeOrder.filter(function(sz){ return cd.activeSizes[sz]; }),
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
     seo_title: cd.els ? cd.els.title.value.trim() : '',
@@ -4311,20 +4088,14 @@ function _spDoCreate(cd) {
     body_description: cd.els ? cd.els.bodyd.value.trim() : '',
     product_category: cd.els ? cd.els.cat.value.trim() : '',
     image_alt: cd.els ? cd.els.alt.value.trim() : '',
-    images: _spChosenImages(cd),
-    // v56 — vendor SKU rides to a custom.vendor_sku metafield (never the variant SKU)
-    vendor_sku: (cd.vskuInput ? cd.vskuInput.value.trim() : '') || (cd.style.sku || ''),
-    // v57 — fabric from invoice/vendor -> custom.fabric (+ standard shopify.fabric once seeded)
-    fabric: cd.style.fabric || cd.style.vendor_fabric || ''
+    images: _spChosenImages(cd)
   };
 
   // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
   api('shopify_create_product', { product: product, collectionNames: ['New Arrivals'] })
   .then(function(res) {
     if (res.error) throw new Error(res.error);
-    cd.productGid = res.product_gid || null;   // v59 — remember it so images can be added after
     _spSetState(cd, 'success', '✓ Live', '✓ Live in Shopify', 'sp-btn-success');
-    if (cd.els) _spRenderImages(cd);           // refresh so the "add images to live product" button appears
 
     if (res.warnings && res.warnings.length) {
       _spShowErrorDetail(cd, 'Note: ' + res.warnings.join(' · '), 'color:var(--gray-text);');
@@ -4396,22 +4167,6 @@ function closeDupModal() {
   var d = el('dup-modal');
   if (d) d.classList.remove('open');
   _activeDup = null;
-}
-
-// v57 — name-based duplicate: the SKU didn't match but the title already exists
-// in Shopify under a different code. "Add inventory" can't apply (no matching
-// SKU), so the choice is Create-anyway or leave it flagged (closing the modal
-// keeps the card in the ⚠ duplicate state so nothing is created silently).
-function _spNameDupModal(cd, existingTitle) {
-  cd.nameDup = existingTitle;
-  showModal(
-    'Already in Shopify?',
-    'A product named "' + existingTitle + '" is already in Shopify (under a different SKU/code). ' +
-    'Create this as a separate product anyway? Close this box to leave it flagged and not create it.',
-    function() { closeModal(); _spDoCreate(cd); },
-    true,
-    'Create anyway'
-  );
 }
 
 function dupDecision(choice) {
@@ -4610,8 +4365,8 @@ function catPreview(){
       var matched = CAT_ROWS.filter(function(r){return r.gid && !r.same;}).length;
       var already = CAT_ROWS.filter(function(r){return r.same;}).length;
       var none = CAT_ROWS.filter(function(r){return !r.gid;}).length;
-      el('cat-summary').innerHTML = '<b>'+matched+'</b> to update &#183; <b>'+already+'</b> already correct &#183; <b>'+none+'</b> need attention<br><span style="color:var(--gray-text);">Apply also sets Gender = Female, Age = Adult, and Color (from each title) on all active products.</span>';
-      el('cat-apply-btn').disabled = CAT_ROWS.length === 0;
+      el('cat-summary').innerHTML = '<b>'+matched+'</b> to update &#183; <b>'+already+'</b> already correct &#183; <b>'+none+'</b> need attention';
+      el('cat-apply-btn').disabled = matched === 0;
       el('cat-warn').style.display = vendorFilter ? 'none' : 'block';
       showStatus('cat-status','success','Preview ready. Review, then Apply.');
     });
@@ -4630,43 +4385,19 @@ function catRenderTable(){
 }
 
 function catApply(){
-  if(!confirm('Write now? Sets the Category field AND the Google feed fields (gender = Female, age = Adult, color from each title) on your active products. Never titles, SKUs, variants, inventory, or prices.')) return;
+  if(!confirm('Write categories now? Category field only, rows marked "will set" only.')) return;
   el('cat-apply-btn').disabled = true; el('cat-preview-btn').disabled = true;
   var todo = CAT_ROWS.filter(function(r){ return r.gid && !r.same; });
   var ok=0, fail=0, i=0;
 
-  // Phase 2 — Google feed fields (gender / age group / color) over ALL active
-  // products. Every product needs these regardless of whether its category
-  // changed, so this runs even when no category rows were updated. Resumable:
-  // google_attrs_run pages via cursor; we loop until hasNextPage is false.
-  function gaPhase(){
-    catStatus('<span class="spinner"></span>Categories done (' + ok + ' set). Setting Google feed fields...');
-    catLog('--- Google feed fields: gender / age group / color ---');
-    var gaN=0, gaUnknown=0, cursor=null;
-    function gaNext(){
-      var body = { limit: 25 };
-      if (cursor) body.cursor = cursor;
-      api('google_attrs_run', body)
-      .then(function(res){
-        gaN += res.summary.processed;
-        gaUnknown += (res.summary.color_unknown ? res.summary.color_unknown.length : 0);
-        catStatus('<span class="spinner"></span>Google feed fields ' + gaN + '...');
-        if (res.hasNextPage) { cursor = res.cursor; setTimeout(gaNext, 250); }
-        else {
-          catLog('Google fields set on ' + gaN + ' products; ' + gaUnknown + ' had no readable color.');
-          showStatus('cat-status','success','Done. Categories: ' + ok + ' set / ' + fail + ' failed. Google feed fields on ' + gaN + ' products (' + gaUnknown + ' need a color check).');
-          el('cat-preview-btn').disabled = false;
-        }
-      })
-      .catch(function(e){ catLog('Google fields FAIL: ' + e.message); showStatus('cat-status','error','Google fields error: ' + e.message); el('cat-preview-btn').disabled = false; });
-    }
-    gaNext();
-  }
-
   function next(){
-    if (i >= todo.length) { gaPhase(); return; }
+    if (i >= todo.length) {
+      showStatus('cat-status','success','Done. Updated ' + ok + ', failed ' + fail + '.');
+      el('cat-preview-btn').disabled = false;
+      return;
+    }
     var r = todo[i]; i++;
-    catStatus('<span class="spinner"></span>Applying category ' + i + ' / ' + todo.length + '...');
+    catStatus('<span class="spinner"></span>Applying ' + i + ' / ' + todo.length + '...');
     api('shopify_set_category', { id: r.id, categoryId: r.gid })
     .then(function(res){
       if (res.error) throw new Error(res.error);
@@ -5263,15 +4994,6 @@ function _spInitDetails(cd){
   wrap.innerHTML =
     '<button type="button" class="sp-fetch-btn">&#8595; Get images &amp; fabric from ' + esc((currentInvoice && currentInvoice.vendor) || 'vendor') + '</button>' +
     '<div class="sp-fetch-status"></div>' +
-    // v57 — vendor-site registry: appears when the brand has no known website.
-    // Paste it once, it saves for this brand and every future scanned product.
-    '<div class="sp-vsite" style="display:none;margin-top:6px;">' +
-      '<label class="sp-l">Vendor website — paste once, saved for ' + esc((currentInvoice && currentInvoice.vendor) || 'this brand') + '</label>' +
-      '<div style="display:flex;gap:6px;">' +
-        '<input class="field-input sp-vsite-input" placeholder="e.g. shakeyourbonbon.com" autocomplete="off"/>' +
-        '<button type="button" class="btn btn-black sp-vsite-save" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use &amp; save</button>' +
-      '</div>' +
-    '</div>' +
     '<div class="sp-images"></div>' +
     '<label class="sp-l">SEO title</label><input class="sp-seo-title" maxlength="60"/>' +
     '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
@@ -5281,24 +5003,17 @@ function _spInitDetails(cd){
         ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Shorts','Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear','Jewelry','Bags','Accessories','Shoes']
           .map(function(c){ return '<option>'+c+'</option>'; }).join('') + '</select></div>' +
       '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
-    '</div>' +
-    // v59 — editable Tags (color, type, brand, fabric auto-added by the worker;
-    // this field carries the style name + AI feature tags like "lace"). Comma-separated.
-    '<label class="sp-l">Tags (comma-separated)</label><input class="sp-seo-tags" placeholder="lace, boy short, Butter Me Up…"/>';
+    '</div>';
   cd.card.insertBefore(wrap, cd.card.querySelector('.sp-card-foot'));
   cd.els = {
     fetchBtn: wrap.querySelector('.sp-fetch-btn'),
     fetchStatus: wrap.querySelector('.sp-fetch-status'),
-    vsite: wrap.querySelector('.sp-vsite'),
-    vsiteInput: wrap.querySelector('.sp-vsite-input'),
-    vsiteSave: wrap.querySelector('.sp-vsite-save'),
     images: wrap.querySelector('.sp-images'),
     title: wrap.querySelector('.sp-seo-title'),
     desc: wrap.querySelector('.sp-seo-desc'),
     bodyd: wrap.querySelector('.sp-seo-body'),
     cat: wrap.querySelector('.sp-seo-cat'),
-    alt: wrap.querySelector('.sp-seo-alt'),
-    tags: wrap.querySelector('.sp-seo-tags')
+    alt: wrap.querySelector('.sp-seo-alt')
   };
   cd.images = []; cd.userEdited = false;
   // v32 — manual-entry styles pulled from a vendor page arrive with photos:
@@ -5313,27 +5028,10 @@ function _spInitDetails(cd){
     _spRenderImages(cd);
     if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page' + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
   }
-  ['title','desc','bodyd','cat','alt','tags'].forEach(function(k){
+  ['title','desc','bodyd','cat','alt'].forEach(function(k){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
   });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
-  // v57 — save the pasted vendor website, then immediately retry the fetch.
-  cd.els.vsiteSave.onclick = function(){
-    var vendor = (currentInvoice && currentInvoice.vendor) || '';
-    var dom = (cd.els.vsiteInput.value || '').trim();
-    if (!dom || dom.indexOf('.') < 0) { cd.els.fetchStatus.textContent = 'Enter a valid website, e.g. brand.com'; return; }
-    cd.els.vsiteSave.disabled = true;
-    cd.els.fetchStatus.textContent = 'Saving ' + vendor + ' website…';
-    api('vendor_site_save', { vendor: vendor, domain: dom })
-    .then(function(res){
-      cd.els.vsiteSave.disabled = false;
-      if (res.error) { cd.els.fetchStatus.textContent = res.error; return; }
-      _vendorDomains[_vendorKey(vendor)] = res.domain || dom;   // cache for every card this session
-      cd.els.vsite.style.display = 'none';
-      _spFetchVendor(cd);   // retry now that the site is known
-    })
-    .catch(function(e){ cd.els.vsiteSave.disabled = false; cd.els.fetchStatus.textContent = 'Save failed: ' + e.message; });
-  };
   _spSeoEnqueue(cd);
 }
 function _spSeoEnqueue(cd){ _spSeoQ.push(cd); _spSeoPump(); }
@@ -5368,41 +5066,17 @@ function _spGenSeo(cd, done){
     cd.els.bodyd.value = j.body_description || '';
     cd.els.cat.value   = j.product_category || '';
     cd.els.alt.value   = j.image_alt || '';
-    // v59 — prefill Tags with the style name + AI feature tags (color, type,
-    // brand, fabric are added automatically by the worker at push). Deduped.
-    if (cd.els.tags) {
-      var _seen = {}, _tags = [];
-      [cd.style.printed_name || cd.style.name].concat(j.tags || []).forEach(function(t){
-        var v = String(t || '').trim();
-        var k = v.toLowerCase();
-        if (v && !_seen[k]) { _seen[k] = 1; _tags.push(v); }
-      });
-      cd.els.tags.value = _tags.join(', ');
-    }
     if (done) done();
   })
   .catch(function(e){ cd.els.title.placeholder = ''; cd.els.fetchStatus.textContent = 'SEO copy: ' + e.message; if (done) done(); });
 }
-// v57 — session cache of vendor->website so all cards for a brand reuse a
-// just-entered site without another save round-trip. Persistence lives in D1
-// (the worker looks it up), this is only an in-memory fast path.
-var _vendorDomains = {};
-function _vendorKey(v){ return String(v || '').toLowerCase().trim(); }
-
 function _spFetchVendor(cd){
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
-  var dom = _vendorDomains[_vendorKey(vendor)] || undefined;   // v57 — pass a saved/entered site if we have one
   cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
   cd.els.fetchBtn.disabled = true;
-  var req = { vendor: vendor, styleCode: cd.style.code,
-    color: cd.colorObj.color || '',                                 // v58 — filter images to this colorway
-    name: cd.style.printed_name || cd.style.name || cd.style.code   // v58 — name fallback if code doesn't match
-  };
-  if (dom) req.domain = dom;
-  api('fetch_vendor_details', req)
+  api('fetch_vendor_details', { vendor: vendor, styleCode: cd.style.code })
   .then(function(res){
     if (res.error) throw new Error(res.error);
-    if (cd.els.vsite) cd.els.vsite.style.display = 'none';   // known now
     var cands = res.candidates || [];
     if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; return; }
     var want = String(cd.colorObj.color || '').toLowerCase();
@@ -5410,16 +5084,7 @@ function _spFetchVendor(cd){
     if (!pick) { _spCandidatePicker(cd, cands); return; }
     _spUseCandidate(cd, pick);
   })
-  .catch(function(e){
-    cd.els.fetchBtn.disabled = false;
-    // v57 — no known website for this brand? Reveal the paste-once field.
-    if (/unknown vendor|VENDOR_SITES|pass a domain/i.test(e.message || '')) {
-      cd.els.fetchStatus.textContent = 'No website on file for ' + vendor + '. Paste it once below and it saves for this brand.';
-      if (cd.els.vsite) cd.els.vsite.style.display = 'block';
-    } else {
-      cd.els.fetchStatus.textContent = e.message;
-    }
-  });
+  .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
 }
 function _spCandidatePicker(cd, cands){
   cd.els.fetchStatus.textContent = 'Pick the match:';
@@ -5435,16 +5100,12 @@ function _spCandidatePicker(cd, cands){
 }
 function _spUseCandidate(cd, cand){
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
-  var dom = _vendorDomains[_vendorKey(vendor)] || undefined;
   cd.els.fetchStatus.textContent = 'Loading details…';
   if (cand.handle){
-    var dreq = { vendor: vendor, handle: cand.handle, color: cd.colorObj.color || '' };   // v58 — colorway filter
-    if (dom) dreq.domain = dom;
-    api('fetch_vendor_details', dreq)
+    api('fetch_vendor_details', { vendor: vendor, handle: cand.handle })
     .then(function(res){
       if (res.error) throw new Error(res.error);
       cd.images = res.images || cand.images || [];
-      cd.imagesAll = res.images_all || cd.images;   // v58 — the full colorway set, for the show-all toggle
       cd.fabric = res.fabric || null; cd.fit = res.fit || null;
       _spRenderImages(cd);
       cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
@@ -5453,7 +5114,7 @@ function _spUseCandidate(cd, cand){
     })
     .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
   } else {
-    cd.images = cand.images || []; cd.imagesAll = cd.images; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
+    cd.images = cand.images || []; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
   }
 }
 function _spRenderImages(cd){
@@ -5464,52 +5125,6 @@ function _spRenderImages(cd){
     im.onclick = function(){ var on = im.dataset.on === '1'; im.dataset.on = on ? '0' : '1'; im.className = 'sp-img' + (on ? ' off' : ' on'); };
     cd.els.images.appendChild(im);
   });
-  // v58 — when we filtered to one colorway, offer a toggle to see every color.
-  var all = cd.imagesAll || cd.images || [];
-  if (all.length > (cd.images || []).length) {
-    var t = document.createElement('button');
-    t.type = 'button'; t.className = 'sp-l';
-    t.style.cssText = 'background:none;border:none;color:var(--gray-text);text-decoration:underline;cursor:pointer;padding:6px 0;font-size:12px;';
-    t.textContent = cd._showingAll ? 'Show only ' + (cd.colorObj.color || 'this color') + ' (' + (cd._colorImages ? cd._colorImages.length : 0) + ')' : 'Show all colors (' + all.length + ')';
-    t.onclick = function(){
-      if (!cd._showingAll) { cd._colorImages = cd.images; cd.images = all; cd._showingAll = true; }
-      else { cd.images = cd._colorImages || cd.images; cd._showingAll = false; }
-      _spRenderImages(cd);
-    };
-    cd.els.images.appendChild(t);
-  }
-  // v59 — if this product is already LIVE (pushed, or already in Shopify) show a
-  // button to attach the currently-selected images without re-pushing. Solves
-  // "I forgot to add images before I hit push."
-  var liveId = _spLiveProductId(cd);
-  if (liveId && (cd.images || []).length) {
-    var ab = document.createElement('button');
-    ab.type = 'button'; ab.className = 'btn btn-black';
-    ab.style.cssText = 'width:100%;margin-top:8px;';
-    ab.textContent = '＋ Add selected images to the live product';
-    ab.onclick = function(){ _spAddImagesToLive(cd, ab); };
-    cd.els.images.appendChild(ab);
-  }
-}
-// v59 — the live product's GID: set on push (cd.productGid) or, for an item
-// already in Shopify, read off the duplicate variant's product.
-function _spLiveProductId(cd){
-  return cd.productGid || (cd.dupVariant && cd.dupVariant.product && cd.dupVariant.product.id) || null;
-}
-function _spAddImagesToLive(cd, btn){
-  var pid = _spLiveProductId(cd);
-  if (!pid){ cd.els.fetchStatus.textContent = 'Push this product first, then add images.'; return; }
-  var imgs = _spChosenImages(cd);
-  if (!imgs.length){ cd.els.fetchStatus.textContent = 'Tap the photos you want (they turn on), then add.'; return; }
-  if (btn) btn.disabled = true;
-  cd.els.fetchStatus.textContent = 'Adding ' + imgs.length + ' image(s) to the live product…';
-  api('shopify_add_images', { product_gid: pid, images: imgs, alt: (cd.els.alt && cd.els.alt.value) || '' })
-  .then(function(res){
-    if (btn) btn.disabled = false;
-    if (res.error) throw new Error(res.error);
-    cd.els.fetchStatus.textContent = '✓ Added ' + (res.added || imgs.length) + ' image(s) to the live product.';
-  })
-  .catch(function(e){ if (btn) btn.disabled = false; cd.els.fetchStatus.textContent = 'Add images failed: ' + e.message; });
 }
 function _spChosenImages(cd){
   var out = [];
