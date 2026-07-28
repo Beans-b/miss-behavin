@@ -507,6 +507,27 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
 .ov-goal .meter{height:6px; border-radius:100px; background:var(--surface-3); overflow:hidden}
 .ov-goal .meter i{display:block; height:100%; background:linear-gradient(90deg,var(--plum),var(--brass))}
 </style>
+<style>
+/* v69 live keyword dashboard */
+.opp-wrap{margin:14px 0}
+#oppBody{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.opp-card{border:1px solid #e6e1d8;border-left:4px solid #b9b2a6;border-radius:10px;padding:10px 12px;background:#fff}
+.opp-card.ctr_gap{border-left-color:#c0563b}
+.opp-card.almost{border-left-color:#c99a3b}
+.opp-card.rising{border-left-color:#3b7d5a}
+.opp-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:11px}
+.opp-type{font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.opp-metric{color:#8a8377;font-variant-numeric:tabular-nums}
+.opp-term{font-weight:600;margin:4px 0 2px;font-size:14px}
+.opp-why{color:#6f685c;font-size:12px;margin-bottom:6px}
+.opp-do{font-size:12px}
+.opp-empty{color:#8a8377;font-size:13px;padding:8px 0}
+#discBody{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.disc-row{display:flex;align-items:center;gap:10px;padding:5px 8px;border:1px solid #eee7dc;border-radius:8px;background:#fff}
+.disc-term{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.disc-m{color:#8a8377;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.btn.mini{padding:2px 8px;font-size:11px;line-height:1.6}
+</style>
 </head>
 <body>
 
@@ -768,10 +789,15 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
         <div><div class="n" id="kwP1">0</div><div class="l">Priority 1</div></div>
       </div>
     </div>
+    <div id="oppWrap" class="opp-wrap">
+      <div class="section-head"><h3>Opportunities</h3><span class="hint">Live from Search Console — highest-impact fixes first, no data entry.</span></div>
+      <div id="oppBody"></div>
+    </div>
     <div class="toolbar">
       <div class="chips" id="kwClusterChips"></div>
       <button class="btn" id="kwAdd">+ Add keyword</button>
       <button class="btn" id="kwGsc" title="Pull the last 28 days of positions from Google Search Console (admin)">↻ Refresh ranks (GSC)</button>
+      <button class="btn" id="kwVol" title="Pull average monthly search volume from Google Ads Keyword Planner (admin)">≈ Pull volume (Google Ads)</button>
       <span id="kwGscNote"></span>
     </div>
     <div class="sov-scroll">
@@ -781,6 +807,10 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
         </tr></thead>
         <tbody id="kwBody"></tbody>
       </table>
+    </div>
+    <div id="discWrap">
+      <div class="section-head"><h3>Discovered in Search Console</h3><span class="hint">Real queries you already rank for that aren't tracked yet. Tap track to add.</span></div>
+      <div id="discBody"></div>
     </div>
     <p class="sov-note">Wire in later: Search Console (clicks, impressions, position, the query gap) · a dated Ahrefs / Semrush / Moz export (volume + difficulty) · manual incognito checks for AI Overviews and ChatGPT. No paid tool is load-bearing.</p>
   </section>
@@ -825,8 +855,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.07.26g -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.26g</b> &middot; per-task ✦ Prompt button on every row (task-specific); footer button = whole-program prompt &middot; +11 style/occasion &amp; feed tasks (7/26) &middot; Start Here order now syncs across devices (D1)</div>
+    <!-- deploy_check: CC-2026.07.28a -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b>CC-2026.07.28a</b> &middot; live keyword dashboard: Keywords tab auto-populated from Search Console (seocmd_keywords); Opportunities panel + Discovered queries; Pull volume from Google Ads Keyword Planner; Toolbox rank/keyword rows now Covered &middot; pairs with worker <b>V69-LIVE-KEYWORDS</b> &middot; per-task ✦ Prompt button on every row; footer button = whole-program prompt</div>
   </div>
 </div>
 
@@ -1720,15 +1750,89 @@ function refreshRanksGSC(){
   }).catch(function(){ if(btn) btn.classList.remove('busy'); if(note) note.textContent=''; toast('GSC pull failed — check the worker / secret'); });
 }
 
+/* ============ v69 — live keyword universe + opportunities + volume ============
+   The keyword list is driven by real Search Console queries (worker action
+   seocmd_keywords), not the hardcoded KEYWORDS seed. Volume fills from Google Ads
+   Keyword Planner (seocmd_volume). Opportunities are computed server-side from
+   live GSC metrics. Nothing here invents data. */
+var KW_LIVE=[];
+function kwLiveByNorm(){ var m={}; KW_LIVE.forEach(function(r){ var n=r.keyword_norm||rankNorm(r.keyword||''); if(n) m[n]=r; }); return m; }
+function applyLiveVolume(){
+  var m=kwLiveByNorm();
+  KEYWORDS.forEach(function(k){
+    var r=m[rankNorm(k.term)];
+    if(r && r.vol!=null){ k.vol=Number(r.vol).toLocaleString('en-US'); if(r.vol_comp) k.kd=r.vol_comp; }
+  });
+}
+function loadKeywordsLive(){
+  if(!mbToken()) return Promise.resolve();
+  return wapi('seocmd_keywords').then(function(r){
+    KW_LIVE=(r && r.rows)?r.rows:[];
+    applyLiveVolume();
+    renderKeywords();
+    renderOpportunities();
+    renderDiscovered();
+  }).catch(function(){});
+}
+function kwFmtPos(p){ return p==null?'—':(Math.round(p*10)/10); }
+function kwFmtPct(x){ return x==null?'—':(Math.round(x*1000)/10)+'%'; }
+function renderOpportunities(){
+  var el=document.getElementById('oppBody'); if(!el) return; el.innerHTML='';
+  var opps=KW_LIVE.filter(function(k){ return k.opportunity; }).sort(function(a,b){ return (b.impressions||0)-(a.impressions||0); });
+  if(!opps.length){ el.innerHTML='<div class="opp-empty">No live opportunities yet — pull Search Console ranks to populate.</div>'; return; }
+  var LABEL={ctr_gap:'Low click-through',almost:'Almost page 1',rising:'Rising demand'};
+  opps.slice(0,20).forEach(function(k){
+    var o=k.opportunity, d=document.createElement('div'); d.className='opp-card '+o.type;
+    d.innerHTML='<div class="opp-top"><span class="opp-type">'+(LABEL[o.type]||o.type)+'</span><span class="opp-metric">pos '+kwFmtPos(k.position)+' · '+(k.impressions||0)+' impr · CTR '+kwFmtPct(k.ctr)+'</span></div>'
+      +'<div class="opp-term">'+esc(k.keyword)+'</div>'
+      +'<div class="opp-why">'+esc(o.why)+'</div>'
+      +'<div class="opp-do"><b>'+esc(o.action)+'</b>'+(k.page?(' · <a href="'+esc(k.page)+'" target="_blank" rel="noopener">page</a>'):'')+'</div>';
+    el.appendChild(d);
+  });
+  var ov=document.getElementById('ovTopOpps'); if(ov) ov.textContent=opps.slice(0,3).map(function(k){ return k.keyword; }).join(' · ')||'—';
+}
+function renderDiscovered(){
+  var el=document.getElementById('discBody'); if(!el) return; el.innerHTML='';
+  var have={}; KEYWORDS.forEach(function(k){ have[rankNorm(k.term)]=1; });
+  var disc=KW_LIVE.filter(function(r){ return !have[r.keyword_norm||rankNorm(r.keyword||'')] && (r.impressions||0)>0; })
+    .sort(function(a,b){ return (b.impressions||0)-(a.impressions||0); }).slice(0,40);
+  if(!disc.length){ el.innerHTML='<div class="opp-empty">No new queries yet — pull Search Console ranks.</div>'; return; }
+  disc.forEach(function(r){
+    var row=document.createElement('div'); row.className='disc-row';
+    row.innerHTML='<span class="disc-term">'+esc(r.keyword)+'</span>'
+      +'<span class="disc-m">pos '+kwFmtPos(r.position)+' · '+(r.impressions||0)+' impr · '+(r.clicks||0)+' clk</span>';
+    var b=document.createElement('button'); b.className='btn mini'; b.textContent='track';
+    b.addEventListener('click',function(){ trackFromDiscovered(r.keyword, r.page||''); });
+    row.appendChild(b); el.appendChild(row);
+  });
+}
+function trackFromDiscovered(term, page){
+  if(KEYWORDS.some(function(k){ return rankNorm(k.term)===rankNorm(term); })) return;
+  KEYWORDS.push({term:term, intent:'info', page:page||'', vol:'—', kd:'—', rank:'—', target:'Top 10', pri:'3', feat:'From GSC', cl:0});
+  if(typeof persist==='function') persist();
+  renderKeywords(); renderDiscovered(); toast('Tracking "'+term+'"');
+}
+function refreshVolume(){
+  var btn=document.getElementById('kwVol'), note=document.getElementById('kwGscNote');
+  if(!mbToken()){ toast('Admin only — open from the LineSheet app'); return; }
+  if(btn) btn.classList.add('busy'); if(note) note.textContent='Pulling search volume from Google Ads…';
+  wapi('seocmd_volume', {keywords: KEYWORDS.map(function(k){ return k.term; })}).then(function(r){
+    if(btn) btn.classList.remove('busy');
+    if(!r || r.error){ if(note) note.textContent=''; toast('Volume: '+((r&&(r.message||r.error))||'no response')); return; }
+    if(note) note.textContent='Volume updated · '+(r.updated||0)+' keywords';
+    loadKeywordsLive();
+  }).catch(function(){ if(btn) btn.classList.remove('busy'); if(note) note.textContent=''; toast('Volume pull failed — check Ads secrets'); });
+}
+
 /* ============ TOOLBOX ============ */
 const TOOLBOX=[
-  {cap:'Keyword research', who:'Ahrefs · Semrush · Moz', cover:'data', feeds:'<b>Keywords tab.</b> Volume, difficulty, intent, parent topic — paste a dated Ahrefs / Semrush / Moz export, or start from Search Console + Keyword Planner.'},
-  {cap:'Rank / position tracking', who:'AccuRanker · Nightwatch · Wincher', cover:'data', feeds:'<b>Keywords tab.</b> Enter current rank per term from Search Console or a manual incognito check; the status cell cycles ranking → top 10 → cited.'},
+  {cap:'Keyword research', who:'Search Console · Google Ads · Ahrefs', cover:'in', feeds:'<b>Keywords tab — auto-populated.</b> The list is your real Search Console queries, not a hand-typed set. Volume fills from Google Ads Keyword Planner (Pull volume). Mine the long-tail + occasion phrases for collections and content; head demand rides the product feed.'},
+  {cap:'Rank / position tracking', who:'Search Console (automated)', cover:'in', feeds:'<b>Keywords tab — automated.</b> Real 28-day average position pulled straight from Search Console, no hand entry. The pattern to act on: page-one rankings with near-zero clicks are a title/meta job, surfaced in Opportunities.'},
   {cap:'Visibility / share-of-voice score', who:'Semrush · Ahrefs', cover:'partial', feeds:'<b>Goals + SoV board.</b> Composite of tracked-keyword positions and AI citations, updated when you refresh the numbers.'},
   {cap:'SERP feature tracking', who:'Semrush · Nightwatch', cover:'partial', feeds:'<b>Keywords tab.</b> The SERP / AI feature column flags AIO, local pack, featured snippet, shopping per term.'},
   {cap:'Site / technical audit', who:'Semrush · Ahrefs · Sitebulb · Screaming Frog', cover:'in', feeds:'<b>Tracker (Technical).</b> Crawl, robots, canonicals, CWV, schema validity — plus the monthly re-audit cadence.'},
   {cap:'AI visibility / citation tracking', who:'Profound · Peec AI · Otterly · Ahrefs Brand Radar', cover:'in', feeds:'<b>Share of Voice board.</b> 18 shopper queries × 4 engines, cited / mentioned / miss, competitor domains. This is the north-star metric.'},
-  {cap:'Backlinks / referring domains', who:'Ahrefs · Semrush · Moz', cover:'data', feeds:'<b>Off-site workstream.</b> No live backlink API — track the brand-stockist directory citations you earn (Rolla\'s, Baggu, Motel).'},
+  {cap:'Backlinks / referring domains', who:'Ahrefs · Semrush · Moz', cover:'data', feeds:'<b>Off-site workstream.</b> No live backlink API. Track the local citations that move AI citations and the map pack — Yelp, Apple Maps, Visit Santa Barbara, Paseo Nuevo. Identical NAP across all separates us from Miss Behavin\' Oxford MS on the brand term.'},
   {cap:'Competitor gap analysis', who:'Semrush · Ahrefs', cover:'partial', feeds:'<b>SoV + Keywords.</b> Log which competitor domains appear in each AI answer and which clusters they own.'},
   {cap:'Goals / targets', who:'Semrush · Moz', cover:'in', feeds:'<b>Goals tab.</b> Baseline → now → 90-day target with progress, editable inline.'},
   {cap:'Scheduled reports & alerts', who:'All major tools', cover:'partial', feeds:'<b>Schedule + Save snapshot.</b> Recurring reminders (pending your OK) prompt each run; snapshot exports the state to JSON / Markdown.'},
@@ -2044,6 +2148,7 @@ function init(){
     toast('Keyword row added — edit it inline');
   };
   document.getElementById('kwGsc').onclick=refreshRanksGSC;
+  var _kwVol=document.getElementById('kwVol'); if(_kwVol) _kwVol.onclick=refreshVolume;
   document.getElementById('search').addEventListener('input',e=>{ searchTerm=e.target.value; renderTasks(); });
   document.querySelectorAll('#statusChips .chip').forEach(c=>{
     c.onclick=()=>{
@@ -2060,11 +2165,11 @@ function init(){
   // Live sync to the LineSheet worker (D1) + live store stats when signed in via the app
   if(mbToken()){
     setSync('● Syncing…','');
-    syncDown().then(liveStats).then(overlayRanksFromGSC);
+    syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive);
     syncPriorityDown();
     setInterval(syncUp, 20000);
     document.addEventListener('visibilitychange', function(){ if(document.hidden){ syncUp(); } else { liveStats(); } });
-    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats).then(overlayRanksFromGSC); };
+    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive); };
   } else {
     setSync('● This device only — open from the LineSheet app to sync','');
   }
