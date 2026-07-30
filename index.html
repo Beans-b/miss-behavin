@@ -698,7 +698,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;">Paste the brand&#8217;s product page and tap Pull &#8212; name, color, photos, and the retail price fill themselves. Type the quantity (rows are one-size by default; tap Sized XS&#8211;L for sized apparel), then Review &amp; publish.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail) &#183; <strong>3.</strong> Type the quantity &#8212; rows are Sized XS&#8211;L; pick Type &#8220;Accessory&#8221; for one-size items &#183; <strong>4.</strong> Review &amp; publish. No URL? Just type into the row.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -709,7 +709,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           </div>
           <div id="man-rows"></div>
           <div id="man-next" style="font-size:12px;color:var(--gray-text);margin-top:12px;display:none;"></div>
-          <button class="btn btn-black" id="man-start-btn" style="display:none;margin-top:10px;" onclick="manualStart()">Review &amp; publish &#8594;</button>
+          <button class="btn btn-black" id="man-start-btn" style="margin-top:10px;opacity:0.4;cursor:not-allowed;" disabled onclick="manualStart()">Review &amp; publish &#8594;</button>
           <div id="man-status" class="status"></div>
         </div>
       </div>
@@ -1115,7 +1115,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 62</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 63</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3598,9 +3598,7 @@ function manTypeChanged(inp){
   var t = String(inp.value || '').trim();
   var isAcc = t === 'Accessory' || t === 'Accessories' ||
               (_typeMap[t] && _typeMap[t].shopify === 'Accessories');
-  var btn = row.querySelector(isAcc ? '.man-mode-os' : '.man-mode-sized');
-  var already = btn && btn.classList.contains('man-mode-on');
-  if (btn && !already) manualSizeMode(btn, isAcc ? 'os' : 'sized');
+  setRowSizing(row, isAcc ? 'os' : 'sized');
 }
 function ensureManTypeDatalist(){
   var dl = el('man-type-list');
@@ -3744,9 +3742,14 @@ function manualFormChanged(){
       hint.style.color = 'var(--gray-text)';
     }
   }
-  var wasHidden = btn.style.display === 'none';
-  btn.style.display = ok ? 'block' : 'none';
-  if (ok && wasHidden) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // build 63 — the button is ALWAYS visible (dimmed until ready) so there is
+  // never a "nothing happens / no next step" moment. The "Still needed" line
+  // above says exactly what's missing.
+  var wasDisabled = btn.disabled;
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.4';
+  btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+  if (ok && wasDisabled) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 /* build 38 — quantity only by default. Accessories (most manual buys) are
@@ -3756,19 +3759,20 @@ function manualFormChanged(){
    other mode's numbers so a hidden quantity can never sneak into a push.
    All field class names are unchanged — the Pull fills rows exactly as
    before. */
-function manualSizeMode(btn, mode){
-  var row = btn.closest('.man-row');
+// build 63 — set a row's sizing mode with no toggle buttons. 'os' shows the
+// single Quantity box (accessories/one-size); 'sized' shows the XS–L grid.
+// Switching clears the other mode's numbers so a hidden quantity can never
+// sneak into a push. Null-safe so a partially-built row can't throw.
+function setRowSizing(row, mode){
   if (!row) return;
   var os = row.querySelector('.man-qty-os'), sized = row.querySelector('.man-qty-sized');
-  var bOs = row.querySelector('.man-mode-os'), bSized = row.querySelector('.man-mode-sized');
+  if (!os || !sized) return;
   if (mode === 'os') {
     os.style.display = 'flex'; sized.style.display = 'none';
-    ['XS','S','M','L','XL'].forEach(function(sz){ row.querySelector('.man-sz-'+sz).value = ''; });
-    bOs.classList.add('man-mode-on'); bSized.classList.remove('man-mode-on');
+    ['XS','S','M','L','XL'].forEach(function(sz){ var e = row.querySelector('.man-sz-'+sz); if (e) e.value = ''; });
   } else {
     os.style.display = 'none'; sized.style.display = 'flex';
-    row.querySelector('.man-sz-OS').value = '';
-    bSized.classList.add('man-mode-on'); bOs.classList.remove('man-mode-on');
+    var e = row.querySelector('.man-sz-OS'); if (e) e.value = '';
   }
   manualFormChanged();
 }
@@ -3787,16 +3791,14 @@ function manualAddRow(){
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
       '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="number" step="0.01" class="field-input man-retail"/></div>' +
     '</div>' +
-    '<div style="display:flex;gap:6px;margin-top:8px;align-items:center;">' +
-      '<label class="sp-l" style="margin:0;">Sizing</label>' +
-      '<button type="button" class="btn btn-outline man-mode-btn man-mode-os man-mode-on" onclick="manualSizeMode(this,\'os\')">Quantity</button>' +
-      '<button type="button" class="btn btn-outline man-mode-btn man-mode-sized" onclick="manualSizeMode(this,\'sized\')">Sized XS&#8211;L</button>' +
-    '</div>' +
-    '<div class="man-qty-os" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      '<div style="flex:1;"><label class="sp-l">Quantity</label><input type="number" min="0" class="field-input man-sz-OS" style="text-align:center;"/></div>' +
+    // build 63 — sizing is Type-driven, no toggle buttons. Rows default to
+    // Sized XS–L (apparel); choosing Type "Accessory" flips the row to a single
+    // Quantity box via manTypeChanged → setRowSizing.
+    '<div class="man-qty-os" style="display:none;gap:6px;margin-top:6px;align-items:flex-end;">' +
+      '<div style="flex:1;"><label class="sp-l">Quantity (one size)</label><input type="number" min="0" class="field-input man-sz-OS" style="text-align:center;"/></div>' +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
-    '<div class="man-qty-sized" style="display:none;gap:6px;margin-top:6px;align-items:flex-end;">' +
+    '<div class="man-qty-sized" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
       ['XS','S','M','L','XL'].map(function(sz){
         return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
       }).join('') +
@@ -3900,7 +3902,7 @@ function resetManualPane() {
   el('man-vendor').value = '';
   el('man-url').value = '';
   el('man-status').style.display = 'none';
-  el('man-start-btn').style.display = 'none';
+  var _sb = el('man-start-btn'); _sb.disabled = true; _sb.style.opacity = '0.4'; _sb.style.cursor = 'not-allowed';
   el('man-next').style.display = 'none';
   Object.keys(_manImages).forEach(function(k){ if (k.indexOf('C-') !== 0) delete _manImages[k]; });
   _manPullN = 0;
