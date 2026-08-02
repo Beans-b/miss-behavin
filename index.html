@@ -1140,7 +1140,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 67 &#183; 2026-08-02 &#183; upload/drag-drop your own product photo (needs Worker v73) + UPC and Vendor SKU labels restyled to match; carries build 66 (editable title, "default" suffix fix), 65 (codeless-style price fix, Prices Missing names the style), 64 (photo include/exclude/remove)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 68 &#183; 2026-08-02 &#183; Category now sets Shopify product Type (accessories stop landing as "Other") + junk "other" tag dropped; carries build 67 (own-photo upload, needs Worker v74; label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3612,6 +3612,29 @@ var _typeMap = {
   'Swim':     { shopify: 'Swimwear',    tag: 'swimwear' },
   'Shoe':     { shopify: 'Shoes',       tag: 'shoes' }
 };
+
+// build 68 — the Category dropdown on the review card -> Shopify product_type +
+// collection tag. Values match the store's EXISTING product types (e.g.
+// 'Rompers', not the dropdown's longer 'Rompers & Jumpsuits' label) so nothing
+// new gets invented in the Type list.
+var _CAT_TO_TYPE = {
+  'Dresses':             { shopify: 'Dresses',     tag: 'dress' },
+  'Tops':                { shopify: 'Tops',        tag: 'top' },
+  'Sweaters':            { shopify: 'Sweaters',    tag: 'sweater' },
+  'Pants':               { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Jeans':               { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Skirts':              { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Shorts':              { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Rompers & Jumpsuits': { shopify: 'Rompers',     tag: 'dress' },
+  'Sets & Co-ords':      { shopify: 'Sets',        tag: 'sets' },
+  'Outerwear':           { shopify: 'Outerwear',   tag: 'outerwear' },
+  'Swimwear':            { shopify: 'Swimwear',    tag: 'swimwear' },
+  'Activewear':          { shopify: 'Activewear',  tag: 'activewear' },
+  'Jewelry':             { shopify: 'Jewelry',     tag: 'jewelry' },
+  'Bags':                { shopify: 'Bags',        tag: 'bags' },
+  'Accessories':         { shopify: 'Accessories', tag: 'accessories' },
+  'Shoes':               { shopify: 'Shoes',       tag: 'shoes' }
+};
 var _liveShopifyTypes = [];        // product types already in the store (runtime)
 var _shopifyTypesLoaded = false;
 function manTypeSuggestions(){
@@ -4546,6 +4569,21 @@ function _spDoCreate(cd) {
   var rawType     = cd.style.type || 'Accessory';
   var typeEntry   = _typeMap[rawType] || { shopify: rawType, tag: rawType.toLowerCase() };
 
+  // build 68 — CATEGORY DRIVES TYPE.
+  //
+  // The bug: Shopify's Category (taxonomy) was landing correctly from the
+  // Category dropdown, but Shopify's TYPE came only from the invoice's extracted
+  // style type. The extraction enum is Dress|Top|Bottom|Jumpsuit|Other, so every
+  // accessory came back "Other" — and "Other" is not in _typeMap, so it passed
+  // through verbatim. Result: you pick "Accessories" on the card and the product
+  // lands as Type "Other" with a junk "other" tag. Exactly what the Cat Ashtray
+  // shows in Shopify.
+  //
+  // The Category dropdown is the field the owner actually curates, so it wins
+  // whenever it is set. The invoice type stays the fallback.
+  var _catType = _CAT_TO_TYPE[(cd.els && cd.els.cat ? cd.els.cat.value : '').trim()];
+  if (_catType) typeEntry = _catType;
+
   var product = {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
     // title, and the vendor is the INVOICE vendor, not hardcoded house label
@@ -4559,7 +4597,10 @@ function _spDoCreate(cd) {
     tags: [cd.colorObj.color, typeEntry.tag]
       .concat((cd.els && cd.els.tags ? cd.els.tags.value.split(',') : []))
       .map(function(t){ return String(t || '').trim(); })
-      .filter(function(x){ return x && x.toLowerCase() !== 'default'; }),   // v72 — lowercase 'default' was leaking in as a tag
+      // v72 — lowercase 'default' was leaking in as a tag.
+      // build 68 — 'other' too: it came from the unmapped "Other" invoice type
+      // and is noise on every accessory (visible on the live Cat Ashtray).
+      .filter(function(x){ var l = x.toLowerCase(); return x && l !== 'default' && l !== 'other'; }),
     sizes: isOneSize ? ['OS'] : APPAREL_SIZES,   // build 59 — full apparel run, OS for one-size
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
