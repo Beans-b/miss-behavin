@@ -220,6 +220,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .modal-actions{display:flex;gap:8px;}
 .modal-actions .btn{margin-top:0;}
 .app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
+/* build 80 - the build number has to be readable at a glance. The rest of
+   the footer stays light; only the version is dark and bold. */
+.app-footer .ver-num{color:var(--black);font-weight:700;font-size:12px;letter-spacing:.06em;}
 
 /* SHOPIFY PUSH */
 .btn-shopify{background:#4e6b57;color:#fff;margin-top:0;}
@@ -1207,7 +1210,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v78. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
+<!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v78. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
+-->
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 80</strong> &#183; 2026-08-02 &#183; needs Worker v78</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1529,7 +1535,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 78;   // keep in step with the footer stamp
+var APP_BUILD = 80;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4817,8 +4823,11 @@ function _spTitleFor(cd) {
 // 'Skorts' added: the store has a "Category is equal to Skorts" collection with
 // 11 products, and the app previously collapsed skorts into Skirts so nothing
 // added here could ever reach it. Needs Worker v78 to resolve its GID.
+// build 80 — Outerwear and Activewear removed: the store does not carry them,
+// so offering them only invited a mis-categorised product that would land in no
+// collection at all. Everything left here maps to a category the store uses.
 var _CATEGORY_LABELS = ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Skorts','Shorts',
-  'Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear',
+  'Rompers & Jumpsuits','Sets & Co-ords','Swimwear',
   'Jewelry','Bags','Accessories','Shoes'];
 
 function _spPopulateType(cd, force){
