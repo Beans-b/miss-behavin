@@ -1207,7 +1207,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 74 &#183; 2026-08-02 &#183; archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v78. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1529,7 +1529,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 74;   // keep in step with the footer stamp
+var APP_BUILD = 78;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3966,6 +3966,7 @@ var _CAT_TO_TYPE = {
   'Pants':               { shopify: 'Bottoms',     tag: 'bottoms' },
   'Jeans':               { shopify: 'Bottoms',     tag: 'bottoms' },
   'Skirts':              { shopify: 'Bottoms',     tag: 'bottoms' },
+  'Skorts':              { shopify: 'Bottoms',     tag: 'bottoms' },   // build 78
   'Shorts':              { shopify: 'Bottoms',     tag: 'bottoms' },
   'Rompers & Jumpsuits': { shopify: 'Rompers',     tag: 'dress' },
   'Sets & Co-ords':      { shopify: 'Sets',        tag: 'sets' },
@@ -4800,48 +4801,63 @@ function _spTitleFor(cd) {
 // v72 — pencil-to-edit on the review card title. Edits the PRODUCT title (what
 // customers see in Shopify), not the SEO title. Enter or blur saves, Escape
 // cancels, and the edited value is what gets pushed.
-// ── build 72 — SHOPIFY TYPE IS ITS OWN FIELD ────────────────────────────
-// Category and Type are two DIFFERENT Shopify fields and must not be merged:
-//   Category = Shopify's STANDARD TAXONOMY (a fixed Shopify-managed list, e.g.
-//              "Apparel & Accessories > Clothing > Pants"). Drives tax and the
-//              Google feed. Deliberately granular — the 2026-07-17 owner
-//              decision dropped "Bottoms" here on purpose: always the specific
-//              type, generic trouser -> Pants.
-//   Type     = free text on the product, and what Type-BASED COLLECTIONS on the
-//              live site are built from. This is where "Bottoms" belongs.
-// Build 68 derived Type from Category silently. That was right in spirit but
-// invented types the store does not have (Swimwear vs the store's "Swim",
-// Sets vs "Set"), which is exactly how "Other" AND "Others" both came to exist.
-// Now the Type is a visible dropdown of the store's REAL types, defaulted from
-// the category, and overridable.
+// ── build 77 — ONE FIELD, AND IT IS THE TAXONOMY CATEGORY ──────────────
+// Settled by the live Bottoms collection rule, which reads:
+//     Category is equal to  Shorts OR Skirts OR Skorts OR Pants OR Jeans
+// Two things follow, and they reverse build 76:
+//   1. Storefront placement runs on CATEGORY, not Type. Type can leave the UI.
+//   2. The rule names the GRANULAR taxonomy labels individually. Build 76
+//      collapsed everything to store types (Skirts -> Bottoms -> Pants), which
+//      would have emptied the Skirts and Shorts collections — nothing would
+//      ever carry those categories again. So the 16-label list stays.
+// Staff see ONE field. product_type is still filled silently from the same
+// choice: it costs nothing, keeps the catalogue consistent, and protects any
+// other collection that might still key off Type (only Bottoms was verified).
+// build 78 — every label here matches a live collection rule in Shopify.
+// 'Skorts' added: the store has a "Category is equal to Skorts" collection with
+// 11 products, and the app previously collapsed skorts into Skirts so nothing
+// added here could ever reach it. Needs Worker v78 to resolve its GID.
+var _CATEGORY_LABELS = ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Skorts','Shorts',
+  'Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear',
+  'Jewelry','Bags','Accessories','Shoes'];
+
 function _spPopulateType(cd, force){
-  var sel = cd.els && cd.els.type;
+  var sel = cd.els && cd.els.cat;
   if (!sel) return;
-  var mapped = (_CAT_TO_TYPE[(cd.els.cat.value || '').trim()] || {}).shopify || '';
-  var live = (_liveShopifyTypes || []).slice().sort(function(a,b){
-    return String(a).localeCompare(String(b), undefined, { sensitivity: 'base' });
-  });
-  var keep = (!force && sel.value) ? sel.value : '';
-  var want = keep || mapped || '';
-  var opts = live.slice();
-  if (want && opts.indexOf(want) === -1) opts.unshift(want);   // never lose the intended value
+  var want = sel.value || '';
+  if (!want && cd.style) {
+    var te = _typeMap[cd.style.type || ''];
+    // seed from the invoice type, translated back to a taxonomy label
+    if (te) {
+      var back = { 'Bottoms':'Pants', 'Rompers':'Rompers & Jumpsuits', 'Sets':'Sets & Co-ords',
+                   'Swimwear':'Swimwear', 'Accessories':'Accessories', 'Dresses':'Dresses',
+                   'Tops':'Tops', 'Sweaters':'Sweaters', 'Shoes':'Shoes' };
+      want = back[te.shopify] || '';
+    }
+  }
+  var opts = _CATEGORY_LABELS.slice();
+  if (want && opts.indexOf(want) === -1) opts.unshift(want);
   sel.innerHTML = '<option value="">— none —</option>' +
     opts.map(function(t){ return '<option value="' + esc(t) + '"' + (t === want ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
   sel.value = want;
   _spTypeNote(cd);
 }
+
 function _spTypeNote(cd){
   var n = cd.els && cd.els.typeNote; if (!n) return;
-  var v = (cd.els.type.value || '').trim();
-  var known = (_liveShopifyTypes || []).some(function(t){ return String(t) === v; });
-  if (!v) { n.textContent = 'No Type set — the product will not appear in any Type-based collection.'; n.className = 'sp-type-note warn'; return; }
-  if (!known && _shopifyTypesLoaded) {
-    n.textContent = '"' + v + '" is not a Type your store uses yet — pushing will create it. Check it is not a near-duplicate of an existing one.';
+  var v = (cd.els.cat.value || '').trim();
+  if (!v) {
+    n.textContent = 'No category set — this product will not land in any collection. Collections match on Category.';
     n.className = 'sp-type-note warn';
-  } else {
-    n.textContent = 'Category sets the Shopify taxonomy (tax + Google feed). Type drives Type-based collections on the site.';
-    n.className = 'sp-type-note';
+    return;
   }
+  var t = (_CAT_TO_TYPE[v] || {}).shopify || '';
+  // build 78 — every collection but one matches on Category. The exception is
+  // "Complete the Look" (Type is equal to Accessories), so Type is still
+  // written automatically; that one cross-sell collection depends on it.
+  n.textContent = 'Sets the Shopify category — collections, tax and the Google feed all match on it' +
+                  (t ? ' · product type set to "' + t + '" automatically' : '') + '.';
+  n.className = 'sp-type-note';
 }
 
 function _spWireTitleEdit(cd) {
@@ -5055,12 +5071,11 @@ function _spDoCreate(cd) {
   //
   // The Category dropdown is the field the owner actually curates, so it wins
   // whenever it is set. The invoice type stays the fallback.
-  var _catType = _CAT_TO_TYPE[(cd.els && cd.els.cat ? cd.els.cat.value : '').trim()];
-  if (_catType) typeEntry = _catType;
-  // build 72 — the visible Type field is the final word. The category map only
-  // supplies its default, so nothing is pushed that you did not see.
-  var _chosenType = (cd.els && cd.els.type ? cd.els.type.value : '').trim();
-  if (_chosenType) typeEntry = { shopify: _chosenType, tag: (_catType ? _catType.tag : _chosenType.toLowerCase()) };
+  // build 77 — the single field IS the taxonomy category. product_type is
+  // derived from it and never shown, so staff have one thing to choose.
+  var _chosen = (cd.els && cd.els.cat ? cd.els.cat.value : '').trim();
+  var _mappedType = _CAT_TO_TYPE[_chosen];
+  if (_mappedType) typeEntry = _mappedType;
 
   var product = {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
@@ -6053,10 +6068,9 @@ function _spInitDetails(cd){
     '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
     '<label class="sp-l">Product description</label><textarea class="sp-seo-body" rows="3"></textarea>' +
     '<div style="display:flex;gap:8px;">' +
-      '<div style="flex:1;"><label class="sp-l">Category</label><select class="sp-seo-cat"><option value="">\u2014</option>' +
-        ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Shorts','Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear','Jewelry','Bags','Accessories','Shoes']
-          .map(function(c){ return '<option>'+c+'</option>'; }).join('') + '</select></div>' +
-      '<div style="flex:1;"><label class="sp-l">Shopify type</label><select class="sp-seo-type"></select></div>' +
+      // build 76 \u2014 ONE field. Options come from the store's own Shopify types at
+      // runtime (_spPopulateType), so what you pick IS the Shopify type.
+      '<div style="flex:1;"><label class="sp-l">Category</label><select class="sp-seo-cat"></select></div>' +
     '</div>' +
     '<div class="sp-type-note"></div>' +
     '<div style="display:flex;gap:8px;">' +
@@ -6077,8 +6091,9 @@ function _spInitDetails(cd){
     desc: wrap.querySelector('.sp-seo-desc'),
     bodyd: wrap.querySelector('.sp-seo-body'),
     cat: wrap.querySelector('.sp-seo-cat'),
-    type: wrap.querySelector('.sp-seo-type'),           // build 72
-    typeNote: wrap.querySelector('.sp-type-note'),      // build 72
+    // build 76 — one field does both jobs, so type and cat are the same element.
+    type: wrap.querySelector('.sp-seo-cat'),
+    typeNote: wrap.querySelector('.sp-type-note'),
     alt: wrap.querySelector('.sp-seo-alt'),
     tags: wrap.querySelector('.sp-seo-tags')
   };
@@ -6113,10 +6128,8 @@ function _spInitDetails(cd){
       cd.els.fetchStatus.textContent = 'Restored your saved edits for this card.';
     }
   });
-  cd.els.cat.addEventListener('change', function(){
-    if (!cd._typeTouched) _spPopulateType(cd, true);
-  });
-  cd.els.type.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
+  // build 76 — one field, one listener.
+  cd.els.cat.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
   // v57 — save the pasted vendor website, then immediately retry the fetch.
   cd.els.vsiteSave.onclick = function(){
@@ -6167,7 +6180,11 @@ function _spGenSeo(cd, done){
     cd.els.title.value = j.seo_title || '';
     cd.els.desc.value  = j.seo_description || '';
     cd.els.bodyd.value = j.body_description || '';
-    cd.els.cat.value   = j.product_category || '';
+    // build 77 — the generator already emits taxonomy labels ("Pants", "Jeans",
+    // "Skirts"), which is exactly what this field holds now. Accept as-is.
+    var _sug = String(j.product_category || '').trim();
+    if (_sug && !cd._typeTouched) cd.els.cat.value = _sug;
+    if (!cd._typeTouched) _spPopulateType(cd, true);
     cd.els.alt.value   = j.image_alt || '';
     // v59 — prefill Tags with the style name + AI feature tags (color, type,
     // brand, fabric are added automatically by the worker at push). Deduped.
