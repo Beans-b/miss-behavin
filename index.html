@@ -224,7 +224,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-card[data-state="skipped"]{opacity:.42;}
 .sp-card-head{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
 .sp-card-info{flex:1;min-width:0;}
-.sp-card-title{font-size:14px;font-weight:600;line-height:1.2;}
+.sp-card-title{font-size:14px;font-weight:600;line-height:1.2;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+/* v72 — pencil-to-edit on the PRODUCT title (not the SEO title). */
+.sp-title-edit{border:none;background:none;cursor:pointer;color:var(--gray-text);font-size:13px;line-height:1;padding:2px 4px;border-radius:3px;}
+.sp-title-edit:hover{background:var(--gray-mid);color:var(--black);}
+.sp-title-input{flex:1;min-width:180px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;padding:4px 6px;border:1px solid var(--black);border-radius:2px;background:#fff;}
 .sp-card-meta{font-size:11px;color:var(--gray-text);margin-top:2px;letter-spacing:.04em;}
 .sp-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
 .sb-idle{background:var(--gray-light);color:var(--gray-text);border:1px solid var(--gray-mid);}
@@ -541,6 +545,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 /* v2 — SEO + vendor-details block on the Shopify review card */
 .sp-seo{padding:10px 14px;border-top:1px solid var(--gray-mid);}
 .sp-seo .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
+/* v72/build 67 — the UPC and Vendor SKU labels sat OUTSIDE .sp-seo, so they
+   never picked up the .sp-l styling and rendered as full-size body text in the
+   link colour. Same rule, applied by row, so every label on the card matches. */
+.sp-upc-row .sp-l,.sp-vsku-row .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
+/* v build 67 — upload-your-own photo drop zone. */
+.sp-drop{flex-basis:100%;width:100%;border:1px dashed var(--gray-mid);border-radius:3px;padding:10px;text-align:center;font-size:11px;color:var(--gray-text);cursor:pointer;background:var(--gray-light);margin-top:6px;font-family:'DM Sans',sans-serif;line-height:1.5;}
+.sp-drop:hover,.sp-drop.drag{border-color:var(--black);color:var(--black);background:#fff;}
+.sp-drop.busy{opacity:.6;cursor:default;}
 .sp-seo input,.sp-seo textarea{width:100%;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 8px;outline:none;-webkit-appearance:none;resize:vertical;}
 .sp-seo input:focus,.sp-seo textarea:focus{border-color:var(--black);}
 .sp-fetch-btn{width:100%;background:#fff;color:var(--primary);border:1px solid var(--primary);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px;cursor:pointer;-webkit-appearance:none;margin-bottom:8px;border-radius:2px;}
@@ -1128,7 +1140,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 65 &#183; 2026-08-02 &#183; codeless styles no longer lose their price + Prices Missing names the style; photo include/exclude/remove on the review card (carries forward from build 63)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 67 &#183; 2026-08-02 &#183; upload/drag-drop your own product photo (needs Worker v73) + UPC and Vendor SKU labels restyled to match; carries build 66 (editable title, "default" suffix fix), 65 (codeless-style price fix, Prices Missing names the style), 64 (photo include/exclude/remove)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -3492,7 +3504,7 @@ function renderArchiveList(invoices, liveNum) {
     // build 31 — say what's actually in the sheet, not just a count
     var names = (inv.styles||[]).map(function(s){
       var c = ((s.colors||[])[0]||{}).color;
-      return (s.name||s.code||'') + (c && c !== 'Default' ? ' — ' + c : '');
+      return (s.name||s.code||'') + _spColorSuffix(c);   // v72 — case-insensitive 'default'
     }).filter(Boolean);
     var namesTxt = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) + ' more' : '');
 
@@ -4262,7 +4274,11 @@ function _buildSpReview(inv) {
       card.innerHTML =
         '<div class="sp-card-head">' +
           '<div class="sp-card-info">' +
-            '<div class="sp-card-title">' + esc(style.name || style.code) + (colorObj.color && colorObj.color !== 'Default' ? ' — ' + esc(colorObj.color) : '') + '</div>' +
+            '<div class="sp-card-title">' +
+              '<span class="sp-title-text">' + esc((style.name || style.code || '') + _spColorSuffix(colorObj.color)) + '</span>' +
+              '<button type="button" class="sp-title-edit" title="Edit the product title customers will see">&#9998;</button>' +
+              '<input type="text" class="sp-title-input" style="display:none" placeholder="Product title"/>' +
+            '</div>' +
             '<div class="sp-card-meta">' + esc(style.code) + ' · ' + esc(style.type || 'Item') + '</div>' +
           '</div>' +
           '<div class="sp-badge sb-idle">Ready</div>' +
@@ -4287,6 +4303,7 @@ function _buildSpReview(inv) {
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
+      _spWireTitleEdit(cd);   // v72 — pencil-to-edit product title
       _spWireUpc(cd);
       // v56 — vendor SKU field (all cards), prefilled from the invoice.
       cd.vskuInput = cd.card.querySelector('.sp-vsku');
@@ -4303,6 +4320,60 @@ function _buildSpReview(inv) {
 
 function _spWireBtn(cd) {
   cd.card.querySelector('.sp-push-btn').onclick = function() { _spPushCard(cd); };
+}
+
+// v72 — PRODUCT TITLE: one builder, used everywhere.
+//
+// Two bugs this closes:
+//   1. The colorway suffix was skipped only when the color was EXACTLY
+//      'Default' (capital D). Manual rows default to 'Default' but invoice
+//      rows come through as lowercase 'default', so the check missed and the
+//      word was glued onto the real Shopify title — "Cherry Cola Lighter -
+//      default". Now matched case-insensitively and trimmed.
+//   2. The card showed an em dash but the pushed title used a hyphen, so what
+//      you read on screen was never quite what Shopify got. Both use ' - ' now.
+function _spColorSuffix(color) {
+  var c = String(color || '').trim();
+  if (!c || c.toLowerCase() === 'default') return '';
+  return ' - ' + c;
+}
+// The title that will actually be sent to Shopify. An owner edit (cd.titleOverride)
+// always wins; otherwise it's style name + colorway.
+function _spTitleFor(cd) {
+  if (cd.titleOverride && cd.titleOverride.trim()) return cd.titleOverride.trim();
+  return (cd.style.name || cd.style.code || '') + _spColorSuffix(cd.colorObj && cd.colorObj.color);
+}
+
+// v72 — pencil-to-edit on the review card title. Edits the PRODUCT title (what
+// customers see in Shopify), not the SEO title. Enter or blur saves, Escape
+// cancels, and the edited value is what gets pushed.
+function _spWireTitleEdit(cd) {
+  var wrap  = cd.card.querySelector('.sp-card-title');
+  if (!wrap) return;
+  var text  = wrap.querySelector('.sp-title-text');
+  var btn   = wrap.querySelector('.sp-title-edit');
+  var input = wrap.querySelector('.sp-title-input');
+  if (!text || !btn || !input) return;
+
+  var show = function(editing) {
+    text.style.display  = editing ? 'none' : '';
+    btn.style.display   = editing ? 'none' : '';
+    input.style.display = editing ? '' : 'none';
+    if (editing) { input.value = _spTitleFor(cd); input.focus(); input.select(); }
+  };
+  var commit = function() {
+    var v = input.value.trim();
+    // Blank resets to the generated title rather than pushing an empty name.
+    cd.titleOverride = v || '';
+    text.textContent = _spTitleFor(cd);
+    show(false);
+  };
+  btn.onclick   = function(){ show(true); };
+  input.onblur  = commit;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter')  { e.preventDefault(); commit(); }
+    if (e.key === 'Escape') { e.preventDefault(); show(false); }
+  };
 }
 
 /* build 39 — UPC field wiring: prefill from the invoice extraction
@@ -4418,8 +4489,7 @@ function _spPushCard(cd) {
     // Cami" duplicate). Compare the title we're about to create against every
     // live Shopify title, separators normalized. If it matches, stop and let
     // the user decide instead of silently creating a duplicate.
-    var wantTitle = (cd.style.name || cd.style.code) +
-      ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : '');
+    var wantTitle = _spTitleFor(cd);   // v72 — check the title we will ACTUALLY push
     var wantKey = _normTitleKey(wantTitle);
     var hit = null;
     for (var i = 0; i < _shopifyExistingTitlesRaw.length; i++) {
@@ -4480,7 +4550,7 @@ function _spDoCreate(cd) {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
     // title, and the vendor is the INVOICE vendor, not hardcoded house label
     // (the N-4 vendor bug — branded items were landing as Miss Behavin').
-    title: (cd.style.name || cd.style.code) + ((cd.colorObj.color && cd.colorObj.color !== 'Default') ? ' - ' + cd.colorObj.color : ''),
+    title: _spTitleFor(cd),   // v72 — owner's edited title wins; 'default' colorway no longer glued on
     vendor: (currentInvoice && currentInvoice.vendor) || "Miss Behavin'",
     product_type: typeEntry.shopify,
     // build 59 — color + type here; the editable Tags field adds the style name
@@ -4489,7 +4559,7 @@ function _spDoCreate(cd) {
     tags: [cd.colorObj.color, typeEntry.tag]
       .concat((cd.els && cd.els.tags ? cd.els.tags.value.split(',') : []))
       .map(function(t){ return String(t || '').trim(); })
-      .filter(function(x){ return x && x !== 'Default'; }),
+      .filter(function(x){ return x && x.toLowerCase() !== 'default'; }),   // v72 — lowercase 'default' was leaking in as a tag
     sizes: isOneSize ? ['OS'] : APPAREL_SIZES,   // build 59 — full apparel run, OS for one-size
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
@@ -4574,7 +4644,7 @@ function showDupModal(cd) {
     ? '"' + cd.dupVariant.product.title + '"'
     : 'an existing product';
   el('dup-modal-desc').textContent =
-    '"' + (cd.style.name || cd.style.code) + (cd.colorObj.color && cd.colorObj.color !== 'Default' ? ' — ' + cd.colorObj.color : '') +
+    '"' + _spTitleFor(cd) +   // v72
     '" matches ' + existing + ' in Shopify. What should happen?';
   el('dup-modal').classList.add('open');
 }
@@ -5499,6 +5569,11 @@ function _spInitDetails(cd){
     cd.fit    = (cd.style && cd.style.vendor_fit)    || (_mk && _mk.fit)    || cd.fit || null;
     _spRenderImages(cd);
     if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page' + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
+  } else {
+    // build 67 \u2014 render even with zero photos so the upload drop zone is there
+    // from the start. A failed vendor pull (blocked site, no style code) used to
+    // leave an empty area with no way to add a photo.
+    _spRenderImages(cd);
   }
   ['title','desc','bodyd','cat','alt','tags'].forEach(function(k){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
@@ -5701,6 +5776,7 @@ function _spRenderImages(cd){
     cd.els.images.appendChild(wrap);
   });
   updateHint();
+  cd.els.images.appendChild(_spBuildDropZone(cd));   // build 67 — always offer your own photo
   // v58 — when we filtered to one colorway, offer a toggle to see every color.
   var all = cd.imagesAll || cd.images || [];
   if (all.length > (cd.images || []).length) {
@@ -5750,8 +5826,80 @@ function _spAddImagesToLive(cd, btn){
 }
 function _spChosenImages(cd){
   var out = [];
-  if (cd.card) cd.card.querySelectorAll('.sp-images .sp-img').forEach(function(im){ if (im.dataset.on === '1') out.push(im.src); });
+  // build 67 — an owner-uploaded photo shows a local preview but must be PUSHED
+  // as the Shopify staged resourceUrl. cd._pushUrl maps preview -> real URL.
+  var map = cd._pushUrl || {};
+  if (cd.card) cd.card.querySelectorAll('.sp-images .sp-img').forEach(function(im){
+    if (im.dataset.on === '1') out.push(map[im.src] || im.src);
+  });
   return out;
+}
+
+// build 67 — UPLOAD YOUR OWN PHOTO.
+// Vendor pulls fail often (blocked site, no style code, item not on the vendor
+// page). This drop zone is always available so there is never a dead end.
+// The file is staged through the Worker (shopify_stage_upload -> Shopify
+// stagedUploadsCreate); we keep a local preview for the thumbnail and remember
+// the returned resourceUrl as what actually gets pushed.
+function _spBuildDropZone(cd){
+  var dz = document.createElement('div');
+  dz.className = 'sp-drop';
+  var idle = 'Photo missing or wrong? Drop images here, or tap to choose from this device.';
+  dz.textContent = idle;
+
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.multiple = true; input.style.display = 'none';
+
+  var handle = function(files){
+    var list = Array.prototype.slice.call(files || []).filter(function(f){ return /^image\//.test(f.type); });
+    if (!list.length) { dz.textContent = 'That was not an image file.'; setTimeout(function(){ dz.textContent = idle; }, 2500); return; }
+    dz.classList.add('busy');
+    var done = 0, failed = 0;
+    list.forEach(function(file){
+      if (file.size > 20 * 1024 * 1024) {
+        failed++; done++;
+        dz.textContent = file.name + ' is over 20MB — resize it first.';
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function(){
+        var dataUrl = String(reader.result || '');
+        var b64 = dataUrl.split(',')[1] || '';
+        dz.textContent = 'Uploading ' + file.name + '…';
+        api('shopify_stage_upload', { filename: file.name, mimeType: file.type, data: b64, fileSize: file.size })
+        .then(function(res){
+          if (res.error) throw new Error(res.error);
+          cd._pushUrl = cd._pushUrl || {};
+          cd._pushUrl[dataUrl] = res.url;        // preview -> Shopify resourceUrl
+          cd.images = (cd.images || []).concat([dataUrl]);
+          if (cd._off) delete cd._off[dataUrl];  // uploaded photos start INCLUDED
+          done++;
+          if (done === list.length) { dz.classList.remove('busy'); _spRenderImages(cd); }
+          else _spRenderImages(cd);
+        })
+        .catch(function(e){
+          failed++; done++;
+          dz.classList.remove('busy');
+          dz.textContent = 'Upload failed: ' + e.message;
+        });
+      };
+      reader.onerror = function(){ failed++; done++; dz.classList.remove('busy'); dz.textContent = 'Could not read ' + file.name; };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  dz.onclick = function(){ if (!dz.classList.contains('busy')) input.click(); };
+  input.onchange = function(){ handle(input.files); input.value = ''; };
+  ['dragenter','dragover'].forEach(function(ev){
+    dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag'); });
+  });
+  dz.addEventListener('drop', function(e){ handle(e.dataTransfer && e.dataTransfer.files); });
+
+  dz.appendChild(input);
+  return dz;
 }
 
 /* ═══════════════════════════════════════
