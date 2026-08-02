@@ -137,6 +137,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 /* PRICING CARDS */
 .p-card{border:1px solid var(--gray-mid);margin-bottom:10px;background:var(--white);}
+/* v72 — an unpriced style, called out by name in the Prices Missing modal. */
+.p-card.p-missing{border-color:var(--red);border-width:2px;background:#fff5f5;}
+.p-card.p-missing .p-retail-input{background:#ffe9e9;}
+.p-card.p-missing .p-card-header::after{content:'NEEDS A RETAIL PRICE';font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--red);white-space:nowrap;}
 .p-card-header{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--white);border-bottom:1px solid var(--gray-mid);}
 .p-code-wrap{flex-shrink:0;min-width:60px;}
 .p-code{font-size:11px;font-weight:600;}
@@ -1124,7 +1128,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 64 &#183; 2026-08-02 &#183; photo include/exclude/remove on the review card (carries forward from build 63)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 65 &#183; 2026-08-02 &#183; codeless styles no longer lose their price + Prices Missing names the style; photo include/exclude/remove on the review card (carries forward from build 63)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2628,9 +2632,12 @@ function renderKelCards(inv) {
     container.appendChild(sl);
   }
 
+  // v72 — carry each style's ORIGINAL index into the group. Cards used to be
+  // matched back to their style by style code, which silently orphaned any
+  // style the invoice gave no code (see collectCurrentInvoice).
   var groups = {};
-  (inv.styles||[]).forEach(function(s) {
-    var t = s.type||'Other'; if(!groups[t]) groups[t]=[];groups[t].push(s);
+  (inv.styles||[]).forEach(function(s, i) {
+    var t = s.type||'Other'; if(!groups[t]) groups[t]=[];groups[t].push({ style: s, idx: i });
   });
 
   Object.keys(groups).forEach(function(type) {
@@ -2638,15 +2645,15 @@ function renderKelCards(inv) {
     h.style.cssText = 'font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);padding:16px 0 8px;border-bottom:1px solid var(--black);margin-bottom:10px;';
     h.textContent = type + 's';
     container.appendChild(h);
-    groups[type].forEach(function(style) {
-      container.appendChild(buildKelCard(style));
+    groups[type].forEach(function(g) {
+      container.appendChild(buildKelCard(g.style, g.idx));   // v72
     });
   });
 
   setAutosave('saved');
 }
 
-function buildKelCard(style) {
+function buildKelCard(style, idx) {
   var costNum = Number(style.cost||0);
   var cost = costNum.toFixed(2);
   var markup = style._markup || '';
@@ -2660,6 +2667,7 @@ function buildKelCard(style) {
   var card = document.createElement('div');
   card.className = 'p-card';
   card.dataset.code = style.code;
+  card.dataset.idx  = (idx === undefined || idx === null) ? '' : String(idx);   // v72 — the reliable card↔style link
   card.dataset.cost = cost;
   card.innerHTML =
     '<div class="p-card-header">'+
@@ -2759,8 +2767,15 @@ function collectCurrentInvoice() {
   if (!currentInvoice) return null;
   var inv = JSON.parse(JSON.stringify(currentInvoice));
   document.querySelectorAll('.p-card').forEach(function(card) {
+    // v72 — match by ORIGINAL INDEX first. The old code-only match dropped any
+    // style the invoice supplied without a style code: dataset.code became the
+    // string "undefined", nothing matched, and every edit on that card (name,
+    // markup, RETAIL PRICE) was silently thrown away on save. That is why a
+    // priced-looking style could still trip the "Prices Missing" gate.
     var code = card.dataset.code;
-    var style = inv.styles.find(function(s){return s.code===code;});
+    var idx = card.dataset.idx === '' ? -1 : parseInt(card.dataset.idx, 10);
+    var style = (idx >= 0 && inv.styles[idx]) ? inv.styles[idx]
+              : inv.styles.find(function(s){ return s.code === code; });
     if (!style) return;
     style.name = (card.querySelector('.p-name-input')||{}).value || style.name;
     style._markup = (card.querySelector('.p-markup-input')||{}).value || '';
@@ -4059,12 +4074,25 @@ function openShopifyReview() {
   }
   currentInvoice = inv;
 
-  var unpriced = (inv.styles || []).filter(function(s) { return _spParseRetail(s._retail) <= 0; });
+  // v72 — NAME the offending styles and jump to the first one. The old modal
+  // reported only a count ("1 style is missing a retail price"), which is
+  // useless on an 8-style sheet — you had to hunt for a blank field by eye.
+  var unpriced = [];
+  (inv.styles || []).forEach(function(s, i) {
+    if (_spParseRetail(s._retail) <= 0) unpriced.push({ style: s, idx: i });
+  });
   if (unpriced.length) {
+    var names = unpriced.map(function(u) {
+      return (u.style.printed_name || u.style.name || u.style.code || 'Untitled style') +
+             (u.style.code ? '' : ' (no style code on the invoice)');
+    });
+    var shown = names.slice(0, 6).join(', ') + (names.length > 6 ? ', +' + (names.length - 6) + ' more' : '');
+    _spHighlightUnpriced(unpriced);
     showModal(
       'Prices Missing',
       unpriced.length + ' style' + (unpriced.length > 1 ? 's are' : ' is') +
-      ' missing a retail price. Set all prices before pushing.',
+      ' missing a retail price: ' + shown +
+      '. Highlighted on the sheet behind this box — set the price, then push.',
       null, false
     );
     return;
@@ -4131,6 +4159,23 @@ function closeShopifyReview() {
   closeDupModal();
 }
 
+// v72 — mark every unpriced card in red and scroll the first one into view, so
+// "which one?" is answered on screen instead of by hunting.
+function _spHighlightUnpriced(unpriced) {
+  document.querySelectorAll('.p-card.p-missing').forEach(function(c) { c.classList.remove('p-missing'); });
+  var first = null;
+  unpriced.forEach(function(u) {
+    var card = document.querySelector('.p-card[data-idx="' + u.idx + '"]');
+    if (!card) return;
+    card.classList.add('p-missing');
+    if (!first) first = card;
+  });
+  if (first) {
+    try { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { first.scrollIntoView(); }
+    var inp = first.querySelector('.p-retail-input');
+    if (inp) setTimeout(function(){ try { inp.focus(); } catch (e) {} }, 400);
+  }
+}
 function _spParseRetail(str) {
   return parseFloat(String(str || '').replace(/[^0-9.]/g, '')) || 0;
 }
