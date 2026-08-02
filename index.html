@@ -548,6 +548,15 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-images .sp-img{width:52px;height:70px;object-fit:cover;border:2px solid transparent;cursor:pointer;background:var(--gray-light);}
 .sp-images .sp-img.on{border-color:var(--green);}
 .sp-images .sp-img.off{opacity:.35;}
+/* v72 — visible include/exclude box + remove (×) on each photo. The toggle
+   always existed but was invisible (a 35% fade), so photos nobody wanted were
+   getting uploaded. Now it reads as a checkbox and says what will happen. */
+.sp-images .sp-imgwrap{position:relative;display:inline-block;line-height:0;}
+.sp-images .sp-imgbox{position:absolute;top:2px;left:2px;width:16px;height:16px;border:1px solid var(--gray-mid);background:#fff;color:#fff;font-size:12px;line-height:15px;text-align:center;cursor:pointer;border-radius:2px;font-family:'DM Sans',sans-serif;user-select:none;}
+.sp-images .sp-imgbox.on{background:var(--green);border-color:var(--green);}
+.sp-images .sp-imgx{position:absolute;top:2px;right:2px;width:16px;height:16px;border:1px solid var(--gray-mid);background:#fff;color:#a00;font-size:13px;line-height:12px;text-align:center;cursor:pointer;padding:0;border-radius:2px;font-family:'DM Sans',sans-serif;}
+.sp-images .sp-imgx:hover{background:#a00;color:#fff;border-color:#a00;}
+.sp-imghint{flex-basis:100%;width:100%;font-size:11px;color:var(--gray-text);margin:0 0 3px;font-family:'DM Sans',sans-serif;line-height:1.4;}
 .sp-cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--gray-mid);background:#fff;padding:4px;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;}
 .sp-cand img{width:48px;height:64px;object-fit:cover;}
 
@@ -1115,7 +1124,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 63</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 64 &#183; 2026-08-02 &#183; photo include/exclude/remove on the review card (carries forward from build 63)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -5589,14 +5598,64 @@ function _spUseCandidate(cd, cand){
     cd.images = cand.images || []; cd.imagesAll = cd.images; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
   }
 }
+// v72 — PHOTO INCLUDE / EXCLUDE / REMOVE.
+// The include toggle already existed (tap a photo, dataset.on flips, and
+// _spChosenImages only collects on='1'), but nothing on screen said so — an
+// excluded photo just looked slightly faded. Now every thumbnail carries a
+// checkbox (green tick = uploads) and an × (drop it from the list entirely),
+// with a live count above the strip. State is keyed by image URL in cd._off /
+// cd._removed so it survives a re-render, including the show-all-colors toggle.
 function _spRenderImages(cd){
   cd.els.images.innerHTML = '';
-  (cd.images || []).forEach(function(u, i){
-    var im = document.createElement('img');
-    im.src = u; im.className = 'sp-img' + (i < 10 ? ' on' : ' off'); im.dataset.on = i < 10 ? '1' : '0';
-    im.onclick = function(){ var on = im.dataset.on === '1'; im.dataset.on = on ? '0' : '1'; im.className = 'sp-img' + (on ? ' off' : ' on'); };
-    cd.els.images.appendChild(im);
+  cd._removed = cd._removed || {};
+  var list = (cd.images || []).filter(function(u){ return !cd._removed[u]; });
+  // First render seeds the old default: first 10 on, anything beyond that off.
+  if (!cd._off) { cd._off = {}; list.forEach(function(u, i){ if (i >= 10) cd._off[u] = true; }); }
+
+  var hint = document.createElement('div');
+  hint.className = 'sp-imghint';
+  cd.els.images.appendChild(hint);
+  var updateHint = function(){
+    if (!list.length) { hint.textContent = 'No photos loaded.'; return; }
+    var on = list.filter(function(u){ return !cd._off[u]; }).length;
+    hint.textContent = on + ' of ' + list.length + ' photo' + (list.length === 1 ? '' : 's') +
+      ' will upload · tap the box to include or exclude · × removes it';
+  };
+
+  list.forEach(function(u){
+    var wrap = document.createElement('div');
+    wrap.className = 'sp-imgwrap';
+    var im  = document.createElement('img');
+    var box = document.createElement('span');
+    var x   = document.createElement('button');
+    im.src = u;
+    box.className = 'sp-imgbox';
+    x.type = 'button'; x.className = 'sp-imgx'; x.textContent = '×';
+    x.title = 'Remove this photo (it will not upload and disappears from the list)';
+    var setState = function(){
+      var off = !!cd._off[u];
+      im.className = 'sp-img' + (off ? ' off' : ' on');
+      im.dataset.on = off ? '0' : '1';   // _spChosenImages reads this
+      box.textContent = off ? '' : '✓';
+      box.className = 'sp-imgbox' + (off ? '' : ' on');
+      box.title = off ? 'Excluded — tap to include' : 'Included — tap to exclude';
+    };
+    var toggle = function(e){
+      if (e) e.stopPropagation();
+      if (cd._off[u]) delete cd._off[u]; else cd._off[u] = true;
+      setState(); updateHint();
+    };
+    im.onclick = toggle; box.onclick = toggle;
+    x.onclick = function(e){
+      e.stopPropagation();
+      cd._removed[u] = true; delete cd._off[u];
+      _spRenderImages(cd);
+    };
+    setState();
+    wrap.appendChild(im); wrap.appendChild(box); wrap.appendChild(x);
+    cd.els.images.appendChild(wrap);
   });
+  updateHint();
   // v58 — when we filtered to one colorway, offer a toggle to see every color.
   var all = cd.imagesAll || cd.images || [];
   if (all.length > (cd.images || []).length) {
@@ -5615,7 +5674,7 @@ function _spRenderImages(cd){
   // button to attach the currently-selected images without re-pushing. Solves
   // "I forgot to add images before I hit push."
   var liveId = _spLiveProductId(cd);
-  if (liveId && (cd.images || []).length) {
+  if (liveId && list.length) {   // v72 — list, not cd.images: removed photos shouldn't keep the button alive
     var ab = document.createElement('button');
     ab.type = 'button'; ab.className = 'btn btn-black';
     ab.style.cssText = 'width:100%;margin-top:8px;';
