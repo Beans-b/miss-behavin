@@ -135,6 +135,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .archive-item:last-child{border-bottom:none;}
 .archive-item-info{flex:1;}
 .archive-file-name{font-size:13px;font-weight:500;margin-bottom:2px;}
+/* build 74 - correct a wrong vendor on an archived sheet */
+.arch-vendor-edit{border:none;background:none;cursor:pointer;color:var(--gray-text);font-size:12px;padding:0 4px;line-height:1;}
+.arch-vendor-edit:hover{color:var(--black);}
+.arch-vendor-row{display:flex;gap:6px;align-items:center;margin:4px 0;}
+.arch-vendor-row input{font-family:'DM Sans',sans-serif;font-size:13px;padding:5px 7px;border:1px solid var(--black);min-width:180px;}
 .archive-meta{font-size:11px;color:var(--gray-text);}
 .archive-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .status-pill{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;}
@@ -1202,7 +1207,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 73 &#183; 2026-08-02 &#183; Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 74 &#183; 2026-08-02 &#183; archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1524,7 +1529,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 73;   // keep in step with the footer stamp
+var APP_BUILD = 74;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3810,6 +3815,10 @@ function renderArchiveList(invoices, liveNum) {
     }).filter(Boolean);
     var namesTxt = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) + ' more' : '');
 
+    // build 74 - the vendor on an archived sheet is editable. Sheets scanned
+    // before Worker v76 had the private-label rewrite applied during
+    // extraction, so the real vendor was never stored and cannot be
+    // recovered automatically - it has to be corrected by hand once.
     var fileName = (inv.vendor||'') + ' · #' + (inv.invoice_number||'');
     var units = (inv.styles||[]).reduce(function(sum,s){
       return sum + (s.colors||[]).reduce(function(t,c){
@@ -3836,7 +3845,7 @@ function renderArchiveList(invoices, liveNum) {
     var archScan = invoiceScanLinksHtml(inv.files);
     item.innerHTML =
       '<div class="archive-item-info">'+
-        '<div class="archive-file-name">'+esc(fileName)+'</div>'+
+        '<div class="archive-file-name">'+esc(fileName)+'<button type="button" class="arch-vendor-edit" title="Correct the vendor on this archived sheet">&#9998;</button></div>'+
         '<div class="archive-meta">'+esc(metaBits.join(' · '))+'</div>'+
         (archScan ? '<div class="archive-scan" style="font-size:12px;margin-top:3px;">📄 '+archScan+'</div>' : '')+
       '</div>'+
@@ -3845,6 +3854,37 @@ function renderArchiveList(invoices, liveNum) {
     // the scan link opens in a new tab — don't also reopen the sheet
     var _scanBox = item.querySelector('.archive-scan');
     if (_scanBox) _scanBox.addEventListener('click', function(e){ e.stopPropagation(); });
+
+    // build 74 - inline vendor correction on an archived sheet.
+    var _vEdit = item.querySelector('.arch-vendor-edit');
+    if (_vEdit) _vEdit.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (item.querySelector('.arch-vendor-row')) return;
+      var row = document.createElement('div');
+      row.className = 'arch-vendor-row';
+      row.innerHTML = '<input type="text" value="' + esc(inv.vendor || '') + '" placeholder="Vendor as printed on the invoice"/>' +
+        '<button type="button" class="arch-link arch-v-save">Save</button>' +
+        '<button type="button" class="arch-link arch-v-cancel">Cancel</button>';
+      row.addEventListener('click', function(ev){ ev.stopPropagation(); });
+      item.querySelector('.archive-item-info').appendChild(row);
+      var inp = row.querySelector('input'); inp.focus(); inp.select();
+      row.querySelector('.arch-v-cancel').onclick = function(){ row.remove(); };
+      row.querySelector('.arch-v-save').onclick = function(){
+        var v = inp.value.trim();
+        if (!v) { inp.focus(); return; }
+        row.querySelector('.arch-v-save').disabled = true;
+        api('archive_set_vendor', { id: inv.id, vendor: v })
+        .then(function(r){
+          if (r.error) throw new Error(r.error);
+          toast('Vendor updated to ' + v);
+          loadArchive();
+        })
+        .catch(function(err){
+          row.querySelector('.arch-v-save').disabled = false;
+          toast('Could not update: ' + err.message);
+        });
+      };
+    });
     if (isLive) {
       item.querySelector('.arch-copy').addEventListener('click', function(e) { e.stopPropagation(); copyLink(); });
       item.querySelector('.arch-unpub').addEventListener('click', function(e) {
