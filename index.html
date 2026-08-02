@@ -123,6 +123,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .vendor-tab{flex-shrink:0;padding:12px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;color:var(--gray-text);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;white-space:nowrap;min-height:44px;}
 .vendor-tab.active{color:var(--black);border-bottom-color:var(--black);}
 .archive-list{padding:0 24px;}
+/* build 71 - archive filter bar */
+.arch-filters{display:flex;flex-wrap:wrap;gap:10px;padding:12px 24px;border-bottom:1px solid var(--gray-mid);align-items:flex-end;}
+.arch-f{display:flex;flex-direction:column;min-width:0;}
+.arch-f .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);margin:0 0 3px;display:block;}
+.arch-f select,.arch-f input{font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 8px;border:1px solid var(--gray-mid);background:var(--white);min-height:36px;}
+.arch-f select{max-width:230px;}
+.arch-count{padding:8px 24px 0;font-size:11px;color:var(--gray-text);letter-spacing:.04em;}
+@media (max-width:520px){.arch-filters{gap:8px;}.arch-f{flex:1 1 45%;}.arch-f select{max-width:none;width:100%;}}
 .archive-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-mid);cursor:pointer;}
 .archive-item:last-child{border-bottom:none;}
 .archive-item-info{flex:1;}
@@ -550,6 +558,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 /* v2 — SEO + vendor-details block on the Shopify review card */
 .sp-seo{padding:10px 14px;border-top:1px solid var(--gray-mid);}
+.sp-type-note{font-size:11px;color:var(--gray-text);line-height:1.4;margin:4px 0 2px;}
+.sp-type-note.warn{color:var(--red);}
 .sp-seo .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
 /* v72/build 67 — the UPC and Vendor SKU labels sat OUTSIDE .sp-seo, so they
    never picked up the .sp-l styling and rendered as full-size body text in the
@@ -798,7 +808,33 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </div>
 
     <div id="ktab-archive" style="display:none;">
-      <div class="vendor-tab-bar" id="vendor-tab-bar"></div>
+      <!-- build 71 - the horizontal vendor tab strip is gone. With 10+ vendors
+           it scrolled off screen and you could not see what existed. Replaced
+           with an alphabetical vendor picker plus a date range. -->
+      <div class="arch-filters">
+        <div class="arch-f">
+          <label class="sp-l" for="arch-vendor">Vendor</label>
+          <select id="arch-vendor"></select>
+        </div>
+        <div class="arch-f">
+          <label class="sp-l" for="arch-from">From</label>
+          <input type="date" id="arch-from"/>
+        </div>
+        <div class="arch-f">
+          <label class="sp-l" for="arch-to">To</label>
+          <input type="date" id="arch-to"/>
+        </div>
+        <div class="arch-f">
+          <label class="sp-l" for="arch-sort">Sort</label>
+          <select id="arch-sort">
+            <option value="new">Newest first</option>
+            <option value="old">Oldest first</option>
+            <option value="az">Vendor A&ndash;Z</option>
+          </select>
+        </div>
+        <button type="button" class="arch-link" id="arch-clear" style="align-self:flex-end;">Clear</button>
+      </div>
+      <div class="arch-count" id="arch-count"></div>
       <div class="archive-list" id="archive-list"></div>
     </div>
 
@@ -1166,7 +1202,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 </div><!-- /app -->
 
-<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 69 &#183; 2026-08-02 &#183; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
+<div class="app-footer">Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 73 &#183; 2026-08-02 &#183; Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1187,7 +1223,13 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="sp-head-title">Review &amp; Push to Shopify</div>
       <div class="sp-head-meta" id="sp-count">&#8212; products</div>
     </div>
-    <button class="sp-close" onclick="closeShopifyReview()">&#8592; Back to Invoice</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <!-- build 73 - review edits used to live only in the DOM. Closing the
+           overlay threw away every SEO rewrite, category, type and photo
+           choice. This persists them onto the invoice record. -->
+      <button class="sp-close" id="sp-save-btn" onclick="saveShopifyReview()">Save progress</button>
+      <button class="sp-close" onclick="closeShopifyReview()">&#8592; Back to Invoice</button>
+    </div>
   </div>
   <div class="sp-body">
     <div class="sp-hint">Products are <strong>immediately live</strong> after each push &#8212; no draft step. Review carefully.</div>
@@ -1474,10 +1516,62 @@ function openView(id, label){
   if (id === 'settings') { setTab('log'); loadLog(); loadCodes(); loadLocations(); loadNotifToUI(); }
 }
 
+/* ── build 70 — UPDATE CHECK (the iPhone home-screen stale-app problem) ──
+   Added to Home Screen with apple-mobile-web-app-capable=yes, iOS runs the app
+   in a STANDALONE web view with its own cache container, separate from Safari.
+   There is no address bar and no reload button, so a cached copy can sit there
+   for days while the desktop shows the current build.
+   This polls the page itself with a cache-busting query, compares the footer
+   build number against the running one, and offers a one-tap hard reload.
+   No service worker involved — adding one would make this worse, not better. */
+var APP_BUILD = 73;   // keep in step with the footer stamp
+
+function _buildNumFromHtml(html){
+  // Scope to the footer FIRST. The file contains older "build 39/42/48"
+  // strings in code comments that would otherwise match.
+  var f = /<div class="app-footer">([\s\S]*?)<\/div>/.exec(html || '');
+  var m = /build\s+(\d+)/i.exec(f ? f[1] : '');
+  return m ? parseInt(m[1], 10) : null;
+}
+function showUpdateBanner(n){
+  if (el('update-banner')) return;
+  var b = document.createElement('div');
+  b.id = 'update-banner';
+  b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:var(--black);color:#fff;' +
+    'padding:12px 16px;font-size:13px;font-family:\'DM Sans\',sans-serif;display:flex;gap:12px;' +
+    'align-items:center;justify-content:center;box-shadow:0 -2px 12px rgba(0,0,0,.25);';
+  b.innerHTML = '<span>Update available &#8212; build ' + n + '</span>' +
+    '<button type="button" id="update-go" style="background:#fff;color:#111;border:none;padding:6px 14px;' +
+    'font-size:12px;font-weight:600;letter-spacing:.06em;cursor:pointer;border-radius:2px;">RELOAD</button>' +
+    '<button type="button" id="update-x" style="background:none;border:none;color:#fff;opacity:.6;' +
+    'font-size:16px;cursor:pointer;padding:0 4px;">&times;</button>';
+  document.body.appendChild(b);
+  el('update-go').onclick = function(){
+    // Query string forces a fresh document even inside the standalone cache.
+    location.replace(location.pathname + '?v=' + Date.now());
+  };
+  el('update-x').onclick = function(){ b.remove(); };
+}
+function checkForUpdate(){
+  fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var n = _buildNumFromHtml(t);
+      if (n && n > APP_BUILD) showUpdateBanner(n);
+    })
+    .catch(function(){ /* offline or blocked — never interrupt the app */ });
+}
+
 /* ── INIT ── */
 window.addEventListener('DOMContentLoaded', function(){
   loadSession();
   if (SESSION) enterApp();
+  checkForUpdate();
+});
+// Re-check when the app comes back to the foreground — the common iPhone case
+// is an app left open for days, never reloaded.
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'visible') checkForUpdate();
 });
 
 /* ═══════════════════════════════════════
@@ -2588,7 +2682,11 @@ function sbSetActive(published, invoice, cb) {
 
 function sbArchiveInvoice(inv, cb) {
   var record = {
-    vendor: inv.vendor || 'Unknown Vendor',
+    // build 71 — the ARCHIVE records the vendor the INVOICE came from, not the
+    // rebranded one. Miss Behavin' is what Shopify and customers see; the
+    // archive is an internal record and needs to say who we actually bought
+    // from. _invoiceVendor is set when a private-label vendor is detected.
+    vendor: inv._invoiceVendor || inv.vendor || 'Unknown Vendor',
     invoice_number: inv.invoice_number || '',
     invoice_date: inv.invoice_date || inv.date || '',
     status: 'live',
@@ -3556,51 +3654,113 @@ function processPage(idx, invoiceMeta) {
    "Live" is derived from the actual active row (not the stale status
    column, which marks every archived sheet 'live' forever). The live
    sheet's row carries Copy link + Unpublish; everything else is deletable. */
+var _archAll = [];      // build 71 — every archived invoice, unfiltered
+var _archLiveNum = null;
+
 function loadArchive() {
   var list = el('archive-list');
-  var tabBar = el('vendor-tab-bar');
   list.innerHTML = '<div class="archive-empty">Loading...</div>';
-  tabBar.innerHTML = '';
 
   sbGetActive(function(activeRow) {
     var liveNum = (activeRow && activeRow.published && activeRow.invoice) ? (activeRow.invoice.invoice_number || '') : null;
     sheetLive = liveNum !== null;
+    _archLiveNum = liveNum;
     sbLoadArchive(function(invoices) {
-      if (invoices.length === 0) {
+      _archAll = invoices || [];
+      if (!_archAll.length) {
+        el('arch-count').textContent = '';
         list.innerHTML = '<div class="archive-empty">No invoices archived yet.</div>';
         return;
       }
-      // v57 — group vendor tabs CASE-INSENSITIVELY so "COTTON CANDY LA" and
-      // "Cotton Candy LA" share one tab. The display name is the nicest-cased
-      // version seen (prefer a mixed-case spelling over an ALL-CAPS one).
-      var vendors = {};        // key: lowercased vendor -> array of invoices
-      var vendorDisplay = {};  // key: lowercased vendor -> display label
-      invoices.forEach(function(inv) {
-        var raw = (inv.vendor || 'Unknown').trim();
-        var key = raw.toLowerCase();
-        if (!vendors[key]) { vendors[key] = []; vendorDisplay[key] = raw; }
-        else if (vendorDisplay[key] === vendorDisplay[key].toUpperCase() && raw !== raw.toUpperCase()) {
-          vendorDisplay[key] = raw; // upgrade an ALL-CAPS label to a mixed-case one
-        }
-        vendors[key].push(inv);
+      _archBuildVendorOptions();
+      ['arch-vendor','arch-from','arch-to','arch-sort'].forEach(function(id){
+        var e = el(id); if (e) e.onchange = archApplyFilters;
       });
-
-      var vendorKeys = Object.keys(vendors);
-      tabBar.innerHTML = '';
-      vendorKeys.forEach(function(k, i) {
-        var btn = document.createElement('button');
-        btn.className = 'vendor-tab' + (i === 0 ? ' active' : '');
-        btn.textContent = vendorDisplay[k];
-        btn.onclick = function() {
-          document.querySelectorAll('.vendor-tab').forEach(function(b){b.classList.remove('active');});
-          btn.classList.add('active');
-          renderArchiveList(vendors[k], liveNum);
-        };
-        tabBar.appendChild(btn);
-      });
-      renderArchiveList(vendors[vendorKeys[0]], liveNum);
+      var c = el('arch-clear');
+      if (c) c.onclick = function(){
+        el('arch-vendor').value = ''; el('arch-from').value = '';
+        el('arch-to').value = ''; el('arch-sort').value = 'new';
+        archApplyFilters();
+      };
+      archApplyFilters();
     });
   });
+}
+
+// Vendors are grouped case-insensitively (so "COTTON CANDY LA" and "Cotton
+// Candy LA" are one entry) and listed ALPHABETICALLY with a count, instead of
+// the old first-seen order in a strip that scrolled off screen.
+function _archVendorKey(inv){ return String(inv.vendor || 'Unknown').trim().toLowerCase(); }
+function _archBuildVendorOptions(){
+  var sel = el('arch-vendor'); if (!sel) return;
+  var disp = {}, count = {};
+  _archAll.forEach(function(inv){
+    var raw = String(inv.vendor || 'Unknown').trim(), k = raw.toLowerCase();
+    if (!disp[k]) disp[k] = raw;
+    // prefer a mixed-case spelling over an ALL-CAPS one
+    else if (disp[k] === disp[k].toUpperCase() && raw !== raw.toUpperCase()) disp[k] = raw;
+    count[k] = (count[k] || 0) + 1;
+  });
+  var keys = Object.keys(disp).sort(function(a,b){
+    return disp[a].localeCompare(disp[b], undefined, { sensitivity: 'base' });
+  });
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">All vendors (' + _archAll.length + ')</option>' +
+    keys.map(function(k){ return '<option value="' + esc(k) + '">' + esc(disp[k]) + ' (' + count[k] + ')</option>'; }).join('');
+  if (cur) sel.value = cur;
+}
+
+// Invoice dates arrive in mixed shapes — "2023-02-10" from extraction, US
+// "05/15/2026" from manual entry, and older sheets have none at all. Returns a
+// comparable Date, falling back to when the sheet was scanned.
+function _archDate(inv){
+  var raw = String(inv.invoice_date || inv.date || '').trim();
+  var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(raw);
+  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+  m = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/.exec(raw);
+  if (m) return new Date(+m[3], +m[1] - 1, +m[2]);
+  if (inv.created_at) { var d = new Date(inv.created_at); if (!isNaN(d.getTime())) return d; }
+  return null;
+}
+
+function archApplyFilters(){
+  var vk   = (el('arch-vendor') || {}).value || '';
+  var from = (el('arch-from')   || {}).value || '';
+  var to   = (el('arch-to')     || {}).value || '';
+  var sort = (el('arch-sort')   || {}).value || 'new';
+
+  var fromD = from ? new Date(from + 'T00:00:00') : null;
+  var toD   = to   ? new Date(to   + 'T23:59:59') : null;
+
+  var rows = _archAll.filter(function(inv){
+    if (vk && _archVendorKey(inv) !== vk) return false;
+    if (fromD || toD) {
+      var d = _archDate(inv);
+      if (!d) return false;                 // undated sheets drop out of a date search
+      if (fromD && d < fromD) return false;
+      if (toD   && d > toD)   return false;
+    }
+    return true;
+  });
+
+  rows.sort(function(a, b){
+    if (sort === 'az') {
+      var c = String(a.vendor||'').localeCompare(String(b.vendor||''), undefined, { sensitivity:'base' });
+      if (c) return c;
+    }
+    var da = _archDate(a), db = _archDate(b);
+    var ta = da ? da.getTime() : 0, tb = db ? db.getTime() : 0;
+    return sort === 'old' ? ta - tb : tb - ta;
+  });
+
+  var note = rows.length + ' of ' + _archAll.length + ' sheet' + (_archAll.length === 1 ? '' : 's');
+  if (vk || from || to) note += ' · filtered';
+  if ((from || to) && rows.length < _archAll.length) {
+    var undated = _archAll.filter(function(i){ return !_archDate(i); }).length;
+    if (undated) note += ' · ' + undated + ' undated sheet' + (undated === 1 ? '' : 's') + ' hidden by the date filter';
+  }
+  el('arch-count').textContent = note;
+  renderArchiveList(rows, _archLiveNum);
 }
 
 function renderArchiveList(invoices, liveNum) {
@@ -4331,10 +4491,98 @@ function _spAutoCheckLive() {
 }
 
 function closeShopifyReview() {
+  // build 73 - never lose work on close. Saves silently; the explicit
+  // Save progress button is for reassurance mid-session.
+  try { _spSaveAll(true); } catch (e) {}
   var o = el('shopify-overlay');
   if (o) o.style.display = 'none';
   closeDupModal();
 }
+
+/* ── build 73 — SAVE PROGRESS ON THE REVIEW SCREEN ──────────────────────
+   Everything typed on a review card (title override, SEO title, search and
+   product description, category, Shopify type, image alt, tags, UPC, vendor
+   SKU, and which photos are in or out) lived only in the DOM. Close the
+   overlay and it was gone — on an 8-product sheet that is a lot of rewriting.
+   Snapshots are stored per style AND per colorway on the invoice record, so a
+   two-colorway style keeps two independent sets. */
+function _spReviewKey(cd){ return String((cd.colorObj && cd.colorObj.color) || 'default'); }
+
+function _spSnapshotCard(cd){
+  var e = cd.els || {};
+  var v = function(x){ return x ? String(x.value || '') : ''; };
+  // Owner-uploaded photos are held as data: URLs for the thumbnail. Persisting
+  // those would put megabytes of base64 into the invoice row, and the Shopify
+  // staged URL they map to is temporary anyway — so only real image URLs are
+  // saved, and the count of dropped ones is reported.
+  var imgs = (cd.images || []).filter(function(u){ return !/^data:/i.test(u); });
+  var droppedUploads = (cd.images || []).length - imgs.length;
+  return {
+    title: cd.titleOverride || '',
+    seo_title: v(e.title), seo_desc: v(e.desc), body: v(e.bodyd),
+    cat: v(e.cat), type: v(e.type), alt: v(e.alt), tags: v(e.tags),
+    upc: v(cd.upcInput), vsku: v(cd.vskuInput),
+    images: imgs,
+    off: Object.keys(cd._off || {}).filter(function(u){ return !/^data:/i.test(u); }),
+    removed: Object.keys(cd._removed || {}).filter(function(u){ return !/^data:/i.test(u); }),
+    typeTouched: !!cd._typeTouched,
+    droppedUploads: droppedUploads,
+    saved_at: new Date().toISOString()
+  };
+}
+
+function _spRestoreCard(cd){
+  var bag = cd.style && cd.style._review;
+  var st  = bag && bag[_spReviewKey(cd)];
+  if (!st) return false;
+  var e = cd.els || {};
+  var set = function(x, val){ if (x && val) x.value = val; };
+  if (st.title) { cd.titleOverride = st.title; var t = cd.card.querySelector('.sp-title-text'); if (t) t.textContent = _spTitleFor(cd); }
+  set(e.title, st.seo_title); set(e.desc, st.seo_desc); set(e.bodyd, st.body);
+  set(e.cat, st.cat); set(e.alt, st.alt); set(e.tags, st.tags);
+  set(cd.upcInput, st.upc); set(cd.vskuInput, st.vsku);
+  if (st.images && st.images.length) {
+    cd.images = st.images.slice();
+    cd._off = {}; (st.off || []).forEach(function(u){ cd._off[u] = true; });
+    cd._removed = {}; (st.removed || []).forEach(function(u){ cd._removed[u] = true; });
+    _spRenderImages(cd);
+  }
+  cd._typeTouched = !!st.typeTouched;
+  if (st.type && e.type) {
+    if (!Array.prototype.some.call(e.type.options, function(o){ return o.value === st.type; })) {
+      e.type.add(new Option(st.type, st.type));
+    }
+    e.type.value = st.type;
+    _spTypeNote(cd);
+  }
+  cd.userEdited = true;   // a restored card must not be overwritten by the SEO generator
+  return true;
+}
+
+function _spSaveAll(silent){
+  if (!currentInvoice || !_spCards.length) return 0;
+  var n = 0, dropped = 0;
+  _spCards.forEach(function(cd){
+    if (!cd.style) return;
+    if (!cd.style._review) cd.style._review = {};
+    var snap = _spSnapshotCard(cd);
+    dropped += snap.droppedUploads || 0;
+    cd.style._review[_spReviewKey(cd)] = snap;
+    n++;
+  });
+  saveCurrentInvoice();
+  if (!silent) {
+    var btn = el('sp-save-btn');
+    if (btn) {
+      var was = btn.textContent;
+      btn.textContent = '\u2713 Saved ' + n + ' card' + (n === 1 ? '' : 's') +
+        (dropped ? ' (' + dropped + ' uploaded photo' + (dropped === 1 ? '' : 's') + ' not saved)' : '');
+      setTimeout(function(){ btn.textContent = was; }, 3200);
+    }
+  }
+  return n;
+}
+function saveShopifyReview(){ _spSaveAll(false); }
 
 // v72 — mark every unpriced card in red and scroll the first one into view, so
 // "which one?" is answered on screen instead of by hunting.
@@ -4512,6 +4760,50 @@ function _spTitleFor(cd) {
 // v72 — pencil-to-edit on the review card title. Edits the PRODUCT title (what
 // customers see in Shopify), not the SEO title. Enter or blur saves, Escape
 // cancels, and the edited value is what gets pushed.
+// ── build 72 — SHOPIFY TYPE IS ITS OWN FIELD ────────────────────────────
+// Category and Type are two DIFFERENT Shopify fields and must not be merged:
+//   Category = Shopify's STANDARD TAXONOMY (a fixed Shopify-managed list, e.g.
+//              "Apparel & Accessories > Clothing > Pants"). Drives tax and the
+//              Google feed. Deliberately granular — the 2026-07-17 owner
+//              decision dropped "Bottoms" here on purpose: always the specific
+//              type, generic trouser -> Pants.
+//   Type     = free text on the product, and what Type-BASED COLLECTIONS on the
+//              live site are built from. This is where "Bottoms" belongs.
+// Build 68 derived Type from Category silently. That was right in spirit but
+// invented types the store does not have (Swimwear vs the store's "Swim",
+// Sets vs "Set"), which is exactly how "Other" AND "Others" both came to exist.
+// Now the Type is a visible dropdown of the store's REAL types, defaulted from
+// the category, and overridable.
+function _spPopulateType(cd, force){
+  var sel = cd.els && cd.els.type;
+  if (!sel) return;
+  var mapped = (_CAT_TO_TYPE[(cd.els.cat.value || '').trim()] || {}).shopify || '';
+  var live = (_liveShopifyTypes || []).slice().sort(function(a,b){
+    return String(a).localeCompare(String(b), undefined, { sensitivity: 'base' });
+  });
+  var keep = (!force && sel.value) ? sel.value : '';
+  var want = keep || mapped || '';
+  var opts = live.slice();
+  if (want && opts.indexOf(want) === -1) opts.unshift(want);   // never lose the intended value
+  sel.innerHTML = '<option value="">— none —</option>' +
+    opts.map(function(t){ return '<option value="' + esc(t) + '"' + (t === want ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+  sel.value = want;
+  _spTypeNote(cd);
+}
+function _spTypeNote(cd){
+  var n = cd.els && cd.els.typeNote; if (!n) return;
+  var v = (cd.els.type.value || '').trim();
+  var known = (_liveShopifyTypes || []).some(function(t){ return String(t) === v; });
+  if (!v) { n.textContent = 'No Type set — the product will not appear in any Type-based collection.'; n.className = 'sp-type-note warn'; return; }
+  if (!known && _shopifyTypesLoaded) {
+    n.textContent = '"' + v + '" is not a Type your store uses yet — pushing will create it. Check it is not a near-duplicate of an existing one.';
+    n.className = 'sp-type-note warn';
+  } else {
+    n.textContent = 'Category sets the Shopify taxonomy (tax + Google feed). Type drives Type-based collections on the site.';
+    n.className = 'sp-type-note';
+  }
+}
+
 function _spWireTitleEdit(cd) {
   var wrap  = cd.card.querySelector('.sp-card-title');
   if (!wrap) return;
@@ -4725,6 +5017,10 @@ function _spDoCreate(cd) {
   // whenever it is set. The invoice type stays the fallback.
   var _catType = _CAT_TO_TYPE[(cd.els && cd.els.cat ? cd.els.cat.value : '').trim()];
   if (_catType) typeEntry = _catType;
+  // build 72 — the visible Type field is the final word. The category map only
+  // supplies its default, so nothing is pushed that you did not see.
+  var _chosenType = (cd.els && cd.els.type ? cd.els.type.value : '').trim();
+  if (_chosenType) typeEntry = { shopify: _chosenType, tag: (_catType ? _catType.tag : _chosenType.toLowerCase()) };
 
   var product = {
     // build29 — colorless items (e.g. one-colorway accessories) get a clean
@@ -5720,6 +6016,10 @@ function _spInitDetails(cd){
       '<div style="flex:1;"><label class="sp-l">Category</label><select class="sp-seo-cat"><option value="">\u2014</option>' +
         ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Shorts','Rompers & Jumpsuits','Sets & Co-ords','Outerwear','Swimwear','Activewear','Jewelry','Bags','Accessories','Shoes']
           .map(function(c){ return '<option>'+c+'</option>'; }).join('') + '</select></div>' +
+      '<div style="flex:1;"><label class="sp-l">Shopify type</label><select class="sp-seo-type"></select></div>' +
+    '</div>' +
+    '<div class="sp-type-note"></div>' +
+    '<div style="display:flex;gap:8px;">' +
       '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
     '</div>' +
     // v59 — editable Tags (color, type, brand, fabric auto-added by the worker;
@@ -5737,6 +6037,8 @@ function _spInitDetails(cd){
     desc: wrap.querySelector('.sp-seo-desc'),
     bodyd: wrap.querySelector('.sp-seo-body'),
     cat: wrap.querySelector('.sp-seo-cat'),
+    type: wrap.querySelector('.sp-seo-type'),           // build 72
+    typeNote: wrap.querySelector('.sp-type-note'),      // build 72
     alt: wrap.querySelector('.sp-seo-alt'),
     tags: wrap.querySelector('.sp-seo-tags')
   };
@@ -5761,6 +6063,20 @@ function _spInitDetails(cd){
   ['title','desc','bodyd','cat','alt','tags'].forEach(function(k){
     cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
   });
+  // build 72 - Type follows Category until you touch Type yourself.
+  // build 73 - restore a saved snapshot AFTER the type list exists, so a saved
+  // type can be selected. Restoring sets userEdited, which stops _spGenSeo from
+  // overwriting the copy you already approved (see the guard in _spGenSeo).
+  ensureShopifyTypes(function(){
+    _spPopulateType(cd, true);
+    if (_spRestoreCard(cd) && cd.els.fetchStatus) {
+      cd.els.fetchStatus.textContent = 'Restored your saved edits for this card.';
+    }
+  });
+  cd.els.cat.addEventListener('change', function(){
+    if (!cd._typeTouched) _spPopulateType(cd, true);
+  });
+  cd.els.type.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
   // v57 — save the pasted vendor website, then immediately retry the fetch.
   cd.els.vsiteSave.onclick = function(){
