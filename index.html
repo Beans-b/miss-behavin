@@ -220,7 +220,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .modal-actions{display:flex;gap:8px;}
 .modal-actions .btn{margin-top:0;}
 .app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
-/* build 80 - the build number has to be readable at a glance. The rest of
+/* build 81 - the build number has to be readable at a glance. The rest of
    the footer stays light; only the version is dark and bold. */
 .app-footer .ver-num{color:var(--black);font-weight:700;font-size:12px;letter-spacing:.06em;}
 
@@ -1213,7 +1213,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v78. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 80</strong> &#183; 2026-08-02 &#183; needs Worker v78</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 81</strong> &#183; 2026-08-02 &#183; needs Worker v78</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1535,7 +1535,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 80;   // keep in step with the footer stamp
+var APP_BUILD = 81;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4579,12 +4579,16 @@ function _spSnapshotCard(cd){
 }
 
 function _spRestoreCard(cd){
-  var bag = cd.style && cd.style._review;
+  var live = (currentInvoice && (currentInvoice.styles || [])[cd.styleIdx]) || cd.style;
+  var bag = live && live._review;
   var st  = bag && bag[_spReviewKey(cd)];
   if (!st) return false;
   var e = cd.els || {};
   var set = function(x, val){ if (x && val) x.value = val; };
-  if (st.title) { cd.titleOverride = st.title; var t = cd.card.querySelector('.sp-title-text'); if (t) t.textContent = _spTitleFor(cd); }
+  // build 81 — set unconditionally so clearing an override also restores.
+  cd.titleOverride = st.title || '';
+  var _t = cd.card.querySelector('.sp-title-text');
+  if (_t) _t.textContent = _spTitleFor(cd);
   set(e.title, st.seo_title); set(e.desc, st.seo_desc); set(e.bodyd, st.body);
   set(e.cat, st.cat); set(e.alt, st.alt); set(e.tags, st.tags);
   set(cd.upcInput, st.upc); set(cd.vskuInput, st.vsku);
@@ -4606,15 +4610,25 @@ function _spRestoreCard(cd){
   return true;
 }
 
+// build 81 — THE BUG: saveCurrentInvoice() does `currentInvoice = collectCurrentInvoice()`,
+// and collectCurrentInvoice() returns a DEEP CLONE. So the moment anything
+// autosaved, every cd.style still pointed at the PREVIOUS clone — detached from
+// currentInvoice. Snapshots written through cd.style landed on an orphan object
+// and were cloned away on the next save. That is why the card said "Restored
+// your saved edits" (an early, empty snapshot survived) while the title edit
+// made afterwards was gone — and why Shopify had the new name but the app did not.
+// Fix: always write into the LIVE currentInvoice, addressed by index.
 function _spSaveAll(silent){
   if (!currentInvoice || !_spCards.length) return 0;
   var n = 0, dropped = 0;
   _spCards.forEach(function(cd){
-    if (!cd.style) return;
-    if (!cd.style._review) cd.style._review = {};
+    var tgt = (currentInvoice.styles || [])[cd.styleIdx] || cd.style;
+    if (!tgt) return;
+    if (!tgt._review) tgt._review = {};
     var snap = _spSnapshotCard(cd);
     dropped += snap.droppedUploads || 0;
-    cd.style._review[_spReviewKey(cd)] = snap;
+    tgt._review[_spReviewKey(cd)] = snap;
+    cd.style = tgt;                    // re-attach so later saves stay live
     n++;
   });
   saveCurrentInvoice();
@@ -4661,7 +4675,7 @@ function _buildSpReview(inv) {
   container.innerHTML = '';
   _spCards = [];
 
-  (inv.styles || []).forEach(function(style) {
+  (inv.styles || []).forEach(function(style, _styleIdx) {   // build 81 — index, not just the object
     var retail = _spParseRetail(style._retail);
 
     (style.colors || []).forEach(function(colorObj) {
@@ -4756,6 +4770,7 @@ function _buildSpReview(inv) {
 
       var cd = {
         card: card, style: style, colorObj: colorObj,
+        styleIdx: _styleIdx,          // build 81 — survives currentInvoice being re-cloned
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
         retail: retail, state: 'idle', dupVariant: null,
         upcInput: null, upcHint: null, vskuInput: null
@@ -4823,7 +4838,7 @@ function _spTitleFor(cd) {
 // 'Skorts' added: the store has a "Category is equal to Skorts" collection with
 // 11 products, and the app previously collapsed skorts into Skirts so nothing
 // added here could ever reach it. Needs Worker v78 to resolve its GID.
-// build 80 — Outerwear and Activewear removed: the store does not carry them,
+// build 81 — Outerwear and Activewear removed: the store does not carry them,
 // so offering them only invited a mis-categorised product that would land in no
 // collection at all. Everything left here maps to a category the store uses.
 var _CATEGORY_LABELS = ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Skorts','Shorts',
