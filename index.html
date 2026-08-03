@@ -220,7 +220,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .modal-actions{display:flex;gap:8px;}
 .modal-actions .btn{margin-top:0;}
 .app-footer{text-align:center;font-size:10px;color:var(--gray-mid);padding:24px 24px 0;letter-spacing:.07em;}
-/* build 82 - the build number has to be readable at a glance. The rest of
+/* build 83 - the build number has to be readable at a glance. The rest of
    the footer stays light; only the version is dark and bold. */
 .app-footer .ver-num{color:var(--black);font-weight:700;font-size:12px;letter-spacing:.06em;}
 
@@ -1213,7 +1213,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v78. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 82</strong> &#183; 2026-08-02 &#183; needs Worker v78</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 83</strong> &#183; 2026-08-02 &#183; needs Worker v78</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1535,7 +1535,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 82;   // keep in step with the footer stamp
+var APP_BUILD = 83;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2793,18 +2793,28 @@ function _renderVendorField(inv){
   if (!input) return;
   var wrap = input.closest('.inv-vendor-edit');
   var raw  = (inv && inv.vendor) || '';
+  // build 83 — capture the vendor the INVOICE arrived with, once, whatever it
+  // is. Previously this was only recorded for private-label names, and editing
+  // the field to anything else DELETED it — so typing "Miss Behavin'" over a
+  // Sky to Moon invoice wiped the only record of who the goods came from and
+  // the archive filed it under Miss Behavin'.
+  if (inv && inv._invoiceVendor === undefined) inv._invoiceVendor = raw;
+
   var priv = _isPrivateLabel(raw);
   var shown = priv ? _privateLabels.becomes : raw;
 
   input.value = shown;
   if (wrap) wrap.classList.toggle('is-private', priv);
+
+  var origin = (inv && inv._invoiceVendor) || raw;
   if (priv) {
-    // Record the invoice's real vendor without ever putting it in a field that
-    // ships. It stays on the invoice object for the audit trail.
-    inv._invoiceVendor = inv._invoiceVendor || raw;
     inv.vendor = _privateLabels.becomes;
     note.style.display = '';
-    note.textContent = 'Private label — invoice says "' + (inv._invoiceVendor || raw) + '". Shopify receives ' + _privateLabels.becomes + '.';
+    note.textContent = 'Private label — invoice says "' + origin + '". Shopify receives ' + _privateLabels.becomes + '.';
+  } else if (origin && origin !== shown) {
+    // Manually overridden. Say so, so the archive record is never a surprise.
+    note.style.display = '';
+    note.textContent = 'Shopify receives "' + shown + '". The archive keeps the invoice vendor, "' + origin + '".';
   } else {
     note.style.display = 'none';
     note.textContent = '';
@@ -2822,14 +2832,12 @@ function _renderVendorField(inv){
     var v = input.value.trim();
     if (!v) { input.value = (currentInvoice && currentInvoice.vendor) || ''; return; }
     if (!currentInvoice) return;
-    if (_isPrivateLabel(v)) {
-      // Typing a private-label name resolves immediately rather than at push.
-      currentInvoice._invoiceVendor = v;
-      currentInvoice.vendor = _privateLabels.becomes;
-    } else {
-      currentInvoice.vendor = v;
-      delete currentInvoice._invoiceVendor;
-    }
+    // build 83 — an edit changes what SHOPIFY receives. It never touches
+    // _invoiceVendor, which is the record of what the invoice actually said.
+    currentInvoice.vendor = _isPrivateLabel(v) ? _privateLabels.becomes : v;
+    // build 83 — the SEO copy names the brand, so a vendor change makes every
+    // saved snapshot stale in exactly the way a rename does.
+    _spInvalidateSnapshots(currentInvoice);
     _renderVendorField(currentInvoice);
     el('kel-inv-title').textContent = (currentInvoice.vendor||'Invoice') + ' — #' + (currentInvoice.invoice_number||'');
     scheduleAutosave();
@@ -4569,9 +4577,12 @@ function _spSnapshotCard(cd){
     seo_title: v(e.title), seo_desc: v(e.desc), body: v(e.bodyd),
     cat: v(e.cat), type: v(e.type), alt: v(e.alt), tags: v(e.tags),
     upc: v(cd.upcInput), vsku: v(cd.vskuInput),
-    // build 82 — the name the SEO copy was written for. If the product is
+    // build 83 — the name the SEO copy was written for. If the product is
     // renamed on the invoice later, the saved copy is stale and must not win.
     src_name: String((cd.style && (cd.style.printed_name || cd.style.name)) || ''),
+    // build 83 — the SEO copy names the BRAND too, so the vendor is part of
+    // what makes it current.
+    src_vendor: String((currentInvoice && currentInvoice.vendor) || ''),
     images: imgs,
     off: Object.keys(cd._off || {}).filter(function(u){ return !/^data:/i.test(u); }),
     removed: Object.keys(cd._removed || {}).filter(function(u){ return !/^data:/i.test(u); }),
@@ -4588,16 +4599,20 @@ function _spRestoreCard(cd){
   if (!st) return false;
   var e = cd.els || {};
   var set = function(x, val){ if (x && val) x.value = val; };
-  // build 82 — was the product renamed on the invoice since this was saved?
+  // build 83 — was the product renamed on the invoice since this was saved?
   // If so the saved SEO copy still describes the OLD name ("BUNBUN Gingham
   // Shorts" on a product now called "Margot Shorts"), so it is dropped and the
   // generator writes fresh copy. Everything else — category, tags, UPC, vendor
   // SKU, photo choices — is still yours and is restored either way.
-  var nowName = String((cd.style && (cd.style.printed_name || cd.style.name)) || '');
-  var renamed = st.src_name !== undefined && st.src_name !== '' && nowName !== '' && st.src_name !== nowName;
+  var nowName   = String((cd.style && (cd.style.printed_name || cd.style.name)) || '');
+  var nowVendor = String((currentInvoice && currentInvoice.vendor) || '');
+  var nameChanged   = st.src_name   !== undefined && st.src_name   !== '' && nowName   !== '' && st.src_name   !== nowName;
+  var vendorChanged = st.src_vendor !== undefined && st.src_vendor !== '' && nowVendor !== '' && st.src_vendor !== nowVendor;
+  var renamed = nameChanged || vendorChanged;   // build 83
   cd._renamedSince = renamed;
+  cd._staleReason = vendorChanged ? 'Vendor' : 'Product name';
 
-  // build 82 — set unconditionally so clearing an override also restores.
+  // build 83 — set unconditionally so clearing an override also restores.
   cd.titleOverride = renamed ? '' : (st.title || '');
   var _t = cd.card.querySelector('.sp-title-text');
   if (_t) _t.textContent = _spTitleFor(cd);
@@ -4624,7 +4639,7 @@ function _spRestoreCard(cd){
   return true;
 }
 
-// build 82 — THE BUG: saveCurrentInvoice() does `currentInvoice = collectCurrentInvoice()`,
+// build 83 — THE BUG: saveCurrentInvoice() does `currentInvoice = collectCurrentInvoice()`,
 // and collectCurrentInvoice() returns a DEEP CLONE. So the moment anything
 // autosaved, every cd.style still pointed at the PREVIOUS clone — detached from
 // currentInvoice. Snapshots written through cd.style landed on an orphan object
@@ -4632,6 +4647,27 @@ function _spRestoreCard(cd){
 // your saved edits" (an early, empty snapshot survived) while the title edit
 // made afterwards was gone — and why Shopify had the new name but the app did not.
 // Fix: always write into the LIVE currentInvoice, addressed by index.
+// build 83 — a vendor change invalidates every saved SEO snapshot on the sheet,
+// including cards not currently rendered. Without this, closing and reopening
+// would restore copy that still names the old brand ("Sky to Moon" on a sheet
+// now marked Miss Behavin').
+function _spInvalidateSnapshots(inv){
+  if (!inv || !inv.styles) return 0;
+  var n = 0, v = String(inv.vendor || '');
+  inv.styles.forEach(function(st){
+    if (!st || !st._review) return;
+    Object.keys(st._review).forEach(function(k){
+      var snap = st._review[k];
+      if (snap && snap.src_vendor !== undefined && snap.src_vendor !== v) {
+        snap.seo_title = ''; snap.seo_desc = ''; snap.body = ''; snap.alt = '';
+        snap.src_vendor = v;
+        n++;
+      }
+    });
+  });
+  return n;
+}
+
 function _spSaveAll(silent){
   if (!currentInvoice || !_spCards.length) return 0;
   var n = 0, dropped = 0;
@@ -4689,7 +4725,7 @@ function _buildSpReview(inv) {
   container.innerHTML = '';
   _spCards = [];
 
-  (inv.styles || []).forEach(function(style, _styleIdx) {   // build 82 — index, not just the object
+  (inv.styles || []).forEach(function(style, _styleIdx) {   // build 83 — index, not just the object
     var retail = _spParseRetail(style._retail);
 
     (style.colors || []).forEach(function(colorObj) {
@@ -4784,7 +4820,7 @@ function _buildSpReview(inv) {
 
       var cd = {
         card: card, style: style, colorObj: colorObj,
-        styleIdx: _styleIdx,          // build 82 — survives currentInvoice being re-cloned
+        styleIdx: _styleIdx,          // build 83 — survives currentInvoice being re-cloned
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
         retail: retail, state: 'idle', dupVariant: null,
         upcInput: null, upcHint: null, vskuInput: null
@@ -4852,7 +4888,7 @@ function _spTitleFor(cd) {
 // 'Skorts' added: the store has a "Category is equal to Skorts" collection with
 // 11 products, and the app previously collapsed skorts into Skirts so nothing
 // added here could ever reach it. Needs Worker v78 to resolve its GID.
-// build 82 — Outerwear and Activewear removed: the store does not carry them,
+// build 83 — Outerwear and Activewear removed: the store does not carry them,
 // so offering them only invited a mis-categorised product that would land in no
 // collection at all. Everything left here maps to a category the store uses.
 var _CATEGORY_LABELS = ['Dresses','Tops','Sweaters','Pants','Jeans','Skirts','Skorts','Shorts',
@@ -6164,7 +6200,7 @@ function _spInitDetails(cd){
     _spPopulateType(cd, true);
     if (_spRestoreCard(cd) && cd.els.fetchStatus) {
       cd.els.fetchStatus.textContent = cd._renamedSince
-        ? 'Product was renamed — SEO copy is being rewritten for the new name. Your category, tags and photo choices were kept.'
+        ? (cd._staleReason || 'Product name') + ' changed — SEO copy is being rewritten. Your category, tags and photo choices were kept.'
         : 'Restored your saved edits for this card.';
     }
   });
@@ -6200,7 +6236,7 @@ function _spSeoPump(){
 }
 function _spGenSeo(cd, done){
   if (!cd.els) { if (done) done(); return; }
-  // build 82 — the userEdited guard used to sit AFTER the API call, so every
+  // build 83 — the userEdited guard used to sit AFTER the API call, so every
   // restored card still paid for a generation that was then thrown away.
   if (cd.userEdited) { cd.els.title.placeholder = ''; if (done) done(); return; }
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
