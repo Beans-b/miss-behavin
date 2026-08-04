@@ -1217,7 +1217,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 87</strong> &#183; 2026-08-02 &#183; needs Worker v80</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 88</strong> &#183; 2026-08-02 &#183; needs Worker v80</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1539,7 +1539,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 87;   // keep in step with the footer stamp
+var APP_BUILD = 88;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4087,12 +4087,58 @@ function manTypeSuggestions(){
 // build 62 — Type drives Sizing: an Accessory is quantity-only (One-size),
 // everything else is sized apparel. Fires as the Type field changes so the
 // row's mode flips automatically; the buttons still override manually.
+// build 88 — the size boxes for a run, built as markup so the row can be
+// re-rendered when the Category changes.
+function _manSizeInputs(runKey){
+  var sizes = (SIZE_RUNS[runKey] || SIZE_RUNS.ALPHA).sizes;
+  return sizes.map(function(sz){
+    return '<div style="flex:1;min-width:44px;text-align:center;"><label class="sp-l" style="white-space:nowrap;">' + esc(sz) +
+           '</label><input type="number" min="0" class="field-input man-sz-' + esc(sz) + '" style="text-align:center;"/></div>';
+  }).join('');
+}
+// Which run does a manual-entry Category imply? Same rules as the invoice path.
+function _manRunForCategory(cat){
+  var c = String(cat || '').trim();
+  if (!c) return 'ALPHA';
+  if (_RUN_BY_CATEGORY[c]) return _RUN_BY_CATEGORY[c];
+  return 'ALPHA';
+}
+// build 88 — Category now drives BOTH the one-size flip and the size run, so a
+// manually entered shoe gets 5-11 and a manually entered pair of jeans 24-31
+// instead of everything being forced into XS-XL.
 function manTypeChanged(inp){
   var row = inp.closest('.man-row'); if (!row) return;
-  var t = String(inp.value || '').trim();
-  var isAcc = t === 'Accessory' || t === 'Accessories' ||
-              (_typeMap[t] && _typeMap[t].shopify === 'Accessories');
-  setRowSizing(row, isAcc ? 'os' : 'sized');
+  var cat = String(inp.value || '').trim();
+  var run = _manRunForCategory(cat);
+  if (run === 'OS') { setRowSizing(row, 'os'); row.dataset.run = 'OS'; manualFormChanged(); return; }
+
+  var box = row.querySelector('.man-qty-sized');
+  if (box && row.dataset.run !== run) {
+    // keep whatever was typed for sizes that exist in both runs
+    var keep = {};
+    box.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){
+      var m = /man-sz-([^\s]+)/.exec(i.className); if (m) keep[m[1]] = i.value;
+    });
+    var btn = box.querySelector('button');
+    box.innerHTML = _manSizeInputs(run) + (btn ? btn.outerHTML : '');
+    box.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){
+      var m = /man-sz-([^\s]+)/.exec(i.className);
+      if (m && keep[m[1]] !== undefined) i.value = keep[m[1]];
+      i.addEventListener('input', manualFormChanged);
+    });
+    row.dataset.run = run;
+  }
+  setRowSizing(row, 'sized');
+  manualFormChanged();
+}
+// build 88 — read the quantities off whatever run the row is showing.
+function _manRowSizes(row){
+  var out = {};
+  row.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){
+    var m = /man-sz-([^\s]+)/.exec(i.className);
+    if (m) out[m[1]] = parseInt(i.value, 10) || 0;
+  });
+  return out;
 }
 function ensureManTypeDatalist(){
   var dl = el('man-type-list');
@@ -4162,7 +4208,8 @@ function manualPull(){
         row.querySelector('.man-retail').value ||
         row.querySelector('.man-cost').value ||
         (row.querySelector('.man-upc') && row.querySelector('.man-upc').value.trim()) ||   // build 39
-        ['XS','S','M','L','XL','OS'].some(function(sz){ return row.querySelector('.man-sz-'+sz).value; });
+        Object.keys(_manRowSizes(row)).some(function(sz){ return _manRowSizes(row)[sz] > 0; }) ||
+        !!(row.querySelector('.man-sz-OS') && row.querySelector('.man-sz-OS').value);   // build 88
       if (!hasData) row.remove();
     });
     el('man-url').value = '';
@@ -4201,7 +4248,8 @@ function manualFormChanged(){
     var need = [];
     if (!row.querySelector('.man-name').value.trim()) need.push('style name');
     if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
-    var qty = ['XS','S','M','L','XL','OS'].reduce(function(t,sz){ return t + (parseInt(row.querySelector('.man-sz-'+sz).value,10)||0); }, 0);
+    var _sz = _manRowSizes(row);   // build 88 — whatever run this row is showing
+    var qty = Object.keys(_sz).reduce(function(t,k){ return t + (_sz[k]||0); }, 0);
     if (!(qty > 0)) {
       var _sizedEl = row.querySelector('.man-qty-sized');
       var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
@@ -4263,7 +4311,7 @@ function setRowSizing(row, mode){
   if (!os || !sized) return;
   if (mode === 'os') {
     os.style.display = 'flex'; sized.style.display = 'none';
-    ['XS','S','M','L','XL'].forEach(function(sz){ var e = row.querySelector('.man-sz-'+sz); if (e) e.value = ''; });
+    row.querySelectorAll('input[class*="man-sz-"]').forEach(function(e){ if (!/man-sz-OS/.test(e.className)) e.value = ''; });   // build 88
   } else {
     os.style.display = 'none'; sized.style.display = 'flex';
     var e = row.querySelector('.man-sz-OS'); if (e) e.value = '';
@@ -4279,7 +4327,13 @@ function manualAddRow(){
   row.innerHTML =
     '<div style="display:flex;gap:8px;">' +
       '<div style="flex:2;"><label class="sp-l">Style name</label><input type="text" class="field-input man-name"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Type</label><input type="text" class="field-input man-type" list="man-type-list" autocomplete="off" placeholder="Search or type…" oninput="manTypeChanged(this)"/></div>' +
+      // build 88 — was a free-text "Type" box with its own vocabulary, which is
+      // how "Other"/"Others" style values got invented. It is now the SAME
+      // Category list the invoice path uses, and it drives the size run.
+      '<div style="flex:1;"><label class="sp-l">Category</label><select class="field-input man-type" onchange="manTypeChanged(this)">' +
+        '<option value="">— none —</option>' +
+        _CATEGORY_LABELS.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('') +
+      '</select></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
@@ -4292,10 +4346,8 @@ function manualAddRow(){
       '<div style="flex:1;"><label class="sp-l">Quantity (one size)</label><input type="number" min="0" class="field-input man-sz-OS" style="text-align:center;"/></div>' +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
-    '<div class="man-qty-sized" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      ['XS','S','M','L','XL'].map(function(sz){
-        return '<div style="flex:1;text-align:center;"><label class="sp-l" style="white-space:nowrap;">'+sz+'</label><input type="number" min="0" class="field-input man-sz-'+sz+'" style="text-align:center;"/></div>';
-      }).join('') +
+    '<div class="man-qty-sized" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;flex-wrap:wrap;">' +
+      _manSizeInputs('ALPHA') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
@@ -4335,11 +4387,14 @@ function manualStart(){
   Array.prototype.forEach.call(rows, function(row, i){
     var name = row.querySelector('.man-name').value.trim();
     var type = row.querySelector('.man-type').value;
+    var _rowRun = row.dataset.run || _manRunForCategory(type);   // build 88
     var color = row.querySelector('.man-color').value.trim() || 'Default';
     var retail = parseFloat(row.querySelector('.man-retail').value);
     var cost = parseFloat(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
-    ['XS','S','M','L','XL','OS'].forEach(function(sz){
+    // build 88 — read the row's own run instead of a fixed list
+    var _rowSizes = _manRowSizes(row);
+    Object.keys(_rowSizes).forEach(function(sz){
       var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
       if (q > 0) sizes[sz] = q;
     });
@@ -4354,6 +4409,10 @@ function manualStart(){
     // build 33 — the price he entered IS the retail; it rides straight
     // through to the pricing card and the Shopify push.
     s._retail = '$' + retail.toFixed(2);
+    // build 88 — carry the run and the chosen Category through to the review
+    // card and the push, so a manually entered shoe stays 5-11 end to end.
+    s._sizeRun = _rowRun;
+    s._manualCategory = type;
     var ik = row.dataset.imgkey;
     if (ik && _manImages[ik] && (_manImages[ik].images || []).length){
       s.vendor_images = _manImages[ik].images;
@@ -5004,6 +5063,7 @@ function _spPopulateType(cd, force){
   var sel = cd.els && cd.els.cat;
   if (!sel) return;
   var want = sel.value || '';
+  if (!want && cd.style && cd.style._manualCategory) want = cd.style._manualCategory;   // build 88
   if (!want && cd.style) {
     var te = _typeMap[cd.style.type || ''];
     // seed from the invoice type, translated back to a taxonomy label
