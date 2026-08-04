@@ -161,6 +161,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .p-name-input{flex:1;border:none;border-bottom:1px dashed var(--gray-mid);font-family:'DM Sans',sans-serif;font-style:normal;font-weight:500;font-size:14px;padding:3px 0 4px;background:transparent;outline:none;color:var(--black);min-width:0;}
 .p-name-input:focus{border-bottom-color:var(--black);}
 .p-card-body{padding:10px 12px;}
+/* build 87 - size run picker on the invoice card */
+.p-run-row{display:flex;align-items:center;gap:6px;padding:0 12px 8px;}
+.p-run-row .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);margin:0;}
+.p-run-select{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 6px;border:1px solid var(--gray-mid);background:#fff;}
 .regen-btn{background:none;border:1px solid var(--gray-mid);border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:13px;color:var(--gray-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;-webkit-appearance:none;padding:0;line-height:1;font-family:inherit;}
 .regen-btn:active{background:var(--gray-light);}
 .regen-btn.spinning{animation:spin .6s linear infinite;pointer-events:none;opacity:.5;}
@@ -1211,9 +1215,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
-     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v79. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 86</strong> &#183; 2026-08-02 &#183; needs Worker v79</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 87</strong> &#183; 2026-08-02 &#183; needs Worker v80</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1535,7 +1539,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 86;   // keep in step with the footer stamp
+var APP_BUILD = 87;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2890,6 +2894,56 @@ function renderKelCards(inv) {
   setAutosave('saved');
 }
 
+// ── build 87 — SIZE RUNS ────────────────────────────────────────────────
+// XS-XL was hardcoded in a dozen places, so shoes and denim had nowhere to go.
+// A style now carries ONE run, resolved in this order (your call: detect from
+// the invoice, fall back to category, always editable):
+//   1. style._sizeRun  — an explicit choice made on the card
+//   2. detected from the size keys the invoice actually printed
+//   3. the default for the style's category
+//   4. ALPHA
+var SIZE_RUNS = {
+  ALPHA: { label: 'XS – XL',   sizes: ['XS','S','M','L','XL'] },
+  WAIST: { label: '24 – 31',   sizes: ['24','25','26','27','28','29','30','31'] },
+  SHOE:  { label: '5 – 11',    sizes: ['5','6','7','8','9','10','11'] },
+  OS:    { label: 'One size',  sizes: ['OS'] }
+};
+var SIZE_RUN_ORDER = ['ALPHA','WAIST','SHOE','OS'];
+
+// Category / invoice-type defaults. Bottoms deliberately default to ALPHA —
+// most skirts are still S/M/L and the invoice detection catches the denim ones.
+var _RUN_BY_TYPE = { 'Shoe':'SHOE', 'Shoes':'SHOE', 'Accessory':'OS', 'Bag':'OS', 'Jewelry':'OS' };
+var _RUN_BY_CATEGORY = {
+  'Shoes':'SHOE',
+  'Jeans':'WAIST',
+  'Accessories':'OS','Bags':'OS','Jewelry':'OS'
+};
+
+// What run do these size keys look like? Numeric >= 20 is a waist, numeric
+// < 20 is a shoe, OS is one-size, anything else is alpha.
+function _detectRunFromKeys(keys){
+  var k = (keys || []).map(function(x){ return String(x).trim(); }).filter(Boolean);
+  if (!k.length) return null;
+  if (k.length === 1 && k[0].toUpperCase() === 'OS') return 'OS';
+  var nums = k.filter(function(x){ return /^\d+(\.5)?$/.test(x); });
+  if (!nums.length) return null;
+  if (nums.length < k.length) return null;               // mixed — trust nothing
+  var max = Math.max.apply(null, nums.map(Number));
+  return max >= 20 ? 'WAIST' : 'SHOE';
+}
+
+function _styleRunKey(style){
+  if (!style) return 'ALPHA';
+  if (style._sizeRun && SIZE_RUNS[style._sizeRun]) return style._sizeRun;
+  var keys = [];
+  (style.colors || []).forEach(function(c){ keys = keys.concat(Object.keys(c.sizes || {})); });
+  var seen = {}; keys = keys.filter(function(x){ if (seen[x]) return false; seen[x] = 1; return true; });
+  var det = _detectRunFromKeys(keys);
+  if (det) return det;
+  return _RUN_BY_TYPE[String(style.type || '').trim()] || 'ALPHA';
+}
+function _styleSizes(style){ return SIZE_RUNS[_styleRunKey(style)].sizes; }
+
 function buildKelCard(style, idx) {
   var costNum = Number(style.cost||0);
   var cost = costNum.toFixed(2);
@@ -2905,6 +2959,7 @@ function buildKelCard(style, idx) {
   card.className = 'p-card';
   card.dataset.code = style.code;
   card.dataset.idx  = (idx === undefined || idx === null) ? '' : String(idx);   // v72 — the reliable card↔style link
+  card.dataset.run  = _styleRunKey(style);   // build 87
   card.dataset.cost = cost;
   card.innerHTML =
     '<div class="p-card-header">'+
@@ -2912,6 +2967,12 @@ function buildKelCard(style, idx) {
       '<input class="p-name-input" type="text" value="'+esc(style.printed_name||style.name||'')+'" placeholder="Style name"/>'+
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
+    // build 87 — size run, editable. Detected value is preselected.
+    '<div class="p-run-row"><label class="sp-l">Size run</label><select class="p-run-select">'+
+      SIZE_RUN_ORDER.map(function(k){
+        return '<option value="'+k+'"'+(k===_styleRunKey(style)?' selected':'')+'>'+esc(SIZE_RUNS[k].label)+'</option>';
+      }).join('')+
+    '</select></div>'+
     '<div class="p-card-body">'+
       '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">'+(costNum>0?'$'+cost:'&#8212;')+'</span></div>'+
       '<div class="p-markup-row">'+
@@ -3019,6 +3080,9 @@ function collectCurrentInvoice() {
     var ab = card.querySelector('.mtype-btn.active');
     style._markupMode = ab ? ab.dataset.mode : 'pct';
     style._retail = (card.querySelector('.p-retail-input')||{}).value || '';
+    // build 87 — remember the chosen size run
+    var _runSel = card.querySelector('.p-run-select');
+    if (_runSel && _runSel.value) style._sizeRun = _runSel.value;
     if (!style._retail && style._markup) {
       var cost = parseFloat(card.dataset.cost)||0;
       var mval = parseFloat(style._markup)||0;
@@ -4541,7 +4605,7 @@ function _spAutoCheckLive() {
     }
     var cd = _spCards[i++];
     if (['success','added','skipped','pushing','restocking','duplicate'].indexOf(cd.state) >= 0) { next(); return; }
-    var sizes = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+    var sizes = (SIZE_RUNS[cd.runKey] ? SIZE_RUNS[cd.runKey].sizes : SIZE_RUNS.ALPHA.sizes).concat(['OS']).filter(function(sz){ return cd.activeSizes[sz]; });   // build 87
     var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
     if (!checkSize) { next(); return; }
     api('shopify_check_sku', { sku: cd.baseSku + '-' + checkSize })
@@ -4747,7 +4811,8 @@ function _buildSpReview(inv) {
       var baseSku = style.code + '-' + slug;
 
       // build 59 — gather quantities across all apparel sizes (incl. XL) + OS.
-      var gatherOrder = ['XS', 'S', 'M', 'L', 'XL', 'OS'];
+      // build 87 - the style's own run (+OS, which can appear on any style)
+      var gatherOrder = _styleSizes(style).concat(['OS']);
       var activeSizes = {};
       gatherOrder.forEach(function(sz) {
         var q = (colorObj.sizes || {})[sz] || 0;
@@ -4834,7 +4899,8 @@ function _buildSpReview(inv) {
 
       var cd = {
         card: card, style: style, colorObj: colorObj,
-        styleIdx: _styleIdx,          // build 86 — survives currentInvoice being re-cloned
+        styleIdx: _styleIdx,          // build 81 — survives currentInvoice being re-cloned
+        runKey: _styleRunKey(style),  // build 87
         slug: slug, baseSku: baseSku, activeSizes: activeSizes,
         retail: retail, state: 'idle', dupVariant: null,
         upcInput: null, upcHint: null, vskuInput: null
@@ -5102,7 +5168,7 @@ function _spPushCard(cd) {
   if (oldErr) oldErr.remove();
 
   // Canonical SKU to check: prefer S, fall back to first active size
-  var sizes     = ['XS','S','M','L','XL','OS'].filter(function(sz){ return cd.activeSizes[sz]; });
+  var sizes     = (SIZE_RUNS[cd.runKey] ? SIZE_RUNS[cd.runKey].sizes : SIZE_RUNS.ALPHA.sizes).concat(['OS']).filter(function(sz){ return cd.activeSizes[sz]; });   // build 87
   var checkSize = sizes.indexOf('S') >= 0 ? 'S' : sizes[0];
   var checkSku  = cd.baseSku + '-' + checkSize;
 
@@ -5148,7 +5214,10 @@ function _spDoCreate(cd) {
   // size when a missing size is restocked later. True one-size items (OS —
   // accessories) still create a single variant. isOneSize keys off an explicit
   // OS quantity, so a lone "S" on an invoice is treated as apparel, not one-size.
-  var APPAREL_SIZES = ['XS','S','M','L','XL'];
+  // build 87 - the style's run, not a fixed alpha list. Every size in the run
+  // still gets a variant (0 stock when the invoice did not list it) so a later
+  // restock can never land in the wrong size - the v59 rule, now run-aware.
+  var APPAREL_SIZES = (SIZE_RUNS[cd.runKey] || SIZE_RUNS.ALPHA).sizes;
   var isOneSize = !!cd.activeSizes['OS'];
   var upcVal = cd.upcInput ? gtinDigits(cd.upcInput.value) : '';
   var useUpc = !!(upcVal && isGtin(upcVal) && isOneSize);   // UPC → barcode only on one-size items
