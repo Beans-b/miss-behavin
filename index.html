@@ -59,8 +59,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .btn[disabled]{opacity:.35;cursor:not-allowed;}
 .btn-black{background:var(--primary);color:#fff;margin-top:0;}
 .btn-primary{background:var(--primary);color:#fff;margin-top:0;}
-.btn-pull{background:var(--pull);color:#fff;margin-top:0;border:none;border-radius:8px;font-weight:700;box-shadow:0 2px 10px rgba(18,161,80,.35);}
-.btn-pull:active{background:#0e7c3e;box-shadow:0 1px 4px rgba(18,161,80,.3);}
+/* build 91 — Pull was the only green button in the app, so it read as the
+   primary action even though it fails whenever a vendor page is unavailable.
+   Now on the same neutral scale as every other secondary button. */
+.btn-pull{background:transparent;color:var(--black);margin-top:0;border:1px solid var(--gray-mid);border-radius:8px;font-weight:600;box-shadow:none;}
+.btn-pull:active{background:var(--gray-light);border-color:var(--black);box-shadow:none;}
 .btn-outline{background:transparent;color:var(--black);border:1px solid var(--gray-mid);}
 /* build 38 — one-size / sized toggle on manual rows */
 .man-mode-btn{width:auto;padding:6px 12px;margin:0;font-size:12px;border-radius:14px;}
@@ -75,6 +78,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .field-input:focus{border-bottom-color:var(--black);}
 .field-hint{font-size:11px;color:var(--gray-text);margin-top:3px;line-height:1.4;}
 select.field-input{-webkit-appearance:none;border-radius:0;background:transparent;}
+
+/* build 91 — MANUAL ENTRY typography. The rows label with .sp-l, which only
+   had styling scoped to .arch-f / .p-run-row / .inv-vendor-edit, so inside the
+   manual pane every label fell back to plain body text: big, black, and
+   heavier than the real field labels above it. Match .field-label exactly so
+   the whole pane reads as one form. */
+#kel-manual .sp-l{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-text);margin:0 0 4px;display:block;line-height:1.3;}
+#kel-manual .field-input{font-size:14px;padding:8px 0;}
+#kel-manual .man-row .field-input{font-size:14px;}
+/* build 91 — a required box that is still empty gets a red rule, so "Still
+   needed: retail price" points at something you can actually see. */
+#kel-manual .field-input.man-need{border-bottom-color:var(--red);}
+#kel-manual .man-need-note{color:var(--red);}
+#man-next.man-next-need{color:var(--red);font-weight:600;}
 
 /* TOGGLE */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray-mid);}
@@ -751,7 +768,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail) &#183; <strong>3.</strong> Type the quantity &#8212; rows are Sized XS&#8211;L; pick Type &#8220;Accessory&#8221; for one-size items &#183; <strong>4.</strong> Review &amp; publish. No URL? Just type into the row.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail) &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -763,6 +780,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div id="man-rows"></div>
           <div id="man-next" style="font-size:12px;color:var(--gray-text);margin-top:12px;display:none;"></div>
           <button class="btn btn-black" id="man-start-btn" style="margin-top:10px;opacity:0.4;cursor:not-allowed;" disabled onclick="manualStart()">Review &amp; publish &#8594;</button>
+          <!-- build 91 — a way out. Backing out of the whole tab was the only
+               way to start over; this empties the pane and leaves one clean row. -->
+          <button class="btn btn-outline" id="man-reset-btn" style="margin-top:8px;font-size:11px;" onclick="manualClearAll(this)">Clear &amp; start over</button>
           <div id="man-status" class="status"></div>
         </div>
       </div>
@@ -1076,6 +1096,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <button class="tab-btn active" id="scgtab-btn-generate" onclick="scgTab('generate')">Generate</button>
       <button class="tab-btn" id="scgtab-btn-archive" onclick="scgTab('archive')">Archive</button>
       <button class="tab-btn" id="scgtab-btn-products" onclick="scgTab('products')">Products</button>
+      <button class="tab-btn" id="scgtab-btn-metafill" onclick="scgTab('metafill')">Meta Fill</button>
     </div>
     <div id="scgtab-generate">
       <div class="edit-howto">Type the brand, tap Generate. It pulls that vendor&#8217;s current styles from your own catalog, researches the brand live on the web, and returns every field ready to paste &#8212; internal links already embedded in the description. Every run saves itself to the Archive tab.</div>
@@ -1106,6 +1127,34 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         </div>
         <div id="scg-prod-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
         <div id="scg-prod-out" style="padding-bottom:24px;"></div>
+      </div>
+    </div>
+    <div id="scgtab-metafill" style="display:none;">
+      <div class="edit-posts-note"><strong>Backfills the meta description across the catalogue, in batches.</strong> Shopify auto-derives a product&#8217;s snippet from its body copy whenever the SEO description field is blank &#8212; that is why so many are 320 characters and why colour variants all read identically. Count first, then preview a batch and read the proposed lines before anything is written. It writes the SEO description field ONLY: never the product title, tags, price, body copy, or inventory. Empty fields only unless you deliberately switch scope. Needs Worker v81.</div>
+      <div style="padding:0 24px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;">
+          <div class="field" style="flex:1;min-width:190px;margin:0;">
+            <label class="field-label">Scope</label>
+            <select class="field-input" id="mf-include">
+              <option value="missing">Empty SEO description only (safe)</option>
+              <option value="missing+copied">Empty + copied from body copy (overwrites)</option>
+              <option value="all">Every flagged meta: empty, copied, too long, spec dump (overwrites)</option>
+            </select>
+          </div>
+          <div class="field" style="width:120px;margin:0;">
+            <label class="field-label">Batch size</label>
+            <input type="number" class="field-input" id="mf-limit" value="10" min="1" max="25"/>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <button class="btn btn-outline" style="width:auto;padding:10px 16px;margin:0;" onclick="mfCount()">Count catalogue</button>
+          <button class="btn btn-outline" style="width:auto;padding:10px 16px;margin:0;" onclick="mfPreview()">Preview batch</button>
+          <button class="btn btn-black" style="width:auto;padding:10px 16px;margin:0;" id="mf-write-btn" onclick="mfWrite()" disabled>Write approved</button>
+        </div>
+        <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:12px;">Optional &#8212; limit the run to specific product handles, one per line or comma separated. Use this for the 16 duplicate colour groups, or for the top pages by GSC impressions.</div>
+        <textarea id="mf-handles" class="field-input" rows="3" placeholder="wren-dress-sky, wren-dress-butter, wren-dress-blush-pink" style="width:100%;margin-bottom:12px;font-family:var(--mono,monospace);font-size:12px;"></textarea>
+        <div id="mf-status" class="status"></div>
+        <div id="mf-out" style="padding-bottom:24px;"></div>
       </div>
     </div>
     <div id="scgtab-archive" style="display:none;">
@@ -1217,7 +1266,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 88</strong> &#183; 2026-08-02 &#183; needs Worker v80</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 91</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: money fields accept &#36;/commas (blank-looking Retail no longer blocks Review &amp; publish), missing boxes underline red, manual-row labels match the rest of the form, Pull is neutral not green, and a Clear &amp; start over button. Carries forward build 90 (Meta Fill tab; needs Worker v81)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1539,7 +1588,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 88;   // keep in step with the footer stamp
+var APP_BUILD = 91;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4106,15 +4155,16 @@ function _manRunForCategory(cat){
 // build 88 — Category now drives BOTH the one-size flip and the size run, so a
 // manually entered shoe gets 5-11 and a manually entered pair of jeans 24-31
 // instead of everything being forced into XS-XL.
-function manTypeChanged(inp){
-  var row = inp.closest('.man-row'); if (!row) return;
-  var cat = String(inp.value || '').trim();
-  var run = _manRunForCategory(cat);
-  if (run === 'OS') { setRowSizing(row, 'os'); row.dataset.run = 'OS'; manualFormChanged(); return; }
+// build 89 — swap a row to a size run, keeping any quantity already typed for a
+// size that exists in both runs (S stays S when you flip Skirts alpha->waist).
+function _manApplyRun(row, run){
+  if (!row) return;
+  var sel = row.querySelector('.man-run');
+  if (sel && sel.value !== run) sel.value = run;
+  if (run === 'OS') { setRowSizing(row, 'os'); row.dataset.run = 'OS'; return; }
 
   var box = row.querySelector('.man-qty-sized');
   if (box && row.dataset.run !== run) {
-    // keep whatever was typed for sizes that exist in both runs
     var keep = {};
     box.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){
       var m = /man-sz-([^\s]+)/.exec(i.className); if (m) keep[m[1]] = i.value;
@@ -4129,6 +4179,20 @@ function manTypeChanged(inp){
     row.dataset.run = run;
   }
   setRowSizing(row, 'sized');
+}
+
+// Category sets the DEFAULT run — but never overrides a run you chose yourself.
+function manTypeChanged(inp){
+  var row = inp.closest('.man-row'); if (!row) return;
+  if (row.dataset.runTouched !== '1') _manApplyRun(row, _manRunForCategory(String(inp.value || '').trim()));
+  manualFormChanged();
+}
+
+// build 89 — explicit run choice. Sticks, so a later Category edit leaves it.
+function manRunChanged(sel){
+  var row = sel.closest('.man-row'); if (!row) return;
+  row.dataset.runTouched = '1';
+  _manApplyRun(row, sel.value);
   manualFormChanged();
 }
 // build 88 — read the quantities off whatever run the row is showing.
@@ -4236,25 +4300,68 @@ function manualOpen(){
 /* build 35 — one visible action at a time, and the app SAYS what's missing.
    Review & publish appears when the vendor is set and a row is complete
    (name + retail price + qty). Cost is optional — margin tracking only. */
+/* build 91 — money fields get typed by hand on a phone, so "$24.99", "24,99"
+   and " 24.99 " all have to mean 24.99. They used to be <input type="number">,
+   which silently reports an EMPTY value for any of those — the row looked
+   filled while validation kept saying "Still needed: retail price". The inputs
+   are now decimal text and every reader goes through this one parser. */
+function _manMoney(v){
+  var s = String(v == null ? '' : v).trim().replace(/[^0-9.,\-]/g, '');
+  // a lone comma with 1-2 trailing digits is a decimal comma (24,99); anything
+  // else is a thousands separator (1,299 must NOT become 1.30)
+  if (s.indexOf('.') === -1 && /^-?\d{1,3},\d{1,2}$/.test(s)) s = s.replace(',', '.');
+  s = s.replace(/,/g, '');                                                      // 1,299.00 -> 1299.00
+  var n = parseFloat(s);
+  return isFinite(n) ? n : NaN;
+}
+// build 91 — flag/unflag a required box so "Still needed" points at something
+// visible instead of leaving him hunting for the empty field.
+function _manFlag(node, needsIt){
+  if (!node) return;
+  if (needsIt) node.classList.add('man-need'); else node.classList.remove('man-need');
+}
+
 function manualFormChanged(){
   var btn = el('man-start-btn');
   if (!btn) return;
   var missing = [];
-  if (!el('man-vendor').value.trim()) missing.push('vendor name');
+  var vendEl = el('man-vendor');
+  var vendEmpty = !vendEl.value.trim();
+  if (vendEmpty) missing.push('vendor name');
+  _manFlag(vendEl, vendEmpty);
   var rows = el('man-rows').querySelectorAll('.man-row');
+  // build 91 — don't paint a brand-new empty form red. The boxes only light up
+  // once he has actually started typing something into the sheet.
+  var started = !vendEmpty;
+  Array.prototype.forEach.call(rows, function(row){
+    if (started) return;
+    ['.man-name','.man-color','.man-retail','.man-cost','.man-upc'].forEach(function(sel){
+      var e = row.querySelector(sel); if (e && String(e.value).trim()) started = true;
+    });
+    var z = _manRowSizes(row);
+    if (Object.keys(z).some(function(k){ return z[k] > 0; })) started = true;
+  });
+  if (!started) _manFlag(vendEl, false);
   var rowOk = false, rowNeed = null;
   Array.prototype.forEach.call(rows, function(row){
-    if (rowOk) return;
     var need = [];
-    if (!row.querySelector('.man-name').value.trim()) need.push('style name');
-    if (!(parseFloat(row.querySelector('.man-retail').value) > 0)) need.push('retail price');
+    var nameEl   = row.querySelector('.man-name');
+    var retailEl = row.querySelector('.man-retail');
+    var nameBad   = !nameEl.value.trim();
+    var retailBad = !(_manMoney(retailEl.value) > 0);
+    if (nameBad)   need.push('style name');
+    if (retailBad) need.push('retail price');
     var _sz = _manRowSizes(row);   // build 88 — whatever run this row is showing
     var qty = Object.keys(_sz).reduce(function(t,k){ return t + (_sz[k]||0); }, 0);
-    if (!(qty > 0)) {
-      var _sizedEl = row.querySelector('.man-qty-sized');
-      var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
-      need.push(_sizedOn ? 'a size quantity (XS\u2013L)' : 'a quantity');
-    }
+    var _sizedEl = row.querySelector('.man-qty-sized');
+    var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
+    var qtyBad = !(qty > 0);
+    if (qtyBad) need.push(_sizedOn ? 'a size quantity' : 'a quantity');
+    // build 91 — mark the exact boxes still blank
+    _manFlag(nameEl, started && nameBad);
+    _manFlag(retailEl, started && retailBad);
+    var _qtyBox = _sizedOn ? _sizedEl : row.querySelector('.man-qty-os');
+    if (_qtyBox) _qtyBox.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){ _manFlag(i, started && qtyBad); });
     if (!need.length) { rowOk = true; }
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
   });
@@ -4277,11 +4384,15 @@ function manualFormChanged(){
   var hint = el('man-next');
   if (hint) {
     hint.style.display = 'block';
-    if (ok) { hint.innerHTML = '&#10003; Ready &#8212; tap Review &amp; publish.'; hint.style.color = 'var(--success-fg)'; }
+    if (ok) { hint.classList.remove('man-next-need'); hint.innerHTML = '&#10003; Ready &#8212; tap Review &amp; publish.'; hint.style.color = 'var(--success-fg)'; }
     else {
+      // build 91 — red, and the matching boxes are outlined red too, so a
+      // blank Retail price can't read as a filled one.
       var need = missing.concat(rowOk ? [] : (rowNeed || []));
-      hint.innerHTML = '<strong>Still needed:</strong> ' + need.join(' &#183; ');
-      hint.style.color = 'var(--gray-text)';
+      hint.classList.add('man-next-need');
+      hint.innerHTML = '<strong>Still needed:</strong> ' + need.join(' &#183; ') +
+                       (started ? ' <span style="font-weight:400;">&#8212; the red-underlined boxes below</span>' : '');
+      hint.style.color = '';
     }
   }
   // build 63 — the button is ALWAYS visible (dimmed until ready) so there is
@@ -4335,9 +4446,18 @@ function manualAddRow(){
         _CATEGORY_LABELS.map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('') +
       '</select></div>' +
     '</div>' +
+    // build 89 — skirts and skorts ship alpha OR waist depending on the vendor,
+    // so Category cannot decide the run for them. The run is its own control:
+    // Category sets the default, this overrides it, and touching it sticks.
+    '<div style="display:flex;gap:8px;margin-top:6px;">' +
+      '<div style="flex:1;"><label class="sp-l">Size run</label><select class="field-input man-run" onchange="manRunChanged(this)">' +
+        SIZE_RUN_ORDER.map(function(k){ return '<option value="'+k+'">'+esc(SIZE_RUNS[k].label)+'</option>'; }).join('') +
+      '</select></div>' +
+      '<div style="flex:1;"></div>' +
+    '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
       '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
-      '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="number" step="0.01" class="field-input man-retail"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-retail" onblur="manMoneyBlur(this)"/></div>' +
     '</div>' +
     // build 63 — sizing is Type-driven, no toggle buttons. Rows default to
     // Sized XS–L (apparel); choosing Type "Accessory" flips the row to a single
@@ -4351,7 +4471,7 @@ function manualAddRow(){
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
-      '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="number" step="0.01" class="field-input man-cost"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-cost" onblur="manMoneyBlur(this)"/></div>' +
     '</div>' +
     // build 39 — real UPCs ride through to Shopify (fixes GSC "Invalid GTIN")
     '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
@@ -4387,10 +4507,12 @@ function manualStart(){
   Array.prototype.forEach.call(rows, function(row, i){
     var name = row.querySelector('.man-name').value.trim();
     var type = row.querySelector('.man-type').value;
-    var _rowRun = row.dataset.run || _manRunForCategory(type);   // build 88
+    // build 89 — the run control wins; dataset.run is what is actually rendered
+    var _runSel = row.querySelector('.man-run');
+    var _rowRun = (_runSel && _runSel.value) || row.dataset.run || _manRunForCategory(type);
     var color = row.querySelector('.man-color').value.trim() || 'Default';
-    var retail = parseFloat(row.querySelector('.man-retail').value);
-    var cost = parseFloat(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
+    var retail = _manMoney(row.querySelector('.man-retail').value);            // build 91 — tolerant parse
+    var cost = _manMoney(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
     // build 88 — read the row's own run instead of a fixed list
     var _rowSizes = _manRowSizes(row);
@@ -4459,6 +4581,46 @@ function resetManualPane() {
   el('man-next').style.display = 'none';
   Object.keys(_manImages).forEach(function(k){ if (k.indexOf('C-') !== 0) delete _manImages[k]; });
   _manPullN = 0;
+  var _vf = el('man-vendor'); if (_vf) _vf.classList.remove('man-need');   // build 91
+  var _mn = el('man-next'); if (_mn) _mn.classList.remove('man-next-need');
+}
+
+/* build 91 — tidy a money box when you leave it: "$24" and "24," both settle
+   to 24.00, and anything unparseable is cleared rather than left looking
+   filled while the parser reads it as empty. */
+function manMoneyBlur(inp){
+  if (!inp) return;
+  var raw = String(inp.value || '').trim();
+  if (!raw) { inp.value = ''; manualFormChanged(); return; }
+  var n = _manMoney(raw);
+  inp.value = isFinite(n) ? n.toFixed(2) : '';
+  manualFormChanged();
+}
+
+/* build 91 — CLEAR & START OVER. Backing out of the tab was the only way to
+   abandon a half-typed sheet. Two taps so a stray press can never wipe real
+   work; the second tap has 5 seconds before the button goes back to normal. */
+var _manClearArm = null;
+function manualClearAll(btn){
+  if (!btn) return;
+  if (!_manClearArm) {
+    _manClearArm = setTimeout(function(){
+      _manClearArm = null;
+      btn.textContent = 'Clear & start over';
+      btn.style.borderColor = ''; btn.style.color = '';
+    }, 5000);
+    btn.textContent = 'Tap again to clear everything';
+    btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)';
+    return;
+  }
+  clearTimeout(_manClearArm); _manClearArm = null;
+  btn.textContent = 'Clear & start over';
+  btn.style.borderColor = ''; btn.style.color = '';
+  resetManualPane();
+  manualAddRow();          // never leave the pane with no row to type into
+  manualFormChanged();
+  el('kel-manual').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (typeof toast === 'function') toast('Manual entry cleared');
 }
 
 function loadSampleInvoice() {
@@ -7159,12 +7321,128 @@ var scgVals = {};
 var scgProgT = null, scgProgStart = 0;
 function scgInit(){ scgTab('generate'); }
 function scgTab(t){
-  ['generate','archive','products'].forEach(function(k){
+  ['generate','archive','products','metafill'].forEach(function(k){
     el('scgtab-'+k).style.display = t===k ? 'block' : 'none';
     el('scgtab-btn-'+k).className = 'tab-btn' + (t===k ? ' active' : '');
   });
   if (t==='archive') scgLoadArchive();
   if (t==='products') scgLoadProducts();
+}
+
+/* ── v81 META FILL ─────────────────────────────────────────────
+   Three explicit steps, in this order, because each one answers a question the
+   next one depends on: how many are there, what would it say, write it.
+
+   There is no "run it all" button and that is deliberate. The catalogue moved
+   27% in four days; a single unattended pass over 142 products would write copy
+   nobody read against a denominator nobody re-checked. Batches of 10 with the
+   proposed lines on screen is slower and it is the version you can defend.
+
+   The Write button stays disabled until a preview has actually returned rows,
+   so it is never possible to write a batch sight unseen. */
+var mfLast = null;
+
+function mfHandles(){
+  var raw = (el('mf-handles') && el('mf-handles').value) || '';
+  var arr = raw.split(/[\s,]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+  return arr.length ? arr : undefined;
+}
+function mfBody(extra){
+  var b = { include: el('mf-include').value, limit: parseInt(el('mf-limit').value,10) || 10 };
+  var h = mfHandles(); if (h) b.handles = h;
+  if (b.include !== 'missing') b.overwrite = true;
+  for (var k in (extra||{})) b[k] = extra[k];
+  return b;
+}
+function mfBusy(on, msg){
+  el('mf-status').innerHTML = on ? '<span class="spinner"></span> ' + esc(msg||'Working…') : '';
+  ['mf-write-btn'].forEach(function(id){ if (el(id)) el(id).disabled = on || !mfLast; });
+}
+
+function mfCount(){
+  mfBusy(true,'Counting the catalogue from the SEO description field…');
+  el('mf-out').innerHTML = '';
+  api('seo_meta_fill', { count_only: true, include: el('mf-include').value }).then(function(r){
+    mfBusy(false);
+    if (!r || r.ok === false) { el('mf-status').innerHTML = '<span style="color:#b00">' + esc((r&&r.error)||'Count failed') + '</span>'; return; }
+    var c = r.census || {};
+    var rows = [
+      ['No meta description at all', c.missing||0],
+      ['Copied from the body copy (field blank)', c.copied||0],
+      ['Over 160 characters', c.toolong||0],
+      ['Spec dump (fabric percentages)', c.specdump||0],
+      ['Clean', c.clean||0]
+    ];
+    el('mf-out').innerHTML =
+      '<div class="edit-posts-note" style="margin-top:12px;"><strong>Denominator: ' + r.denominator + ' published products, read ' + esc(r.denominator_dated) + '.</strong> ' +
+      'Counted from the Shopify SEO description field, not from the rendered page. Any coverage percentage you quote from this carries that date.' +
+      (r.truncated ? ' <span style="color:#b00">INCOMPLETE &#8212; hit the 3000-product ceiling.</span>' : '') + '</div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;">' +
+      rows.map(function(x){ return '<tr><td style="padding:7px 6px;border-bottom:1px solid var(--border,#eee);">' + esc(x[0]) + '</td>' +
+        '<td style="padding:7px 6px;border-bottom:1px solid var(--border,#eee);text-align:right;font-weight:600;">' + x[1] + '</td></tr>'; }).join('') +
+      '</table>' +
+      '<div style="margin-top:10px;font-size:13px;"><strong>' + r.eligible_for_this_include + '</strong> eligible under the scope selected.</div>';
+  }).catch(function(e){ mfBusy(false); el('mf-status').innerHTML = '<span style="color:#b00">' + esc(e.message) + '</span>'; });
+}
+
+function mfPreview(){
+  mfLast = null;
+  mfBusy(true,'Writing proposals — nothing is being saved…');
+  el('mf-out').innerHTML = '';
+  api('seo_meta_fill', mfBody({ dry_run: true })).then(function(r){
+    if (!r || r.ok === false) { mfBusy(false); el('mf-status').innerHTML = '<span style="color:#b00">' + esc((r&&r.error)||'Preview failed') + '</span>'; return; }
+    mfLast = r; mfBusy(false);
+    mfRender(r, false);
+    if (el('mf-write-btn')) el('mf-write-btn').disabled = !(r.results||[]).some(function(x){ return x.ok; });
+  }).catch(function(e){ mfBusy(false); el('mf-status').innerHTML = '<span style="color:#b00">' + esc(e.message) + '</span>'; });
+}
+
+function mfWrite(){
+  if (!mfLast) return;
+  var approved = (mfLast.results||[]).filter(function(x,i){
+    var cb = el('mf-cb-' + i); return x.ok && cb && cb.checked;
+  }).map(function(x){ return x.handle; });
+  if (!approved.length) { el('mf-status').innerHTML = '<span style="color:#b00">Nothing ticked. Tick the lines you want written.</span>'; return; }
+  if (!confirm('Write ' + approved.length + ' meta description(s) to Shopify? This changes the SEO description field only.')) return;
+  mfBusy(true,'Writing ' + approved.length + ' to Shopify…');
+  /* Re-generates for the approved handles rather than posting the previewed text
+     back. Slightly more expensive, and it means the copy that lands has passed
+     the seoMetaVerdict gate on the server at write time instead of trusting a
+     string that made a round trip through the browser. */
+  api('seo_meta_fill', mfBody({ apply: true, handles: approved, limit: approved.length })).then(function(r){
+    mfBusy(false);
+    if (!r || r.ok === false) { el('mf-status').innerHTML = '<span style="color:#b00">' + esc((r&&r.error)||'Write failed') + '</span>'; return; }
+    mfLast = null;
+    if (el('mf-write-btn')) el('mf-write-btn').disabled = true;
+    mfRender(r, true);
+  }).catch(function(e){ mfBusy(false); el('mf-status').innerHTML = '<span style="color:#b00">' + esc(e.message) + '</span>'; });
+}
+
+function mfRender(r, wrote){
+  var rows = r.results || [];
+  var head = '<div class="edit-posts-note" style="margin-top:12px;">' +
+    (wrote ? '<strong>Wrote ' + r.written + '.</strong> ' : '<strong>Preview only &#8212; nothing written.</strong> ') +
+    'Scope <code>' + esc(r.include) + '</code> &#183; batch ' + r.batch_size + ' of ' + r.eligible_total + ' eligible &#183; ' +
+    r.remaining_after_this_batch + ' left after this &#183; denominator ' + r.denominator + ' (' + esc(r.denominator_dated) + ')' +
+    (r.rejected ? ' &#183; <span style="color:#b00">' + r.rejected + ' rejected by the quality gate</span>' : '') +
+    (r.errors ? ' &#183; <span style="color:#b00">' + r.errors + ' error(s)</span>' : '') +
+    '</div>';
+  var body = rows.map(function(x, i){
+    var badge = x.written ? '<span style="color:#0a0;font-weight:600;">WRITTEN</span>'
+              : x.ok      ? '<span style="color:#0a0;">passes gate</span>'
+              :             '<span style="color:#b00;">' + esc(x.note || 'rejected') + '</span>';
+    return '<div style="border:1px solid var(--border,#e4e0da);border-radius:8px;padding:10px 12px;margin-bottom:8px;">' +
+      '<div style="display:flex;gap:8px;align-items:flex-start;">' +
+        (wrote || !x.ok ? '' : '<input type="checkbox" id="mf-cb-' + i + '" checked style="margin-top:3px;">') +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:600;font-size:13px;">' + esc(x.title) + '</div>' +
+          '<div style="font-family:var(--mono,monospace);font-size:11px;color:var(--gray-text,#777);">' + esc(x.handle) + ' &#183; flagged: ' + esc(x.reason) + ' &#183; ' + badge + '</div>' +
+          (x.old ? '<div style="font-size:12px;color:#999;margin-top:6px;"><em>was (' + x.old_chars + ' chars):</em> ' + esc(x.old.slice(0,180)) + (x.old.length>180?'…':'') + '</div>' : '<div style="font-size:12px;color:#999;margin-top:6px;"><em>was: blank &#8212; Shopify was auto-deriving from the body copy</em></div>') +
+          '<div style="font-size:13px;margin-top:6px;">' + esc(x.proposed || '—') + ' <span style="color:var(--gray-text,#777);">(' + x.chars + ' chars)</span></div>' +
+        '</div>' +
+      '</div></div>';
+  }).join('');
+  el('mf-out').innerHTML = head + (body || '<div class="fc-empty">Nothing eligible under this scope.</div>');
 }
 /* HONEST NOTE: this progress bar is a TIMED ESTIMATE, not real server progress.
    The Worker call is a single request/response, so nothing streams back to
