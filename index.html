@@ -59,7 +59,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .btn[disabled]{opacity:.35;cursor:not-allowed;}
 .btn-black{background:var(--primary);color:#fff;margin-top:0;}
 .btn-primary{background:var(--primary);color:#fff;margin-top:0;}
-/* build 91 — Pull was the only green button in the app, so it read as the
+/* build 92 — Pull was the only green button in the app, so it read as the
    primary action even though it fails whenever a vendor page is unavailable.
    Now on the same neutral scale as every other secondary button. */
 .btn-pull{background:transparent;color:var(--black);margin-top:0;border:1px solid var(--gray-mid);border-radius:8px;font-weight:600;box-shadow:none;}
@@ -79,18 +79,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 .field-hint{font-size:11px;color:var(--gray-text);margin-top:3px;line-height:1.4;}
 select.field-input{-webkit-appearance:none;border-radius:0;background:transparent;}
 
-/* build 91 — MANUAL ENTRY typography. The rows label with .sp-l, which only
+/* build 92 — MANUAL ENTRY typography. The rows label with .sp-l, which only
    had styling scoped to .arch-f / .p-run-row / .inv-vendor-edit, so inside the
    manual pane every label fell back to plain body text: big, black, and
    heavier than the real field labels above it. Match .field-label exactly so
    the whole pane reads as one form. */
 #kel-manual .sp-l{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-text);margin:0 0 4px;display:block;line-height:1.3;}
 #kel-manual .field-input{font-size:14px;padding:8px 0;}
-#kel-manual .man-row .field-input{font-size:14px;}
-/* build 91 — a required box that is still empty gets a red rule, so "Still
+/* build 92 — a required box that is still empty gets a red rule, so "Still
    needed: retail price" points at something you can actually see. */
 #kel-manual .field-input.man-need{border-bottom-color:var(--red);}
-#kel-manual .man-need-note{color:var(--red);}
 #man-next.man-next-need{color:var(--red);font-weight:600;}
 
 /* TOGGLE */
@@ -268,6 +266,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-card-head{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;background:var(--gray-light);border-bottom:1px solid var(--gray-mid);}
 .sp-card-info{flex:1;min-width:0;}
 .sp-card-title{font-size:14px;font-weight:600;line-height:1.2;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+/* v83 — researched keywords used on a review card. */
+.sp-kwused{font-size:11px;line-height:1.6;margin:8px 0 2px;color:var(--gray-text,#777)}
+.sp-kwused .kw{display:inline-block;border:1px solid #d8d8d8;border-radius:3px;padding:1px 6px;margin:0 4px 3px 0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#333;background:#fafafa;white-space:nowrap}
+.sp-kwused .kw.brand{border-style:dashed}
+.sp-kwused .kwlabel{text-transform:uppercase;letter-spacing:.06em;font-size:9px;margin-right:4px}
+.sp-kwused .kwnone{font-style:italic}
+
 /* v72 — pencil-to-edit on the PRODUCT title (not the SEO title). */
 .sp-title-edit{border:none;background:none;cursor:pointer;color:var(--gray-text);font-size:13px;line-height:1;padding:2px 4px;border-radius:3px;}
 .sp-title-edit:hover{background:var(--gray-mid);color:var(--black);}
@@ -780,7 +786,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div id="man-rows"></div>
           <div id="man-next" style="font-size:12px;color:var(--gray-text);margin-top:12px;display:none;"></div>
           <button class="btn btn-black" id="man-start-btn" style="margin-top:10px;opacity:0.4;cursor:not-allowed;" disabled onclick="manualStart()">Review &amp; publish &#8594;</button>
-          <!-- build 91 — a way out. Backing out of the whole tab was the only
+          <!-- build 92 — a way out. Backing out of the whole tab was the only
                way to start over; this empties the pane and leaves one clean row. -->
           <button class="btn btn-outline" id="man-reset-btn" style="margin-top:8px;font-size:11px;" onclick="manualClearAll(this)">Clear &amp; start over</button>
           <div id="man-status" class="status"></div>
@@ -1264,9 +1270,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 91</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: money fields accept &#36;/commas (blank-looking Retail no longer blocks Review &amp; publish), missing boxes underline red, manual-row labels match the rest of the form, Pull is neutral not green, and a Clear &amp; start over button. Carries forward build 90 (Meta Fill tab; needs Worker v81)</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1588,7 +1595,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 91;   // keep in step with the footer stamp
+var APP_BUILD = 92;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4300,7 +4307,7 @@ function manualOpen(){
 /* build 35 — one visible action at a time, and the app SAYS what's missing.
    Review & publish appears when the vendor is set and a row is complete
    (name + retail price + qty). Cost is optional — margin tracking only. */
-/* build 91 — money fields get typed by hand on a phone, so "$24.99", "24,99"
+/* build 92 — money fields get typed by hand on a phone, so "$24.99", "24,99"
    and " 24.99 " all have to mean 24.99. They used to be <input type="number">,
    which silently reports an EMPTY value for any of those — the row looked
    filled while validation kept saying "Still needed: retail price". The inputs
@@ -4314,7 +4321,7 @@ function _manMoney(v){
   var n = parseFloat(s);
   return isFinite(n) ? n : NaN;
 }
-// build 91 — flag/unflag a required box so "Still needed" points at something
+// build 92 — flag/unflag a required box so "Still needed" points at something
 // visible instead of leaving him hunting for the empty field.
 function _manFlag(node, needsIt){
   if (!node) return;
@@ -4330,7 +4337,7 @@ function manualFormChanged(){
   if (vendEmpty) missing.push('vendor name');
   _manFlag(vendEl, vendEmpty);
   var rows = el('man-rows').querySelectorAll('.man-row');
-  // build 91 — don't paint a brand-new empty form red. The boxes only light up
+  // build 92 — don't paint a brand-new empty form red. The boxes only light up
   // once he has actually started typing something into the sheet.
   var started = !vendEmpty;
   Array.prototype.forEach.call(rows, function(row){
@@ -4357,7 +4364,7 @@ function manualFormChanged(){
     var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
     var qtyBad = !(qty > 0);
     if (qtyBad) need.push(_sizedOn ? 'a size quantity' : 'a quantity');
-    // build 91 — mark the exact boxes still blank
+    // build 92 — mark the exact boxes still blank
     _manFlag(nameEl, started && nameBad);
     _manFlag(retailEl, started && retailBad);
     var _qtyBox = _sizedOn ? _sizedEl : row.querySelector('.man-qty-os');
@@ -4386,7 +4393,7 @@ function manualFormChanged(){
     hint.style.display = 'block';
     if (ok) { hint.classList.remove('man-next-need'); hint.innerHTML = '&#10003; Ready &#8212; tap Review &amp; publish.'; hint.style.color = 'var(--success-fg)'; }
     else {
-      // build 91 — red, and the matching boxes are outlined red too, so a
+      // build 92 — red, and the matching boxes are outlined red too, so a
       // blank Retail price can't read as a filled one.
       var need = missing.concat(rowOk ? [] : (rowNeed || []));
       hint.classList.add('man-next-need');
@@ -4511,7 +4518,7 @@ function manualStart(){
     var _runSel = row.querySelector('.man-run');
     var _rowRun = (_runSel && _runSel.value) || row.dataset.run || _manRunForCategory(type);
     var color = row.querySelector('.man-color').value.trim() || 'Default';
-    var retail = _manMoney(row.querySelector('.man-retail').value);            // build 91 — tolerant parse
+    var retail = _manMoney(row.querySelector('.man-retail').value);            // build 92 — tolerant parse
     var cost = _manMoney(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
     // build 88 — read the row's own run instead of a fixed list
@@ -4581,11 +4588,11 @@ function resetManualPane() {
   el('man-next').style.display = 'none';
   Object.keys(_manImages).forEach(function(k){ if (k.indexOf('C-') !== 0) delete _manImages[k]; });
   _manPullN = 0;
-  var _vf = el('man-vendor'); if (_vf) _vf.classList.remove('man-need');   // build 91
+  var _vf = el('man-vendor'); if (_vf) _vf.classList.remove('man-need');   // build 92
   var _mn = el('man-next'); if (_mn) _mn.classList.remove('man-next-need');
 }
 
-/* build 91 — tidy a money box when you leave it: "$24" and "24," both settle
+/* build 92 — tidy a money box when you leave it: "$24" and "24," both settle
    to 24.00, and anything unparseable is cleared rather than left looking
    filled while the parser reads it as empty. */
 function manMoneyBlur(inp){
@@ -4597,7 +4604,7 @@ function manMoneyBlur(inp){
   manualFormChanged();
 }
 
-/* build 91 — CLEAR & START OVER. Backing out of the tab was the only way to
+/* build 92 — CLEAR & START OVER. Backing out of the tab was the only way to
    abandon a half-typed sheet. Two taps so a stray press can never wipe real
    work; the second tap has 5 seconds before the button goes back to normal. */
 var _manClearArm = null;
@@ -6473,8 +6480,11 @@ function _spInitDetails(cd){
       '</div>' +
     '</div>' +
     '<div class="sp-images"></div>' +
-    '<label class="sp-l">SEO title</label><input class="sp-seo-title" maxlength="60"/>' +
-    '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="165"></textarea>' +
+    // v83 — which researched phrases fed this copy. Says so plainly when the
+    // category has none, rather than leaving you to guess whether it worked.
+    '<div class="sp-kwused"></div>' +
+    '<label class="sp-l">SEO title</label><input class="sp-seo-title" maxlength="70"/>' +
+    '<label class="sp-l">Search description</label><textarea class="sp-seo-desc" rows="2" maxlength="160"></textarea>' +
     '<label class="sp-l">Product description</label><textarea class="sp-seo-body" rows="3"></textarea>' +
     '<div style="display:flex;gap:8px;">' +
       // build 76 \u2014 ONE field. Options come from the store's own Shopify types at
@@ -6483,7 +6493,7 @@ function _spInitDetails(cd){
     '</div>' +
     '<div class="sp-type-note"></div>' +
     '<div style="display:flex;gap:8px;">' +
-      '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="110"/></div>' +
+      '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="125"/></div>' +
     '</div>' +
     // v59 — editable Tags (color, type, brand, fabric auto-added by the worker;
     // this field carries the style name + AI feature tags like "lace"). Comma-separated.
@@ -6496,6 +6506,7 @@ function _spInitDetails(cd){
     vsiteInput: wrap.querySelector('.sp-vsite-input'),
     vsiteSave: wrap.querySelector('.sp-vsite-save'),
     images: wrap.querySelector('.sp-images'),
+    kwused: wrap.querySelector('.sp-kwused'),
     title: wrap.querySelector('.sp-seo-title'),
     desc: wrap.querySelector('.sp-seo-desc'),
     bodyd: wrap.querySelector('.sp-seo-body'),
@@ -6569,6 +6580,28 @@ function _spSeoPump(){
   _spSeoRunning = true;
   _spGenSeo(cd, function(){ _spSeoRunning = false; setTimeout(_spSeoPump, 150); });
 }
+// v83 — one small renderer, no dependencies. Silent when there is nothing to
+// say, explicit when a category simply has no researched terms yet.
+function _spShowKeywords(cd, reg){
+  var el = cd && cd.els && cd.els.kwused;
+  if (!el) return;
+  if (!reg) { el.innerHTML = ''; return; }
+  var cats = reg.category_terms || [], brands = reg.brand_terms || [];
+  if (!cats.length && !brands.length){
+    el.innerHTML = '<span class="kwnone">' + esc(reg.note || 'No researched keywords for this category yet.') + '</span>';
+    return;
+  }
+  var chip = function(r, cls){
+    return '<span class="kw' + (cls ? ' ' + cls : '') + '" title="'
+      + esc(r.volume_band + ' searches/mo band' + (r.serp_verified ? ' — SERP verified' : ''))
+      + '">' + esc(r.keyword) + '</span>';
+  };
+  var h = '<span class="kwlabel">researched words used</span>';
+  if (cats.length)   h += cats.map(function(r){ return chip(r); }).join('');
+  if (brands.length) h += '<br><span class="kwlabel">brand</span>' + brands.map(function(r){ return chip(r, 'brand'); }).join('');
+  el.innerHTML = h;
+}
+
 function _spGenSeo(cd, done){
   if (!cd.els) { if (done) done(); return; }
   // build 86 — the userEdited guard used to sit AFTER the API call, so every
@@ -6580,6 +6613,9 @@ function _spGenSeo(cd, done){
     title: cd.style.name || cd.style.code,
     brand: vendor,
     type: cd.style.type || '',
+    // v83 — if the staff has already set the Category dropdown, that beats the
+    // invoice's garment type for looking up researched vocabulary.
+    category: (cd.els && cd.els.cat && cd.els.cat.value) || '',
     colors: [cd.colorObj.color],
     fabric: cd.fabric || cd.style.fabric || undefined,
     fit: cd.fit || cd.style.fit || undefined,
@@ -6590,6 +6626,12 @@ function _spGenSeo(cd, done){
     var t = String(res.text || '').trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
     var j = JSON.parse(t);
     cd.els.title.placeholder = '';
+    // v83 — show the researched vocabulary the Worker handed to the writer.
+    // These are real Google Keyword Planner phrases for this garment category
+    // and this brand, out of the Keywords tab in the Command Center. They are
+    // here to make the listing speak the language shoppers type; a product page
+    // is not a ranking target and this does not pretend otherwise.
+    _spShowKeywords(cd, res.registry);
     if (cd.userEdited) { if (done) done(); return; }
     cd.els.title.value = j.seo_title || '';
     cd.els.desc.value  = j.seo_description || '';
