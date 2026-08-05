@@ -627,6 +627,25 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--gray-mid);background:#fff;padding:4px;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;}
 .sp-cand img{width:48px;height:64px;object-fit:cover;}
 
+/* build 95 — CORRECT THE PRODUCT LINK.
+   Photos come from ONE vendor page. If that page was the wrong item there was
+   no way to say so: the review card only offered a name search, and Manual
+   Entry never showed what it pulled. Both do now. */
+.sp-purl{margin-top:6px;}
+.sp-purl-toggle{background:none;border:none;padding:2px 0;margin:0;color:var(--gray-text);font-family:'DM Sans',sans-serif;font-size:12px;text-decoration:underline;cursor:pointer;}
+.sp-purl-toggle:hover{color:var(--primary);}
+.sp-purl-hint{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;}
+.sp-purl-src{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;word-break:break-all;}
+.sp-purl-src a{color:var(--gray-text);}
+.man-pulled{border:1px solid var(--gray-mid);background:var(--gray-light);padding:8px;margin-bottom:8px;}
+.man-pulled .mp-head{font-size:11px;color:var(--gray-text);line-height:1.4;font-family:'DM Sans',sans-serif;margin-bottom:6px;word-break:break-all;}
+.man-pulled .mp-head a{color:var(--gray-text);}
+.man-pulled .mp-strip{display:flex;flex-wrap:wrap;gap:4px;}
+.man-pulled .mp-strip img{width:46px;height:62px;object-fit:cover;border:1px solid var(--gray-mid);background:#fff;}
+.man-pulled .mp-fix{margin-top:7px;}
+.man-pulled .mp-fix .field-input{font-size:13px;padding:7px 8px;}
+.man-pulled .mp-status{font-size:11px;margin-top:5px;line-height:1.4;font-family:'DM Sans',sans-serif;color:var(--gray-text);}
+
 /* v2 — name pick-list under the pricing card header */
 .name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
 .nc-loading,.nc-empty{font-size:12px;color:var(--gray-text);padding:4px 0;line-height:1.4;}
@@ -774,7 +793,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="loadSampleInvoice()" style="margin-top:8px;font-size:12px;">Load Sample Invoice (No API Cost)</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail) &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
+          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail), then <strong>check the photos that appear on the row</strong> &#8212; wrong item? paste the correct URL in the Re-pull box right there &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -1270,12 +1289,13 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 94</strong> &#183; 2026-08-05 &#183; The blog draft now names the researched keyword phrases that fed the post, the way the product review card already did &#8212; live testing proved the words were reaching the blog writer but there was no way to see it, which was the whole point of showing them; needs Worker v86, and says so plainly on an older one; carries build 93
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 93</strong> &#183; 2026-08-05 &#183; Create Blog now gets the researched keyword vocabulary too, matched on the post topic and the featured brand (needs Worker v85, which also fixes a category roll-up: a Tank Top asked for &quot;Tank Tops&quot; vocabulary and found none because the registry files terms under Tops); the blog meta counters stopped fighting the rules file &#8212; the title counter read 62 / 60 in red on a title the standard allows to 70, and both counters now count characters the way the validator does rather than UTF-16 units; carries build 92
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 94</strong> &#183; 2026-08-05 &#183; The blog draft now names the researched keyword phrases that fed the post, the way the product review card already did &#8212; live testing proved the words were reaching the blog writer but there was no way to see it, which was the whole point of showing them; needs Worker v86, and says so plainly on an older one; carries build 93</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 95</strong> &#183; 2026-08-05 &#183; A wrong product link is fixable now. Manual Entry shows the photos it pulled right on the row, names the page they came from, and carries a Re-pull box to swap in the correct URL &#8212; the photos used to stay invisible until the review screen, which is where the wrong item was being found. The review card gains a &quot;Wrong photos? Paste the exact product page URL&quot; box that replaces the whole photo set, fabric and fit from that page, keeping your category, tags and edited copy. A vendor page whose brand field is a style code (Z031023) no longer lands in Vendor. No Worker change &#8212; runs on v86+; carries build 94</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -4238,7 +4258,11 @@ function manualPull(){
   .then(function(res){
     if (res.error) throw new Error(res.error);
     el('man-status').style.display='none';
-    if (res.vendor && !el('man-vendor').value.trim()) el('man-vendor').value = res.vendor;
+    // build 95 — a vendor's own Shopify "vendor" field is sometimes their
+    // internal style code ("Z031023"), and that code was landing in the Vendor
+    // box, then on the Shopify product, then on the review card's button. A
+    // brand name has a space or has no digits; a code has digits and no space.
+    if (res.vendor && !el('man-vendor').value.trim() && !_manLooksLikeCode(res.vendor)) el('man-vendor').value = res.vendor;
     var colors = (res.colors && res.colors.length) ? res.colors : [''];
     // One-colorway vendor pages (Emi Jay style) carry the color in the TITLE,
     // not a Color option — split "Name in Color" so we never ship "- Default".
@@ -4253,7 +4277,11 @@ function manualPull(){
       _manPullN++;
       var key = 'PULL-' + _manPullN;
       row.dataset.imgkey = key;
-      _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null };
+      // build 95 — remember WHICH page these photos came from. It is shown on
+      // the row and carried to the review card, so a wrong link is visible
+      // where it happens instead of two screens later.
+      _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null,
+                          src_url: url, src_title: String(res.title || '').trim() };
       var nm = String(res.title || '').trim();
       if (c){
         var cEsc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -4287,16 +4315,124 @@ function manualPull(){
       if (!hasData) row.remove();
     });
     el('man-url').value = '';
+    // build 95 \u2014 show the photos HERE. They used to be invisible until the
+    // review screen, which is where a wrong link was being discovered.
+    Array.prototype.forEach.call(el('man-rows').querySelectorAll('.man-row'), _manRenderPulled);
     manualFormChanged();
     // build 35 \u2014 the message matches what the page actually gave us; the
     // "Still needed" line under the rows tracks the rest live.
+    // build 95 \u2014 and it now says to LOOK at the photos before moving on.
     showStatus('man-status','success', res.title
-      ? '\u2713 Pulled. Check the row, then type the quantity (tap Sized XS\u2013L first if it\u2019s sized apparel).'
-      : '\u2713 Pulled what the page offered (photos). The line above shows what still needs typing.');
+      ? '\u2713 Pulled. Check the photos on the row \u2014 wrong item? Paste the correct URL right there. Then type the quantity.'
+      : '\u2713 Pulled what the page offered (photos). Check them on the row; the line above shows what still needs typing.');
+    if (res.vendor && _manLooksLikeCode(res.vendor) && !el('man-vendor').value.trim()) {
+      showStatus('man-status','error','Photos pulled, but that page gave "' + esc(res.vendor) + '" as the brand \u2014 that is a style code, not a brand. Type the brand name in Vendor above.');
+    }
     toast(((res.images||[]).length) + ' photo(s) pulled \u00b7 ' + colors.length + ' row(s) added');
   })
   .catch(function(e){ showStatus('man-status','error', esc(e.message || 'Could not read that page \u2014 enter by hand.')); });
 }
+
+/* build 95 — does this read as a vendor style code rather than a brand name?
+   A brand has a space ("Shake Your Bon Bon") or has no digits ("Motel"); an
+   internal code has digits and no space ("Z031023"). Stops a code from
+   silently becoming the Shopify vendor. */
+function _manLooksLikeCode(v){
+  var s = String(v || '').trim();
+  if (!s) return true;
+  return /\d/.test(s) && !/\s/.test(s);
+}
+
+/* build 95 — SHOW THE PULLED PHOTOS ON THE ROW.
+   A Pull said "photos pulled" and then showed nothing until the review screen,
+   two steps and one size entry later — which is where a wrong product link was
+   being discovered. The row now shows the photos, names the page they came
+   from, and carries a box to re-pull from the correct URL. Safe to call again:
+   it replaces its own block. */
+function _manRenderPulled(row){
+  if (!row) return;
+  var old = row.querySelector('.man-pulled');
+  if (old) old.remove();
+  var key = row.dataset.imgkey;
+  var data = key && _manImages[key];
+  if (!data) return;
+  var imgs = data.images || [];
+  var host = '';
+  try { host = new URL(data.src_url).hostname.replace(/^www\./, ''); } catch (e) {}
+  var label = data.src_title || host || data.src_url || '';
+  var box = document.createElement('div');
+  box.className = 'man-pulled';
+  box.innerHTML =
+    '<div class="mp-head">' +
+      (imgs.length ? imgs.length + ' photo(s)' : 'No photos') + ' pulled from ' +
+      (data.src_url
+        ? '<a href="' + esc(data.src_url) + '" target="_blank" rel="noopener">' + esc(label) + '</a>'
+        : esc(label || 'the vendor page')) +
+      (data.fabric ? ' &#183; fabric: ' + esc(data.fabric) : '') +
+      '<br>These are the photos that go to Shopify. Wrong item? Paste the correct product URL below.' +
+    '</div>' +
+    '<div class="mp-strip">' +
+      imgs.slice(0, 12).map(function(u){ return '<img src="' + esc(u) + '" alt=""/>'; }).join('') +
+      (imgs.length > 12 ? '<span class="mp-more">+' + (imgs.length - 12) + ' more</span>' : '') +
+    '</div>' +
+    '<div class="mp-fix" style="display:flex;gap:6px;">' +
+      '<input type="text" class="field-input mp-url" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
+      '<button type="button" class="btn btn-outline mp-go" style="width:auto;padding:7px 12px;margin:0;white-space:nowrap;">Re-pull</button>' +
+    '</div>' +
+    '<div class="mp-status"></div>';
+  box.querySelector('.mp-go').onclick = function(){ manualRepull(row); };
+  row.insertBefore(box, row.firstChild);
+}
+
+/* build 95 — replace THIS row's photos from a corrected product URL. The row
+   becomes that product: name, color and retail follow the photos. Quantities,
+   category, size run, wholesale cost and UPC are typed by hand and are left
+   alone. */
+function manualRepull(row){
+  var box = row.querySelector('.man-pulled');
+  if (!box) return;
+  var inp = box.querySelector('.mp-url');
+  var go  = box.querySelector('.mp-go');
+  var st  = box.querySelector('.mp-status');
+  var url = inp ? inp.value.trim() : '';
+  if (!/^https?:\/\//i.test(url)){ if (st) st.textContent = 'Paste the full product page URL (starts with https://).'; return; }
+  if (go) go.disabled = true;
+  if (st) st.textContent = 'Reading that page…';
+  api('fetch_vendor_details', { productUrl: url })
+  .then(function(res){
+    if (go) go.disabled = false;
+    if (res.error) throw new Error(res.error);
+    var key = row.dataset.imgkey;
+    if (!key){ _manPullN++; key = 'PULL-' + _manPullN; row.dataset.imgkey = key; }
+    _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null,
+                        src_url: url, src_title: String(res.title || '').trim() };
+    var colors = (res.colors && res.colors.length) ? res.colors : [];
+    var nm = String(res.title || '').trim();
+    var c  = colors[0] || '';
+    if (!c){
+      var tm = nm.match(/^(.*)\s+in\s+([A-Za-z][A-Za-z \-]{2,30})$/);
+      if (tm){ nm = tm[1].trim(); c = tm[2].trim(); }
+    } else {
+      var cEsc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      nm = nm.replace(new RegExp('\\s*(?:-|in)\\s*' + cEsc + '\\s*$', 'i'), '').trim() || nm;
+    }
+    var vend = (el('man-vendor').value || '').trim();
+    if (vend && nm){
+      var vEsc = vend.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      nm = nm.replace(new RegExp('\\s*[|\\u2013\\u2014-]\\s*' + vEsc + '\\s*$', 'i'), '').trim() || nm;
+    }
+    if (nm) row.querySelector('.man-name').value = nm;
+    if (c)  row.querySelector('.man-color').value = c;
+    if (res.price) row.querySelector('.man-retail').value = Number(res.price).toFixed(2);
+    _manRenderPulled(row);
+    var st2 = row.querySelector('.man-pulled .mp-status');
+    if (st2) st2.textContent = '✓ Replaced — ' + ((res.images || []).length) + ' photo(s) from that page.' +
+      (colors.length > 1 ? ' That page carries ' + colors.length + ' colors; this row took "' + c + '". Pull it again for the others.' : '');
+    manualFormChanged();
+  })
+  .catch(function(e){ if (go) go.disabled = false; if (st) st.textContent = e.message || 'Could not read that page.'; });
+}
+
 /* build 32 — open the pane with ONE clean starter row (the + Add style
    button is gone; a Pull adds its own rows). Toggles closed if already open. */
 function manualOpen(){
@@ -4550,6 +4686,9 @@ function manualStart(){
       s.vendor_images = _manImages[ik].images;
       s.vendor_fabric = _manImages[ik].fabric || null;
       s.vendor_fit = _manImages[ik].fit || null;
+      // build 95 — carry the page the photos came from, so the review card can
+      // say which link it used instead of leaving you to guess.
+      s.vendor_src_url = _manImages[ik].src_url || null;
       _manImages['C-' + s.code] = _manImages[ik]; // survives even if a re-collect drops custom fields
     }
     styles.push(s);
@@ -4893,6 +5032,10 @@ function _spSnapshotCard(cd){
     // what makes it current.
     src_vendor: String((currentInvoice && currentInvoice.vendor) || ''),
     images: imgs,
+    // build 95 — the vendor page these photos came from, so a reopened card can
+    // still say which link it used.
+    src_url: cd.sourceUrl || '',
+    src_label: cd.sourceLabel || '',
     off: Object.keys(cd._off || {}).filter(function(u){ return !/^data:/i.test(u); }),
     removed: Object.keys(cd._removed || {}).filter(function(u){ return !/^data:/i.test(u); }),
     typeTouched: !!cd._typeTouched,
@@ -4934,6 +5077,9 @@ function _spRestoreCard(cd){
     cd._removed = {}; (st.removed || []).forEach(function(u){ cd._removed[u] = true; });
     _spRenderImages(cd);
   }
+  // build 95 — restore which page the photos came from.
+  if (st.src_url) { cd.sourceUrl = st.src_url; cd.sourceLabel = st.src_label || ''; }
+  _spShowSource(cd);
   cd._typeTouched = !!st.typeTouched;
   if (st.type && e.type) {
     if (!Array.prototype.some.call(e.type.options, function(o){ return o.value === st.type; })) {
@@ -6473,6 +6619,22 @@ function _spInitDetails(cd){
   wrap.innerHTML =
     '<button type="button" class="sp-fetch-btn">&#8595; Get images &amp; fabric from ' + esc((currentInvoice && currentInvoice.vendor) || 'vendor') + '</button>' +
     '<div class="sp-fetch-status"></div>' +
+    // build 95 — CORRECT THE PRODUCT LINK, always available.
+    // The only ways in were a name search against the whole vendor catalog and
+    // a candidate list. If the link behind these photos was the wrong item
+    // there was no way to say so — the photos were stuck. This takes the exact
+    // product URL and replaces the photo set with that page's.
+    '<div class="sp-purl">' +
+      '<div class="sp-purl-src"></div>' +
+      '<button type="button" class="sp-purl-toggle">Wrong photos? Paste the exact product page URL</button>' +
+      '<div class="sp-purl-body" style="display:none;">' +
+        '<div style="display:flex;gap:6px;margin-top:4px;">' +
+          '<input class="field-input sp-purl-input" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
+          '<button type="button" class="btn btn-black sp-purl-go" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use this page</button>' +
+        '</div>' +
+        '<div class="sp-purl-hint">Replaces every photo on this card, plus fabric and fit, with that page&#8217;s. Your category, tags, sizes and any copy you have already edited stay.</div>' +
+      '</div>' +
+    '</div>' +
     // v57 — vendor-site registry: appears when the brand has no known website.
     // Paste it once, it saves for this brand and every future scanned product.
     '<div class="sp-vsite" style="display:none;margin-top:6px;">' +
@@ -6508,6 +6670,12 @@ function _spInitDetails(cd){
     vsite: wrap.querySelector('.sp-vsite'),
     vsiteInput: wrap.querySelector('.sp-vsite-input'),
     vsiteSave: wrap.querySelector('.sp-vsite-save'),
+    // build 95 — the exact-product-URL control
+    purlSrc: wrap.querySelector('.sp-purl-src'),
+    purlToggle: wrap.querySelector('.sp-purl-toggle'),
+    purlBody: wrap.querySelector('.sp-purl-body'),
+    purlInput: wrap.querySelector('.sp-purl-input'),
+    purlGo: wrap.querySelector('.sp-purl-go'),
     images: wrap.querySelector('.sp-images'),
     kwused: wrap.querySelector('.sp-kwused'),
     title: wrap.querySelector('.sp-seo-title'),
@@ -6526,6 +6694,8 @@ function _spInitDetails(cd){
   // like a vendor-search fetch).
   var _mk = (cd.style && typeof _manImages !== 'undefined' && _manImages['C-' + cd.style.code]) || null;
   var _vimgs = (cd.style && cd.style.vendor_images) || (_mk && _mk.images) || [];
+  // build 95 — which page these photos came from, so the card can name it.
+  cd.sourceUrl = (cd.style && cd.style.vendor_src_url) || (_mk && _mk.src_url) || cd.sourceUrl || '';
   if (_vimgs.length){
     cd.images = _vimgs.slice();
     cd.fabric = (cd.style && cd.style.vendor_fabric) || (_mk && _mk.fabric) || cd.fabric || null;
@@ -6556,6 +6726,21 @@ function _spInitDetails(cd){
   // build 76 — one field, one listener.
   cd.els.cat.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
+  // build 95 — the exact-product-URL escape hatch. Collapsed by default so the
+  // card stays quiet, one tap away when the photos are wrong.
+  cd.els.purlToggle.onclick = function(){
+    var open = cd.els.purlBody.style.display !== 'none';
+    cd.els.purlBody.style.display = open ? 'none' : 'block';
+    cd.els.purlToggle.textContent = open
+      ? 'Wrong photos? Paste the exact product page URL'
+      : 'Hide the product URL box';
+    if (!open && cd.els.purlInput) cd.els.purlInput.focus();
+  };
+  cd.els.purlGo.onclick = function(){ _spUseProductUrl(cd); };
+  cd.els.purlInput.addEventListener('keydown', function(ev){
+    if (ev.key === 'Enter'){ ev.preventDefault(); _spUseProductUrl(cd); }
+  });
+  _spShowSource(cd);
   // v57 — save the pasted vendor website, then immediately retry the fetch.
   cd.els.vsiteSave.onclick = function(){
     var vendor = (currentInvoice && currentInvoice.vendor) || '';
@@ -6698,6 +6883,66 @@ function _spFetchVendor(cd){
     }
   });
 }
+/* build 95 — name the page these photos came from. Silent when unknown (an
+   invoice-scanned product that was never pulled from a URL). */
+function _spShowSource(cd){
+  var e = cd && cd.els && cd.els.purlSrc;
+  if (!e) return;
+  if (!cd.sourceUrl){ e.innerHTML = ''; return; }
+  var label = cd.sourceLabel || '';
+  if (!label){ try { label = new URL(cd.sourceUrl).hostname.replace(/^www\./, ''); } catch (err) { label = cd.sourceUrl; } }
+  e.innerHTML = 'Photos from <a href="' + esc(cd.sourceUrl) + '" target="_blank" rel="noopener">' + esc(label) + '</a>';
+}
+
+/* build 95 — REPLACE THE PHOTOS FROM AN EXACT PRODUCT URL.
+   The Worker already reads a pasted product URL (fetch_vendor_details with
+   productUrl — it is what Manual Entry's Pull uses); nothing on the review card
+   ever called it, so a wrong link was final. This calls it, swaps the whole
+   photo set, and resets the include/exclude and removed state so the new set
+   starts clean. Copy you have already edited is left alone. */
+function _spUseProductUrl(cd){
+  var url = (cd.els.purlInput.value || '').trim();
+  if (!/^https?:\/\//i.test(url)){
+    cd.els.fetchStatus.textContent = 'Paste the full product page URL (it starts with https://).';
+    return;
+  }
+  cd.els.purlGo.disabled = true;
+  cd.els.fetchStatus.textContent = 'Reading that page…';
+  api('fetch_vendor_details', { productUrl: url })
+  .then(function(res){
+    cd.els.purlGo.disabled = false;
+    if (res.error) throw new Error(res.error);
+    var imgs = (res.images || []).slice();
+    if (!imgs.length){
+      cd.els.fetchStatus.textContent = 'That page loaded but carried no photos. Check the URL, or drop your own photo below.';
+      return;
+    }
+    cd.images = imgs;
+    cd.imagesAll = imgs.slice();
+    cd._showingAll = false; cd._colorImages = null;
+    cd._off = null;          // re-seeds first 10 on, like a fresh pull
+    cd._removed = {};
+    if (res.fabric) cd.fabric = res.fabric;
+    if (res.fit) cd.fit = res.fit;
+    cd.sourceUrl = url;
+    cd.sourceLabel = String(res.title || '').trim();
+    if (cd.style) cd.style.vendor_src_url = url;   // survives a save/reopen
+    _spRenderImages(cd);
+    _spShowSource(cd);
+    cd.els.purlInput.value = '';
+    cd.els.fetchStatus.textContent = '✓ ' + imgs.length + ' photo(s) from ' + (cd.sourceLabel || 'that page') +
+      (cd.fabric ? ' · fabric: ' + cd.fabric : '') + (cd.fit ? ' · fit: ' + cd.fit : '') + ' — tap to include or exclude.';
+    // Copy you have already touched is yours; untouched copy is rewritten now
+    // that the fabric and the real product are known.
+    if (!cd.userEdited) _spGenSeo(cd);
+    if (typeof _spSaveAll === 'function') _spSaveAll(true);
+  })
+  .catch(function(e){
+    cd.els.purlGo.disabled = false;
+    cd.els.fetchStatus.textContent = e.message || 'Could not read that page.';
+  });
+}
+
 function _spCandidatePicker(cd, cands){
   cd.els.fetchStatus.textContent = 'Pick the match:';
   cd.els.images.innerHTML = '';
@@ -6723,7 +6968,15 @@ function _spUseCandidate(cd, cand){
       cd.images = res.images || cand.images || [];
       cd.imagesAll = res.images_all || cd.images;   // v58 — the full colorway set, for the show-all toggle
       cd.fabric = res.fabric || null; cd.fit = res.fit || null;
+      // build 95 — a different match is a NEW photo set: clear the old
+      // include/exclude and removed state instead of carrying it across, and
+      // record which page won so the card can name it.
+      cd._off = null; cd._removed = {}; cd._showingAll = false; cd._colorImages = null;
+      cd.sourceUrl = dom ? ('https://' + dom + '/products/' + cand.handle) : '';
+      cd.sourceLabel = String(res.title || cand.title || '').trim();
+      if (cd.style && cd.sourceUrl) cd.style.vendor_src_url = cd.sourceUrl;
       _spRenderImages(cd);
+      _spShowSource(cd);
       cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
       cd.els.fetchBtn.disabled = false;
       _spGenSeo(cd);
