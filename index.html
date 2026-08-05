@@ -1270,11 +1270,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 93</strong> &#183; 2026-08-05 &#183; Create Blog now gets the researched keyword vocabulary too, matched on the post topic and the featured brand (needs Worker v85, which also fixes a category roll-up: a Tank Top asked for &quot;Tank Tops&quot; vocabulary and found none because the registry files terms under Tops); the blog meta counters stopped fighting the rules file &#8212; the title counter read 62 / 60 in red on a title the standard allows to 70, and both counters now count characters the way the validator does rather than UTF-16 units; carries build 92
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 93</strong> &#183; 2026-08-05 &#183; Create Blog now gets the researched keyword vocabulary too, matched on the post topic and the featured brand (needs Worker v85, which also fixes a category roll-up: a Tank Top asked for &quot;Tank Tops&quot; vocabulary and found none because the registry files terms under Tops); the blog meta counters stopped fighting the rules file &#8212; the title counter read 62 / 60 in red on a title the standard allows to 70, and both counters now count characters the way the validator does rather than UTF-16 units; carries build 92</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 94</strong> &#183; 2026-08-05 &#183; The blog draft now names the researched keyword phrases that fed the post, the way the product review card already did &#8212; live testing proved the words were reaching the blog writer but there was no way to see it, which was the whole point of showing them; needs Worker v86, and says so plainly on an older one; carries build 93</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1384,6 +1385,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <button class="sp-close" onclick="editClosePreview()">Close</button>
   </div>
   <div class="edit-prev-body">
+    <div class="sp-kwused" id="edit-kwused" style="padding:12px 24px 0;"></div>
     <div class="edit-field">
       <label class="field-label">Title</label>
       <input type="text" id="edit-f-title" oninput="editSync()"/>
@@ -1596,7 +1598,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 93;   // keep in step with the footer stamp
+var APP_BUILD = 94;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -7127,14 +7129,45 @@ function editGenerate(){
   api('edit_generate', payload)
   .then(function(res){
     editState.draft = editParseDraft(res);
+    // build 94 — the Worker (v86+) returns the researched phrases it handed to
+    // the writer. editParseDraft only reads res.text, so hold it separately.
+    editState.registry = res && res.registry;
     el('edit-gen-status').style.display = 'none';
     el('edit-gen-btn').disabled = false;
+    editShowKeywords();
     editOpenPreview();
   })
   .catch(function(e){
     el('edit-gen-btn').disabled = false;
     showStatus('edit-gen-status','error','Draft failed: ' + esc(e.message) + ' — try again.');
   });
+}
+
+// build 94 — name the researched phrases that fed this post. Same idea as the
+// product review card: if a topic matched nothing, say so rather than leaving
+// you to guess whether the registry was consulted at all.
+function editShowKeywords(){
+  var el2 = el('edit-kwused');
+  if (!el2) return;
+  var reg = editState.registry;
+  if (!reg) {
+    el2.innerHTML = '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
+    return;
+  }
+  var topics = reg.topic_terms || [], brands = reg.brand_terms || [];
+  if (!topics.length && !brands.length) {
+    el2.innerHTML = '<span class="kwnone">' + esc(reg.note || 'No researched terms matched this topic.') + '</span>';
+    return;
+  }
+  var chip = function(r, cls){
+    return '<span class="kw' + (cls ? ' ' + cls : '') + '" title="'
+      + esc(r.volume_band + ' searches/mo band' + (r.serp_verified ? ' \u2014 SERP verified' : ''))
+      + '">' + esc(r.keyword) + '</span>';
+  };
+  var h = '<span class="kwlabel">researched words used</span>';
+  if (topics.length) h += topics.map(function(r){ return chip(r); }).join('');
+  if (brands.length) h += '<br><span class="kwlabel">brand</span>' + brands.map(function(r){ return chip(r, 'brand'); }).join('');
+  el2.innerHTML = h;
 }
 
 function editRegenerate(){
