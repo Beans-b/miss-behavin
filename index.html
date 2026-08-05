@@ -1292,6 +1292,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 99</strong> &#183; 2026-08-05 &#183; Manual Entry takes several colours on one style. Type them comma-separated in the Colour box and the row grows a quantity line per colour &#8212; one product each, named &quot;Style - Colour&quot;, with its own SKU (CODE-COLOUR-SIZE) and its own review card. The invoice path has always worked this way; Manual Entry was the one place that assumed a single colourway, so a four-colour style had to be typed four times. Quantities are per colour on purpose &#8212; colours rarely arrive in equal counts and a wrong count is a wrong number at the register. Also fixes a latent counting bug: the row quantity read assigned instead of summing. No Worker change &#8212; runs on v90. Carries build 98
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 98</strong> &#183; 2026-08-05 &#183; A product pushed with no photograph now goes to the register only and no empty page goes live (Worker v90 does the holding; this is the screen catching up). The 0-channels repair stopped warning that photoless products would show on the website without an image, because the Worker now refuses to do that, and it no longer reports &quot;on all N channels&quot; for products it deliberately held back. Adding photos to a live product now tells you whether a held product was released, or why it was not. NEW Photo channel check in Store Utilities: reads the catalogue as it stands, finds products with no real photograph showing beyond the register &#8212; the case the push cannot see, because Shopify fetches an image link afterwards and a blocked vendor site leaves a product that pushed &quot;with photos&quot; and has none &#8212; and releases anything held that now has one. Needs Worker v90. Carries build 97
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 97</strong> &#183; 2026-08-05 &#183; The &quot;Update available&quot; banner stops appearing on the build you are already running. The visible footer said 96 but the APP_BUILD constant the update-checker compares against was still 94, so every load read 96 off its own footer, saw 96 is greater than 94, and raised the banner &#8212; dismissing it did nothing because the next load repeated the comparison. No other change. Runs on Worker v86+; v88 adds the researched keyword vocabulary to the bulk Meta Fill backfill. Carries build 96
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 96</strong> &#183; 2026-08-05 &#183; On the Review &amp; Push card the product-URL box is now a real, open text field with its own label and Use this page button, instead of an underlined line you had to tap to reveal &#8212; a link reads as a note, not as somewhere to type, so the one control that fixes wrong photos was still effectively hidden. No Worker change &#8212; runs on v86+; carries build 95 (wrong product link fixable in Manual Entry and on the review card; style-code vendor guard)
@@ -1302,7 +1303,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 99</strong> &#183; 2026-08-05 &#183; Manual Entry takes several colours on one style. Type them comma-separated in the Colour box and the row grows a quantity line per colour &#8212; one product each, named &quot;Style - Colour&quot;, with its own SKU (CODE-COLOUR-SIZE) and its own review card. The invoice path has always worked this way; Manual Entry was the one place that assumed a single colourway, so a four-colour style had to be typed four times. Quantities are per colour on purpose &#8212; colours rarely arrive in equal counts and a wrong count is a wrong number at the register. Also fixes a latent counting bug: the row quantity read assigned instead of summing. No Worker change &#8212; runs on v90. Carries build 98</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 100</strong> &#183; 2026-08-05 &#183; A UPC per colour. Each colour line in Manual Entry carries its own UPC box with a camera scan, on one-size rows only &#8212; a sized run has no place for one because each size would need its own. Two colours given the same barcode is flagged as you type. AND THE TRAP IT UNCOVERED: the review card seeded its UPC field from the STYLE barcode, so a four-colour style would have written one barcode onto all four products, which is exactly what makes a register scan ambiguous. The colourway&#39;s own UPC now wins, and the style-level one is inherited only when the style has a single colourway. No Worker change &#8212; runs on v90. Carries build 99</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1625,7 +1626,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 99;   // keep in step with the footer stamp
+var APP_BUILD = 100;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4322,13 +4323,15 @@ function _manRenderColorGrid(row){
   var colors = _manColors(row);
   if (colors.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
 
-  var keep = {};
+  var keep = {}, keepUpc = {};
   box.querySelectorAll('.man-crow').forEach(function(cr){
     var cn = cr.getAttribute('data-color') || '';
     cr.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
       var m = /man-csz-([^\s]+)/.exec(i.className);
       if (m) keep[cn.toLowerCase() + '|' + m[1]] = i.value;
     });
+    var u = cr.querySelector('.man-cupc');       // build 100
+    if (u) keepUpc[cn.toLowerCase()] = u.value;
   });
 
   var run   = row.dataset.run || 'ALPHA';
@@ -4338,6 +4341,11 @@ function _manRenderColorGrid(row){
             '<button class="btn btn-outline" style="width:auto;padding:6px 10px;margin:0;font-size:12px;" ' +
               'onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
           '</div>';
+  // build 100 — the UPC boxes ride along on ONE-SIZE rows only. Same rule the
+  // review card has always applied: one UPC cannot cover several sizes without
+  // making a register scan ambiguous, so a sized run gets no per-colour UPC and
+  // says so rather than offering a box that would be wrong to fill.
+  var wantUpc = (sizes.length === 1 && sizes[0] === 'OS');
   colors.forEach(function(cn, ci){
     h += '<div class="man-crow" data-ci="' + ci + '" data-color="' + esc(cn) + '" ' +
            'style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:6px 0;border-top:1px solid #f0f0f0;">' +
@@ -4350,12 +4358,76 @@ function _manRenderColorGrid(row){
                'style="text-align:center;" value="' + esc(v === undefined ? '' : v) + '"/>' +
            '</div>';
     });
+    if (wantUpc) {
+      var uv = keepUpc[cn.toLowerCase()];
+      h += '<div style="flex:2.2;min-width:150px;">' +
+             '<label class="sp-l" style="white-space:nowrap;">UPC</label>' +
+             '<div style="display:flex;gap:4px;">' +
+               '<input type="text" inputmode="numeric" autocomplete="off" class="field-input man-cupc" ' +
+                 'value="' + esc(uv === undefined ? '' : uv) + '"/>' +
+               '<button type="button" class="btn btn-outline man-cupc-scan" ' +
+                 'style="width:auto;padding:8px 10px;margin:0;" title="Scan with camera">&#128247;</button>' +
+             '</div>' +
+             '<div class="man-cupc-hint" style="display:none;font-size:11px;margin-top:3px;"></div>' +
+           '</div>';
+    }
     h += '</div>';
   });
+  if (!wantUpc) {
+    h += '<div style="font-size:11px;color:#999;margin-top:6px;">A UPC belongs to one package, so a sized run has no place to put one &#8212; each size would need its own. Scan them on the review cards, or leave them and the SKU barcode is used.</div>';
+  }
   box.innerHTML = h;
   box.style.display = 'block';
   box.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
     i.addEventListener('input', manualFormChanged);
+  });
+  box.querySelectorAll('.man-cupc').forEach(function(i){
+    i.addEventListener('input', function(){ _manColorUpcCheck(box); manualFormChanged(); });
+  });
+  box.querySelectorAll('.man-cupc-scan').forEach(function(b){
+    b.onclick = function(){
+      var inp = b.parentNode.querySelector('.man-cupc');
+      openScanner(function(code){
+        inp.value = gtinDigits(code);
+        _manColorUpcCheck(box);
+        manualFormChanged();
+      });
+    };
+  });
+  _manColorUpcCheck(box);
+}
+
+// build 100 — check the UPCs against the GS1 check digit AND against each other.
+// Two colourways given the same barcode is the failure this whole per-colour
+// change exists to avoid; catching it here beats finding it at the register.
+function _manColorUpcCheck(box){
+  if (!box) return;
+  var seen = {};
+  box.querySelectorAll('.man-cupc').forEach(function(i){
+    var d = gtinDigits(i.value);
+    if (d) seen[d] = (seen[d] || 0) + 1;
+  });
+  box.querySelectorAll('.man-cupc').forEach(function(i){
+    var hint = i.parentNode.parentNode.querySelector('.man-cupc-hint');
+    if (!hint) return;
+    var d = gtinDigits(i.value);
+    if (!d) { hint.style.display = 'none'; i.style.borderBottomColor = ''; return; }
+    if (seen[d] > 1) {
+      hint.style.display = 'block';
+      hint.style.color = 'var(--red)';
+      hint.textContent = 'Same UPC as another colour — every product needs its own.';
+      i.style.borderBottomColor = 'var(--red)';
+    } else if (!isGtin(d)) {
+      hint.style.display = 'block';
+      hint.style.color = 'var(--red)';
+      hint.textContent = 'Not a valid UPC — the SKU barcode will be used instead.';
+      i.style.borderBottomColor = 'var(--red)';
+    } else {
+      hint.style.display = 'block';
+      hint.style.color = 'var(--gray-text)';
+      hint.textContent = '✓ Valid';
+      i.style.borderBottomColor = '';
+    }
   });
 }
 
@@ -4370,8 +4442,16 @@ function manColorChanged(inp){
     row.querySelectorAll('input[class*="man-sz-"]').forEach(function(e){ e.value = ''; });
     if (os) os.style.display = 'none';
     if (sized) sized.style.display = 'none';
+    // build 100 — one box cannot hold four barcodes. Hide it rather than leave
+    // a field whose value would have to be copied onto every colour.
+    var _u = row.querySelector('.man-upc');
+    var _uw = row.querySelector('.man-upc-row');
+    if (_u) _u.value = '';
+    if (_uw) _uw.style.display = 'none';
     _manRenderColorGrid(row);
   } else {
+    var _uw2 = row.querySelector('.man-upc-row');
+    if (_uw2) _uw2.style.display = 'flex';
     var box = row.querySelector('.man-colors');
     if (box) { box.style.display = 'none'; box.innerHTML = ''; }
     setRowSizing(row, (row.dataset.run === 'OS') ? 'os' : 'sized');
@@ -4393,7 +4473,12 @@ function _manRowColorSets(row){
       var q = parseInt(i.value, 10) || 0;
       if (m && q > 0) { sizes[m[1]] = q; total += q; }
     });
-    if (total > 0) out.push({ color: cn, sizes: sizes, total: total });
+    // build 100 — the colourway's own UPC. Invalid stays null and the SKU
+    // barcode is used at push, exactly as a style-level UPC has always behaved.
+    var _u = cr.querySelector('.man-cupc');
+    var _ud = _u ? gtinDigits(_u.value) : '';
+    if (total > 0) out.push({ color: cn, sizes: sizes, total: total,
+                              barcode: (_ud && isGtin(_ud)) ? _ud : null });
   });
   return out;
 }
@@ -4859,7 +4944,7 @@ function manualAddRow(){
       '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-cost" onblur="manMoneyBlur(this)"/></div>' +
     '</div>' +
     // build 39 — real UPCs ride through to Shopify (fixes GSC "Invalid GTIN")
-    '<div style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
+    '<div class="man-upc-row" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
       '<div style="flex:1;"><label class="sp-l">UPC from packaging (optional &#8212; scan or type)</label><input type="text" inputmode="numeric" class="field-input man-upc" autocomplete="off"/></div>' +
       '<button type="button" class="btn btn-outline" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera" onclick="manualScanUpc(this)">&#128247;</button>' +
     '</div>' +
@@ -5708,7 +5793,16 @@ function _spWireUpc(cd) {
   if (!input) return;   // multi-size card — no UPC field by design
   cd.upcInput = input;
   cd.upcHint  = cd.card.querySelector('.sp-upc-hint');
-  if (cd.style.barcode) input.value = gtinDigits(cd.style.barcode);
+  // build 100 — THE DUPLICATE-BARCODE TRAP. This read cd.style.barcode, which
+  // belongs to the STYLE. On a four-colour style that wrote the SAME barcode
+  // onto all four products, and a duplicate barcode is the precise thing that
+  // makes a register scan ambiguous. The colourway's own UPC wins; the
+  // style-level one is only inherited when there IS one colourway, which is the
+  // only case where it is unambiguously about this product.
+  var _cwUpc = cd.colorObj && cd.colorObj.barcode;
+  var _oneColorway = ((cd.style && cd.style.colors) || []).length <= 1;
+  var _seed = _cwUpc || (_oneColorway ? cd.style.barcode : '');
+  if (_seed) input.value = gtinDigits(_seed);
   input.addEventListener('input', function(){ _spUpcValidate(cd); });
   cd.card.querySelector('.sp-upc-scan').onclick = function(){
     openScanner(function(code){
