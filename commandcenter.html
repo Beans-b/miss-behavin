@@ -778,6 +778,55 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <div class="goals" id="goals"></div>
   </section>
 
+  <style>
+  /* ---- v82 keyword registry (MB-REG-V1) ---- */
+  #regWrap{margin:0 0 22px}
+  #regWrap .reg-status{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 12px;font-family:var(--mono);font-size:11px}
+  #regWrap .pill{border:1px solid var(--line);border-radius:99px;padding:3px 10px;letter-spacing:.04em}
+  #regWrap .pill.bad{border-color:#b4432c;color:#b4432c}
+  #regWrap .pill.good{border-color:#3d7a4e;color:#3d7a4e}
+  #regWrap .reg-filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 10px}
+  #regWrap .reg-filters select,#regWrap .reg-filters input{font:inherit;font-size:12px;padding:4px 7px;border:1px solid var(--line);border-radius:4px;background:transparent;color:inherit}
+  #regWrap .reg-filters input[type=search]{min-width:200px}
+  #regWrap .reg-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+  #regWrap .reg-chip{cursor:pointer;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.03em;background:transparent;color:inherit}
+  #regWrap .reg-chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  #regWrap .reg-scroll{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:6px}
+  #regWrap table.reg{width:100%;border-collapse:collapse;font-size:12px}
+  #regWrap table.reg th{position:sticky;top:0;background:var(--paper);text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:8px 8px;border-bottom:1px solid var(--line);z-index:1}
+  #regWrap table.reg td{padding:6px 8px;border-bottom:1px solid var(--line-faint,rgba(0,0,0,.06));vertical-align:top}
+  #regWrap table.reg tr:hover td{background:rgba(0,0,0,.02)}
+  #regWrap .kwterm{font-weight:600}
+  #regWrap .band{font-family:var(--mono);font-size:11px;white-space:nowrap}
+  #regWrap .midpt{color:var(--ink-faint);font-size:10px}
+  #regWrap .tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.04em;border:1px solid var(--line);border-radius:3px;padding:1px 5px;margin:0 3px 2px 0;white-space:nowrap}
+  #regWrap .tag.killed{border-color:#b4432c;color:#b4432c}
+  #regWrap .tag.demoted{border-color:#9a7b2f;color:#9a7b2f}
+  #regWrap .tag.feed{border-color:#6a6a6a;color:#6a6a6a}
+  #regWrap .tag.ver{border-color:#3d7a4e;color:#3d7a4e}
+  #regWrap .tag.auto{border-style:dashed}
+  #regWrap .reg-note{font-size:11px;color:var(--ink-faint);margin:8px 0 0;line-height:1.55}
+  #regWrap .reg-add{border:1px solid var(--line);border-radius:6px;padding:12px;margin:14px 0 0}
+  #regWrap .reg-add .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  #regWrap .reg-add input{font:inherit;font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:4px;background:transparent;color:inherit}
+  #regWrap .reg-add input.k{min-width:190px}#regWrap .reg-add input.s{min-width:150px}#regWrap .reg-add input.r{min-width:260px;flex:1}
+  #regWrap .lane-dec{margin:14px 0 0;font-size:12px}
+  #regWrap .lane-dec .ld{border-left:2px solid var(--line);padding:4px 0 4px 10px;margin:0 0 8px}
+  #regWrap .lane-dec .ld b{font-family:var(--mono);font-size:11px;letter-spacing:.05em}
+  #regWrap .lane-dec .ld .src{color:var(--ink-faint);font-size:10px;font-family:var(--mono)}
+  #regSetup{border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin:10px 0 14px}
+  #regSetup.done{opacity:.72}
+  #regSetup .setup-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  #regSetup .setup-head span{text-transform:none;letter-spacing:0;font-size:11px;color:var(--ink-faint)}
+  #regSetup .setup-why{font-size:12px;margin:9px 0 6px;line-height:1.5}
+  #regSetup ol.setup-files{font-size:12px;margin:0 0 10px;padding-left:20px;line-height:1.7}
+  #regSetup .setup-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #regSetup input[type=file]{font:inherit;font-size:12px}
+  #regSetup .setup-log{font-family:var(--mono);font-size:11px;margin-top:9px;line-height:1.7;white-space:pre-wrap}
+  #regSetup .setup-log .ok{color:#3d7a4e}
+  #regSetup .setup-log .err{color:#b4432c}
+  </style>
+
   <!-- ============ PANEL: KEYWORDS ============ -->
   <section class="panel" id="panel-keywords" role="tabpanel">
     <div class="sov-intro">
@@ -789,6 +838,64 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
         <div><div class="n" id="kwP1">0</div><div class="l">Priority 1</div></div>
       </div>
     </div>
+    <!-- ============ v82: KEYWORD REGISTRY (MB-REG-V1) ============ -->
+    <div id="regWrap">
+      <div class="section-head"><h3>Keyword registry</h3><span class="hint">The sized corpus from <code>missb_keyword_baseline_v2_2026-08-05.xlsx</code>, live out of <code>keyword_meta</code>. Volume ranks a list; it decides nothing. No term becomes a page without a live SERP read.</span></div>
+      <div class="reg-setup" id="regSetup">
+        <div class="setup-head"><b>Setup</b><span id="setupState">checking…</span></div>
+        <div class="setup-body" id="setupBody">
+          <p class="setup-why">One-time load. Pick these two files out of your <code>miss-behavin</code> folder and this does the rest — no command line, no SQL.</p>
+          <ol class="setup-files">
+            <li><code>missb_metadata_RULES_v1.json</code> — in the main folder</li>
+            <li><code>App\missb_keyword_seed_720_2026-08-05.json</code> — in the App folder</li>
+          </ol>
+          <div class="setup-row">
+            <input type="file" id="setupFiles" accept=".json,application/json" multiple>
+            <button class="btn" id="setupGo">Load registry</button>
+          </div>
+          <div class="setup-log" id="setupLog"></div>
+        </div>
+      </div>
+      <div class="reg-status" id="regStatus"></div>
+      <div class="reg-chips" id="regChips"></div>
+      <div class="reg-filters">
+        <select id="regLane"><option value="">lane: all</option></select>
+        <select id="regSeason"><option value="">season: all</option></select>
+        <select id="regStatusSel"><option value="">status: all</option></select>
+        <select id="regBand"><option value="">band: all</option></select>
+        <select id="regTopic"><option value="">category: all</option></select>
+        <select id="regVerif"><option value="">verified: all</option><option value="1">verified only</option><option value="0">unverified only</option></select>
+        <select id="regGroup"><option value="">comparable group: all</option><option value="batch1">batch1 (English)</option><option value="batch234">batch234 (All languages)</option></select>
+        <input type="search" id="regSearch" placeholder="search terms…">
+        <button class="btn" id="regReload">↻ Reload</button>
+        <button class="btn" id="regStock" title="Refresh the cached in-stock count per collection (admin)">≈ Refresh stock</button>
+        <span id="regCount"></span>
+      </div>
+      <div class="reg-scroll">
+        <table class="reg" id="regTable">
+          <thead><tr>
+            <th>Term</th><th>Band</th><th>Bid</th><th>Lane / season</th><th>Status</th>
+            <th>Owning URL</th><th>Stock</th><th>SERP</th><th>Origin</th>
+          </tr></thead>
+          <tbody id="regBody"></tbody>
+        </table>
+      </div>
+      <p class="reg-note" id="regNotes"></p>
+
+      <div class="reg-add">
+        <div class="section-head" style="margin:0 0 8px"><h3 style="font-size:13px">Add a term</h3><span class="hint">Captured with who, where from and why. New terms enter <b>unverified</b> and cannot own a page until a live SERP read says otherwise.</span></div>
+        <div class="row">
+          <input class="k" id="regNewTerm" placeholder="term (lowercase)">
+          <input class="s" id="regNewSource" placeholder="source — GSC, Pinterest, a customer…">
+          <input class="r" id="regNewReason" placeholder="why is it worth tracking">
+          <button class="btn" id="regAddBtn">+ Add unverified</button>
+          <span id="regAddNote"></span>
+        </div>
+      </div>
+
+      <div class="lane-dec" id="regLanes"></div>
+    </div>
+
     <div id="oppWrap" class="opp-wrap">
       <div class="section-head"><h3>Opportunities</h3><span class="hint">Live from Search Console — highest-impact fixes first, no data entry.</span></div>
       <div id="oppBody"></div>
@@ -853,8 +960,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.08.05a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b style="font-size:14px; color:var(--ink); letter-spacing:.06em">CC-2026.08.05a</b> &middot; KEYWORD RESEARCH THREAD CLOSED OUT. Keyword Planner batches 2, 3 and 4 run live - sized corpus 280 to 720 terms, baseline v2 recalculated clean &middot; hoco and homecoming SERP-verified, and the recommendation CHANGED: $11.22 top-of-page bid is the highest in the corpus but it is a WARNING as much as an opportunity, five sponsored blocks push organic down, so build the permanent URL and refresh every July rather than spending against a half-gone window &middot; SoV log repaired - 4 corrupted rows fixed, ChatGPT NOT-RUN contradiction resolved, panel / in_panel / aio_rendered / notes columns added, Panel B and a Grok lane seeded OUTSIDE the locked 72 which both still compute to exactly 72 &middot; vocabulary rules corrected: fits overstated at 4%, cute is real volume but never a page target, college and dorm added as body-copy-only after 17 of 17 terms returned zero &middot; 15 superseded files retired to old\superseded_2026-08-05\ &middot; 10 existing rows updated st/n only per decision 10, 4 new rows added with Brian's approval &middot; carries forward from CC-2026.08.04c</div>
+    <!-- deploy_check: CC-2026.08.05c -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b style="font-size:14px; color:var(--ink); letter-spacing:.06em">CC-2026.08.05c</b> &middot; KEYWORD REGISTRY LIVE IN THIS TAB. worker v82 extends keyword_meta in place to the master doc 9.1 model - 33 columns added, no second table, no second generator, no parallel handlers &middot; 719 of 720 workbook terms seeded (graduation dress white was a genuine duplicate across batch1 and batch3 and was merged, batch1 keeping the C occasion bucket), with band, midpoint, bid, origin, pull date, SERP state and a volume_comparable_group so batch1 English volumes are never silently compared against the batch2-4 All-languages pull &middot; metadata validator MB-VAL-V1 reads EVERY numeric limit from missb_metadata_RULES_v1.json at runtime out of a new metadata_rules table and FAILS CLOSED if the file is not loaded - there is no hardcoded fallback anywhere &middot; rules file bumped to v1.2.0 with the alt_text and url_handle blocks it was missing, so 10-125 alt and the blocking no-4-digit-year handle rule are read, not retyped &middot; three live defects fixed: the apply path was writing meta descriptions at slice(0,320), double the 160 block ceiling, and now blocks instead of truncating; the SEO title was silently truncated at 70 and now blocks; the private-label rename FINDER was hardcoded to Cotton Candy so Sky to Moon was invisible to the scan, and now builds its pattern from the private_labels table &middot; the PDP meta pattern lost the In stock at Miss Behavin Santa Barbara boutique close, resolving the L1284 versus L5448 contradiction in favour of the master doc; the brand-page geo token stays &middot; 128 validator tests pass, one passing and one failing case per blocking rule &middot; the seo_meta_fill backfill path also lost its literals - the 110 floor, the 160 ceiling and the UTF-16 character counting are gone, and its prompt no longer asks for 120-155 characters &middot; ONE-BUTTON SETUP: the Keywords tab now carries a Setup box. Pick missb_metadata_RULES_v1.json and missb_keyword_seed_720_2026-08-05.json and it loads the rules and all 719 keywords itself, in chunks, with a running count. No wrangler, no SQL console, no pasting a 1.4MB file. The .sql files still exist for anyone who prefers the command line &middot; carries forward from CC-2026.08.05a</div>
   </div>
 </div>
 
@@ -1875,6 +1982,293 @@ function refreshVolume(){
   }).catch(function(){ if(btn) btn.classList.remove('busy'); if(note) note.textContent=''; toast('Volume pull failed — check Ads secrets'); });
 }
 
+/* ============ v82 — KEYWORD REGISTRY (MB-REG-V1) ============
+   Reads action=seocmd_kw_registry. The registry is the 719 stored rows from the
+   720-term workbook plus anything added by hand. Nothing here invents data and
+   nothing here renders a band midpoint as a search count. */
+var REG_ROWS=[], REG_LANES=[], REG_NOTES={}, REG_FACETS={}, REG_CHIP='';
+
+/* Alias kept for compatibility. The 2026-08-04 audit found loadKeywordsLive()
+   calling renderKeywordsLive(), which was defined nowhere, so the Keywords tab
+   threw on open in CC-2026.08.04c. The current file calls renderKeywords()
+   directly and does NOT have that defect — verified by counting definitions —
+   but an older cached copy of this page, or any other surface still calling the
+   old name, now lands on a real function instead of a ReferenceError. */
+function renderKeywordsLive(){
+  if(typeof renderKeywords==='function') renderKeywords();
+  if(typeof renderOpportunities==='function') renderOpportunities();
+  if(typeof renderDiscovered==='function') renderDiscovered();
+}
+
+function regEsc(v){ return esc(v==null?'':String(v)); }
+function regFill(sel,obj,label){
+  var el=document.getElementById(sel); if(!el) return;
+  var cur=el.value;
+  el.innerHTML='<option value="">'+label+': all</option>';
+  Object.keys(obj||{}).sort().forEach(function(k){
+    if(k==='(none)'&&label==='season') return;
+    var o=document.createElement('option'); o.value=k; o.textContent=k+' ('+obj[k]+')'; el.appendChild(o);
+  });
+  el.value=cur;
+}
+function loadKeywordRegistry(){
+  if(!mbToken()) { var st=document.getElementById('regStatus');
+    if(st) st.innerHTML='<span class="pill bad">not signed in</span><span class="pill">open this page from the LineSheet app to read the registry</span>';
+    return Promise.resolve(); }
+  return wapi('seocmd_kw_registry').then(function(r){
+    if(!r||!r.ok){ toast('Registry: '+((r&&(r.message||r.error))||'no response')); return; }
+    REG_ROWS=r.rows||[]; REG_LANES=r.lane_decisions||[]; REG_NOTES=r.notes||{}; REG_FACETS=r.facets||{};
+    regFill('regLane',REG_FACETS.lane,'lane');
+    regFill('regSeason',REG_FACETS.season,'season');
+    regFill('regStatusSel',REG_FACETS.status,'status');
+    regFill('regBand',REG_FACETS.volume_band,'band');
+    regFill('regTopic',REG_FACETS.topic_lane,'category');
+    return wapi('seocmd_rules_get').then(function(rr){ renderRegistryStatus(rr); renderKeywordRegistry(); renderLaneDecisions(); });
+  }).catch(function(e){ toast('Registry load failed'); });
+}
+function renderRegistryStatus(rr){
+  var el=document.getElementById('regStatus'); if(!el) return;
+  var seeded=REG_ROWS.filter(function(r){ return r.seed_version; }).length;
+  var verified=REG_ROWS.filter(function(r){ return Number(r.serp_verified)===1; }).length;
+  var auto=REG_ROWS.filter(function(r){ return String(r.status_source||'').indexOf('auto:')===0; }).length;
+  var unassigned=REG_ROWS.filter(function(r){ return (r.lane||'unassigned')==='unassigned'; }).length;
+  var h=[];
+  h.push('<span class="pill">'+REG_ROWS.length+' terms · '+seeded+' seeded</span>');
+  h.push('<span class="pill '+(verified?'good':'bad')+'">'+verified+' SERP-verified</span>');
+  h.push('<span class="pill">'+unassigned+' lane unassigned</span>');
+  h.push('<span class="pill'+(auto?'':' good')+'">'+auto+' auto-assigned, unreviewed</span>');
+  if(rr&&rr.loaded) h.push('<span class="pill good">rules v'+regEsc(rr.version)+' loaded · '+regEsc(rr.validator)+'</span>');
+  else h.push('<span class="pill bad">metadata rules NOT loaded — every validated write path refuses</span>');
+  el.innerHTML=h.join('');
+  var chips=document.getElementById('regChips'); if(!chips) return;
+  var C=[['','everything'],['auto','auto-assigned · review'],['unassigned','lane unassigned'],
+         ['unverified','unverified'],['novol','no volume'],['nopage','no owning URL'],['killed','killed / demoted']];
+  chips.innerHTML='';
+  C.forEach(function(c){
+    var b=document.createElement('button'); b.className='reg-chip'+(REG_CHIP===c[0]?' on':'');
+    b.textContent=c[1]; b.onclick=function(){ REG_CHIP=(REG_CHIP===c[0]?'':c[0]); renderRegistryStatus(rr); renderKeywordRegistry(); };
+    chips.appendChild(b);
+  });
+}
+function regFiltered(){
+  var v=function(id){ var e=document.getElementById(id); return e?e.value:''; };
+  var lane=v('regLane'), season=v('regSeason'), st=v('regStatusSel'), band=v('regBand'),
+      topic=v('regTopic'), ver=v('regVerif'), grp=v('regGroup'), q=(v('regSearch')||'').toLowerCase().trim();
+  return REG_ROWS.filter(function(r){
+    if(lane && String(r.lane||'(none)')!==lane) return false;
+    if(season && String(r.season||'(none)')!==season) return false;
+    if(st && String(r.status||'(none)')!==st) return false;
+    if(band && String(r.volume_band||'(none)')!==band) return false;
+    if(topic && String(r.topic_lane||'(none)')!==topic) return false;
+    if(ver!=='' && String(Number(r.serp_verified)||0)!==ver) return false;
+    if(grp && String(r.volume_comparable_group||'')!==grp) return false;
+    if(q && String(r.keyword||'').toLowerCase().indexOf(q)<0) return false;
+    if(REG_CHIP==='auto' && String(r.status_source||'').indexOf('auto:')!==0) return false;
+    if(REG_CHIP==='unassigned' && (r.lane||'unassigned')!=='unassigned') return false;
+    if(REG_CHIP==='unverified' && Number(r.serp_verified)===1) return false;
+    if(REG_CHIP==='novol' && r.volume_band!=='no data') return false;
+    if(REG_CHIP==='nopage' && String(r.page||'').trim()) return false;
+    if(REG_CHIP==='killed' && ['killed','demoted'].indexOf(String(r.status))<0) return false;
+    return true;
+  });
+}
+function renderKeywordRegistry(){
+  var body=document.getElementById('regBody'); if(!body) return;
+  var rows=regFiltered();
+  var cnt=document.getElementById('regCount');
+  if(cnt) cnt.textContent=rows.length+' of '+REG_ROWS.length;
+  body.innerHTML='';
+  rows.slice(0,600).forEach(function(r){
+    var tr=document.createElement('tr');
+
+    // Band is the real value. The midpoint is shown ONLY as a labelled band
+    // midpoint, never as a count — 500,000 means the 100K-1M band.
+    var band=r.volume_band==='no data'
+      ? '<span class="band">no data</span>'
+      : '<span class="band">'+regEsc(r.volume_band)+'</span>'
+        +(r.volume_band_midpoint!=null?'<div class="midpt" title="Band midpoint, NOT a search count">mid '+Number(r.volume_band_midpoint).toLocaleString('en-US')+'</div>':'');
+
+    var laneTxt=regEsc(r.lane||'unassigned')+(r.season?' · '+regEsc(r.season):'')
+      +(r.refresh_month?'<div class="midpt">refresh m'+regEsc(r.refresh_month)+'</div>':'');
+
+    var stTags='';
+    var stc={killed:'killed',demoted:'demoted','feed-only':'feed'}[String(r.status)]||'';
+    stTags+='<span class="tag '+stc+'">'+regEsc(r.status||'active')+'</span>';
+    if(String(r.status_source||'').indexOf('auto:')===0) stTags+='<span class="tag auto">auto</span>';
+    if(r.killed_reason) stTags+='<div class="midpt" title="'+regEsc(r.killed_reason)+'">'+regEsc(String(r.killed_reason).slice(0,90))+'…</div>';
+
+    var stock=(r.stock_in_stock_skus!=null)
+      ? regEsc(r.stock_in_stock_skus)+'<div class="midpt">as of '+regEsc(r.stock_checked_at||'—')+'</div>'
+      : '<span class="midpt">—</span>';
+
+    var serp=Number(r.serp_verified)===1
+      ? '<span class="tag ver">verified</span>'+(r.serp_read_date?'<div class="midpt">'+regEsc(r.serp_read_date)+'</div>':'')
+        +(r.ad_load?'<div class="midpt">ads: '+regEsc(r.ad_load)+'</div>':'')
+      : '<span class="tag">unverified</span>';
+
+    tr.innerHTML='<td><span class="kwterm">'+regEsc(r.keyword)+'</span>'
+        +(r.bucket?'<div class="midpt">'+regEsc(r.bucket)+(r.bucket_normalised?' → '+regEsc(r.bucket_normalised):'')+'</div>':'')+'</td>'
+      +'<td>'+band+'</td>'
+      +'<td class="band">'+(r.bid_high!=null?'$'+Number(r.bid_high).toFixed(2):'—')+'</td>'
+      +'<td>'+laneTxt+'</td>'
+      +'<td>'+stTags+'</td>'
+      +'<td>'+(r.page?'<a href="'+regEsc(r.page)+'" target="_blank" rel="noopener">'+regEsc(r.page)+'</a>':'<span class="midpt">—</span>')+'</td>'
+      +'<td>'+stock+'</td>'
+      +'<td>'+serp+'</td>'
+      +'<td class="midpt">'+regEsc(r.origin_batch||'')+'<div>'+regEsc(r.volume_comparable_group||'')+'</div></td>';
+    body.appendChild(tr);
+  });
+  if(rows.length>600){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td colspan="9" class="midpt">Showing the first 600 of '+rows.length+'. Narrow the filters to see the rest — nothing is hidden, the table is capped for rendering speed.</td>';
+    body.appendChild(tr);
+  }
+  var n=document.getElementById('regNotes');
+  if(n) n.innerHTML=Object.keys(REG_NOTES).map(function(k){ return '<b>'+regEsc(k)+':</b> '+regEsc(REG_NOTES[k]); }).join('<br>');
+}
+function renderLaneDecisions(){
+  var el=document.getElementById('regLanes'); if(!el) return;
+  if(!REG_LANES.length){ el.innerHTML=''; return; }
+  el.innerHTML='<div class="section-head" style="margin:0 0 8px"><h3 style="font-size:13px">Killed and demoted lanes</h3><span class="hint">Every lane carries its reason, including the ones where no term could be assigned without guessing.</span></div>'
+    +REG_LANES.map(function(l){
+      return '<div class="ld"><b>'+regEsc(l.lane_label||l.lane_key)+' · '+regEsc(l.decision)+'</b> '
+        +'<span class="src">'+regEsc(l.terms_assigned)+' term(s) · '+regEsc(l.source)+'</span><br>'+regEsc(l.reason)+'</div>';
+    }).join('');
+}
+function regAddTerm(){
+  var t=document.getElementById('regNewTerm'), s=document.getElementById('regNewSource'),
+      w=document.getElementById('regNewReason'), note=document.getElementById('regAddNote');
+  if(!t) return;
+  var payload={ keyword:(t.value||'').trim(), source:(s.value||'').trim(), reason:(w.value||'').trim() };
+  if(!payload.keyword||!payload.source||!payload.reason){ if(note) note.textContent='term, source and reason are all required'; return; }
+  if(note) note.textContent='adding…';
+  wapi('seocmd_kw_add',payload).then(function(r){
+    if(r&&r.ok){ if(note) note.textContent='added unverified'; t.value=''; s.value=''; w.value=''; loadKeywordRegistry(); }
+    else if(note) note.textContent=(r&&(r.note||r.error))||'failed';
+  }).catch(function(){ if(note) note.textContent='failed'; });
+}
+function regRefreshStock(){
+  var b=document.getElementById('regStock'); if(b) b.classList.add('busy');
+  wapi('seocmd_stock_refresh').then(function(r){
+    if(b) b.classList.remove('busy');
+    toast(r&&r.ok?('Stock snapshot refreshed · '+r.collections+' collections'):('Stock: '+((r&&(r.message||r.error))||'no response')));
+    if(r&&r.ok) loadKeywordRegistry();
+  }).catch(function(){ if(b) b.classList.remove('busy'); toast('Stock refresh failed'); });
+}
+/* ---- one-button setup ----
+   Reads the two data files in the browser and posts them to the Worker. The
+   seed goes up in chunks so a 719-row load is a series of small requests
+   rather than one that times out. Nothing is written until both files parse. */
+var SETUP_CHUNK=100;
+function setupLog(msg,cls){
+  var el=document.getElementById('setupLog'); if(!el) return;
+  var d=document.createElement('div'); if(cls) d.className=cls; d.textContent=msg; el.appendChild(d);
+}
+function refreshSetupStatus(){
+  var st=document.getElementById('setupState'), box=document.getElementById('regSetup');
+  if(!mbToken()){ if(st) st.textContent='sign in from the LineSheet app to run setup'; return Promise.resolve(); }
+  return wapi('seocmd_setup_status').then(function(r){
+    if(!r||!r.ok){ if(st) st.textContent='could not read status'; return; }
+    var need=[];
+    if(!r.rules_loaded) need.push('metadata rules');
+    if(!r.keywords_seeded) need.push('keyword registry');
+    if(st){
+      st.textContent = need.length
+        ? ('not loaded yet: '+need.join(' + '))
+        : ('loaded · rules v'+r.rules_version+' · '+r.keywords_seeded+' terms · '+r.lane_decisions+' lanes');
+    }
+    if(box) box.classList.toggle('done', need.length===0);
+    if(r.index_failures && r.index_failures.length)
+      setupLog('WARNING: a database index did not get created. The one-term-one-URL rule is running on the Worker check alone. Tell Claude.','err');
+  }).catch(function(){ if(st) st.textContent='could not read status'; });
+}
+function setupReadFile(f){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){ try{ res({name:f.name, json:JSON.parse(fr.result)}); }catch(e){ rej(new Error(f.name+' is not readable JSON')); } };
+    fr.onerror=function(){ rej(new Error('could not read '+f.name)); };
+    fr.readAsText(f);
+  });
+}
+function setupRun(){
+  var input=document.getElementById('setupFiles'), btn=document.getElementById('setupGo'),
+      log=document.getElementById('setupLog');
+  if(log) log.innerHTML='';
+  if(!mbToken()){ setupLog('Open this page from the LineSheet app first — setup needs an admin session.','err'); return; }
+  var files=(input && input.files)?Array.prototype.slice.call(input.files):[];
+  if(!files.length){ setupLog('Pick the two .json files first.','err'); return; }
+
+  if(btn) btn.classList.add('busy');
+  Promise.all(files.map(setupReadFile)).then(function(parsed){
+    /* Work out which file is which by looking inside, so it does not matter
+       what order they were picked in or whether one was renamed. */
+    var rules=null, seed=null;
+    parsed.forEach(function(p){
+      if(p.json && p.json.meta_title && p.json.counting) rules=p.json;
+      else if(p.json && Array.isArray(p.json.rows)) seed=p.json;
+    });
+    if(!rules && !seed) throw new Error('Neither file looks right. Expected missb_metadata_RULES_v1.json and missb_keyword_seed_720_2026-08-05.json.');
+    if(rules && !rules.alt_text) throw new Error('That rules file is older than v1.2.0 — it has no alt_text block. Use the one Claude saved on 2026-08-05.');
+
+    var chain=Promise.resolve();
+    if(rules){
+      chain=chain.then(function(){
+        setupLog('Loading metadata rules v'+rules.version+'…');
+        return wapi('seocmd_rules_put',{rules:rules}).then(function(r){
+          if(!r||!r.ok) throw new Error('rules: '+((r&&(r.message||r.error))||'no response'));
+          setupLog('Metadata rules v'+r.version+' loaded.','ok');
+        });
+      });
+    }
+    if(seed){
+      var rows=seed.rows||[], lanes=seed.lane_decisions||[], done=0, failedTotal=0;
+      chain=chain.then(function(){ setupLog('Loading '+rows.length+' keywords…'); });
+      for(var i=0;i<rows.length;i+=SETUP_CHUNK){
+        (function(start){
+          chain=chain.then(function(){
+            var slice=rows.slice(start,start+SETUP_CHUNK);
+            var payload={ rows:slice, seed_version:seed.seed_version };
+            if(start===0) payload.lane_decisions=lanes;
+            if(start+SETUP_CHUNK>=rows.length) payload.final=true;
+            return wapi('seocmd_kw_seed',payload).then(function(r){
+              if(!r) throw new Error('no response from the worker');
+              if(r.error) throw new Error(r.error);
+              done+=r.written||0; failedTotal+=(r.failed||[]).length;
+              setupLog('  '+done+' / '+rows.length);
+              if(r.failed && r.failed.length)
+                r.failed.slice(0,3).forEach(function(f){ setupLog('  could not load "'+f.keyword+'": '+f.why,'err'); });
+            });
+          });
+        })(i);
+      }
+      chain=chain.then(function(){
+        setupLog(failedTotal? (done+' keywords loaded, '+failedTotal+' failed — see above.') : (done+' keywords loaded.'), failedTotal?'err':'ok');
+      });
+    }
+    return chain;
+  }).then(function(){
+    setupLog('Done. Refreshing the registry…','ok');
+    if(btn) btn.classList.remove('busy');
+    if(input) input.value='';
+    return refreshSetupStatus().then(loadKeywordRegistry);
+  }).catch(function(e){
+    if(btn) btn.classList.remove('busy');
+    setupLog('Stopped: '+(e&&e.message?e.message:e),'err');
+    setupLog('Nothing was half-written — every row is an upsert, so you can fix the problem and press Load again.','');
+  });
+}
+
+function bindRegistry(){
+  var sg=document.getElementById('setupGo'); if(sg) sg.onclick=setupRun;
+  ['regLane','regSeason','regStatusSel','regBand','regTopic','regVerif','regGroup'].forEach(function(id){
+    var e=document.getElementById(id); if(e) e.onchange=renderKeywordRegistry;
+  });
+  var q=document.getElementById('regSearch'); if(q) q.oninput=renderKeywordRegistry;
+  var rl=document.getElementById('regReload'); if(rl) rl.onclick=loadKeywordRegistry;
+  var ab=document.getElementById('regAddBtn'); if(ab) ab.onclick=regAddTerm;
+  var sb=document.getElementById('regStock'); if(sb) sb.onclick=regRefreshStock;
+}
+
 /* ============ TOOLBOX ============ */
 const TOOLBOX=[
   {cap:'Keyword research', who:'Search Console · Google Ads · Ahrefs', cover:'in', feeds:'<b>Keywords tab — auto-populated.</b> The list is your real Search Console queries, not a hand-typed set. Volume fills from Google Ads Keyword Planner (Pull volume). Mine the long-tail + occasion phrases for collections and content; head demand rides the product feed.'},
@@ -2190,6 +2584,7 @@ function init(){
   renderStreams(); renderStreamChips(); renderTasks(); renderSov();
   renderCadences(); renderPlaybooks();
   renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox(); renderOverview();
+  bindRegistry(); refreshSetupStatus(); loadKeywordRegistry();   // v82
   const day=updateDay(); renderTimeline(day); updateProgress();
   initTabs();
   document.getElementById('kwAdd').onclick=()=>{
@@ -2216,11 +2611,11 @@ function init(){
   // Live sync to the LineSheet worker (D1) + live store stats when signed in via the app
   if(mbToken()){
     setSync('● Syncing…','');
-    syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive);
+    syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive).then(loadKeywordRegistry);
     syncPriorityDown();
     setInterval(syncUp, 20000);
     document.addEventListener('visibilitychange', function(){ if(document.hidden){ syncUp(); } else { liveStats(); } });
-    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive); };
+    var lb=document.getElementById('livebar'); if(lb) lb.onclick=function(){ setSync('● Refreshing…',''); syncDown().then(liveStats).then(overlayRanksFromGSC).then(loadKeywordsLive).then(loadKeywordRegistry); };
   } else {
     setSync('● This device only — open from the LineSheet app to sync','');
   }
