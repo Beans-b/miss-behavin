@@ -1084,6 +1084,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div id="fixch-status" class="status"></div>
       <div id="fixch-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
 
+      <button class="btn btn-outline" id="phch-btn" onclick="phChScan()" style="margin-top:10px;">Photo channel check</button>
+      <div class="field-hint">The one case the push cannot catch. Adding an image does not upload it &#8212; it hands Shopify a link and Shopify fetches it later, so a vendor site that blocks the fetch leaves a product that was pushed &quot;with photos&quot; and ends up with none, live on the website. This reads the catalogue as it stands and finds ACTIVE products with no real photo that are showing beyond the register, and it also releases anything that was held and now has a photo. Nothing is pre-ticked. Needs worker v90.</div>
+      <div id="phch-status" class="status"></div>
+      <div id="phch-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
+
       <div class="section-title" style="margin-top:18px;">Private label</div>
       <!-- build 69 - the list of vendors that become Miss Behavin'. Editable
            here so a new private label never needs a Worker redeploy. -->
@@ -1287,6 +1292,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 98</strong> &#183; 2026-08-05 &#183; A product pushed with no photograph now goes to the register only and no empty page goes live (Worker v90 does the holding; this is the screen catching up). The 0-channels repair stopped warning that photoless products would show on the website without an image, because the Worker now refuses to do that, and it no longer reports &quot;on all N channels&quot; for products it deliberately held back. Adding photos to a live product now tells you whether a held product was released, or why it was not. NEW Photo channel check in Store Utilities: reads the catalogue as it stands, finds products with no real photograph showing beyond the register &#8212; the case the push cannot see, because Shopify fetches an image link afterwards and a blocked vendor site leaves a product that pushed &quot;with photos&quot; and has none &#8212; and releases anything held that now has one. Needs Worker v90. Carries build 97
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 97</strong> &#183; 2026-08-05 &#183; The &quot;Update available&quot; banner stops appearing on the build you are already running. The visible footer said 96 but the APP_BUILD constant the update-checker compares against was still 94, so every load read 96 off its own footer, saw 96 is greater than 94, and raised the banner &#8212; dismissing it did nothing because the next load repeated the comparison. No other change. Runs on Worker v86+; v88 adds the researched keyword vocabulary to the bulk Meta Fill backfill. Carries build 96
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 96</strong> &#183; 2026-08-05 &#183; On the Review &amp; Push card the product-URL box is now a real, open text field with its own label and Use this page button, instead of an underlined line you had to tap to reveal &#8212; a link reads as a note, not as somewhere to type, so the one control that fixes wrong photos was still effectively hidden. No Worker change &#8212; runs on v86+; carries build 95 (wrong product link fixable in Manual Entry and on the review card; style-code vendor guard)
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 95</strong> &#183; 2026-08-05 &#183; A wrong product link is fixable now. Manual Entry shows the photos it pulled right on the row, names the page they came from, and carries a Re-pull box to swap in the correct URL; the review card gains a product-URL box that replaces the whole photo set, fabric and fit; a vendor page whose brand field is a style code (Z031023) no longer lands in Vendor. Superseded in 96 only in that the review-card box was a tap-to-reveal link
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 94</strong> &#183; 2026-08-05 &#183; The blog draft now names the researched keyword phrases that fed the post, the way the product review card already did &#8212; live testing proved the words were reaching the blog writer but there was no way to see it, which was the whole point of showing them; needs Worker v86, and says so plainly on an older one; carries build 93
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 93</strong> &#183; 2026-08-05 &#183; Create Blog now gets the researched keyword vocabulary too, matched on the post topic and the featured brand (needs Worker v85, which also fixes a category roll-up: a Tank Top asked for &quot;Tank Tops&quot; vocabulary and found none because the registry files terms under Tops); the blog meta counters stopped fighting the rules file &#8212; the title counter read 62 / 60 in red on a title the standard allows to 70, and both counters now count characters the way the validator does rather than UTF-16 units; carries build 92
@@ -1294,7 +1302,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 96</strong> &#183; 2026-08-05 &#183; On the Review &amp; Push card the product-URL box is now a real, open text field with its own label and Use this page button, instead of an underlined line you had to tap to reveal &#8212; a link reads as a note, not as somewhere to type, so the one control that fixes wrong photos was still effectively hidden. No Worker change &#8212; runs on v86+; carries build 95 (wrong product link fixable in Manual Entry and on the review card; style-code vendor guard)</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 99</strong> &#183; 2026-08-05 &#183; Manual Entry takes several colours on one style. Type them comma-separated in the Colour box and the row grows a quantity line per colour &#8212; one product each, named &quot;Style - Colour&quot;, with its own SKU (CODE-COLOUR-SIZE) and its own review card. The invoice path has always worked this way; Manual Entry was the one place that assumed a single colourway, so a four-colour style had to be typed four times. Quantities are per colour on purpose &#8212; colours rarely arrive in equal counts and a wrong count is a wrong number at the register. Also fixes a latent counting bug: the row quantity read assigned instead of summing. No Worker change &#8212; runs on v90. Carries build 98</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1617,7 +1625,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 94;   // keep in step with the footer stamp
+var APP_BUILD = 99;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3265,7 +3273,7 @@ function fixChScan() {
 function _fixchRenderReview(r) {
   var box = el('fixch-review');
   var h = '<div class="sp-l" style="margin:0 0 4px;">Stuck on 0 sales channels — tick only what should go live (' + r.zero_count + ')</div>' +
-          '<div style="font-size:12px;color:#666;margin-bottom:6px;">These are invisible everywhere, even POS. Nothing is pre-ticked. A product with no photos will show on the website without an image — tick those only if that is OK.</div>';
+          '<div style="font-size:12px;color:#666;margin-bottom:6px;">These are invisible everywhere, even POS. Nothing is pre-ticked. Anything marked NO PHOTOS goes to the register only &#8212; it will not reach the website until it has a photograph, so it is safe to tick. (Worker v90.)</div>';
   (r.products || []).forEach(function(p){
     var photoBadge = p.photos > 0
       ? '<span style="color:#999;font-size:11px;white-space:nowrap;">' + p.photos + ' photo' + (p.photos===1?'':'s') + '</span>'
@@ -3279,7 +3287,7 @@ function _fixchRenderReview(r) {
   if (r.zero_count > (r.products || []).length) {
     h += '<div style="font-size:11px;color:#999;margin-top:4px;">+' + (r.zero_count - r.products.length) + ' more not shown — run again after this batch.</div>';
   }
-  h += '<button type="button" class="btn btn-black" id="fixch-go" style="margin-top:12px;" disabled>Publish <span id="fixch-apply-n">0</span> product(s) to all ' + r.channels + ' channels</button>' +
+  h += '<button type="button" class="btn btn-black" id="fixch-go" style="margin-top:12px;" disabled>Publish <span id="fixch-apply-n">0</span> product(s) &#8212; photos to all ' + r.channels + ' channels, no photos to the register</button>' +
        '<button type="button" class="btn btn-outline" id="fixch-cancel" style="margin-top:8px;">Cancel</button>';
   box.innerHTML = h;
   box.style.display = 'block';
@@ -3304,11 +3312,117 @@ function fixChApply() {
   .then(function(r) {
     btn.disabled = false;
     if (r.error) { showStatus('fixch-status','error', esc(r.error)); return; }
-    var msg = '✓ ' + r.published + ' of ' + r.requested + ' product' + (r.requested===1?'':'s') + ' now on all ' + r.channels + ' sales channels.';
+    // build 98 — the Worker splits these two groups, so the screen has to as
+    // well. Saying "all N channels" about a product it deliberately held to the
+    // register is the app lying about its own behaviour.
+    var _held = r.held_to_pos || 0;
+    var _all  = (r.published || 0) - _held;
+    var msg = '✓ ' + r.published + ' of ' + r.requested + ' product' + (r.requested===1?'':'s') + ' published.';
+    if (_all)  msg += ' ' + _all + ' on all ' + r.channels + ' channels.';
+    if (_held) msg += ' ' + _held + ' had no photos &#8212; register only, no page live. Add a photo and they release themselves.';
     if ((r.failed||[]).length) msg += ' Failed: ' + esc(r.failed.slice(0,3).join(' · '));
     showStatus('fixch-status', (r.failed||[]).length ? 'error' : 'success', msg);
   })
   .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Failed — tap again.')); });
+}
+
+/* ── build 98 — PHOTO CHANNEL CHECK (worker v90) ──────────────────────
+   Two lists in one pass, because the Worker scans once and reports both:
+     TAKE OFF THE WEBSITE — no real photograph, showing beyond the register.
+     PUT BACK ON          — was held for photos, now has one.
+   Nothing is pre-ticked either way, and the scan says plainly when it did not
+   reach the whole catalogue rather than presenting a short pass as clean. */
+function phChScan() {
+  var btn = el('phch-btn');
+  btn.disabled = true;
+  el('phch-review').style.display = 'none';
+  showStatus('phch-status','loading','<span class="spinner"></span>Reading the catalogue&#8230; this one is slow on purpose, it paces itself so Shopify does not cut it off.');
+  api('photo_channel_audit', { dry_run: true })
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('phch-status','error', esc(r.error)); return; }
+    var n = (r.offender_count || 0) + (r.release_count || 0);
+    if (!n) {
+      var clean = '✓ Nothing to change. Every product with no photograph is on the register only, and nothing is waiting to be released. Register channel: ' + esc(r.pos_channel || '');
+      if (r.truncated) clean += ' &#8212; but ' + esc(r.note || 'the scan stopped early.');
+      showStatus('phch-status', r.truncated ? 'error' : 'success', clean);
+      return;
+    }
+    el('phch-status').style.display = 'none';
+    _phChRenderReview(r);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('phch-status','error', esc(e.message || 'Scan failed — tap again.')); });
+}
+function _phChRenderReview(r) {
+  var box = el('phch-review');
+  var h = '';
+  if (r.truncated) {
+    h += '<div style="font-size:12px;color:var(--red, #b05a43);margin-bottom:8px;font-weight:600;">' + esc(r.note || 'The scan did not reach the whole catalogue.') + '</div>';
+  }
+  h += '<div style="font-size:12px;color:#666;margin-bottom:8px;">Scanned ' + (r.scanned||0) + ' active products. Register channel: ' + esc(r.pos_channel || '') + '</div>';
+
+  if ((r.products || []).length) {
+    h += '<div class="sp-l" style="margin:0 0 4px;">Take off the website &#8212; no photograph (' + r.offender_count + ')</div>' +
+         '<div style="font-size:12px;color:#666;margin-bottom:6px;">These are live beyond the register with nothing to show. Ticking one takes it off those channels and puts it on the register.</div>';
+    (r.products || []).forEach(function(p){
+      var why = p.photos_failed
+        ? '<span style="color:var(--red, #b05a43);font-size:11px;white-space:nowrap;">' + p.photos_failed + ' image(s) FAILED to load</span>'
+        : '<span style="color:var(--red, #b05a43);font-size:11px;white-space:nowrap;">NO PHOTOS</span>';
+      h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+             '<input type="checkbox" class="phch-ck" value="' + esc(p.id) + '"/>' +
+             '<span style="flex:1;">' + esc(p.title) + (p.adds_pos ? ' <span style="color:#999;font-size:11px;">(will also be added to the register)</span>' : '') + '</span>' +
+             '<span style="color:#999;font-size:11px;">' + esc(p.vendor || '') + '</span> ' + why +
+           '</label>';
+    });
+  }
+
+  if ((r.releases || []).length) {
+    h += '<div class="sp-l" style="margin:14px 0 4px;">Put back on the website &#8212; photos have arrived (' + r.release_count + ')</div>' +
+         '<div style="font-size:12px;color:#666;margin-bottom:6px;">These were held for want of a photograph and now have one. Ticking one publishes it to every channel.</div>';
+    (r.releases || []).forEach(function(p){
+      h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+             '<input type="checkbox" class="phch-ck" value="' + esc(p.id) + '"/>' +
+             '<span style="flex:1;">' + esc(p.title) + '</span>' +
+             '<span style="color:#999;font-size:11px;">' + esc(p.vendor || '') + '</span> ' +
+             '<span style="color:var(--success-fg, #4a7c59);font-size:11px;white-space:nowrap;">' + p.photos + ' photo' + (p.photos===1?'':'s') + ' &#8212; on ' + p.channels_on + ' of ' + p.channels_total + '</span>' +
+           '</label>';
+    });
+  }
+
+  h += '<button type="button" class="btn btn-black" id="phch-go" style="margin-top:12px;" disabled>Apply to <span id="phch-apply-n">0</span> product(s)</button>' +
+       '<button type="button" class="btn btn-outline" id="phch-cancel" style="margin-top:8px;">Cancel</button>';
+  box.innerHTML = h;
+  box.style.display = 'block';
+  var upd = function(){
+    var n = box.querySelectorAll('.phch-ck:checked').length;
+    el('phch-apply-n').textContent = n;
+    el('phch-go').disabled = (n === 0);
+  };
+  Array.prototype.forEach.call(box.querySelectorAll('.phch-ck'), function(ck){ ck.addEventListener('change', upd); });
+  el('phch-go').onclick = phChApply;
+  el('phch-cancel').onclick = function(){ box.style.display = 'none'; };
+}
+function phChApply() {
+  var box = el('phch-review');
+  var ids = Array.prototype.map.call(box.querySelectorAll('.phch-ck:checked'), function(ck){ return ck.value; });
+  if (!ids.length) return;
+  var btn = el('phch-btn');
+  btn.disabled = true;
+  box.style.display = 'none';
+  showStatus('phch-status','loading','<span class="spinner"></span>Applying to ' + ids.length + ' product(s)&#8230;');
+  api('photo_channel_audit', { ids: ids })
+  .then(function(r) {
+    btn.disabled = false;
+    if (r.error) { showStatus('phch-status','error', esc(r.error)); return; }
+    var bits = [];
+    if (r.demoted)  bits.push(r.demoted + ' taken off the website (register only)');
+    if (r.released) bits.push(r.released + ' released to all channels');
+    var msg = bits.length ? '✓ ' + bits.join(' · ') + '.' : 'Nothing was changed.';
+    if (r.not_found) msg += ' ' + r.not_found + ' were not found in the fresh scan and were left alone.';
+    if ((r.failed||[]).length) msg += ' Problems: ' + esc(r.failed.slice(0,3).join(' · '));
+    showStatus('phch-status', ((r.failed||[]).length || r.not_found) ? 'error' : 'success', msg);
+  })
+  .catch(function(e) { btn.disabled = false; showStatus('phch-status','error', esc(e.message || 'Failed — tap again.')); });
 }
 
 /* ── build 69 — private-label vendor list (worker v75) ────────────────
@@ -4174,6 +4288,116 @@ function _manSizeInputs(runKey){
            '</label><input type="number" min="0" class="field-input man-sz-' + esc(sz) + '" style="text-align:center;"/></div>';
   }).join('');
 }
+/* ── build 99 — SEVERAL COLOURS ON ONE MANUAL ROW ─────────────────────
+   One style number, four colourways, four products. The invoice path has done
+   this from the start because an invoice carries a colours array; Manual Entry
+   was the only place that assumed exactly one. Type them comma-separated and
+   the row grows a quantity line per colour.
+
+   Deliberately NOT one shared quantity applied to all: colours almost never
+   arrive in equal counts, and a wrong count is a wrong number at the register. */
+function _manColors(row){
+  var el2 = row && row.querySelector('.man-color');
+  var raw = (el2 && el2.value) || '';
+  var out = [], seen = {};
+  raw.split(',').forEach(function(c){
+    var t = String(c).trim();
+    if (!t) return;
+    var k = t.toLowerCase();
+    if (seen[k]) return;          // "Ivory, ivory" is one colourway, not two
+    seen[k] = 1;
+    out.push(t);
+  });
+  return out.slice(0, 12);        // a manual row is not a bulk importer
+}
+function _manIsMulti(row){ return _manColors(row).length > 1; }
+
+// One line per colour, each carrying the row's current size run. Values already
+// typed survive a re-render, keyed by colour NAME rather than position, so
+// re-ordering or renaming the list does not scramble the counts.
+function _manRenderColorGrid(row){
+  if (!row) return;
+  var box = row.querySelector('.man-colors');
+  if (!box) return;
+  var colors = _manColors(row);
+  if (colors.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  var keep = {};
+  box.querySelectorAll('.man-crow').forEach(function(cr){
+    var cn = cr.getAttribute('data-color') || '';
+    cr.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
+      var m = /man-csz-([^\s]+)/.exec(i.className);
+      if (m) keep[cn.toLowerCase() + '|' + m[1]] = i.value;
+    });
+  });
+
+  var run   = row.dataset.run || 'ALPHA';
+  var sizes = (run === 'OS') ? ['OS'] : ((SIZE_RUNS[run] || SIZE_RUNS.ALPHA).sizes);
+  var h = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+            '<label class="sp-l" style="margin:0;">Quantity per colour &#8212; ' + colors.length + ' products</label>' +
+            '<button class="btn btn-outline" style="width:auto;padding:6px 10px;margin:0;font-size:12px;" ' +
+              'onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
+          '</div>';
+  colors.forEach(function(cn, ci){
+    h += '<div class="man-crow" data-ci="' + ci + '" data-color="' + esc(cn) + '" ' +
+           'style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:6px 0;border-top:1px solid #f0f0f0;">' +
+           '<div style="flex:1.4;min-width:90px;"><span style="font-size:13px;">' + esc(cn) + '</span></div>';
+    sizes.forEach(function(sz){
+      var v = keep[cn.toLowerCase() + '|' + sz];
+      h += '<div style="flex:1;min-width:44px;text-align:center;">' +
+             '<label class="sp-l" style="white-space:nowrap;">' + esc(sz) + '</label>' +
+             '<input type="number" min="0" class="field-input man-csz-' + esc(sz) + '" ' +
+               'style="text-align:center;" value="' + esc(v === undefined ? '' : v) + '"/>' +
+           '</div>';
+    });
+    h += '</div>';
+  });
+  box.innerHTML = h;
+  box.style.display = 'block';
+  box.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
+    i.addEventListener('input', manualFormChanged);
+  });
+}
+
+// The Colour box changed. Swap the row between single and multi, and CLEAR the
+// boxes that are no longer in play — a hidden quantity that still counts is how
+// a row reads as filled when the visible grid is empty.
+function manColorChanged(inp){
+  var row = inp.closest('.man-row'); if (!row) return;
+  var multi = _manIsMulti(row);
+  var os = row.querySelector('.man-qty-os'), sized = row.querySelector('.man-qty-sized');
+  if (multi) {
+    row.querySelectorAll('input[class*="man-sz-"]').forEach(function(e){ e.value = ''; });
+    if (os) os.style.display = 'none';
+    if (sized) sized.style.display = 'none';
+    _manRenderColorGrid(row);
+  } else {
+    var box = row.querySelector('.man-colors');
+    if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+    setRowSizing(row, (row.dataset.run === 'OS') ? 'os' : 'sized');
+  }
+  manualFormChanged();
+}
+
+// Read the grid back as the shape the rest of the app already speaks: the same
+// colours array an invoice produces. A colour with no quantity typed is not a
+// product and is dropped rather than pushed as an empty.
+function _manRowColorSets(row){
+  if (!_manIsMulti(row)) return null;
+  var out = [];
+  row.querySelectorAll('.man-crow').forEach(function(cr){
+    var cn = cr.getAttribute('data-color') || '';
+    var sizes = {}, total = 0;
+    cr.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
+      var m = /man-csz-([^\s]+)/.exec(i.className);
+      var q = parseInt(i.value, 10) || 0;
+      if (m && q > 0) { sizes[m[1]] = q; total += q; }
+    });
+    if (total > 0) out.push({ color: cn, sizes: sizes, total: total });
+  });
+  return out;
+}
+
 // Which run does a manual-entry Category imply? Same rules as the invoice path.
 function _manRunForCategory(cat){
   var c = String(cat || '').trim();
@@ -4190,6 +4414,15 @@ function _manApplyRun(row, run){
   if (!row) return;
   var sel = row.querySelector('.man-run');
   if (sel && sel.value !== run) sel.value = run;
+  // build 99 — a multi-colour row draws its own boxes, so the run has to reach
+  // them. Without this, flipping Alpha to One-size left four colour lines still
+  // showing XS-XL and the quantities would have been read against the wrong run.
+  if (_manIsMulti(row)) {
+    row.dataset.run = run;
+    _manRenderColorGrid(row);
+    manualFormChanged();
+    return;
+  }
   if (run === 'OS') { setRowSizing(row, 'os'); row.dataset.run = 'OS'; return; }
 
   var box = row.querySelector('.man-qty-sized');
@@ -4227,9 +4460,12 @@ function manRunChanged(sel){
 // build 88 — read the quantities off whatever run the row is showing.
 function _manRowSizes(row){
   var out = {};
-  row.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){
-    var m = /man-sz-([^\s]+)/.exec(i.className);
-    if (m) out[m[1]] = parseInt(i.value, 10) || 0;
+  // build 99 — reads the per-colour boxes as well, and SUMS. The old line
+  // assigned, which was fine when a size appeared once but would have reported
+  // the last colour's count as the whole row's.
+  row.querySelectorAll('input[class*="man-sz-"], input[class*="man-csz-"]').forEach(function(i){
+    var m = /man-c?sz-([^\s]+)/.exec(i.className);
+    if (m) out[m[1]] = (out[m[1]] || 0) + (parseInt(i.value, 10) || 0);
   });
   return out;
 }
@@ -4500,13 +4736,14 @@ function manualFormChanged(){
     var qty = Object.keys(_sz).reduce(function(t,k){ return t + (_sz[k]||0); }, 0);
     var _sizedEl = row.querySelector('.man-qty-sized');
     var _sizedOn = _sizedEl && _sizedEl.style.display !== 'none';
+    var _multi   = _manIsMulti(row);            // build 99
     var qtyBad = !(qty > 0);
-    if (qtyBad) need.push(_sizedOn ? 'a size quantity' : 'a quantity');
+    if (qtyBad) need.push(_multi ? 'a quantity for at least one colour' : (_sizedOn ? 'a size quantity' : 'a quantity'));
     // build 92 — mark the exact boxes still blank
     _manFlag(nameEl, started && nameBad);
     _manFlag(retailEl, started && retailBad);
-    var _qtyBox = _sizedOn ? _sizedEl : row.querySelector('.man-qty-os');
-    if (_qtyBox) _qtyBox.querySelectorAll('input[class*="man-sz-"]').forEach(function(i){ _manFlag(i, started && qtyBad); });
+    var _qtyBox = _multi ? row.querySelector('.man-colors') : (_sizedOn ? _sizedEl : row.querySelector('.man-qty-os'));
+    if (_qtyBox) _qtyBox.querySelectorAll('input[class*="man-sz-"], input[class*="man-csz-"]').forEach(function(i){ _manFlag(i, started && qtyBad); });
     if (!need.length) { rowOk = true; }
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
   });
@@ -4601,9 +4838,12 @@ function manualAddRow(){
       '<div style="flex:1;"></div>' +
     '</div>' +
     '<div style="display:flex;gap:8px;margin-top:6px;">' +
-      '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color"/></div>' +
+      '<div style="flex:2;"><label class="sp-l">Color</label><input type="text" class="field-input man-color" oninput="manColorChanged(this)" placeholder="Ivory, Black, Sage"/>' +
+        '<div style="font-size:11px;color:#999;margin-top:3px;">Several colours? Separate them with commas &#8212; you get one product per colour, named &quot;Style - Colour&quot;, each with its own SKU.</div></div>' +
       '<div style="flex:1;"><label class="sp-l">Retail price $</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-retail" onblur="manMoneyBlur(this)"/></div>' +
     '</div>' +
+    // build 99 — drawn only when the Colour box holds more than one name.
+    '<div class="man-colors" style="display:none;margin-top:8px;"></div>' +
     // build 63 — sizing is Type-driven, no toggle buttons. Rows default to
     // Sized XS–L (apparel); choosing Type "Accessory" flips the row to a single
     // Quantity box via manTypeChanged → setRowSizing.
@@ -4655,7 +4895,7 @@ function manualStart(){
     // build 89 — the run control wins; dataset.run is what is actually rendered
     var _runSel = row.querySelector('.man-run');
     var _rowRun = (_runSel && _runSel.value) || row.dataset.run || _manRunForCategory(type);
-    var color = row.querySelector('.man-color').value.trim() || 'Default';
+    var color = (row.querySelector('.man-color').value.split(',')[0] || '').trim() || 'Default';   // build 99
     var retail = _manMoney(row.querySelector('.man-retail').value);            // build 92 — tolerant parse
     var cost = _manMoney(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
     var sizes = {};
@@ -4665,13 +4905,19 @@ function manualStart(){
       var q = parseInt(row.querySelector('.man-sz-'+sz).value, 10) || 0;
       if (q > 0) sizes[sz] = q;
     });
-    if (!name || !(retail > 0) || !Object.keys(sizes).length){ bad++; return; }
+    // build 99 — several colourways on one row become several colour sets, the
+    // same shape an invoice produces, so the review cards, the SKUs, the titles
+    // and the push all work unchanged: one product per colour, named
+    // "<style> - <colour>", SKU <code>-<COLOUR>-<size>.
+    var _sets = _manRowColorSets(row);
+    if (_sets && !_sets.length) { bad++; return; }     // colours typed, no counts
+    if (!name || !(retail > 0) || (!_sets && !Object.keys(sizes).length)){ bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
     // build 39 — a valid typed/scanned UPC rides into the style and prefills
     // the push card; invalid stays null (SKU barcode at push, never blocks)
     var upcRaw = gtinDigits((row.querySelector('.man-upc') || {}).value || '');
     var s = { code: 'MAN-' + _stamp + '-' + (i+1), type: type, name: name, cost: cost,
-              colors: [{ color: color, sizes: sizes, total: units }], notes: null,
+              colors: _sets || [{ color: color, sizes: sizes, total: units }], notes: null,
               barcode: (upcRaw && isGtin(upcRaw)) ? upcRaw : null, fabric: null, fit: null };
     // build 33 — the price he entered IS the retail; it rides straight
     // through to the pricing card and the Shopify push.
@@ -5683,6 +5929,10 @@ function _spDoCreate(cd) {
 
     if (res.warnings && res.warnings.length) {
       _spShowErrorDetail(cd, 'Note: ' + res.warnings.join(' · '), 'color:var(--gray-text);');
+    } else if (res.channels_held_for_photos) {
+      // build 98 — this is not a warning, it is the rule working. Say so
+      // plainly rather than leaving a one-channel product looking broken.
+      _spShowErrorDetail(cd, 'No photos &#8212; on the register only. No page is live. Add a photo below and it publishes itself to the rest.', 'color:var(--gray-text);');
     } else if (typeof res.channels_published === 'number' && res.channels_published > 0) {
       // build 31 — say it out loud so a 0-channel product can never pass silently
       _spShowErrorDetail(cd, '✓ Live on ' + res.channels_published + ' sales channel' + (res.channels_published===1?'':'s'), 'color:var(--success-fg);');
@@ -7077,7 +7327,15 @@ function _spAddImagesToLive(cd, btn){
   .then(function(res){
     if (btn) btn.disabled = false;
     if (res.error) throw new Error(res.error);
-    cd.els.fetchStatus.textContent = '✓ Added ' + (res.added || imgs.length) + ' image(s) to the live product.';
+    // build 98 — Worker v90 returns `note` (whether a product held to the
+    // register was released, or why it was not) and `rejected` (images Shopify
+    // refused). Both were being dropped, so the one sentence that says whether
+    // the way back worked reached nobody, and 5 selected / 3 attached read as
+    // an unqualified success.
+    var _m = '✓ Added ' + (res.added || imgs.length) + ' image(s) to the live product.';
+    if (res.rejected) _m += ' Some were refused: ' + res.rejected;
+    if (res.note)     _m += ' ' + res.note;
+    cd.els.fetchStatus.textContent = _m;
   })
   .catch(function(e){ if (btn) btn.disabled = false; cd.els.fetchStatus.textContent = 'Add images failed: ' + e.message; });
 }
