@@ -632,8 +632,6 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
    no way to say so: the review card only offered a name search, and Manual
    Entry never showed what it pulled. Both do now. */
 .sp-purl{margin-top:6px;}
-.sp-purl-toggle{background:none;border:none;padding:2px 0;margin:0;color:var(--gray-text);font-family:'DM Sans',sans-serif;font-size:12px;text-decoration:underline;cursor:pointer;}
-.sp-purl-toggle:hover{color:var(--primary);}
 .sp-purl-hint{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;}
 .sp-purl-src{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;word-break:break-all;}
 .sp-purl-src a{color:var(--gray-text);}
@@ -1289,13 +1287,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 95</strong> &#183; 2026-08-05 &#183; A wrong product link is fixable now. Manual Entry shows the photos it pulled right on the row, names the page they came from, and carries a Re-pull box to swap in the correct URL; the review card gains a product-URL box that replaces the whole photo set, fabric and fit; a vendor page whose brand field is a style code (Z031023) no longer lands in Vendor. Superseded in 96 only in that the review-card box was a tap-to-reveal link
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 94</strong> &#183; 2026-08-05 &#183; The blog draft now names the researched keyword phrases that fed the post, the way the product review card already did &#8212; live testing proved the words were reaching the blog writer but there was no way to see it, which was the whole point of showing them; needs Worker v86, and says so plainly on an older one; carries build 93
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 93</strong> &#183; 2026-08-05 &#183; Create Blog now gets the researched keyword vocabulary too, matched on the post topic and the featured brand (needs Worker v85, which also fixes a category roll-up: a Tank Top asked for &quot;Tank Tops&quot; vocabulary and found none because the registry files terms under Tops); the blog meta counters stopped fighting the rules file &#8212; the title counter read 62 / 60 in red on a title the standard allows to 70, and both counters now count characters the way the validator does rather than UTF-16 units; carries build 92
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 95</strong> &#183; 2026-08-05 &#183; A wrong product link is fixable now. Manual Entry shows the photos it pulled right on the row, names the page they came from, and carries a Re-pull box to swap in the correct URL &#8212; the photos used to stay invisible until the review screen, which is where the wrong item was being found. The review card gains a &quot;Wrong photos? Paste the exact product page URL&quot; box that replaces the whole photo set, fabric and fit from that page, keeping your category, tags and edited copy. A vendor page whose brand field is a style code (Z031023) no longer lands in Vendor. No Worker change &#8212; runs on v86+; carries build 94</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 96</strong> &#183; 2026-08-05 &#183; On the Review &amp; Push card the product-URL box is now a real, open text field with its own label and Use this page button, instead of an underlined line you had to tap to reveal &#8212; a link reads as a note, not as somewhere to type, so the one control that fixes wrong photos was still effectively hidden. No Worker change &#8212; runs on v86+; carries build 95 (wrong product link fixable in Manual Entry and on the review card; style-code vendor guard)</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -6624,16 +6623,17 @@ function _spInitDetails(cd){
     // a candidate list. If the link behind these photos was the wrong item
     // there was no way to say so — the photos were stuck. This takes the exact
     // product URL and replaces the photo set with that page's.
+    // build 96 — the box is OPEN. It was behind a "tap to reveal" link, which
+    // reads as a note rather than a place to type, so the one control that
+    // fixes a wrong link was still effectively hidden.
     '<div class="sp-purl">' +
       '<div class="sp-purl-src"></div>' +
-      '<button type="button" class="sp-purl-toggle">Wrong photos? Paste the exact product page URL</button>' +
-      '<div class="sp-purl-body" style="display:none;">' +
-        '<div style="display:flex;gap:6px;margin-top:4px;">' +
-          '<input class="field-input sp-purl-input" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
-          '<button type="button" class="btn btn-black sp-purl-go" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use this page</button>' +
-        '</div>' +
-        '<div class="sp-purl-hint">Replaces every photo on this card, plus fabric and fit, with that page&#8217;s. Your category, tags, sizes and any copy you have already edited stay.</div>' +
+      '<label class="sp-l">Wrong photos? Paste the exact product page URL</label>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<input type="text" class="field-input sp-purl-input" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
+        '<button type="button" class="btn btn-black sp-purl-go" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use this page</button>' +
       '</div>' +
+      '<div class="sp-purl-hint">Replaces every photo on this card, plus fabric and fit, with that page&#8217;s. Your category, tags, sizes and any copy you have already edited stay.</div>' +
     '</div>' +
     // v57 — vendor-site registry: appears when the brand has no known website.
     // Paste it once, it saves for this brand and every future scanned product.
@@ -6670,10 +6670,8 @@ function _spInitDetails(cd){
     vsite: wrap.querySelector('.sp-vsite'),
     vsiteInput: wrap.querySelector('.sp-vsite-input'),
     vsiteSave: wrap.querySelector('.sp-vsite-save'),
-    // build 95 — the exact-product-URL control
+    // build 95 — the exact-product-URL control (build 96: always open)
     purlSrc: wrap.querySelector('.sp-purl-src'),
-    purlToggle: wrap.querySelector('.sp-purl-toggle'),
-    purlBody: wrap.querySelector('.sp-purl-body'),
     purlInput: wrap.querySelector('.sp-purl-input'),
     purlGo: wrap.querySelector('.sp-purl-go'),
     images: wrap.querySelector('.sp-images'),
@@ -6726,16 +6724,7 @@ function _spInitDetails(cd){
   // build 76 — one field, one listener.
   cd.els.cat.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
-  // build 95 — the exact-product-URL escape hatch. Collapsed by default so the
-  // card stays quiet, one tap away when the photos are wrong.
-  cd.els.purlToggle.onclick = function(){
-    var open = cd.els.purlBody.style.display !== 'none';
-    cd.els.purlBody.style.display = open ? 'none' : 'block';
-    cd.els.purlToggle.textContent = open
-      ? 'Wrong photos? Paste the exact product page URL'
-      : 'Hide the product URL box';
-    if (!open && cd.els.purlInput) cd.els.purlInput.focus();
-  };
+  // build 95 — the exact-product-URL escape hatch (build 96: a plain open box).
   cd.els.purlGo.onclick = function(){ _spUseProductUrl(cd); };
   cd.els.purlInput.addEventListener('keydown', function(ev){
     if (ev.key === 'Enter'){ ev.preventDefault(); _spUseProductUrl(cd); }
