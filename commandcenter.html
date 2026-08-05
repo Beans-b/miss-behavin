@@ -838,56 +838,9 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <div class="sov-intro" style="margin-bottom:6px">
       <p>Two things live on this tab. <b>The keyword registry</b> below is the researched corpus — every sized term, what it is worth, and whether it has been checked on a real Google page. <b>The position tracker</b> further down is a short hand-picked list whose live Search Console rank is pulled on demand. Different jobs: the registry decides what to build and what words to use, the tracker watches how a handful of pages are doing.</p>
     </div>
-    <div id="oppWrap" class="opp-wrap">
-      <div class="section-head"><h3>Opportunities</h3><span class="hint">Live from Search Console, recalculated every refresh. Not research — these are real searches that reached the site in the last 28 days.</span></div>
-      <p class="sov-note" style="margin:0 0 10px">Three things get flagged. <b>Low click-through</b>: the page ranks on page one but almost nobody clicks, which is a title and meta job, not a ranking job. <b>Almost page 1</b>: sitting at position 11-20, one step away. <b>Rising demand</b>: impressions climbing against the previous period, so something new is being searched for. The query shown is what a real person typed.</p>
-      <div id="oppBody"></div>
-    </div>
-    <div class="section-head" style="margin-top:26px"><h3>Position tracker</h3><span class="hint">The baseline. A hand-picked list of terms mapped to specific pages, with a target position, rank-tracked live from Search Console.</span></div>
-    <p class="sov-note" style="margin:0 0 10px">This is how you tell whether a page is working. Each row pairs a term with the page meant to win it and the position you are aiming at; Refresh ranks pulls the real number from Search Console. <b>When you decide to build a registry term, add it here</b> — that is what turns a decision into something measurable.</p>
-    <div class="kw-summary">
-      <div><div class="n" id="kwTotal">0</div><div class="l">Rank-tracked</div></div>
-      <div><div class="n" id="kwTop">0</div><div class="l">In top 10</div></div>
-      <div><div class="n" id="kwCited">0</div><div class="l">AI-cited</div></div>
-      <div><div class="n" id="kwP1">0</div><div class="l">Priority 1</div></div>
-    </div>
-    <div class="toolbar">
-      <div class="chips" id="kwClusterChips"></div>
-      <button class="btn" id="kwAdd">+ Add keyword</button>
-      <button class="btn" id="kwGsc" title="Pull the last 28 days of positions from Google Search Console (admin)">↻ Refresh ranks (GSC)</button>
-      <button class="btn" id="kwVol" title="Pull average monthly search volume from Google Ads Keyword Planner (admin)">≈ Pull volume (Google Ads)</button>
-      <span id="kwGscNote"></span>
-    </div>
-    <div class="sov-scroll">
-      <table class="kw" id="kwTable">
-        <thead><tr>
-          <th>Keyword</th><th>Intent</th><th>Mapped page</th><th>Vol</th><th>KD</th><th>Rank / AI</th><th>Target</th><th>Pri</th><th>SERP / AI feature</th>
-        </tr></thead>
-        <tbody id="kwBody"></tbody>
-      </table>
-    </div>
-    <div id="discWrap">
-      <div class="section-head"><h3>Discovered in Search Console</h3><span class="hint">Real queries you already rank for that aren't tracked yet. Tap track to add.</span></div>
-      <div id="discBody"></div>
-    </div>
     <!-- ============ v82: KEYWORD REGISTRY (MB-REG-V1) ============ -->
     <div id="regWrap">
       <div class="section-head"><h3>Keyword registry</h3><span class="hint">The sized corpus from <code>missb_keyword_baseline_v2_2026-08-05.xlsx</code>, live out of <code>keyword_meta</code>. Volume ranks a list; it decides nothing. No term becomes a page without a live SERP read.</span></div>
-      <div class="reg-setup" id="regSetup">
-        <div class="setup-head"><b>Setup</b><span id="setupState">checking…</span></div>
-        <div class="setup-body" id="setupBody">
-          <p class="setup-why">One-time load. Pick these two files out of your <code>miss-behavin</code> folder and this does the rest — no command line, no SQL.</p>
-          <ol class="setup-files">
-            <li><code>missb_metadata_RULES_v1.json</code> — in the main folder</li>
-            <li><code>App\missb_keyword_seed_720_2026-08-05.json</code> — in the App folder</li>
-          </ol>
-          <div class="setup-row">
-            <input type="file" id="setupFiles" accept=".json,application/json" multiple>
-            <button class="btn" id="setupGo">Load registry</button>
-          </div>
-          <div class="setup-log" id="setupLog"></div>
-        </div>
-      </div>
       <div class="reg-status" id="regStatus"></div>
       <div class="reg-chips" id="regChips"></div>
       <div class="reg-filters">
@@ -928,7 +881,55 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
 
       <div class="lane-dec" id="regLanes"></div>
     </div>
-    <p class="sov-note">The registry is research, not results. What it holds is what people search for and what it is worth. Whether a page of yours is actually doing well lives in the Position tracker above, which reads live Search Console.</p>
+
+    <div id="oppWrap" class="opp-wrap">
+      <div class="section-head"><h3>Opportunities</h3><span class="hint">Live from Search Console, recalculated every refresh. Not research — these are real searches that reached the site in the last 28 days.</span></div>
+      <p class="sov-note" style="margin:0 0 10px">Three things get flagged. <b>Low click-through</b>: the page ranks on page one but almost nobody clicks, which is a title and meta job, not a ranking job. <b>Almost page 1</b>: sitting at position 11-20, one step away. <b>Rising demand</b>: impressions climbing against the previous period, so something new is being searched for. The query shown is what a real person typed.</p>
+      <div id="oppBody"></div>
+    </div>
+    <div class="section-head" style="margin-top:26px"><h3>Position tracker</h3><span class="hint">The baseline. A hand-picked list of terms mapped to specific pages, with a target position, rank-tracked live from Search Console.</span></div>
+    <p class="sov-note" style="margin:0 0 10px">This is how you tell whether a page is working. Each row pairs a term with the page meant to win it and the position you are aiming at; Refresh ranks pulls the real number from Search Console. <b>When you decide to build a registry term, add it here</b> — that is what turns a decision into something measurable.</p>
+    <div class="kw-summary">
+      <div><div class="n" id="kwTotal">0</div><div class="l">Rank-tracked</div></div>
+      <div><div class="n" id="kwTop">0</div><div class="l">In top 10</div></div>
+      <div><div class="n" id="kwCited">0</div><div class="l">AI-cited</div></div>
+      <div><div class="n" id="kwP1">0</div><div class="l">Priority 1</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="chips" id="kwClusterChips"></div>
+      <button class="btn" id="kwAdd">+ Add keyword</button>
+      <button class="btn" id="kwGsc" title="Pull the last 28 days of positions from Google Search Console (admin)">↻ Refresh ranks (GSC)</button>
+      <button class="btn" id="kwVol" title="Pull average monthly search volume from Google Ads Keyword Planner (admin)">≈ Pull volume (Google Ads)</button>
+      <span id="kwGscNote"></span>
+    </div>
+    <div class="sov-scroll">
+      <table class="kw" id="kwTable">
+        <thead><tr>
+          <th>Keyword</th><th>Intent</th><th>Mapped page</th><th>Vol</th><th>KD</th><th>Rank / AI</th><th>Target</th><th>Pri</th><th>SERP / AI feature</th>
+        </tr></thead>
+        <tbody id="kwBody"></tbody>
+      </table>
+    </div>
+    <div id="discWrap">
+      <div class="section-head"><h3>Discovered in Search Console</h3><span class="hint">Real queries you already rank for that aren't tracked yet. Tap track to add.</span></div>
+      <div id="discBody"></div>
+    </div>
+    <div class="section-head" style="margin-top:30px"><h3>Registry setup</h3><span class="hint">One-time load. You should not need this again unless a new research batch arrives.</span></div>
+      <div class="reg-setup" id="regSetup">
+        <div class="setup-head"><b>Setup</b><span id="setupState">checking…</span></div>
+        <div class="setup-body" id="setupBody">
+          <p class="setup-why">Pick these two files out of your <code>miss-behavin</code> folder and this does the rest — no command line, no SQL. Safe to run again: every row is a write-or-overwrite and your own edits are never touched.</p>
+          <ol class="setup-files">
+            <li><code>missb_metadata_RULES_v1.json</code> — in the main folder</li>
+            <li><code>App\missb_keyword_seed_720_2026-08-05.json</code> — in the App folder</li>
+          </ol>
+          <div class="setup-row">
+            <input type="file" id="setupFiles" accept=".json,application/json" multiple>
+            <button class="btn" id="setupGo">Load registry</button>
+          </div>
+          <div class="setup-log" id="setupLog"></div>
+        </div>
+      </div>
   </section>
 
   <!-- ============ PANEL: TOOLBOX ============ -->
@@ -969,8 +970,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.08.05g -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b style="font-size:14px; color:var(--ink); letter-spacing:.06em">CC-2026.08.05g</b> &middot; KEYWORD REGISTRY LIVE IN THIS TAB. worker v82 extends keyword_meta in place to the master doc 9.1 model - 33 columns added, no second table, no second generator, no parallel handlers &middot; 719 of 720 workbook terms seeded (graduation dress white was a genuine duplicate across batch1 and batch3 and was merged, batch1 keeping the C occasion bucket), with band, midpoint, bid, origin, pull date, SERP state and a volume_comparable_group so batch1 English volumes are never silently compared against the batch2-4 All-languages pull &middot; metadata validator MB-VAL-V1 reads EVERY numeric limit from missb_metadata_RULES_v1.json at runtime out of a new metadata_rules table and FAILS CLOSED if the file is not loaded - there is no hardcoded fallback anywhere &middot; rules file bumped to v1.2.0 with the alt_text and url_handle blocks it was missing, so 10-125 alt and the blocking no-4-digit-year handle rule are read, not retyped &middot; three live defects fixed: the apply path was writing meta descriptions at slice(0,320), double the 160 block ceiling, and now blocks instead of truncating; the SEO title was silently truncated at 70 and now blocks; the private-label rename FINDER was hardcoded to Cotton Candy so Sky to Moon was invisible to the scan, and now builds its pattern from the private_labels table &middot; the PDP meta pattern lost the In stock at Miss Behavin Santa Barbara boutique close, resolving the L1284 versus L5448 contradiction in favour of the master doc; the brand-page geo token stays &middot; 128 validator tests pass, one passing and one failing case per blocking rule &middot; the seo_meta_fill backfill path also lost its literals - the 110 floor, the 160 ceiling and the UTF-16 character counting are gone, and its prompt no longer asks for 120-155 characters &middot; THE LOOP IS CLOSED. Every registry row now carries a TRACK button: it asks which collection URL is meant to win the term, refuses a product URL and refuses a URL another term already claims, then pushes the term into the Position tracker where Search Console measures it. Tracking is deliberately NOT gated on serp_verified - the baseline has to be taken BEFORE you commit, not after - so an unverified term tracks with a warning instead of a refusal &middot; OPPORTUNITIES NOW NAMES THE PAGE. worker v84 pulls a second Search Console query on the query+page dimension and stores the top page per term, so a card reads rewrite title/meta AND links the URL. The mapped page wins when you have set one, because that is the page you decided should win; otherwise it shows the page Google actually served, which is often the surprise &middot; KEYWORDS TAB REORDERED so the tab opens on what is happening rather than on the research: Opportunities first (live Search Console), then the Position tracker baseline, then Discovered, and the 719-term keyword registry moved to the BOTTOM &middot; Opportunities and the Position tracker each gained a plain-language explainer. Opportunities was NOT removed - it is live Search Console data recalculated on every refresh, not old research, and it is the only feed showing what real people actually searched to reach the site in the last 28 days. The stale Wire in later footnote naming Ahrefs and Semrush exports is gone &middot; STALE HEADER REMOVED from the Keywords tab: the paragraph claiming volume and difficulty need an Ahrefs or Semrush export predated the Google Ads pull and was wrong twice over with 719 sized terms in the tab. The four counters now sit under their own Position tracker heading so they stop reading as a count of the registry, and the tab badge shows the registry total instead of the 22 hardcoded rank-tracked terms. The rank tracker itself is KEPT - it pulls live Search Console positions and deleting it would have quietly ended rank tracking &middot; THE JOIN IS LIVE: worker v83 hands the researched vocabulary to the product SEO writer at intake, by garment category and by brand, for both the manual entry screen and the automated push. 488 of 719 terms now carry one of the 16 CATEGORY dropdown values, 15 of 16 categories covered - only Activewear has nothing, and the catalogue carries no activewear. Killed-lane terms are offered as PRODUCT COPY only, never as page targets, which is what master doc 5.5 says about the jewellery terms &middot; FIXED: the selected filter chip was rendering ink-on-ink and unreadable - this stylesheet has --surface and --ink but no --paper, and the chip rule asked for --paper. The sticky table header had the same bug &middot; index.html input caps corrected to match the rules file - the SEO title was capped at 60 so a valid 61-70 character title could not be typed, and the description allowed 165, above the 160 block ceiling &middot; ONE-BUTTON SETUP: the Keywords tab now carries a Setup box. Pick missb_metadata_RULES_v1.json and missb_keyword_seed_720_2026-08-05.json and it loads the rules and all 719 keywords itself, in chunks, with a running count. No wrangler, no SQL console, no pasting a 1.4MB file. The .sql files still exist for anyone who prefers the command line &middot; carries forward from CC-2026.08.05a</div>
+    <!-- deploy_check: CC-2026.08.05h -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; <b style="font-size:14px; color:var(--ink); letter-spacing:.06em">CC-2026.08.05h</b> &middot; KEYWORD REGISTRY LIVE IN THIS TAB. worker v82 extends keyword_meta in place to the master doc 9.1 model - 33 columns added, no second table, no second generator, no parallel handlers &middot; 719 of 720 workbook terms seeded (graduation dress white was a genuine duplicate across batch1 and batch3 and was merged, batch1 keeping the C occasion bucket), with band, midpoint, bid, origin, pull date, SERP state and a volume_comparable_group so batch1 English volumes are never silently compared against the batch2-4 All-languages pull &middot; metadata validator MB-VAL-V1 reads EVERY numeric limit from missb_metadata_RULES_v1.json at runtime out of a new metadata_rules table and FAILS CLOSED if the file is not loaded - there is no hardcoded fallback anywhere &middot; rules file bumped to v1.2.0 with the alt_text and url_handle blocks it was missing, so 10-125 alt and the blocking no-4-digit-year handle rule are read, not retyped &middot; three live defects fixed: the apply path was writing meta descriptions at slice(0,320), double the 160 block ceiling, and now blocks instead of truncating; the SEO title was silently truncated at 70 and now blocks; the private-label rename FINDER was hardcoded to Cotton Candy so Sky to Moon was invisible to the scan, and now builds its pattern from the private_labels table &middot; the PDP meta pattern lost the In stock at Miss Behavin Santa Barbara boutique close, resolving the L1284 versus L5448 contradiction in favour of the master doc; the brand-page geo token stays &middot; 128 validator tests pass, one passing and one failing case per blocking rule &middot; the seo_meta_fill backfill path also lost its literals - the 110 floor, the 160 ceiling and the UTF-16 character counting are gone, and its prompt no longer asks for 120-155 characters &middot; KEYWORD RESEARCH IS BACK AT THE TOP of the tab, where it is read daily. Only the one-time Setup card moved to the bottom, under its own Registry setup heading - it is a thing you touch once, so it should not sit above the research &middot; THE LOOP IS CLOSED. Every registry row now carries a TRACK button: it asks which collection URL is meant to win the term, refuses a product URL and refuses a URL another term already claims, then pushes the term into the Position tracker where Search Console measures it. Tracking is deliberately NOT gated on serp_verified - the baseline has to be taken BEFORE you commit, not after - so an unverified term tracks with a warning instead of a refusal &middot; OPPORTUNITIES NOW NAMES THE PAGE. worker v84 pulls a second Search Console query on the query+page dimension and stores the top page per term, so a card reads rewrite title/meta AND links the URL. The mapped page wins when you have set one, because that is the page you decided should win; otherwise it shows the page Google actually served, which is often the surprise &middot; KEYWORDS TAB REORDERED so the tab opens on what is happening rather than on the research: Opportunities first (live Search Console), then the Position tracker baseline, then Discovered, and the 719-term keyword registry moved to the BOTTOM &middot; Opportunities and the Position tracker each gained a plain-language explainer. Opportunities was NOT removed - it is live Search Console data recalculated on every refresh, not old research, and it is the only feed showing what real people actually searched to reach the site in the last 28 days. The stale Wire in later footnote naming Ahrefs and Semrush exports is gone &middot; STALE HEADER REMOVED from the Keywords tab: the paragraph claiming volume and difficulty need an Ahrefs or Semrush export predated the Google Ads pull and was wrong twice over with 719 sized terms in the tab. The four counters now sit under their own Position tracker heading so they stop reading as a count of the registry, and the tab badge shows the registry total instead of the 22 hardcoded rank-tracked terms. The rank tracker itself is KEPT - it pulls live Search Console positions and deleting it would have quietly ended rank tracking &middot; THE JOIN IS LIVE: worker v83 hands the researched vocabulary to the product SEO writer at intake, by garment category and by brand, for both the manual entry screen and the automated push. 488 of 719 terms now carry one of the 16 CATEGORY dropdown values, 15 of 16 categories covered - only Activewear has nothing, and the catalogue carries no activewear. Killed-lane terms are offered as PRODUCT COPY only, never as page targets, which is what master doc 5.5 says about the jewellery terms &middot; FIXED: the selected filter chip was rendering ink-on-ink and unreadable - this stylesheet has --surface and --ink but no --paper, and the chip rule asked for --paper. The sticky table header had the same bug &middot; index.html input caps corrected to match the rules file - the SEO title was capped at 60 so a valid 61-70 character title could not be typed, and the description allowed 165, above the 160 block ceiling &middot; ONE-BUTTON SETUP: the Keywords tab now carries a Setup box. Pick missb_metadata_RULES_v1.json and missb_keyword_seed_720_2026-08-05.json and it loads the rules and all 719 keywords itself, in chunks, with a running count. No wrangler, no SQL console, no pasting a 1.4MB file. The .sql files still exist for anyone who prefers the command line &middot; carries forward from CC-2026.08.05a</div>
   </div>
 </div>
 
