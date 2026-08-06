@@ -1309,6 +1309,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 101</strong> &#183; 2026-08-05 &#183; UPC entry is out of Manual Entry. Nothing was lost: every variant has always been pushed with its SKU as the barcode, so four colourways get four unique scannable codes with nothing typed. A typed UPC was only ever the manufacturer&#39;s GTIN, which software cannot invent &#8212; GS1 issues those against a paid company prefix &#8212; and its absence is already declared correctly to Google. On the review card it collapses behind a link and opens itself when an invoice really did print one. Vendor is now a picker AND a text box: click for the brands already in your catalogue, type a new one, and a near-miss spelling is called out because a variation creates a second brand in Shopify that no collection groups with the first. Needs Worker v91. Carries build 100
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 100</strong> &#183; 2026-08-05 &#183; A UPC per colour. Each colour line in Manual Entry carries its own UPC box with a camera scan, on one-size rows only &#8212; a sized run has no place for one because each size would need its own. Two colours given the same barcode is flagged as you type. AND THE TRAP IT UNCOVERED: the review card seeded its UPC field from the STYLE barcode, so a four-colour style would have written one barcode onto all four products, which is exactly what makes a register scan ambiguous. The colourway&#39;s own UPC now wins, and the style-level one is inherited only when the style has a single colourway. No Worker change &#8212; runs on v90. Carries build 99
@@ -1323,7 +1324,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 104</strong> &#183; 2026-08-06 &#183; The People list was drawing the app&#39;s own stored tokens as if they were staff, each with a delete button beside it. main_oauth_token is the live Shopify access token &#8212; removing it would have cut off every push, scan and lookup, and the row looked like a blank entry worth tidying up. Only entries with a name AND a role are people; the rest are counted and explained rather than silently dropped. Carries build 103</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1661,7 +1662,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 103;   // keep in step with the footer stamp
+var APP_BUILD = 104;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2701,8 +2702,21 @@ function loadCodes(){
   .then(function(res){
     var wrap = el('codes-list');
     wrap.innerHTML = '';
-    if (!(res.codes||[]).length) { wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">No codes yet. Add the first person below.</div>'; return; }
-    res.codes.forEach(function(c){
+    // build 104 — the Worker keeps two of its own values in this same storage:
+    // main_oauth_token (the live Shopify access token) and edit_cc_token. Both
+    // parse as JSON, so both were being drawn as people with a blank name and a
+    // DELETE BUTTON. Removing main_oauth_token would cut the app off from
+    // Shopify completely — every push, scan and lookup — and the row looked
+    // like an empty entry worth tidying up.
+    //
+    // A person always has a name AND a role, because codes_save demands both.
+    // Anything else is machinery. Counted, not silently swallowed: a row that
+    // vanishes with no explanation is its own kind of confusing.
+    var _all = res.codes || [];
+    var _people = _all.filter(function(c){ return c && c.name && c.role; });
+    var _internal = _all.length - _people.length;
+    if (!_people.length) { wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">No codes yet. Add the first person below.</div>'; return; }
+    _people.forEach(function(c){
       var row = document.createElement('div');
       row.className = 'code-row';
       row.innerHTML = '<div class="code-name">'+esc(c.name)+'<div class="code-role">'+esc(c.role)+'</div></div>' +
@@ -2715,6 +2729,14 @@ function loadCodes(){
       };
       wrap.appendChild(row);
     });
+    if (_internal) {
+      var note = document.createElement('div');
+      note.style.cssText = 'font-size:11px;color:var(--gray-text);margin-top:10px;line-height:1.5;';
+      note.textContent = _internal + ' app entr' + (_internal === 1 ? 'y is' : 'ies are') +
+        ' stored alongside these and not shown — they are the app\u2019s own Shopify and dashboard tokens, not people. ' +
+        'They must stay: deleting one cuts the app off from Shopify.';
+      wrap.appendChild(note);
+    }
   })
   .catch(function(e){ el('codes-list').innerHTML = '<div style="font-size:13px;color:var(--red);">'+esc(e.message)+'</div>'; });
 }
