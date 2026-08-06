@@ -1309,6 +1309,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 104</strong> &#183; 2026-08-06 &#183; The People list was drawing the app&#39;s own stored tokens as if they were staff, each with a delete button beside it. main_oauth_token is the live Shopify access token &#8212; removing it would have cut off every push, scan and lookup, and the row looked like a blank entry worth tidying up. Only entries with a name AND a role are people; the rest are counted and explained rather than silently dropped. Carries build 103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 101</strong> &#183; 2026-08-05 &#183; UPC entry is out of Manual Entry. Nothing was lost: every variant has always been pushed with its SKU as the barcode, so four colourways get four unique scannable codes with nothing typed. A typed UPC was only ever the manufacturer&#39;s GTIN, which software cannot invent &#8212; GS1 issues those against a paid company prefix &#8212; and its absence is already declared correctly to Google. On the review card it collapses behind a link and opens itself when an invoice really did print one. Vendor is now a picker AND a text box: click for the brands already in your catalogue, type a new one, and a near-miss spelling is called out because a variation creates a second brand in Shopify that no collection groups with the first. Needs Worker v91. Carries build 100
@@ -1324,7 +1325,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 104</strong> &#183; 2026-08-06 &#183; The People list was drawing the app&#39;s own stored tokens as if they were staff, each with a delete button beside it. main_oauth_token is the live Shopify access token &#8212; removing it would have cut off every push, scan and lookup, and the row looked like a blank entry worth tidying up. Only entries with a name AND a role are people; the rest are counted and explained rather than silently dropped. Carries build 103</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 105</strong> &#183; 2026-08-06 &#183; The handoff banner decided whose turn it was from the ROLE, which tied what a person is allowed to do to which sheet is waiting on them &#8212; two different questions. It meant the person you hand sheets to could only ever be a Pricer; promote her to Admin and she would have been shown &quot;Waiting on Kelly&quot; on a sheet waiting on her. It now reads the handoff record: the sender sees who they are waiting on, anyone else who can actually price a sheet sees that it is their turn, and everyone else sees nothing. Roles are free to be whatever they should be. Carries build 104</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1662,7 +1663,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 104;   // keep in step with the footer stamp
+var APP_BUILD = 105;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2817,7 +2818,20 @@ function renderHandoffBanner(){
       'background:var(--black,#111);color:#fff;display:flex;gap:10px;align-items:center;flex-wrap:wrap;';
     document.body.insertBefore(b, document.body.firstChild);
   }
-  var mine = SESSION && (SESSION.role === 'pricer');
+  // build 105 — this used to be `SESSION.role === 'pricer'`, which tied whose
+  // TURN it is to what a person is ALLOWED to do. Two different questions. It
+  // meant Kelly could only ever be a Pricer: promote her to Admin, which she
+  // needs eventually, and she would have been shown the sender's view — "Waiting
+  // on Kelly, cancel the handoff" — on a sheet that was waiting on her.
+  //
+  // The handoff record already knows who sent it. If that is me, I am waiting.
+  // If it is not me and I can actually price a sheet, it is my turn. Anyone who
+  // cannot price one is not shown a job they cannot do.
+  var _norm  = function(x){ return String(x || '').trim().toLowerCase(); };
+  var _iSent = _norm(SESSION && SESSION.name) === _norm(_handoff.from_name);
+  var _canPrice = SESSION && (SESSION.role === 'pricer' || SESSION.role === 'admin');
+  if (!_iSent && !_canPrice) { if (b) b.remove(); return; }
+  var mine = !_iSent && _canPrice;
   var when = _handoff.started_at ? new Date(_handoff.started_at) : null;
   var ago  = when ? when.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   var n    = _handoff.item_count || 0;
@@ -2827,7 +2841,7 @@ function renderHandoffBanner(){
     ? '<span style="flex:1;"><strong>' + who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') +
       ' to name and price.</strong> ' + esc(ago) + note + '</span>' +
       '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">I&#39;m done</button>'
-    : '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'Kelly') + ' to name and price ' +
+    : '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'whoever prices these') + ' to name and price ' +
       (n || 'these') + ' item' + (n === 1 ? '' : 's') + ' &#8212; sent ' + esc(ago) + note + '</span>' +
       '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">Cancel the handoff</button>';
 }
