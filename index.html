@@ -1240,12 +1240,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
       <div class="section">
         <div class="section-title">Add / Update a Person</div>
+        <div class="field-hint" style="margin-bottom:10px;">To rename someone or change their role, enter their <strong>existing code</strong> with the new details and save &#8212; it updates in place. A <strong>Pricer</strong> can open the sheet you hand them, name and price it, and push it to Shopify. They cannot reach Settings, access codes, Store Utilities, Categories or the Activity Log.</div>
         <div class="field"><label class="field-label">Name</label><input class="field-input" id="code-name" placeholder="e.g. Sofia" autocomplete="off"/></div>
         <div class="field"><label class="field-label">Access code (4+ characters)</label><input class="field-input" id="code-code" placeholder="e.g. 7291" autocomplete="off"/></div>
         <div class="field"><label class="field-label">Role</label>
           <select class="field-input" id="code-role">
             <option value="employee">Employee &#8212; Quick Fix, Full Count + Staff Pricing</option>
             <option value="staff">Staff &#8212; Staff Pricing only (read-only)</option>
+            <option value="pricer">Pricer &#8212; names, prices and publishes handed-off sheets</option>
             <option value="admin">Admin &#8212; everything</option>
           </select>
         </div>
@@ -1307,6 +1309,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 101</strong> &#183; 2026-08-05 &#183; UPC entry is out of Manual Entry. Nothing was lost: every variant has always been pushed with its SKU as the barcode, so four colourways get four unique scannable codes with nothing typed. A typed UPC was only ever the manufacturer&#39;s GTIN, which software cannot invent &#8212; GS1 issues those against a paid company prefix &#8212; and its absence is already declared correctly to Google. On the review card it collapses behind a link and opens itself when an invoice really did print one. Vendor is now a picker AND a text box: click for the brands already in your catalogue, type a new one, and a near-miss spelling is called out because a variation creates a second brand in Shopify that no collection groups with the first. Needs Worker v91. Carries build 100
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 100</strong> &#183; 2026-08-05 &#183; A UPC per colour. Each colour line in Manual Entry carries its own UPC box with a camera scan, on one-size rows only &#8212; a sized run has no place for one because each size would need its own. Two colours given the same barcode is flagged as you type. AND THE TRAP IT UNCOVERED: the review card seeded its UPC field from the STYLE barcode, so a four-colour style would have written one barcode onto all four products, which is exactly what makes a register scan ambiguous. The colourway&#39;s own UPC now wins, and the style-level one is inherited only when the style has a single colourway. No Worker change &#8212; runs on v90. Carries build 99
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 99</strong> &#183; 2026-08-05 &#183; Manual Entry takes several colours on one style. Type them comma-separated in the Colour box and the row grows a quantity line per colour &#8212; one product each, named &quot;Style - Colour&quot;, with its own SKU (CODE-COLOUR-SIZE) and its own review card. The invoice path has always worked this way; Manual Entry was the one place that assumed a single colourway, so a four-colour style had to be typed four times. Quantities are per colour on purpose &#8212; colours rarely arrive in equal counts and a wrong count is a wrong number at the register. Also fixes a latent counting bug: the row quantity read assigned instead of summing. No Worker change &#8212; runs on v90. Carries build 98
@@ -1320,7 +1323,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1578,8 +1581,12 @@ var MENU = [
   { id:'floorcount', icon:'📦', label:'Quick Fix',   desc:'Scan or search to fix one item (manager)', roles:['admin'] },
   { id:'countmode',  icon:'🧮', label:'Full Count',    desc:'Count every product, with sign-off', roles:['admin','employee'] },
   { id:'approvals',  icon:'\u2705', label:'Approvals',    desc:'Review & approve submitted counts', roles:['admin'] },
-  { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin'] },
-  { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff'] },
+  // build 103 — a Pricer needs BOTH: LineSheet is where a handed-off sheet is
+  // named, priced and pushed, and Staff Pricing is the published-price view.
+  // Without these she logged in to an empty menu — the role existed and had
+  // nowhere to go.
+  { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin','pricer'] },
+  { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff','pricer'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
   { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
   { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
@@ -1606,6 +1613,17 @@ function showMenu(){
     b.onclick = m.url ? function(){ window.location.href = m.url; } : function(){ openView(m.id, m.label); };
     list.appendChild(b);
   });
+  // build 103 — this lived in Store Utilities, which is admin-only, so the one
+  // person the notification is FOR could not switch it on. It is a per-device
+  // setting and belongs where every role can see it.
+  var nb = document.createElement('div');
+  nb.style.cssText = 'margin-top:18px;padding-top:14px;border-top:1px solid var(--gray-mid);';
+  nb.innerHTML =
+    '<div class="sp-l" style="margin-bottom:6px;">Notifications on this phone</div>' +
+    '<button type="button" class="btn btn-outline" onclick="pushEnable(\'push-status-menu\')">Notify me on this phone</button>' +
+    '<div style="font-size:11px;color:var(--gray-text);margin-top:6px;line-height:1.5;">Buzzes this device when a sheet is handed over to be named and priced. Per device &#8212; turn it on wherever you want it. On an iPhone it only works from the Home Screen app: Share &#8594; Add to Home Screen, open it from the icon, then tap this.</div>' +
+    '<div id="push-status-menu" class="status"></div>';
+  list.appendChild(nb);
   editCheckDue();
   // staff role: jump straight into pricing (their only destination)
   if (SESSION.role === 'staff') openView('staff', 'Staff Pricing');
@@ -1643,7 +1661,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 102;   // keep in step with the footer stamp
+var APP_BUILD = 103;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2861,9 +2879,11 @@ function _b64uToU8(b64){
   for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
   return out;
 }
-function pushEnable(){
-  var st = el('push-status');
-  var say = function(kind, msg){ showStatus('push-status', kind, msg); };
+function pushEnable(statusId){
+  // build 103 — two places call this now (the menu, for everybody, and Store
+  // Utilities, for admins), so it reports into whichever asked.
+  var SID = statusId || 'push-status';
+  var say = function(kind, msg){ showStatus(SID, kind, msg); };
   if (!pushSupported()) {
     say('error', 'This browser cannot do push. On an iPhone, add the app to your Home Screen first (Share &#8594; Add to Home Screen), open it from there, and try again.');
     return;
