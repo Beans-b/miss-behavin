@@ -166,6 +166,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 /* PRICING CARDS */
 .p-card{border:1px solid var(--gray-mid);margin-bottom:10px;background:var(--white);}
 /* v72 — an unpriced style, called out by name in the Prices Missing modal. */
+/* build 106 — a photos-only style has no price ON PURPOSE. Dressing an
+   intentional state as a failure teaches people to ignore red, which is the
+   one thing red has to keep meaning. Neutral until it actually blocks a push. */
+.p-card.p-awaiting .p-card-header::after{content:'AWAITING NAME + PRICE';font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--gray-text);white-space:nowrap;}
 .p-card.p-missing{border-color:var(--red);border-width:2px;background:#fff5f5;}
 .p-card.p-missing .p-retail-input{background:#ffe9e9;}
 .p-card.p-missing .p-card-header::after{content:'NEEDS A RETAIL PRICE';font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--red);white-space:nowrap;}
@@ -848,7 +852,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
           <div style="display:flex;gap:10px;margin-top:12px;">
             <button class="btn btn-outline" onclick="saveCurrentInvoice()" style="flex:1;">Save</button>
-            <button class="btn btn-outline" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
+            <button class="btn btn-shopify" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
             <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
           </div>
           <div id="bottom-save-status" style="font-size:11px;color:#666;margin-top:6px;text-align:center;"></div>
@@ -1309,6 +1313,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 105</strong> &#183; 2026-08-06 &#183; The handoff banner decided whose turn it was from the ROLE, which tied what a person is allowed to do to which sheet is waiting on them &#8212; two different questions. It meant the person you hand sheets to could only ever be a Pricer; promote her to Admin and she would have been shown &quot;Waiting on Kelly&quot; on a sheet waiting on her. It now reads the handoff record: the sender sees who they are waiting on, anyone else who can actually price a sheet sees that it is their turn, and everyone else sees nothing. Roles are free to be whatever they should be. Carries build 104
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 104</strong> &#183; 2026-08-06 &#183; The People list was drawing the app&#39;s own stored tokens as if they were staff, each with a delete button beside it. main_oauth_token is the live Shopify access token &#8212; removing it would have cut off every push, scan and lookup, and the row looked like a blank entry worth tidying up. Only entries with a name AND a role are people; the rest are counted and explained rather than silently dropped. Carries build 103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101
@@ -1325,7 +1330,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 105</strong> &#183; 2026-08-06 &#183; The handoff banner decided whose turn it was from the ROLE, which tied what a person is allowed to do to which sheet is waiting on them &#8212; two different questions. It meant the person you hand sheets to could only ever be a Pricer; promote her to Admin and she would have been shown &quot;Waiting on Kelly&quot; on a sheet waiting on her. It now reads the handoff record: the sender sees who they are waiting on, anyone else who can actually price a sheet sees that it is their turn, and everyone else sees nothing. Roles are free to be whatever they should be. Carries build 104</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 106</strong> &#183; 2026-08-06 &#183; THE HANDOFF WAS DESTROYING THE SHEET IT HANDED OVER. Opening the LineSheet archives whatever sheet was left over and clears the active slot &#8212; right for a buyer starting fresh, exactly wrong for someone opening a sheet they were just sent. Kelly tapped her notification and the app filed the sheet away before she could see it, every time. A sheet waiting to be priced is now opened instead. The banner is tappable and takes you straight there. And a photos-only style reads &quot;AWAITING NAME + PRICE&quot; in grey rather than a red error &#8212; the blank is deliberate, and dressing it as a failure teaches people to ignore red. Red is kept for the moment it really blocks a push. Carries build 105</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1663,7 +1668,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 105;   // keep in step with the footer stamp
+var APP_BUILD = 106;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2815,7 +2820,13 @@ function renderHandoffBanner(){
     b = document.createElement('div');
     b.id = id;
     b.style.cssText = 'position:sticky;top:0;z-index:900;padding:10px 14px;font-size:13px;line-height:1.5;' +
-      'background:var(--black,#111);color:#fff;display:flex;gap:10px;align-items:center;flex-wrap:wrap;';
+      'background:var(--black,#111);color:#fff;display:flex;gap:10px;align-items:center;flex-wrap:wrap;cursor:pointer;';
+    // build 106 — it said whose turn it was and gave no way to get there, which
+    // on a phone means hunting through a menu with the answer on screen.
+    b.onclick = function(ev){
+      if (ev.target && ev.target.tagName === 'BUTTON') return;   // the buttons do their own thing
+      openView('linesheet', 'LineSheet');
+    };
     document.body.insertBefore(b, document.body.firstChild);
   }
   // build 105 — this used to be `SESSION.role === 'pricer'`, which tied whose
@@ -2853,6 +2864,10 @@ function handoffSend(){
   if (!inv || !(inv.styles || []).length) { toast('Nothing on the sheet to hand off.'); return; }
   var count = 0;
   (inv.styles || []).forEach(function(st){ count += ((st.colors || []).length || 1); });
+  // build 106 — if you tried to push first and got the missing-price stop, the
+  // red is still on screen. Handing off is the answer to that message, not a
+  // continuation of it.
+  document.querySelectorAll('.p-card.p-missing').forEach(function(c){ c.classList.remove('p-missing'); });
   var note = prompt('Anything to tell her about these? (optional)', '') || '';
   currentInvoice = inv;
   sbSetActive(sheetLive, inv, function(ok){
@@ -3047,12 +3062,29 @@ function loadActiveInvoiceForKel() {
   // build 32 — the working area ALWAYS opens clean. Whatever sheet was left
   // over from last time is snapshotted to Archive; if it isn't live for
   // staff, the active slot is cleared too. Reopen any sheet from Archive.
+  //
+  // build 106 — WITH ONE EXCEPTION, and it is the one that matters. A sheet
+  // that has been handed over to be named and priced is not leftovers. Kelly
+  // tapped her notification, opened this screen, and the app archived the sheet
+  // she had just been sent and cleared the active slot before she could look at
+  // it — showing her an empty page with no explanation. Nothing was lost (it
+  // went to Archive) but the handoff was, every single time.
   currentInvoice = null;
   el('kel-empty').style.display = 'block';
   el('pricing-section').style.display = 'none';
   sbGetActive(function(row) {
     sheetLive = !!(row && row.published);
-    if (row && row.invoice && (row.invoice.styles||[]).length) {
+    var _hasSheet = !!(row && row.invoice && (row.invoice.styles||[]).length);
+    // sbGetActive refreshes _handoff before this callback runs.
+    var _waiting  = !!(_handoff && _handoff.state === 'needs_pricing');
+    if (_waiting && _hasSheet) {
+      currentInvoice = row.invoice;
+      kelTab('invoice');
+      renderKelCards(currentInvoice);
+      try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
+      return;
+    }
+    if (_hasSheet) {
       sbArchiveInvoice(row.invoice, function(){});
       if (!row.published) sbSetActive(false, null, function(){});
     }
@@ -3247,7 +3279,8 @@ function buildKelCard(style, idx) {
   }).join('');
 
   var card = document.createElement('div');
-  card.className = 'p-card';
+  // build 106 — _needsName / _needsPrice are set by a photos-only Manual Entry.
+  card.className = 'p-card' + ((style._needsPrice || style._needsName) ? ' p-awaiting' : '');
   card.dataset.code = style.code;
   card.dataset.idx  = (idx === undefined || idx === null) ? '' : String(idx);   // v72 — the reliable card↔style link
   card.dataset.run  = _styleRunKey(style);   // build 87
@@ -5732,6 +5765,7 @@ function _spHighlightUnpriced(unpriced) {
   unpriced.forEach(function(u) {
     var card = document.querySelector('.p-card[data-idx="' + u.idx + '"]');
     if (!card) return;
+    card.classList.remove('p-awaiting');   // build 106 — now it really is blocking
     card.classList.add('p-missing');
     if (!first) first = card;
   });
