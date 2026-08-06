@@ -794,14 +794,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div class="status" id="extract-status"></div>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
-          <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail), then <strong>check the photos that appear on the row</strong> &#8212; wrong item? paste the correct URL in the Re-pull box right there &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
-          <div style="font-size:12px;line-height:1.5;color:var(--gray-text);margin-bottom:10px;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:8px;">
-            <strong style="color:var(--ink,#111);">Name and price are optional here.</strong> Fill them in if you know them, or leave them and hand the sheet to whoever prices it. Nothing publishes from this screen &#8212; the push to Shopify refuses any item with a missing name or price and tells you which one.
-          </div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label>
             <input type="text" class="field-input" id="man-vendor" list="man-vendor-list" autocomplete="off" placeholder="Choose a brand you carry, or type a new one"/>
             <datalist id="man-vendor-list"></datalist>
-            <div class="field-hint" id="man-vendor-hint" style="font-size:11px;">Click the box for the brands already in your catalogue, or type a new one. Spelling matters &#8212; a variation creates a second brand in Shopify that no collection or report groups with the first.</div>
+            <div class="field-hint" id="man-vendor-hint" style="font-size:11px;display:none;"></div>
           </div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
@@ -1318,6 +1314,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 108</strong> &#183; 2026-08-06 &#183; Load Sample Invoice removed. It loaded a fake invoice for demonstrating the app, nobody demonstrates the app, and it sat one tap from Extract looking like a normal option &#8212; a control nobody uses is a wrong turn with a button on it. Its function stays unreferenced rather than unpicking the fixture and risking the real extraction path. Carries build 107
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 107</strong> &#183; 2026-08-06 &#183; Manual Entry no longer demands a name or a price. It was behind a Photos-only checkbox &#8212; a mode you had to remember &#8212; so the form still turned red about a price on a sheet you were about to hand to someone else to price. Nothing publishes from that screen, and both are already enforced at the Shopify push, which names the offenders and refuses. A row needs a quantity; that is all. NEW Handoffs tab replaces Help: every sheet sent for naming and pricing, each carrying its own copy of the items, so sending a second one no longer overwrites the first &#8212; which is why Kelly opened the old sheet. Tap one to open it. Needs Worker v93. Carries build 106
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 106</strong> &#183; 2026-08-06 &#183; THE HANDOFF WAS DESTROYING THE SHEET IT HANDED OVER. Opening the LineSheet archives whatever sheet was left over and clears the active slot &#8212; right for a buyer starting fresh, exactly wrong for someone opening a sheet they were just sent. Kelly tapped her notification and the app filed the sheet away before she could see it, every time. A sheet waiting to be priced is now opened instead. The banner is tappable and takes you straight there. And a photos-only style reads &quot;AWAITING NAME + PRICE&quot; in grey rather than a red error &#8212; the blank is deliberate, and dressing it as a failure teaches people to ignore red. Red is kept for the moment it really blocks a push. Carries build 105
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 105</strong> &#183; 2026-08-06 &#183; The handoff banner decided whose turn it was from the ROLE, which tied what a person is allowed to do to which sheet is waiting on them &#8212; two different questions. It meant the person you hand sheets to could only ever be a Pricer; promote her to Admin and she would have been shown &quot;Waiting on Kelly&quot; on a sheet waiting on her. It now reads the handoff record: the sender sees who they are waiting on, anyone else who can actually price a sheet sees that it is their turn, and everyone else sees nothing. Roles are free to be whatever they should be. Carries build 104
@@ -1337,7 +1334,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 108</strong> &#183; 2026-08-06 &#183; Load Sample Invoice removed. It loaded a fake invoice for demonstrating the app, nobody demonstrates the app, and it sat one tap from Extract looking like a normal option &#8212; a control nobody uses is a wrong turn with a button on it. Its function stays unreferenced rather than unpicking the fixture and risking the real extraction path. Carries build 107</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 109</strong> &#183; 2026-08-06 &#183; Manual Entry loses its standing instructions: the four numbered steps, the name-and-price explainer, and the vendor paragraph. They explained the screen to someone seeing it once, above a screen used every week, and two of them were already out of date &#8212; the steps still ended &quot;Type the quantity, then Review &amp; publish&quot;, written before a sheet could be handed to anyone. The vendor hint ELEMENT stays, because the near-miss spelling check writes into it, but it is silent until there is a near miss worth naming. Carries build 108</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1675,7 +1672,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 108;   // keep in step with the footer stamp
+var APP_BUILD = 109;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4857,27 +4854,24 @@ function vendorSpellCheck(){
   if (!inp || !hint) return;
   var v = String(inp.value || '').trim();
   var norm = function(x){ return String(x).toLowerCase().replace(/[^a-z0-9]/g, ''); };
-  if (!v || !_liveVendors.length) {
-    hint.style.color = '';
-    hint.textContent = 'Click the box for the brands already in your catalogue, or type a new one. Spelling matters \u2014 a variation creates a second brand in Shopify that no collection or report groups with the first.';
-    return;
-  }
+  // build 109 — silent by default. The standing paragraph that used to live
+  // here explained the field to someone seeing it once; the near-miss warning
+  // below is the part that earns its space, and it only appears when there is
+  // actually a near miss.
+  if (!v || !_liveVendors.length) { hint.style.display = 'none'; hint.textContent = ''; return; }
   var exact = _liveVendors.some(function(x){ return x === v; });
-  if (exact) {
-    hint.style.color = 'var(--gray-text)';
-    hint.textContent = '\u2713 ' + v + ' \u2014 already in your catalogue.';
-    return;
-  }
+  if (exact) { hint.style.display = 'none'; hint.textContent = ''; return; }
   var near = null, nv = norm(v);
   for (var i = 0; i < _liveVendors.length; i++) {
     if (norm(_liveVendors[i]) === nv) { near = _liveVendors[i]; break; }
   }
+  hint.style.display = 'block';
   if (near) {
     hint.style.color = 'var(--red)';
     hint.textContent = 'Your catalogue spells this "' + near + '". Typing it differently creates a SECOND brand \u2014 tap the box and pick the existing one unless this really is a new label.';
   } else {
     hint.style.color = 'var(--gray-text)';
-    hint.textContent = 'New brand \u2014 it will be created in Shopify exactly as typed. Check the spelling against the invoice.';
+    hint.textContent = 'New brand \u2014 it will be created in Shopify exactly as typed.';
   }
 }
 
