@@ -777,7 +777,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div class="tab-bar">
       <button class="tab-btn active" onclick="kelTab('invoice')">Invoice</button>
       <button class="tab-btn" onclick="kelTab('archive')">Archive</button>
-      <button class="tab-btn" onclick="kelTab('help')">Help</button>
+      <button class="tab-btn" onclick="kelTab('handoff')">Handoffs</button>
     </div>
 
     <div id="ktab-invoice">
@@ -796,11 +796,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
           <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail), then <strong>check the photos that appear on the row</strong> &#8212; wrong item? paste the correct URL in the Re-pull box right there &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
-          <label style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;margin-bottom:10px;border:1px solid var(--gray-mid);border-radius:8px;cursor:pointer;">
-            <input type="checkbox" id="man-photos-only" onchange="manPhotosOnlyChanged()" style="margin-top:2px;"/>
-            <span style="font-size:12px;line-height:1.5;"><strong>Photos only &#8212; someone else names and prices these.</strong><br>
-            <span style="color:var(--gray-text);">Style name and price stop being required, so you can get the pictures and counts in now. Nothing reaches Shopify until the names and prices are filled in &#8212; the push already refuses a sheet with a missing price.</span></span>
-          </label>
+          <div style="font-size:12px;line-height:1.5;color:var(--gray-text);margin-bottom:10px;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:8px;">
+            <strong style="color:var(--ink,#111);">Name and price are optional here.</strong> Fill them in if you know them, or leave them and hand the sheet to whoever prices it. Nothing publishes from this screen &#8212; the push to Shopify refuses any item with a missing name or price and tells you which one.
+          </div>
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label>
             <input type="text" class="field-input" id="man-vendor" list="man-vendor-list" autocomplete="off" placeholder="Choose a brand you carry, or type a new one"/>
             <datalist id="man-vendor-list"></datalist>
@@ -907,7 +905,15 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="archive-list" id="archive-list"></div>
     </div>
 
-    <div id="ktab-help" style="display:none;">
+    <div id="ktab-handoff" style="display:none;">
+      <div class="section">
+        <div class="section-title">Sheets sent for naming &amp; pricing</div>
+        <div class="field-hint" style="margin-bottom:10px;">Every sheet handed over, with its own copy of the items &#8212; sending a second one does not disturb the first. Tap one to open it, fill in the names and prices, then push it to Shopify and mark it done.</div>
+        <div id="handoff-list"><div style="font-size:13px;color:var(--gray-text);">Loading&#8230;</div></div>
+      </div>
+    </div>
+
+    <div id="ktab-help-unused" style="display:none;">
       <div class="section">
         <div class="section-title">Upload &amp; Extract Invoice</div>
         <div style="font-size:13px;color:#444;line-height:1.6;margin-bottom:10px;">Photograph each page of the vendor invoice and select all pages at once &#8212; or upload the invoice PDF itself (Faire &#8594; Orders &#8594; download the invoice) and every page reads in one pass. Tap <strong>Extract All with Claude</strong> &#8212; the app reads every style code, color, size, quantity, and wholesale cost automatically, and generates a product name for every style.</div>
@@ -1313,6 +1319,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 106</strong> &#183; 2026-08-06 &#183; THE HANDOFF WAS DESTROYING THE SHEET IT HANDED OVER. Opening the LineSheet archives whatever sheet was left over and clears the active slot &#8212; right for a buyer starting fresh, exactly wrong for someone opening a sheet they were just sent. Kelly tapped her notification and the app filed the sheet away before she could see it, every time. A sheet waiting to be priced is now opened instead. The banner is tappable and takes you straight there. And a photos-only style reads &quot;AWAITING NAME + PRICE&quot; in grey rather than a red error &#8212; the blank is deliberate, and dressing it as a failure teaches people to ignore red. Red is kept for the moment it really blocks a push. Carries build 105
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 105</strong> &#183; 2026-08-06 &#183; The handoff banner decided whose turn it was from the ROLE, which tied what a person is allowed to do to which sheet is waiting on them &#8212; two different questions. It meant the person you hand sheets to could only ever be a Pricer; promote her to Admin and she would have been shown &quot;Waiting on Kelly&quot; on a sheet waiting on her. It now reads the handoff record: the sender sees who they are waiting on, anyone else who can actually price a sheet sees that it is their turn, and everyone else sees nothing. Roles are free to be whatever they should be. Carries build 104
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 104</strong> &#183; 2026-08-06 &#183; The People list was drawing the app&#39;s own stored tokens as if they were staff, each with a delete button beside it. main_oauth_token is the live Shopify access token &#8212; removing it would have cut off every push, scan and lookup, and the row looked like a blank entry worth tidying up. Only entries with a name AND a role are people; the rest are counted and explained rather than silently dropped. Carries build 103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 103</strong> &#183; 2026-08-06 &#183; Three things build 102 got wrong about the new Pricer role, each of which stopped that person dead: the role was never added to the dropdown so the code could not be created; the role appeared in no menu tile so she would have logged in to an empty menu; and the notification switch sat inside admin-only Store Utilities, so the one person it exists for could not turn it on. A Pricer now sees LineSheet and Staff Pricing, and the notification switch is on the main menu for every role. No Worker change &#8212; v92 already permits all of this. Carries build 102
@@ -1330,7 +1337,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 106</strong> &#183; 2026-08-06 &#183; THE HANDOFF WAS DESTROYING THE SHEET IT HANDED OVER. Opening the LineSheet archives whatever sheet was left over and clears the active slot &#8212; right for a buyer starting fresh, exactly wrong for someone opening a sheet they were just sent. Kelly tapped her notification and the app filed the sheet away before she could see it, every time. A sheet waiting to be priced is now opened instead. The banner is tappable and takes you straight there. And a photos-only style reads &quot;AWAITING NAME + PRICE&quot; in grey rather than a red error &#8212; the blank is deliberate, and dressing it as a failure teaches people to ignore red. Red is kept for the moment it really blocks a push. Carries build 105</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 107</strong> &#183; 2026-08-06 &#183; Manual Entry no longer demands a name or a price. It was behind a Photos-only checkbox &#8212; a mode you had to remember &#8212; so the form still turned red about a price on a sheet you were about to hand to someone else to price. Nothing publishes from that screen, and both are already enforced at the Shopify push, which names the offenders and refuses. A row needs a quantity; that is all. NEW Handoffs tab replaces Help: every sheet sent for naming and pricing, each carrying its own copy of the items, so sending a second one no longer overwrites the first &#8212; which is why Kelly opened the old sheet. Tap one to open it. Needs Worker v93. Carries build 106</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1668,7 +1675,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 106;   // keep in step with the footer stamp
+var APP_BUILD = 107;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2826,6 +2833,7 @@ function renderHandoffBanner(){
     b.onclick = function(ev){
       if (ev.target && ev.target.tagName === 'BUTTON') return;   // the buttons do their own thing
       openView('linesheet', 'LineSheet');
+      kelTab('handoff');   // build 107 — the list, so you pick which sheet
     };
     document.body.insertBefore(b, document.body.firstChild);
   }
@@ -2846,15 +2854,16 @@ function renderHandoffBanner(){
   var when = _handoff.started_at ? new Date(_handoff.started_at) : null;
   var ago  = when ? when.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
   var n    = _handoff.item_count || 0;
+  var more = (_handoffOpenCount > 1) ? (' (+' + (_handoffOpenCount - 1) + ' more waiting)') : '';
   var who  = esc(_handoff.from_name || 'The buyer');
   var note = _handoff.note ? ' &#8212; &ldquo;' + esc(_handoff.note) + '&rdquo;' : '';
   b.innerHTML = mine
     ? '<span style="flex:1;"><strong>' + who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') +
-      ' to name and price.</strong> ' + esc(ago) + note + '</span>' +
+      ' to name and price.</strong>' + more + ' ' + esc(ago) + note + '</span>' +
       '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">I&#39;m done</button>'
     : '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'whoever prices these') + ' to name and price ' +
       (n || 'these') + ' item' + (n === 1 ? '' : 's') + ' &#8212; sent ' + esc(ago) + note + '</span>' +
-      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">Cancel the handoff</button>';
+      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish(true)">Cancel the handoff</button>';
 }
 
 // Hand it over. The sheet is saved FIRST — a notification that arrives before
@@ -2872,10 +2881,12 @@ function handoffSend(){
   currentInvoice = inv;
   sbSetActive(sheetLive, inv, function(ok){
     if (!ok) { toast('Could not save the sheet — nothing was sent.'); return; }
-    api('handoff_start', { note: note, to: 'Kelly', item_count: count })
+    // build 107 — the sheet travels WITH the handoff. It used to be read back
+    // out of the shared active slot, so a second handoff overwrote the first.
+    api('handoff_start', { note: note, to: 'Kelly', item_count: count, invoice: inv })
     .then(function(r){
       if (r.error) { toast(r.error); return; }
-      _handoff = { state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:'Kelly',
+      _handoff = { id:r.id, state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:'Kelly',
                    note:note, item_count:count, started_at:r.started_at };
       renderHandoffBanner();
       // Say which channels actually fired. "Sent" when nothing was configured
@@ -2906,12 +2917,18 @@ function _handoffTextLink(count){
   a.click();
 }
 
-function handoffFinish(){
-  api('handoff_done', {})
+// build 107 — by id. Closing "the" handoff would have cleared every other sheet
+// still waiting the moment one was finished.
+function handoffFinish(cancelled){
+  var id = _openHandoffId || (_handoff && _handoff.id);
+  if (!id) { toast('Nothing open to finish.'); return; }
+  api('handoff_done', { id: id, cancelled: !!cancelled })
   .then(function(r){
     if (r.error) { toast(r.error); return; }
-    _handoff = null; renderHandoffBanner();
-    toast('Done \u2014 the sheet is no longer waiting on anyone.');
+    if (_openHandoffId === id) _openHandoffId = null;
+    if (_handoff && _handoff.id === id) { _handoff = null; renderHandoffBanner(); }
+    toast(cancelled ? 'Handoff cancelled.' : 'Done \u2014 that sheet is no longer waiting on anyone.');
+    if (el('ktab-handoff') && el('ktab-handoff').style.display !== 'none') loadHandoffs();
   })
   .catch(function(e){ toast(e.message); });
 }
@@ -2981,11 +2998,15 @@ var autosaveTimer = null;
 var sheetLive = false;   // replaces the old live-bar DOM check — true while the active sheet is published to staff
 
 // D1-backed persistence (same actions as before, now authenticated)
-var _handoff = null, _handoffPending = false;
+var _handoff = null, _handoffPending = false, _handoffOpenCount = 0;
 function sbGetActive(cb) {
   api('get_active')
   .then(function(res) {
-    if (res.data) { _handoff = res.data.handoff || null; renderHandoffBanner(); }   // build 102
+    if (res.data) {
+      _handoff = res.data.handoff || null;
+      _handoffOpenCount = res.data.handoff_open_count || 0;   // build 107
+      renderHandoffBanner();
+    }
     if (res.data && res.data.invoice) {
       var row = res.data;
       row.invoice = typeof row.invoice === 'string' ? JSON.parse(row.invoice) : row.invoice;
@@ -3049,13 +3070,90 @@ function sbDeleteInvoice(id, cb) {
 
 /* ── KEL TABS ── */
 function kelTab(name) {
-  ['invoice','archive','help'].forEach(function(t) {
-    el('ktab-'+t).style.display = t===name?'block':'none';
+  ['invoice','archive','handoff'].forEach(function(t) {
+    var e = el('ktab-'+t); if (e) e.style.display = t===name?'block':'none';
   });
   document.querySelectorAll('#view-linesheet .tab-btn').forEach(function(b,i) {
-    b.classList.toggle('active', ['invoice','archive','help'][i]===name);
+    b.classList.toggle('active', ['invoice','archive','handoff'][i]===name);
   });
   if (name==='archive') loadArchive();
+  if (name==='handoff') loadHandoffs();
+}
+
+/* ── build 107 — THE HANDOFF QUEUE (worker v93) ───────────────────────
+   v92 kept ONE handoff and read the sheet out of the shared active slot, so
+   sending a second sheet overwrote the first and the person opening the app was
+   shown whichever sheet happened to be sitting there. Each handoff now carries
+   its own copy. This is the list of them. */
+var _openHandoffId = null;
+function loadHandoffs(){
+  var wrap = el('handoff-list');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">Loading&#8230;</div>';
+  api('handoff_list', {})
+  .then(function(r){
+    if (r.error) throw new Error(r.error);
+    var open = r.open || [], recent = r.recent || [];
+    if (!open.length && !recent.length) {
+      wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">Nothing has been handed over yet. Build a sheet on the Invoice tab, then tap <strong>Send to Kelly</strong>.</div>';
+      return;
+    }
+    var h = '';
+    var when = function(x){ try { return new Date(x).toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }); } catch(e){ return ''; } };
+    if (open.length) {
+      h += '<div class="sp-l" style="margin:0 0 6px;">Waiting (' + open.length + ')</div>';
+      open.forEach(function(o){
+        h += '<div class="code-row" style="cursor:pointer;align-items:flex-start;" data-open="' + esc(o.id) + '">' +
+               '<div style="flex:1;">' +
+                 '<div style="font-size:14px;">' + esc(o.vendor || 'Sheet') + ' &#183; ' + (o.item_count || 0) + ' item' + (o.item_count === 1 ? '' : 's') + '</div>' +
+                 '<div style="font-size:11px;color:var(--gray-text);margin-top:2px;">from ' + esc(o.from_name || '') + ' &#183; ' + esc(when(o.started_at)) +
+                   (o.note ? ' &#183; &ldquo;' + esc(o.note) + '&rdquo;' : '') + '</div>' +
+               '</div>' +
+               '<button type="button" class="btn btn-shopify" style="width:auto;padding:6px 12px;margin:0;font-size:12px;">Open</button>' +
+             '</div>';
+      });
+    }
+    if (recent.length) {
+      h += '<div class="sp-l" style="margin:16px 0 6px;">Finished</div>';
+      recent.forEach(function(o){
+        h += '<div class="code-row" style="align-items:flex-start;opacity:.7;">' +
+               '<div style="flex:1;">' +
+                 '<div style="font-size:13px;">' + esc(o.vendor || 'Sheet') + ' &#183; ' + (o.item_count || 0) + ' item' + (o.item_count === 1 ? '' : 's') + '</div>' +
+                 '<div style="font-size:11px;color:var(--gray-text);margin-top:2px;">' +
+                   (o.state === 'cancelled' ? 'cancelled' : ('done by ' + esc(o.finished_by || ''))) +
+                   ' &#183; ' + esc(when(o.finished_at)) + '</div>' +
+               '</div></div>';
+      });
+    }
+    wrap.innerHTML = h;
+    wrap.querySelectorAll('[data-open]').forEach(function(rowEl){
+      rowEl.onclick = function(){ openHandoff(rowEl.getAttribute('data-open')); };
+    });
+  })
+  .catch(function(e){ wrap.innerHTML = '<div style="font-size:13px;color:var(--red);">' + esc(e.message) + '</div>'; });
+}
+
+// Load ONE handed-over sheet into the working area, from its own snapshot —
+// never from the active slot, which is what went wrong before.
+function openHandoff(id){
+  api('handoff_open', { id: id })
+  .then(function(r){
+    if (r.error) throw new Error(r.error);
+    var d = r.data || {};
+    if (!d.invoice || !(d.invoice.styles||[]).length) throw new Error('That handoff has no items on it.');
+    _openHandoffId = d.id;
+    currentInvoice = d.invoice;
+    sheetLive = false;
+    kelTab('invoice');
+    renderKelCards(currentInvoice);
+    try { _renderVendorField(currentInvoice); } catch (e) {}
+    // Put it in the active slot too, so autosave and the push work exactly as
+    // they always have. The snapshot in the queue stays untouched as the record.
+    sbSetActive(false, currentInvoice, function(){});
+    showStatus('extract-status','success','\u2713 Opened ' + esc(d.vendor || 'the sheet') + ' from ' + esc(d.from_name || '') + '. Fill in the names and prices, then push to Shopify and mark it done.');
+    try { el('pricing-section').scrollIntoView({ behavior:'smooth' }); } catch (e) {}
+  })
+  .catch(function(e){ toast(e.message); });
 }
 
 function loadActiveInvoiceForKel() {
@@ -5034,14 +5132,11 @@ function manualFormChanged(){
     var need = [];
     var nameEl   = row.querySelector('.man-name');
     var retailEl = row.querySelector('.man-retail');
-    // build 102 — in photos-only mode a blank name and price are the POINT, not
-    // an omission. The sheet still cannot be pushed without them; that guard
-    // lives at the Shopify review, where the person filling them in is standing.
-    var _po = _manPhotosOnly();
-    var nameBad   = !_po && !nameEl.value.trim();
-    var retailBad = !_po && !(_manMoney(retailEl.value) > 0);
-    if (nameBad)   need.push('style name');
-    if (retailBad) need.push('retail price');
+    // build 107 — neither is required. Nothing publishes from Manual Entry, and
+    // both are enforced at the Shopify review, which names the offenders and
+    // refuses to push. Demanding them twice — once where it is pointless and
+    // once where it counts — only teaches people to type a zero to get past it.
+    var nameBad = false, retailBad = false;
     var _sz = _manRowSizes(row);   // build 88 — whatever run this row is showing
     var qty = Object.keys(_sz).reduce(function(t,k){ return t + (_sz[k]||0); }, 0);
     var _sizedEl = row.querySelector('.man-qty-sized');
@@ -5201,16 +5296,10 @@ function manualScanUpc(btn){
    what arrived and how many, and the person who prices it needs to SEE it
    first. Those are two people and two moments, and forcing them into one form
    is why this was being done by text message. */
-function _manPhotosOnly(){
-  var c = el('man-photos-only');
-  return !!(c && c.checked);
-}
-function manPhotosOnlyChanged(){
-  var on = _manPhotosOnly();
-  var b = el('man-start-btn');
-  if (b) b.textContent = on ? 'Save & hand off \u2192' : 'Review & publish \u2192';
-  manualFormChanged();
-}
+// build 107 — kept as a no-op so nothing that still calls it breaks. The mode
+// it used to switch on is now simply how Manual Entry behaves.
+function _manPhotosOnly(){ return false; }
+function manPhotosOnlyChanged(){ manualFormChanged(); }
 
 function manualStart(){
   var vendor = el('man-vendor').value.trim();
@@ -5247,12 +5336,9 @@ function manualStart(){
     // "<style> - <colour>", SKU <code>-<COLOUR>-<size>.
     var _sets = _manRowColorSets(row);
     if (_sets && !_sets.length) { bad++; return; }     // colours typed, no counts
-    // build 102 — photos-only: a quantity is still required (it is the one thing
-    // only the person unpacking the box knows), name and price are not.
-    var _po2 = _manPhotosOnly();
-    var _noQty = (!_sets && !Object.keys(sizes).length);
-    if (_po2) { if (_noQty) { bad++; return; } }
-    else if (!name || !(retail > 0) || _noQty) { bad++; return; }
+    // build 107 — a quantity is the one thing only the person unpacking the box
+    // knows, so it stays required. Name and price can come from anyone, later.
+    if (!_sets && !Object.keys(sizes).length) { bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
     // build 39 — a valid typed/scanned UPC rides into the style and prefills
     // the push card; invalid stays null (SKU barcode at push, never blocks)
@@ -5266,8 +5352,8 @@ function manualStart(){
     // build 102 — a blank name would render as the machine style code, which
     // reads like a real name and is the sort of thing that ends up published.
     // Flagged instead, so every screen can show it as waiting on a person.
-    if (_po2 && !name) { s.name = ''; s._needsName = true; }
-    if (_po2 && !(retail > 0)) { s._retail = '$0.00'; s._needsPrice = true; }
+    if (!name) { s.name = ''; s._needsName = true; }
+    if (!(retail > 0)) { s._retail = '$0.00'; s._needsPrice = true; }
     // build 88 — carry the run and the chosen Category through to the review
     // card and the push, so a manually entered shoe stays 5-11 end to end.
     s._sizeRun = _rowRun;
@@ -5284,8 +5370,8 @@ function manualStart(){
     }
     styles.push(s);
   });
-  if (!styles.length){ showStatus('man-status','error','Every row needs a style name, a retail price, and at least one quantity.'); return; }
-  if (bad) showStatus('man-status','error', bad + ' incomplete row(s) skipped (need name + retail price + a quantity).');
+  if (!styles.length){ showStatus('man-status','error','Every row needs at least one quantity. Name and price are optional \u2014 fill them in here or hand the sheet on.'); return; }
+  if (bad) showStatus('man-status','error', bad + ' row(s) skipped \u2014 a row needs at least one quantity.');
   else el('man-status').style.display = 'none';
   var d = new Date();
   var manual = {
