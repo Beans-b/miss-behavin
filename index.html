@@ -792,7 +792,16 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
           <div style="font-size:12px;color:var(--gray-text,#777);margin-bottom:10px;line-height:1.5;"><strong>1.</strong> Vendor name &#183; <strong>2.</strong> Paste the product URL &amp; tap Pull (fills name, color, photos, retail), then <strong>check the photos that appear on the row</strong> &#8212; wrong item? paste the correct URL in the Re-pull box right there &#183; <strong>3.</strong> Pick the Category &#8212; it sets the size run (Size run overrides it; choose One size for accessories) &#183; <strong>4.</strong> Type the quantity, then Review &amp; publish. No URL? Just type into the row.</div>
-          <div class="field"><label class="field-label">Vendor (exact brand spelling)</label><input type="text" class="field-input" id="man-vendor"/></div>
+          <label style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;margin-bottom:10px;border:1px solid var(--gray-mid);border-radius:8px;cursor:pointer;">
+            <input type="checkbox" id="man-photos-only" onchange="manPhotosOnlyChanged()" style="margin-top:2px;"/>
+            <span style="font-size:12px;line-height:1.5;"><strong>Photos only &#8212; someone else names and prices these.</strong><br>
+            <span style="color:var(--gray-text);">Style name and price stop being required, so you can get the pictures and counts in now. Nothing reaches Shopify until the names and prices are filled in &#8212; the push already refuses a sheet with a missing price.</span></span>
+          </label>
+          <div class="field"><label class="field-label">Vendor (exact brand spelling)</label>
+            <input type="text" class="field-input" id="man-vendor" list="man-vendor-list" autocomplete="off" placeholder="Choose a brand you carry, or type a new one"/>
+            <datalist id="man-vendor-list"></datalist>
+            <div class="field-hint" id="man-vendor-hint" style="font-size:11px;">Click the box for the brands already in your catalogue, or type a new one. Spelling matters &#8212; a variation creates a second brand in Shopify that no collection or report groups with the first.</div>
+          </div>
           <div class="field"><label class="field-label">Vendor product page URL</label>
             <div style="display:flex;gap:8px;">
               <input type="text" class="field-input" id="man-url" style="flex:1;"/>
@@ -839,6 +848,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
           <div style="display:flex;gap:10px;margin-top:12px;">
             <button class="btn btn-outline" onclick="saveCurrentInvoice()" style="flex:1;">Save</button>
+            <button class="btn btn-outline" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
             <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
           </div>
           <div id="bottom-save-status" style="font-size:11px;color:#666;margin-top:6px;text-align:center;"></div>
@@ -1078,6 +1088,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="field-hint">Mints a fresh access token from the app credentials so new permissions take effect immediately. Run this once after any app permission change (like adding sales-channel access). Shows the permission list; the token itself never appears anywhere. Needs worker v41 + the two client-credential secrets in Cloudflare.</div>
       <div id="rtok-status" class="status"></div>
 
+      <div class="section-title" style="margin-top:18px;">Notifications on this phone</div>
+      <button class="btn btn-outline" id="push-btn" onclick="pushEnable()">Notify me on this phone</button>
+      <div class="field-hint">Turns on a lock-screen notification when a sheet is handed over for naming and pricing. Per device &#8212; whoever taps this on their own phone gets them. On an iPhone it only works from the Home Screen app (Share &#8594; Add to Home Screen), not a Safari tab. Needs worker v92 and the push keys.</div>
+      <div id="push-status" class="status"></div>
+
       <div class="section-title" style="margin-top:18px;">Sales channels</div>
       <button class="btn btn-outline" id="fixch-btn" onclick="fixChScan()">Find products stuck on 0 sales channels</button>
       <div class="field-hint">Repairs the invisible-product bug only: lists ACTIVE products on ZERO sales channels (broken &#8212; not even at POS) with their photo counts, and publishes only the ones you tick. Products already on any channel &#8212; including your POS-only, no-photo items &#8212; are never touched. Needs worker v39.</div>
@@ -1292,6 +1307,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 101</strong> &#183; 2026-08-05 &#183; UPC entry is out of Manual Entry. Nothing was lost: every variant has always been pushed with its SKU as the barcode, so four colourways get four unique scannable codes with nothing typed. A typed UPC was only ever the manufacturer&#39;s GTIN, which software cannot invent &#8212; GS1 issues those against a paid company prefix &#8212; and its absence is already declared correctly to Google. On the review card it collapses behind a link and opens itself when an invoice really did print one. Vendor is now a picker AND a text box: click for the brands already in your catalogue, type a new one, and a near-miss spelling is called out because a variation creates a second brand in Shopify that no collection groups with the first. Needs Worker v91. Carries build 100
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 100</strong> &#183; 2026-08-05 &#183; A UPC per colour. Each colour line in Manual Entry carries its own UPC box with a camera scan, on one-size rows only &#8212; a sized run has no place for one because each size would need its own. Two colours given the same barcode is flagged as you type. AND THE TRAP IT UNCOVERED: the review card seeded its UPC field from the STYLE barcode, so a four-colour style would have written one barcode onto all four products, which is exactly what makes a register scan ambiguous. The colourway&#39;s own UPC now wins, and the style-level one is inherited only when the style has a single colourway. No Worker change &#8212; runs on v90. Carries build 99
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 99</strong> &#183; 2026-08-05 &#183; Manual Entry takes several colours on one style. Type them comma-separated in the Colour box and the row grows a quantity line per colour &#8212; one product each, named &quot;Style - Colour&quot;, with its own SKU (CODE-COLOUR-SIZE) and its own review card. The invoice path has always worked this way; Manual Entry was the one place that assumed a single colourway, so a four-colour style had to be typed four times. Quantities are per colour on purpose &#8212; colours rarely arrive in equal counts and a wrong count is a wrong number at the register. Also fixes a latent counting bug: the row quantity read assigned instead of summing. No Worker change &#8212; runs on v90. Carries build 98
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 98</strong> &#183; 2026-08-05 &#183; A product pushed with no photograph now goes to the register only and no empty page goes live (Worker v90 does the holding; this is the screen catching up). The 0-channels repair stopped warning that photoless products would show on the website without an image, because the Worker now refuses to do that, and it no longer reports &quot;on all N channels&quot; for products it deliberately held back. Adding photos to a live product now tells you whether a held product was released, or why it was not. NEW Photo channel check in Store Utilities: reads the catalogue as it stands, finds products with no real photograph showing beyond the register &#8212; the case the push cannot see, because Shopify fetches an image link afterwards and a blocked vendor site leaves a product that pushed &quot;with photos&quot; and has none &#8212; and releases anything held that now has one. Needs Worker v90. Carries build 97
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 97</strong> &#183; 2026-08-05 &#183; The &quot;Update available&quot; banner stops appearing on the build you are already running. The visible footer said 96 but the APP_BUILD constant the update-checker compares against was still 94, so every load read 96 off its own footer, saw 96 is greater than 94, and raised the banner &#8212; dismissing it did nothing because the next load repeated the comparison. No other change. Runs on Worker v86+; v88 adds the researched keyword vocabulary to the bulk Meta Fill backfill. Carries build 96
@@ -1303,7 +1320,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 100</strong> &#183; 2026-08-05 &#183; A UPC per colour. Each colour line in Manual Entry carries its own UPC box with a camera scan, on one-size rows only &#8212; a sized run has no place for one because each size would need its own. Two colours given the same barcode is flagged as you type. AND THE TRAP IT UNCOVERED: the review card seeded its UPC field from the STYLE barcode, so a four-colour style would have written one barcode onto all four products, which is exactly what makes a register scan ambiguous. The colourway&#39;s own UPC now wins, and the style-level one is inherited only when the style has a single colourway. No Worker change &#8212; runs on v90. Carries build 99</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 102</strong> &#183; 2026-08-06 &#183; THE HANDOFF. A Photos-only switch on Manual Entry drops the style-name and price requirement, so the person opening the box can get the pictures and counts in and hand the sheet to whoever prices it. Send to Kelly saves the sheet first, then notifies, and reports which channels actually fired rather than saying &quot;sent&quot; when nothing is configured. A banner on both screens answers whose turn it is. Push is opt-in per phone (Home Screen app only on iPhone). And a blank NAME is now stopped at the Shopify review the way a blank price already was &#8212; without it a photos-only item would publish under its machine code. Needs Worker v92 and sw.js uploaded alongside this file. Carries build 101</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1626,7 +1643,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 100;   // keep in step with the footer stamp
+var APP_BUILD = 102;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2723,7 +2740,8 @@ function saveLocation(){
   .catch(function(e){ showStatus('loc-status','error',e.message); });
 }
 
-/* ── STAFF NOTIFICATIONS (unchanged — device-local) ── */
+/* ── STAFF NOTIFICATIONS (build 102: the SMS half is still device-local;
+       push is per-device and registered with the Worker) ── */
 function loadNotifToUI(){
   var phone=ls('mb_staff_phone');var doS=ls('mb_notif_sms')==='true';
   var ns=el('notif-sms');if(!ns)return;
@@ -2741,6 +2759,134 @@ function saveNotifSettings(){
   lsSet('mb_notif_sms',doS);
   if(phone){lsSet('mb_staff_phone',phone);el('staff-phone-display').textContent=phone;}
   showStatus('notif-status','success','✓ Saved.');
+}
+
+/* ── build 102 — THE HANDOFF (worker v92) ─────────────────────────────
+   One line at the top of the app that answers "whose turn is it". Both people
+   see the same sentence, which is the point — the arrangement stops living in
+   somebody's head. */
+function renderHandoffBanner(){
+  var id = 'handoff-banner';
+  var b = el(id);
+  var waiting = _handoff && _handoff.state === 'needs_pricing';
+  if (!waiting) { if (b) b.remove(); return; }
+  if (!b) {
+    b = document.createElement('div');
+    b.id = id;
+    b.style.cssText = 'position:sticky;top:0;z-index:900;padding:10px 14px;font-size:13px;line-height:1.5;' +
+      'background:var(--black,#111);color:#fff;display:flex;gap:10px;align-items:center;flex-wrap:wrap;';
+    document.body.insertBefore(b, document.body.firstChild);
+  }
+  var mine = SESSION && (SESSION.role === 'pricer');
+  var when = _handoff.started_at ? new Date(_handoff.started_at) : null;
+  var ago  = when ? when.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+  var n    = _handoff.item_count || 0;
+  var who  = esc(_handoff.from_name || 'The buyer');
+  var note = _handoff.note ? ' &#8212; &ldquo;' + esc(_handoff.note) + '&rdquo;' : '';
+  b.innerHTML = mine
+    ? '<span style="flex:1;"><strong>' + who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') +
+      ' to name and price.</strong> ' + esc(ago) + note + '</span>' +
+      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">I&#39;m done</button>'
+    : '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'Kelly') + ' to name and price ' +
+      (n || 'these') + ' item' + (n === 1 ? '' : 's') + ' &#8212; sent ' + esc(ago) + note + '</span>' +
+      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">Cancel the handoff</button>';
+}
+
+// Hand it over. The sheet is saved FIRST — a notification that arrives before
+// the work does is worse than no notification.
+function handoffSend(){
+  var inv = collectCurrentInvoice();
+  if (!inv || !(inv.styles || []).length) { toast('Nothing on the sheet to hand off.'); return; }
+  var count = 0;
+  (inv.styles || []).forEach(function(st){ count += ((st.colors || []).length || 1); });
+  var note = prompt('Anything to tell her about these? (optional)', '') || '';
+  currentInvoice = inv;
+  sbSetActive(sheetLive, inv, function(ok){
+    if (!ok) { toast('Could not save the sheet — nothing was sent.'); return; }
+    api('handoff_start', { note: note, to: 'Kelly', item_count: count })
+    .then(function(r){
+      if (r.error) { toast(r.error); return; }
+      _handoff = { state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:'Kelly',
+                   note:note, item_count:count, started_at:r.started_at };
+      renderHandoffBanner();
+      // Say which channels actually fired. "Sent" when nothing was configured
+      // is the lie that makes a notification system untrustworthy.
+      var d = r.delivery || {};
+      var bits = [];
+      if (d.sms === 'sent') bits.push('texted');
+      else if (d.sms && d.sms !== 'not configured') bits.push('text ' + d.sms);
+      if (/sent/.test(String(d.push || ''))) bits.push('pushed');
+      else if (d.push && d.push !== 'not configured') bits.push('push: ' + d.push);
+      toast(bits.length ? 'Handed off \u2014 ' + bits.join(', ') + '.'
+                        : 'Handed off. NOTHING WAS SENT \u2014 no text or push is set up yet, so tell her yourself.');
+      _handoffTextLink(count);
+    })
+    .catch(function(e){ toast('Handed off locally, but the notification failed: ' + e.message); });
+  });
+}
+
+// The fallback that always works: your own Messages app, prewritten. Costs
+// nothing, needs no account, and comes from your real number.
+function _handoffTextLink(count){
+  var phone = ls('mb_staff_phone');
+  if (!phone) return;
+  var url = window.location.href.split('?')[0].split('#')[0];
+  var msg = count + ' item(s) ready to name and price: ' + url;
+  var a = document.createElement('a');
+  a.href = 'sms:' + phone + '&body=' + encodeURIComponent(msg);
+  a.click();
+}
+
+function handoffFinish(){
+  api('handoff_done', {})
+  .then(function(r){
+    if (r.error) { toast(r.error); return; }
+    _handoff = null; renderHandoffBanner();
+    toast('Done \u2014 the sheet is no longer waiting on anyone.');
+  })
+  .catch(function(e){ toast(e.message); });
+}
+
+/* ── build 102 — PUSH, per device ─────────────────────────────────────
+   Opt-in on the phone that wants it. On iPhone this only works once the app has
+   been added to the Home Screen, which is a real limitation and worth saying out
+   loud rather than letting it fail silently. */
+function pushSupported(){
+  return ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+}
+function _b64uToU8(b64){
+  var pad = '='.repeat((4 - (b64.length % 4)) % 4);
+  var raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  var out = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+function pushEnable(){
+  var st = el('push-status');
+  var say = function(kind, msg){ showStatus('push-status', kind, msg); };
+  if (!pushSupported()) {
+    say('error', 'This browser cannot do push. On an iPhone, add the app to your Home Screen first (Share &#8594; Add to Home Screen), open it from there, and try again.');
+    return;
+  }
+  say('loading', '<span class="spinner"></span>Setting up&#8230;');
+  api('push_key', {})
+  .then(function(r){
+    if (!r.configured || !r.key) throw new Error('Push is not set up on the server yet — the VAPID keys have not been added to the Worker.');
+    return navigator.serviceWorker.register('/sw.js')
+      .then(function(reg){ return navigator.serviceWorker.ready.then(function(){ return reg; }); })
+      .then(function(reg){
+        return Notification.requestPermission().then(function(perm){
+          if (perm !== 'granted') throw new Error('Notifications were not allowed. Turn them on for this app in your phone settings, then try again.');
+          return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _b64uToU8(r.key) });
+        });
+      });
+  })
+  .then(function(sub){ return api('push_subscribe', { subscription: JSON.parse(JSON.stringify(sub)) }); })
+  .then(function(r){
+    if (r && r.error) throw new Error(r.error);
+    say('success', '\u2713 This phone will now get a notification when a sheet needs naming and pricing. Send a test handoff to check it.');
+  })
+  .catch(function(e){ say('error', esc(e.message || 'Could not turn on notifications.')); });
 }
 
 /* ── MODAL ── */
@@ -2764,9 +2910,11 @@ var autosaveTimer = null;
 var sheetLive = false;   // replaces the old live-bar DOM check — true while the active sheet is published to staff
 
 // D1-backed persistence (same actions as before, now authenticated)
+var _handoff = null, _handoffPending = false;
 function sbGetActive(cb) {
   api('get_active')
   .then(function(res) {
+    if (res.data) { _handoff = res.data.handoff || null; renderHandoffBanner(); }   // build 102
     if (res.data && res.data.invoice) {
       var row = res.data;
       row.invoice = typeof row.invoice === 'string' ? JSON.parse(row.invoice) : row.invoice;
@@ -4323,15 +4471,13 @@ function _manRenderColorGrid(row){
   var colors = _manColors(row);
   if (colors.length < 2) { box.style.display = 'none'; box.innerHTML = ''; return; }
 
-  var keep = {}, keepUpc = {};
+  var keep = {};
   box.querySelectorAll('.man-crow').forEach(function(cr){
     var cn = cr.getAttribute('data-color') || '';
     cr.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
       var m = /man-csz-([^\s]+)/.exec(i.className);
       if (m) keep[cn.toLowerCase() + '|' + m[1]] = i.value;
     });
-    var u = cr.querySelector('.man-cupc');       // build 100
-    if (u) keepUpc[cn.toLowerCase()] = u.value;
   });
 
   var run   = row.dataset.run || 'ALPHA';
@@ -4341,11 +4487,15 @@ function _manRenderColorGrid(row){
             '<button class="btn btn-outline" style="width:auto;padding:6px 10px;margin:0;font-size:12px;" ' +
               'onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
           '</div>';
-  // build 100 — the UPC boxes ride along on ONE-SIZE rows only. Same rule the
-  // review card has always applied: one UPC cannot cover several sizes without
-  // making a register scan ambiguous, so a sized run gets no per-colour UPC and
-  // says so rather than offering a box that would be wrong to fill.
-  var wantUpc = (sizes.length === 1 && sizes[0] === 'OS');
+  // build 101 — the UPC boxes are gone. Nothing needs typing: every variant is
+  // pushed with barcode = its SKU (CODE-COLOUR-SIZE), so these four colourways
+  // get four unique scannable barcodes written onto four Shopify products with
+  // no input at all. A typed UPC was only ever the MANUFACTURER's GTIN, which
+  // software cannot invent — GS1 issues them against a paid company prefix, and
+  // a made-up one either fails its check digit or belongs to somebody else's
+  // product. Its absence is already declared correctly by the Worker
+  // (custom_product = true). The one place it still makes sense is the review
+  // card, package in hand, and there it is behind a link.
   colors.forEach(function(cn, ci){
     h += '<div class="man-crow" data-ci="' + ci + '" data-color="' + esc(cn) + '" ' +
            'style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:6px 0;border-top:1px solid #f0f0f0;">' +
@@ -4358,76 +4508,14 @@ function _manRenderColorGrid(row){
                'style="text-align:center;" value="' + esc(v === undefined ? '' : v) + '"/>' +
            '</div>';
     });
-    if (wantUpc) {
-      var uv = keepUpc[cn.toLowerCase()];
-      h += '<div style="flex:2.2;min-width:150px;">' +
-             '<label class="sp-l" style="white-space:nowrap;">UPC</label>' +
-             '<div style="display:flex;gap:4px;">' +
-               '<input type="text" inputmode="numeric" autocomplete="off" class="field-input man-cupc" ' +
-                 'value="' + esc(uv === undefined ? '' : uv) + '"/>' +
-               '<button type="button" class="btn btn-outline man-cupc-scan" ' +
-                 'style="width:auto;padding:8px 10px;margin:0;" title="Scan with camera">&#128247;</button>' +
-             '</div>' +
-             '<div class="man-cupc-hint" style="display:none;font-size:11px;margin-top:3px;"></div>' +
-           '</div>';
-    }
     h += '</div>';
   });
-  if (!wantUpc) {
-    h += '<div style="font-size:11px;color:#999;margin-top:6px;">A UPC belongs to one package, so a sized run has no place to put one &#8212; each size would need its own. Scan them on the review cards, or leave them and the SKU barcode is used.</div>';
-  }
+  h += '<div style="font-size:11px;color:#999;margin-top:6px;">Barcodes are automatic &#8212; each colour is pushed with its own scannable code (' +
+       esc(colors.length) + ' unique codes), so there is nothing to type or scan here.</div>';
   box.innerHTML = h;
   box.style.display = 'block';
   box.querySelectorAll('input[class*="man-csz-"]').forEach(function(i){
     i.addEventListener('input', manualFormChanged);
-  });
-  box.querySelectorAll('.man-cupc').forEach(function(i){
-    i.addEventListener('input', function(){ _manColorUpcCheck(box); manualFormChanged(); });
-  });
-  box.querySelectorAll('.man-cupc-scan').forEach(function(b){
-    b.onclick = function(){
-      var inp = b.parentNode.querySelector('.man-cupc');
-      openScanner(function(code){
-        inp.value = gtinDigits(code);
-        _manColorUpcCheck(box);
-        manualFormChanged();
-      });
-    };
-  });
-  _manColorUpcCheck(box);
-}
-
-// build 100 — check the UPCs against the GS1 check digit AND against each other.
-// Two colourways given the same barcode is the failure this whole per-colour
-// change exists to avoid; catching it here beats finding it at the register.
-function _manColorUpcCheck(box){
-  if (!box) return;
-  var seen = {};
-  box.querySelectorAll('.man-cupc').forEach(function(i){
-    var d = gtinDigits(i.value);
-    if (d) seen[d] = (seen[d] || 0) + 1;
-  });
-  box.querySelectorAll('.man-cupc').forEach(function(i){
-    var hint = i.parentNode.parentNode.querySelector('.man-cupc-hint');
-    if (!hint) return;
-    var d = gtinDigits(i.value);
-    if (!d) { hint.style.display = 'none'; i.style.borderBottomColor = ''; return; }
-    if (seen[d] > 1) {
-      hint.style.display = 'block';
-      hint.style.color = 'var(--red)';
-      hint.textContent = 'Same UPC as another colour — every product needs its own.';
-      i.style.borderBottomColor = 'var(--red)';
-    } else if (!isGtin(d)) {
-      hint.style.display = 'block';
-      hint.style.color = 'var(--red)';
-      hint.textContent = 'Not a valid UPC — the SKU barcode will be used instead.';
-      i.style.borderBottomColor = 'var(--red)';
-    } else {
-      hint.style.display = 'block';
-      hint.style.color = 'var(--gray-text)';
-      hint.textContent = '✓ Valid';
-      i.style.borderBottomColor = '';
-    }
   });
 }
 
@@ -4442,16 +4530,10 @@ function manColorChanged(inp){
     row.querySelectorAll('input[class*="man-sz-"]').forEach(function(e){ e.value = ''; });
     if (os) os.style.display = 'none';
     if (sized) sized.style.display = 'none';
-    // build 100 — one box cannot hold four barcodes. Hide it rather than leave
-    // a field whose value would have to be copied onto every colour.
     var _u = row.querySelector('.man-upc');
-    var _uw = row.querySelector('.man-upc-row');
     if (_u) _u.value = '';
-    if (_uw) _uw.style.display = 'none';
     _manRenderColorGrid(row);
   } else {
-    var _uw2 = row.querySelector('.man-upc-row');
-    if (_uw2) _uw2.style.display = 'flex';
     var box = row.querySelector('.man-colors');
     if (box) { box.style.display = 'none'; box.innerHTML = ''; }
     setRowSizing(row, (row.dataset.run === 'OS') ? 'os' : 'sized');
@@ -4473,12 +4555,10 @@ function _manRowColorSets(row){
       var q = parseInt(i.value, 10) || 0;
       if (m && q > 0) { sizes[m[1]] = q; total += q; }
     });
-    // build 100 — the colourway's own UPC. Invalid stays null and the SKU
-    // barcode is used at push, exactly as a style-level UPC has always behaved.
-    var _u = cr.querySelector('.man-cupc');
-    var _ud = _u ? gtinDigits(_u.value) : '';
-    if (total > 0) out.push({ color: cn, sizes: sizes, total: total,
-                              barcode: (_ud && isGtin(_ud)) ? _ud : null });
+    // build 101 — no typed barcode. The push writes barcode = SKU per variant,
+    // which is unique per colourway and per size, so every product is scannable
+    // the moment it lands.
+    if (total > 0) out.push({ color: cn, sizes: sizes, total: total, barcode: null });
   });
   return out;
 }
@@ -4562,6 +4642,58 @@ function ensureManTypeDatalist(){
 // Merge the store's existing product types into the picker. Fails open — a
 // fetch error (or an older Worker without the endpoint) just leaves the
 // curated list above, so the field still works before the Worker is updated.
+/* ── build 101 — VENDOR PICKER (worker v91) ───────────────────────────
+   Vendor is not a label, it is a key: it becomes the Shopify vendor field, it
+   drives the private-label swap to Miss Behavin', and it is what collections
+   and reports group on. "Nikibiki" and "NikiBiki" are two brands as far as
+   Shopify is concerned. A datalist gives the list and the free-text box in one
+   control — pick what you carry, type what you don't. */
+var _liveVendors = [], _vendorsLoaded = false;
+function ensureVendors(cb){
+  if (_vendorsLoaded){ if (cb) cb(); return; }
+  api('shopify_get_vendors', {})
+    .then(function(res){
+      if (res && res.vendors) _liveVendors = res.vendors;
+      _vendorsLoaded = true; fillVendorList(); if (cb) cb();
+    })
+    .catch(function(){ _vendorsLoaded = true; if (cb) cb(); });   // offline or older worker — the box still takes free text
+}
+function fillVendorList(){
+  var dl = el('man-vendor-list');
+  if (!dl) return;
+  dl.innerHTML = _liveVendors.map(function(v){ return '<option value="' + esc(v) + '"></option>'; }).join('');
+}
+// A near-miss is the whole problem this solves, so name it rather than let it
+// through silently. Never blocks — a genuinely new brand has to be typeable.
+function vendorSpellCheck(){
+  var inp = el('man-vendor'), hint = el('man-vendor-hint');
+  if (!inp || !hint) return;
+  var v = String(inp.value || '').trim();
+  var norm = function(x){ return String(x).toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  if (!v || !_liveVendors.length) {
+    hint.style.color = '';
+    hint.textContent = 'Click the box for the brands already in your catalogue, or type a new one. Spelling matters \u2014 a variation creates a second brand in Shopify that no collection or report groups with the first.';
+    return;
+  }
+  var exact = _liveVendors.some(function(x){ return x === v; });
+  if (exact) {
+    hint.style.color = 'var(--gray-text)';
+    hint.textContent = '\u2713 ' + v + ' \u2014 already in your catalogue.';
+    return;
+  }
+  var near = null, nv = norm(v);
+  for (var i = 0; i < _liveVendors.length; i++) {
+    if (norm(_liveVendors[i]) === nv) { near = _liveVendors[i]; break; }
+  }
+  if (near) {
+    hint.style.color = 'var(--red)';
+    hint.textContent = 'Your catalogue spells this "' + near + '". Typing it differently creates a SECOND brand \u2014 tap the box and pick the existing one unless this really is a new label.';
+  } else {
+    hint.style.color = 'var(--gray-text)';
+    hint.textContent = 'New brand \u2014 it will be created in Shopify exactly as typed. Check the spelling against the invoice.';
+  }
+}
+
 function ensureShopifyTypes(cb){
   if (_shopifyTypesLoaded){ if (cb) cb(); return; }
   api('shopify_get_types', {})
@@ -4813,8 +4945,12 @@ function manualFormChanged(){
     var need = [];
     var nameEl   = row.querySelector('.man-name');
     var retailEl = row.querySelector('.man-retail');
-    var nameBad   = !nameEl.value.trim();
-    var retailBad = !(_manMoney(retailEl.value) > 0);
+    // build 102 — in photos-only mode a blank name and price are the POINT, not
+    // an omission. The sheet still cannot be pushed without them; that guard
+    // lives at the Shopify review, where the person filling them in is standing.
+    var _po = _manPhotosOnly();
+    var nameBad   = !_po && !nameEl.value.trim();
+    var retailBad = !_po && !(_manMoney(retailEl.value) > 0);
     if (nameBad)   need.push('style name');
     if (retailBad) need.push('retail price');
     var _sz = _manRowSizes(row);   // build 88 — whatever run this row is showing
@@ -4833,6 +4969,7 @@ function manualFormChanged(){
     else if (rowNeed === null || need.length < rowNeed.length) rowNeed = need;
   });
   if (!rows.length) rowNeed = ['a style row'];
+  if (_manPhotosOnly() && rowNeed && !rowNeed.length) rowNeed = null;
   var ok = rowOk && !missing.length;
 
   // build 39 — live UPC validation per row (never blocks Review & publish;
@@ -4899,6 +5036,13 @@ function setRowSizing(row, mode){
 function manualAddRow(){
   ensureManTypeDatalist();   // curated types available immediately
   ensureShopifyTypes();      // merge in the store's live types (once, async)
+  ensureVendors();           // build 101 — and the brands you already carry
+  var _mv = el('man-vendor');
+  if (_mv && !_mv.dataset.wired) {
+    _mv.dataset.wired = '1';
+    _mv.addEventListener('input', vendorSpellCheck);
+    _mv.addEventListener('change', vendorSpellCheck);
+  }
   var row = document.createElement('div');
   row.className = 'man-row';
   row.style.cssText = 'border-top:1px solid var(--gray-mid);padding-top:10px;margin-top:10px;';
@@ -4943,11 +5087,13 @@ function manualAddRow(){
     '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
       '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-cost" onblur="manMoneyBlur(this)"/></div>' +
     '</div>' +
-    // build 39 — real UPCs ride through to Shopify (fixes GSC "Invalid GTIN")
-    '<div class="man-upc-row" style="display:flex;gap:6px;margin-top:6px;align-items:flex-end;">' +
-      '<div style="flex:1;"><label class="sp-l">UPC from packaging (optional &#8212; scan or type)</label><input type="text" inputmode="numeric" class="field-input man-upc" autocomplete="off"/></div>' +
-      '<button type="button" class="btn btn-outline" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera" onclick="manualScanUpc(this)">&#128247;</button>' +
-    '</div>' +
+    // build 101 — the UPC row is gone from Manual Entry. Barcodes are automatic
+    // (barcode = SKU, unique per colourway and size). A manufacturer GTIN is a
+    // different thing, cannot be generated, and is worth capturing only with the
+    // package in your hand — so it lives on the review card, behind a link.
+    // The hidden input stays so the invoice path, which DOES extract a printed
+    // UPC, has somewhere to put it without a special case.
+    '<input type="hidden" class="man-upc"/>' +
     '<div class="man-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>';
   el('man-rows').appendChild(row);
 }
@@ -4961,6 +5107,22 @@ function manualScanUpc(btn){
     manualFormChanged();
   });
 }
+/* ── build 102 — PHOTOS ONLY ──────────────────────────────────────────
+   The whole handoff turns on this one idea: the person who opens the box knows
+   what arrived and how many, and the person who prices it needs to SEE it
+   first. Those are two people and two moments, and forcing them into one form
+   is why this was being done by text message. */
+function _manPhotosOnly(){
+  var c = el('man-photos-only');
+  return !!(c && c.checked);
+}
+function manPhotosOnlyChanged(){
+  var on = _manPhotosOnly();
+  var b = el('man-start-btn');
+  if (b) b.textContent = on ? 'Save & hand off \u2192' : 'Review & publish \u2192';
+  manualFormChanged();
+}
+
 function manualStart(){
   var vendor = el('man-vendor').value.trim();
   if (!vendor){ showStatus('man-status','error','Vendor is required (exact brand spelling).'); return; }
@@ -4996,7 +5158,12 @@ function manualStart(){
     // "<style> - <colour>", SKU <code>-<COLOUR>-<size>.
     var _sets = _manRowColorSets(row);
     if (_sets && !_sets.length) { bad++; return; }     // colours typed, no counts
-    if (!name || !(retail > 0) || (!_sets && !Object.keys(sizes).length)){ bad++; return; }
+    // build 102 — photos-only: a quantity is still required (it is the one thing
+    // only the person unpacking the box knows), name and price are not.
+    var _po2 = _manPhotosOnly();
+    var _noQty = (!_sets && !Object.keys(sizes).length);
+    if (_po2) { if (_noQty) { bad++; return; } }
+    else if (!name || !(retail > 0) || _noQty) { bad++; return; }
     var units = Object.keys(sizes).reduce(function(t,k){ return t + sizes[k]; }, 0);
     // build 39 — a valid typed/scanned UPC rides into the style and prefills
     // the push card; invalid stays null (SKU barcode at push, never blocks)
@@ -5007,6 +5174,11 @@ function manualStart(){
     // build 33 — the price he entered IS the retail; it rides straight
     // through to the pricing card and the Shopify push.
     s._retail = '$' + retail.toFixed(2);
+    // build 102 — a blank name would render as the machine style code, which
+    // reads like a real name and is the sort of thing that ends up published.
+    // Flagged instead, so every screen can show it as waiting on a person.
+    if (_po2 && !name) { s.name = ''; s._needsName = true; }
+    if (_po2 && !(retail > 0)) { s._retail = '$0.00'; s._needsPrice = true; }
     // build 88 — carry the run and the chosen Category through to the review
     // card and the push, so a manually entered shoe stays 5-11 end to end.
     s._sizeRun = _rowRun;
@@ -5035,6 +5207,7 @@ function manualStart(){
     styles: styles
   };
   currentInvoice = manual;
+  _handoffPending = _manPhotosOnly();   // build 102
   renderKelCards(manual);
   el('kel-inv-title').textContent = manual.vendor + ' — #' + manual.invoice_number;
   el('kel-inv-details').textContent = manual.date + ' · ' + manual.styles.length + ' styles';
@@ -5247,6 +5420,21 @@ function openShopifyReview() {
   // v72 — NAME the offending styles and jump to the first one. The old modal
   // reported only a count ("1 style is missing a retail price"), which is
   // useless on an 8-style sheet — you had to hunt for a blank field by eye.
+  // build 102 — a blank NAME had no guard, so a photos-only style would have
+  // published under its machine code (MAN-08052310-1), which reads enough like
+  // a name to survive a glance and is then live on the website. The price guard
+  // below has named its offenders since v72; this does the same.
+  var unnamed = [];
+  (inv.styles || []).forEach(function(s, i) {
+    if (!String(s.name || '').trim()) unnamed.push(s.code || 'a style with no code');
+  });
+  if (unnamed.length) {
+    showModal('Names Missing',
+      unnamed.length + ' item' + (unnamed.length > 1 ? 's have' : ' has') + ' no name yet' +
+      (_handoff && _handoff.state === 'needs_pricing' ? ' — this sheet is still waiting on ' + (_handoff.to_name || 'Kelly') + '.' : '.') +
+      ' Name them on the sheet behind this box, then push.', null, false);
+    return;
+  }
   var unpriced = [];
   (inv.styles || []).forEach(function(s, i) {
     if (_spParseRetail(s._retail) <= 0) unpriced.push({ style: s, idx: i });
@@ -5545,14 +5733,22 @@ function _buildSpReview(inv) {
       // build 39/59 — real UPCs flow to Shopify. Only ONE-SIZE cards get the
       // field: a style-level UPC can never be copied across apparel sizes
       // (duplicate barcodes make POS scans ambiguous).
+      // build 101 — collapsed. Nothing here needs filling: the product is
+      // already scannable on its SKU barcode. This is only for a manufacturer
+      // GTIN printed on the package, which improves the Google and Bing product
+      // feeds and nothing else. Out of the way, one tap when it matters.
       var upcHtml = isOneSize
         ? '<div class="sp-upc-row" style="padding:0 14px 10px;">' +
-            '<label class="sp-l">UPC / GTIN from packaging (optional — scan or type)</label>' +
+            '<a href="#" class="sp-upc-toggle" style="font-size:11px;color:var(--gray-text);text-decoration:underline;">Add the printed UPC (optional)</a>' +
+            '<div class="sp-upc-body" style="display:none;margin-top:6px;">' +
+            '<label class="sp-l">UPC / GTIN from packaging &#8212; only if the brand printed one</label>' +
             '<div style="display:flex;gap:6px;">' +
               '<input type="text" inputmode="numeric" class="field-input sp-upc" autocomplete="off"/>' +
               '<button type="button" class="btn btn-outline sp-upc-scan" style="width:auto;padding:8px 12px;margin:0;" title="Scan with camera">&#128247;</button>' +
             '</div>' +
             '<div class="sp-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>' +
+            '<div style="font-size:11px;color:#999;margin-top:4px;">Leave it blank and the product still scans &#8212; every variant is pushed with its SKU as the barcode.</div>' +
+            '</div>' +
           '</div>'
         : '';
 
@@ -5803,6 +5999,20 @@ function _spWireUpc(cd) {
   var _oneColorway = ((cd.style && cd.style.colors) || []).length <= 1;
   var _seed = _cwUpc || (_oneColorway ? cd.style.barcode : '');
   if (_seed) input.value = gtinDigits(_seed);
+  // build 101 — the row is collapsed. Open it on tap, and open it automatically
+  // when an invoice actually extracted a printed UPC, so a real value is never
+  // hidden behind a link nobody clicked.
+  var _tog = cd.card.querySelector('.sp-upc-toggle');
+  var _body = cd.card.querySelector('.sp-upc-body');
+  if (_tog && _body) {
+    _tog.onclick = function(e){
+      e.preventDefault();
+      var open = _body.style.display !== 'none';
+      _body.style.display = open ? 'none' : 'block';
+      _tog.textContent = open ? 'Add the printed UPC (optional)' : 'Hide the UPC box';
+    };
+    if (input.value) { _body.style.display = 'block'; _tog.textContent = 'Hide the UPC box'; }
+  }
   input.addEventListener('input', function(){ _spUpcValidate(cd); });
   cd.card.querySelector('.sp-upc-scan').onclick = function(){
     openScanner(function(code){
