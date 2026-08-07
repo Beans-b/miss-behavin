@@ -532,6 +532,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render img{max-width:100%;height:auto;margin:8px 0;}
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
+.edit-chk{margin:0 0 10px;font-size:11px;line-height:1.55;}
+.edit-chk .hd{font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:10px;margin-bottom:4px;}
+.edit-chk.bad{background:#fdf2f2;border:1px solid #e4b8b8;padding:9px 10px;color:#8a1f1f;}
+.edit-chk.warnbox{background:#fffdf2;border:1px solid #dfcf8a;padding:9px 10px;color:#7a6414;}
+.edit-chk.good{color:var(--green,#2a7a3c);font-weight:600;}
+.edit-chk ul{margin:3px 0 0;padding-left:16px;}
 #edit-facts{width:100%;background:transparent;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px;outline:none;color:var(--black);line-height:1.5;resize:vertical;}
 #edit-facts:focus{border-color:var(--black);}
 #edit-facts.thin{border-color:#c9a227;background:#fffdf2;}
@@ -1329,6 +1335,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 111</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 110
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 110</strong> &#183; 2026-08-06 &#183; THE POST COULD NEVER HAVE BEEN SPECIFIC, BECAUSE NOTHING SPECIFIC WAS EVER ASKED FOR. The writer is rightly forbidden from inventing fabrics, prices, reviews and numbers, and this screen collected a topic and a brand and nothing else &#8212; so the only thing left to write was advice true of any boutique anywhere, which is exactly the copy readers skim and AI answers never cite. Create Blog now asks WHAT ACTUALLY HAPPENED: what sold out and how fast, who tried something on, what a customer asked for, what is in the window. Those lines reach the writer as the material the post is built from, ahead of everything else. Leaving it blank still works and is never blocked, but it says plainly what you are giving up, and the draft screen tells you afterwards whether the post was written from real detail or from shape alone &#8212; the one thing you can still fix before publishing. Needs Worker v96, which also gives the blog a real voice: a mid-twenties staffer who works the floor and helps buy the range, writing for customers 14 to 28. Carries build 109
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 109</strong> &#183; 2026-08-06 &#183; THE WEEKLY BLOG NUDGE NOW HAPPENS IN THE APP, AND IT KNOWS THE DIFFERENCE BETWEEN WRITE ONE AND PUBLISH THE ONE YOU HAVE. There was never a reminder to miss: the blog had no notification of any kind, only a grey banner that checked published posts, so it could tell you to write a post while a finished draft sat in Posts one tap from live &#8212; which is the state the weekly auto-draft creates every Wednesday. A waiting draft now wins the banner and sends you to Posts; &quot;a post is due&quot; shows only when nothing is written. The banner is tappable end to end and the Create Blog tile carries a dot, so the nudge survives scrolling past it. Everyone who can open Create Blog sees it, no per-device opt-in, nothing to switch on. Needs Worker v95, which also fixes the two separate bugs that stopped the Wednesday auto-draft running at all. Carries build 108
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 108</strong> &#183; 2026-08-06 &#183; Load Sample Invoice removed. It loaded a fake invoice for demonstrating the app, nobody demonstrates the app, and it sat one tap from Extract looking like a normal option &#8212; a control nobody uses is a wrong turn with a button on it. Its function stays unreferenced rather than unpicking the fixture and risking the real extraction path. Carries build 107
@@ -8139,6 +8146,7 @@ function editGenerate(){
     // the writer. editParseDraft only reads res.text, so hold it separately.
     editState.registry = res && res.registry;
     editState.hadFacts = !!(res && res.had_facts);   // build 110
+    editState.checks  = (res && res.checks) || null;  // build 111
     el('edit-gen-status').style.display = 'none';
     el('edit-gen-btn').disabled = false;
     editShowKeywords();
@@ -8160,16 +8168,31 @@ function editShowKeywords(){
   // build 110 — say plainly whether real material fed this draft. A post written
   // from shape alone is not a failure, but the reviewer should know before they
   // publish, because it is the one thing they can still fix by hand.
+  // build 111 — the Worker now checks nine rules in code after generation. Show
+  // what it found ABOVE everything else: a failed check is the reviewer's job and
+  // it is the only thing on this screen they cannot see by reading the draft.
+  var c = editState.checks, chk = '';
+  if (c) {
+    if (c.fail && c.fail.length) {
+      chk += '<div class="edit-chk bad"><div class="hd">' + c.fail.length + ' check' + (c.fail.length === 1 ? '' : 's') + ' failed</div><ul>' +
+        c.fail.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></div>';
+    }
+    if (c.warn && c.warn.length) {
+      chk += '<div class="edit-chk warnbox"><div class="hd">worth a look</div><ul>' +
+        c.warn.map(function(f){ return '<li>' + esc(f) + '</li>'; }).join('') + '</ul></div>';
+    }
+    if (!chk) chk = '<div class="edit-chk good">&#10003; All automatic checks passed</div>';
+  }
   var factLine = editState.hadFacts
     ? '<span class="kwlabel">written from your real details</span><br>'
     : '<span class="kwnone">No first-hand detail was given, so this post can only say what any boutique could say. Add a real line on the Write tab and regenerate.</span><br>';
   if (!reg) {
-    el2.innerHTML = factLine + '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
+    el2.innerHTML = chk + factLine + '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
     return;
   }
   var topics = reg.topic_terms || [], brands = reg.brand_terms || [];
   if (!topics.length && !brands.length) {
-    el2.innerHTML = factLine + '<span class="kwnone">' + esc(reg.note || 'No researched terms matched this topic.') + '</span>';
+    el2.innerHTML = chk + factLine + '<span class="kwnone">' + esc(reg.note || 'No researched terms matched this topic.') + '</span>';
     return;
   }
   var chip = function(r, cls){
@@ -8177,7 +8200,7 @@ function editShowKeywords(){
       + esc(r.volume_band + ' searches/mo band' + (r.serp_verified ? ' \u2014 SERP verified' : ''))
       + '">' + esc(r.keyword) + '</span>';
   };
-  var h = factLine + '<span class="kwlabel">researched words used</span>';
+  var h = chk + factLine + '<span class="kwlabel">researched words used</span>';
   if (topics.length) h += topics.map(function(r){ return chip(r); }).join('');
   if (brands.length) h += '<br><span class="kwlabel">brand</span>' + brands.map(function(r){ return chip(r, 'brand'); }).join('');
   el2.innerHTML = h;
