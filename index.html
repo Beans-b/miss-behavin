@@ -540,9 +540,6 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-chk ul{margin:3px 0 0;padding-left:16px;}
 #edit-facts{width:100%;background:transparent;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px;outline:none;color:var(--black);line-height:1.5;resize:vertical;}
 #edit-facts:focus{border-color:var(--black);}
-#edit-facts.thin{border-color:#c9a227;background:#fffdf2;}
-.edit-facts-warn{display:none;font-size:11px;color:#8a6d1f;margin-top:6px;line-height:1.5;}
-.edit-facts-warn.on{display:block;}
 #blog-due-banner.ready{background:#eef6ee;border-color:#bcd9bc;}
 #blog-due-banner .bdb-txt{cursor:pointer;flex:1;}
 .menu-item-dot{width:9px;height:9px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-left:2px;}
@@ -1081,12 +1078,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div id="edit-arr-loading" class="fc-empty"><span class="spinner"></span> Loading arrivals&#8230;</div>
     </div>
 
-    <!-- build 110 — the only part of a post nobody else could have written. -->
+    <!-- build 113 — optional notes. The placeholder says what goes here; the
+         explanatory copy that used to sit around it was written in build 110,
+         before the research, and it argued for something we no longer do. -->
     <div class="field" style="padding:0 24px;margin-bottom:4px;">
-      <label class="field-label">What actually happened <span style="font-weight:400;text-transform:none;letter-spacing:0;">(this is what makes the post yours)</span></label>
-      <textarea id="edit-facts" rows="4" oninput="editFactsCheck()" placeholder="One per line. What sold out and how fast &#183; who tried something on and what they said &#183; what a customer asked for &#183; what is in the window this week &#183; what you would wear it with"></textarea>
-      <div class="field-hint">Real details only, in your own words. They get quoted and built into the post. Anything you leave out will NOT be invented &#8212; the writer flags it as [CONFIRM] instead.</div>
-      <div class="edit-facts-warn" id="edit-facts-warn">&#9888;&#65039; With nothing here the post can only say what any boutique could say. That version gets skimmed by readers and cited by nothing. One honest line is enough.</div>
+      <label class="field-label">What actually happened <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+      <textarea id="edit-facts" rows="4" placeholder="One per line. What sold out and how fast &#183; who tried something on and what they said &#183; what a customer asked for &#183; what is in the window this week &#183; what you would wear it with"></textarea>
     </div>
     <div style="padding:0 24px;">
       <div id="edit-gen-status" class="status"></div>
@@ -1335,6 +1332,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 112</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 111
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 111</strong> &#183; 2026-08-06 &#183; THE POST COULD NEVER HAVE BEEN SPECIFIC, BECAUSE NOTHING SPECIFIC WAS EVER ASKED FOR. The writer is rightly forbidden from inventing fabrics, prices, reviews and numbers, and this screen collected a topic and a brand and nothing else &#8212; so the only thing left to write was advice true of any boutique anywhere, which is exactly the copy readers skim and AI answers never cite. Create Blog now asks WHAT ACTUALLY HAPPENED: what sold out and how fast, who tried something on, what a customer asked for, what is in the window. Those lines reach the writer as the material the post is built from, ahead of everything else. Leaving it blank still works and is never blocked, but it says plainly what you are giving up, and the draft screen tells you afterwards whether the post was written from real detail or from shape alone &#8212; the one thing you can still fix before publishing. Needs Worker v96, which also gives the blog a real voice: a mid-twenties staffer who works the floor and helps buy the range, writing for customers 14 to 28. Carries build 110
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 110</strong> &#183; 2026-08-06 &#183; THE WEEKLY BLOG NUDGE NOW HAPPENS IN THE APP, AND IT KNOWS THE DIFFERENCE BETWEEN WRITE ONE AND PUBLISH THE ONE YOU HAVE. There was never a reminder to miss: the blog had no notification of any kind, only a grey banner that checked published posts, so it could tell you to write a post while a finished draft sat in Posts one tap from live &#8212; which is the state the weekly auto-draft creates every Wednesday. A waiting draft now wins the banner and sends you to Posts; &quot;a post is due&quot; shows only when nothing is written. The banner is tappable end to end and the Create Blog tile carries a dot, so the nudge survives scrolling past it. Everyone who can open Create Blog sees it, no per-device opt-in, nothing to switch on. Needs Worker v95, which also fixes the two separate bugs that stopped the Wednesday auto-draft running at all. Carries build 109
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 109</strong> &#183; 2026-08-06 &#183; Manual Entry loses its standing instructions: the four numbered steps, the name-and-price explainer, and the vendor paragraph. They explained the screen to someone seeing it once, above a screen used every week, and two of them were already out of date &#8212; the steps still ended &quot;Type the quantity, then Review &amp; publish&quot;, written before a sheet could be handed to anyone. The vendor hint ELEMENT stays, because the near-miss spelling check writes into it, but it is silent until there is a near miss worth naming. Carries build 108
@@ -1358,7 +1356,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 112</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 111</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 113</strong> &#183; 2026-08-07 &#183; THE COPY AROUND THE NOTES BOX ARGUED FOR SOMETHING WE STOPPED DOING, AND ONE LINE OF IT WAS FALSE. It was written in build 110, before the research settled how this blog should work, and it sold the box as the thing that makes a post unique &#8212; then warned that without it a post would be &quot;cited by nothing&quot;. That is not what the evidence says: comparison and concrete attributes carry citation and neither needs a first-hand fact. Worse, it promised the writer would flag a missing detail as [CONFIRM], which Worker v97 no longer does &#8212; it writes around the gap or drops the claim. Promising behaviour the code does not have is how a screen stops being believed. The box stays, marked optional, with its placeholder doing the explaining. The subtitle, the hint, the amber warning and the matching note on the draft screen are gone. No Worker change &#8212; runs on v97. Carries build 112</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1697,7 +1695,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 112;   // keep in step with the footer stamp
+var APP_BUILD = 113;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -7941,7 +7939,6 @@ function editReset(){
 function editInit(){
   editReset();
   var fa = el('edit-facts'); if (fa) fa.value = '';
-  editFactsCheck();
   editTab('write');
   editSetMode('topic');
   editLoadBrands();
@@ -8097,17 +8094,6 @@ function editRenderArrivals(){
   });
 }
 
-// build 110 — the warning is advisory, never a block. Someone who genuinely has
-// nothing to add this week should still be able to draft; they just get told
-// plainly what they are giving up.
-function editFactsCheck(){
-  var ta = el('edit-facts'), w = el('edit-facts-warn');
-  if (!ta || !w) return;
-  var empty = !ta.value.trim();
-  w.classList.toggle('on', empty);
-  ta.classList.toggle('thin', empty);
-}
-
 function editBuildPayload(){
   var byline = 'Sophie'; // blog publisher name (single named voice)
   var facts = (el('edit-facts') && el('edit-facts').value.trim()) || '';
@@ -8183,9 +8169,7 @@ function editShowKeywords(){
     }
     if (!chk) chk = '<div class="edit-chk good">&#10003; All automatic checks passed</div>';
   }
-  var factLine = editState.hadFacts
-    ? '<span class="kwlabel">written from your real details</span><br>'
-    : '<span class="kwnone">No first-hand detail was given, so this post can only say what any boutique could say. Add a real line on the Write tab and regenerate.</span><br>';
+  var factLine = '';   // build 113 — the editorial about first-hand detail is gone; the checks panel is the useful signal
   if (!reg) {
     el2.innerHTML = chk + factLine + '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
     return;
