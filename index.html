@@ -164,7 +164,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .archive-empty{padding:28px 0;text-align:center;font-size:13px;color:var(--gray-text);}
 
 /* PRICING CARDS */
-.p-card{border:1px solid var(--gray-mid);margin-bottom:10px;background:var(--white);}
+.p-card{border:1px solid var(--gray-mid);margin-bottom:10px;background:var(--white);position:relative;}
 /* v72 — an unpriced style, called out by name in the Prices Missing modal. */
 /* build 106 — a photos-only style has no price ON PURPOSE. Dressing an
    intentional state as a failure teaches people to ignore red, which is the
@@ -188,6 +188,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .regen-btn:active{background:var(--gray-light);}
 .regen-btn.spinning{animation:spin .6s linear infinite;pointer-events:none;opacity:.5;}
 .regen-btn.done{color:var(--success-fg);border-color:var(--success-fg);}
+/* build 120 — remove a product from the invoice entirely. Deliberately a
+   SQUARE "×" sitting in the card's own top-right corner, outside the header
+   row the regen (↻) button lives in — different shape, different position,
+   so the two are never reached for by mistake. */
+.p-delete-btn{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:4px;background:var(--white);border:1px solid var(--gray-mid);color:var(--gray-text);font-size:14px;font-weight:600;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;padding:0;font-family:inherit;z-index:2;}
+.p-delete-btn:active{background:var(--red);border-color:var(--red);color:#fff;}
 .p-cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0eeeb;}
 .p-cost-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
 .p-cost-val{font-size:14px;font-weight:600;color:var(--gray-text);}
@@ -1368,6 +1374,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 119</strong> &#183; 2026-08-07 &#183; CRITICAL FIX &#8212; the photo/fabric fetch on Review &amp; Push was searching &quot;Miss Behavin&#39;&quot; for a private-labeled product&#39;s photos instead of the REAL brand (e.g. Valfre), so it always came back &quot;no product matched&quot; the moment build 117&#39;s private-label checkbox was used. The Get images button, the vendor-website paste-once box, and the candidate search all read the Shopify-facing vendor (correct for what gets pushed and for SEO copy) instead of the true invoice vendor (needed for finding the real product page). Now split: SEO copy and the Shopify push still say Miss Behavin&#39; as before, but every external photo/fabric lookup uses the actual supplier. No Worker change. Carries build 118
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 113</strong> &#183; 2026-08-07 &#183; THE COPY AROUND THE NOTES BOX ARGUED FOR SOMETHING WE STOPPED DOING, AND ONE LINE OF IT WAS FALSE. It was written in build 110, before the research settled how this blog should work, and it sold the box as the thing that makes a post unique &#8212; then warned that without it a post would be &quot;cited by nothing&quot;. That is not what the evidence says: comparison and concrete attributes carry citation and neither needs a first-hand fact. Worse, it promised the writer would flag a missing detail as [CONFIRM], which Worker v97 no longer does &#8212; it writes around the gap or drops the claim. Promising behaviour the code does not have is how a screen stops being believed. The box stays, marked optional, with its placeholder doing the explaining. The subtitle, the hint, the amber warning and the matching note on the draft screen are gone. No Worker change &#8212; runs on v97. Carries build 112
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 112</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 111
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 111</strong> &#183; 2026-08-06 &#183; THE POST COULD NEVER HAVE BEEN SPECIFIC, BECAUSE NOTHING SPECIFIC WAS EVER ASKED FOR. The writer is rightly forbidden from inventing fabrics, prices, reviews and numbers, and this screen collected a topic and a brand and nothing else &#8212; so the only thing left to write was advice true of any boutique anywhere, which is exactly the copy readers skim and AI answers never cite. Create Blog now asks WHAT ACTUALLY HAPPENED: what sold out and how fast, who tried something on, what a customer asked for, what is in the window. Those lines reach the writer as the material the post is built from, ahead of everything else. Leaving it blank still works and is never blocked, but it says plainly what you are giving up, and the draft screen tells you afterwards whether the post was written from real detail or from shape alone &#8212; the one thing you can still fix before publishing. Needs Worker v96, which also gives the blog a real voice: a mid-twenties staffer who works the floor and helps buy the range, writing for customers 14 to 28. Carries build 110
@@ -1393,7 +1400,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 119</strong> &#183; 2026-08-07 &#183; CRITICAL FIX &#8212; the photo/fabric fetch on Review &amp; Push was searching &quot;Miss Behavin&#39;&quot; for a private-labeled product&#39;s photos instead of the REAL brand (e.g. Valfre), so it always came back &quot;no product matched&quot; the moment build 117&#39;s private-label checkbox was used. The Get images button, the vendor-website paste-once box, and the candidate search all read the Shopify-facing vendor (correct for what gets pushed and for SEO copy) instead of the true invoice vendor (needed for finding the real product page). Now split: SEO copy and the Shopify push still say Miss Behavin&#39; as before, but every external photo/fabric lookup uses the actual supplier. No Worker change. Carries build 118</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 120</strong> &#183; 2026-08-07 &#183; TWO FIXES. Opening an archived invoice was showing it mixed with a DIFFERENT vendor&#39;s products (A Shop of Things pulled in Valfre&#39;s styles) &#8212; the archive save on the Worker matched an existing record by invoice number ALONE, so two different vendors with a blank or matching invoice number were treated as the same sheet and had their style lists merged together. The match now also requires the vendor to agree, so a re-save of the SAME invoice still merges correctly but two different vendors never collide. Needs Worker v99. Any archive record already corrupted this way needs a manual look &#8212; open it and use the new delete control below to remove whatever doesn&#39;t belong. SEPARATELY: each product card now has its own Remove control &#8212; a small square &times; in the card&#39;s top-right corner, confirms before deleting, and is deliberately NOT the circular &#8635; regen button in the header (that one only renames). No Worker change needed for this half. Carries build 119</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1732,7 +1739,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 119;   // keep in step with the footer stamp
+var APP_BUILD = 120;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3568,7 +3575,11 @@ function buildKelCard(style, idx) {
         '<input class="p-retail-input" type="text" inputmode="decimal" placeholder="$0.00" value="'+esc(retail)+'"/>'+
       '</div>'+
       (colorRows?'<div class="p-colors">'+colorRows+'</div>':'')+
-    '</div>';
+    '</div>'+
+    // build 120 — delete-product control, kept OUTSIDE .p-card-header on
+    // purpose (see .p-delete-btn CSS note) so it can never be mistaken for
+    // the regen (↻) button that lives inside the header.
+    '<button type="button" class="p-delete-btn" title="Remove this product from the invoice">&times;</button>';
 
   var nameInput = card.querySelector('.p-name-input');
   var retailInput = card.querySelector('.p-retail-input');
@@ -3576,6 +3587,12 @@ function buildKelCard(style, idx) {
   nameInput.addEventListener('input', function() { scheduleAutosave(); });
 
   card.querySelector('.regen-btn').addEventListener('click', function() { regenName(card, style.code, style.type); });
+
+  card.querySelector('.p-delete-btn').addEventListener('click', function(e) {
+    e.stopPropagation();
+    var label = (nameInput.value || style.printed_name || style.name || style.code || 'this product').trim();
+    deleteProductFromCard(card.dataset.idx, style.code, label);
+  });
 
   retailInput.addEventListener('input', function() {
     retailInput.dataset.manual = retailInput.value ? 'true' : '';
@@ -3587,6 +3604,27 @@ function buildKelCard(style, idx) {
   if (retail) retailInput.dataset.manual = 'true';
 
   return card;
+}
+
+// build 120 — remove a single product from the working invoice. Matches the
+// SAME idx-first-then-code fallback collectCurrentInvoice() already uses, so
+// a style with no code (never assigned one on the invoice) still deletes
+// correctly. Rebuilds every card afterward rather than just removing the one
+// DOM node, so every remaining card's dataset.idx stays correct — deleting
+// out of order (e.g. card 0 then card 2) is otherwise how index drift bugs
+// like this happen.
+function deleteProductFromCard(idx, code, label) {
+  showModal('Remove product', 'Remove "' + label + '" from this invoice? This cannot be undone.', function() {
+    closeModal();
+    if (!currentInvoice || !currentInvoice.styles) return;
+    var i = (idx === '' || idx === undefined || idx === null) ? -1 : parseInt(idx, 10);
+    var pos = (i >= 0 && currentInvoice.styles[i]) ? i
+            : currentInvoice.styles.findIndex(function(s) { return s.code === code; });
+    if (pos < 0) return;
+    currentInvoice.styles.splice(pos, 1);
+    renderKelCards(currentInvoice);
+    scheduleAutosave();
+  }, true, 'Remove');
 }
 
 /* ── AUTOSAVE (1.5s debounce, unchanged) ── */
