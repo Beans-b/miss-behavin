@@ -532,6 +532,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render img{max-width:100%;height:auto;margin:8px 0;}
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
+#edit-facts{width:100%;background:transparent;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px;outline:none;color:var(--black);line-height:1.5;resize:vertical;}
+#edit-facts:focus{border-color:var(--black);}
+#edit-facts.thin{border-color:#c9a227;background:#fffdf2;}
+.edit-facts-warn{display:none;font-size:11px;color:#8a6d1f;margin-top:6px;line-height:1.5;}
+.edit-facts-warn.on{display:block;}
 #blog-due-banner.ready{background:#eef6ee;border-color:#bcd9bc;}
 #blog-due-banner .bdb-txt{cursor:pointer;flex:1;}
 .menu-item-dot{width:9px;height:9px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-left:2px;}
@@ -1070,6 +1075,13 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div id="edit-arr-loading" class="fc-empty"><span class="spinner"></span> Loading arrivals&#8230;</div>
     </div>
 
+    <!-- build 110 — the only part of a post nobody else could have written. -->
+    <div class="field" style="padding:0 24px;margin-bottom:4px;">
+      <label class="field-label">What actually happened <span style="font-weight:400;text-transform:none;letter-spacing:0;">(this is what makes the post yours)</span></label>
+      <textarea id="edit-facts" rows="4" oninput="editFactsCheck()" placeholder="One per line. What sold out and how fast &#183; who tried something on and what they said &#183; what a customer asked for &#183; what is in the window this week &#183; what you would wear it with"></textarea>
+      <div class="field-hint">Real details only, in your own words. They get quoted and built into the post. Anything you leave out will NOT be invented &#8212; the writer flags it as [CONFIRM] instead.</div>
+      <div class="edit-facts-warn" id="edit-facts-warn">&#9888;&#65039; With nothing here the post can only say what any boutique could say. That version gets skimmed by readers and cited by nothing. One honest line is enough.</div>
+    </div>
     <div style="padding:0 24px;">
       <div id="edit-gen-status" class="status"></div>
       <button class="btn btn-black" id="edit-gen-btn" onclick="editGenerate()">Generate Draft</button>
@@ -1317,6 +1329,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 110</strong> &#183; 2026-08-06 &#183; THE POST COULD NEVER HAVE BEEN SPECIFIC, BECAUSE NOTHING SPECIFIC WAS EVER ASKED FOR. The writer is rightly forbidden from inventing fabrics, prices, reviews and numbers, and this screen collected a topic and a brand and nothing else &#8212; so the only thing left to write was advice true of any boutique anywhere, which is exactly the copy readers skim and AI answers never cite. Create Blog now asks WHAT ACTUALLY HAPPENED: what sold out and how fast, who tried something on, what a customer asked for, what is in the window. Those lines reach the writer as the material the post is built from, ahead of everything else. Leaving it blank still works and is never blocked, but it says plainly what you are giving up, and the draft screen tells you afterwards whether the post was written from real detail or from shape alone &#8212; the one thing you can still fix before publishing. Needs Worker v96, which also gives the blog a real voice: a mid-twenties staffer who works the floor and helps buy the range, writing for customers 14 to 28. Carries build 109
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 109</strong> &#183; 2026-08-06 &#183; THE WEEKLY BLOG NUDGE NOW HAPPENS IN THE APP, AND IT KNOWS THE DIFFERENCE BETWEEN WRITE ONE AND PUBLISH THE ONE YOU HAVE. There was never a reminder to miss: the blog had no notification of any kind, only a grey banner that checked published posts, so it could tell you to write a post while a finished draft sat in Posts one tap from live &#8212; which is the state the weekly auto-draft creates every Wednesday. A waiting draft now wins the banner and sends you to Posts; &quot;a post is due&quot; shows only when nothing is written. The banner is tappable end to end and the Create Blog tile carries a dot, so the nudge survives scrolling past it. Everyone who can open Create Blog sees it, no per-device opt-in, nothing to switch on. Needs Worker v95, which also fixes the two separate bugs that stopped the Wednesday auto-draft running at all. Carries build 108
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 108</strong> &#183; 2026-08-06 &#183; Load Sample Invoice removed. It loaded a fake invoice for demonstrating the app, nobody demonstrates the app, and it sat one tap from Extract looking like a normal option &#8212; a control nobody uses is a wrong turn with a button on it. Its function stays unreferenced rather than unpicking the fixture and risking the real extraction path. Carries build 107
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 107</strong> &#183; 2026-08-06 &#183; Manual Entry no longer demands a name or a price. It was behind a Photos-only checkbox &#8212; a mode you had to remember &#8212; so the form still turned red about a price on a sheet you were about to hand to someone else to price. Nothing publishes from that screen, and both are already enforced at the Shopify push, which names the offenders and refuses. A row needs a quantity; that is all. NEW Handoffs tab replaces Help: every sheet sent for naming and pricing, each carrying its own copy of the items, so sending a second one no longer overwrites the first &#8212; which is why Kelly opened the old sheet. Tap one to open it. Needs Worker v93. Carries build 106
@@ -7920,6 +7933,8 @@ function editReset(){
 
 function editInit(){
   editReset();
+  var fa = el('edit-facts'); if (fa) fa.value = '';
+  editFactsCheck();
   editTab('write');
   editSetMode('topic');
   editLoadBrands();
@@ -8075,12 +8090,24 @@ function editRenderArrivals(){
   });
 }
 
+// build 110 — the warning is advisory, never a block. Someone who genuinely has
+// nothing to add this week should still be able to draft; they just get told
+// plainly what they are giving up.
+function editFactsCheck(){
+  var ta = el('edit-facts'), w = el('edit-facts-warn');
+  if (!ta || !w) return;
+  var empty = !ta.value.trim();
+  w.classList.toggle('on', empty);
+  ta.classList.toggle('thin', empty);
+}
+
 function editBuildPayload(){
   var byline = 'Sophie'; // blog publisher name (single named voice)
+  var facts = (el('edit-facts') && el('edit-facts').value.trim()) || '';
   if (editState.mode === 'topic') {
     var topic = el('edit-topic').value.trim();
     if (!topic) { toast('Add a topic or question first.'); return null; }
-    return { mode:'topic', topic:topic, angle:el('edit-angle').value.trim(), brand:editState.brand, products:[], byline:byline };
+    return { mode:'topic', topic:topic, angle:el('edit-angle').value.trim(), brand:editState.brand, products:[], byline:byline, facts:facts };
   }
   var picked = Object.keys(editState.selected).map(function(k){ return editState.selected[k]; });
   if (!picked.length) { toast('Pick at least one arrival.'); return null; }
@@ -8090,7 +8117,7 @@ function editBuildPayload(){
   var products = picked.map(function(p){ return { title:p.title, type:p.type, price:p.price, brand:editBrandOf(p.vendor), image:(p.images&&p.images[0])||p.thumb||null }; });
   // Single-brand drop if all picks share a brand, else default to first.
   var brands = products.map(function(p){ return p.brand; }).filter(function(v,i,a){ return a.indexOf(v)===i; });
-  return { mode:'arrivals', brand:brands.length===1?brands[0]:products[0].brand, products:products, byline:byline };
+  return { mode:'arrivals', brand:brands.length===1?brands[0]:products[0].brand, products:products, byline:byline, facts:facts };
 }
 
 function editParseDraft(res){
@@ -8111,6 +8138,7 @@ function editGenerate(){
     // build 94 — the Worker (v86+) returns the researched phrases it handed to
     // the writer. editParseDraft only reads res.text, so hold it separately.
     editState.registry = res && res.registry;
+    editState.hadFacts = !!(res && res.had_facts);   // build 110
     el('edit-gen-status').style.display = 'none';
     el('edit-gen-btn').disabled = false;
     editShowKeywords();
@@ -8129,13 +8157,19 @@ function editShowKeywords(){
   var el2 = el('edit-kwused');
   if (!el2) return;
   var reg = editState.registry;
+  // build 110 — say plainly whether real material fed this draft. A post written
+  // from shape alone is not a failure, but the reviewer should know before they
+  // publish, because it is the one thing they can still fix by hand.
+  var factLine = editState.hadFacts
+    ? '<span class="kwlabel">written from your real details</span><br>'
+    : '<span class="kwnone">No first-hand detail was given, so this post can only say what any boutique could say. Add a real line on the Write tab and regenerate.</span><br>';
   if (!reg) {
-    el2.innerHTML = '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
+    el2.innerHTML = factLine + '<span class="kwnone">Worker is older than v86 &#8212; it cannot report which researched words it used.</span>';
     return;
   }
   var topics = reg.topic_terms || [], brands = reg.brand_terms || [];
   if (!topics.length && !brands.length) {
-    el2.innerHTML = '<span class="kwnone">' + esc(reg.note || 'No researched terms matched this topic.') + '</span>';
+    el2.innerHTML = factLine + '<span class="kwnone">' + esc(reg.note || 'No researched terms matched this topic.') + '</span>';
     return;
   }
   var chip = function(r, cls){
@@ -8143,7 +8177,7 @@ function editShowKeywords(){
       + esc(r.volume_band + ' searches/mo band' + (r.serp_verified ? ' \u2014 SERP verified' : ''))
       + '">' + esc(r.keyword) + '</span>';
   };
-  var h = '<span class="kwlabel">researched words used</span>';
+  var h = factLine + '<span class="kwlabel">researched words used</span>';
   if (topics.length) h += topics.map(function(r){ return chip(r); }).join('');
   if (brands.length) h += '<br><span class="kwlabel">brand</span>' + brands.map(function(r){ return chip(r, 'brand'); }).join('');
   el2.innerHTML = h;
