@@ -532,6 +532,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render img{max-width:100%;height:auto;margin:8px 0;}
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
+#blog-due-banner.ready{background:#eef6ee;border-color:#bcd9bc;}
+#blog-due-banner .bdb-txt{cursor:pointer;flex:1;}
+.menu-item-dot{width:9px;height:9px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-left:2px;}
 #blog-due-banner button{background:var(--primary);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;cursor:pointer;flex-shrink:0;min-height:38px;}
 .edit-posts-note{font-size:11px;color:var(--gray-text);padding:14px 24px 6px;line-height:1.4;}
 .edit-post-row{padding:12px 24px;border-bottom:1px solid var(--gray-light);}
@@ -1314,6 +1317,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 109</strong> &#183; 2026-08-06 &#183; THE WEEKLY BLOG NUDGE NOW HAPPENS IN THE APP, AND IT KNOWS THE DIFFERENCE BETWEEN WRITE ONE AND PUBLISH THE ONE YOU HAVE. There was never a reminder to miss: the blog had no notification of any kind, only a grey banner that checked published posts, so it could tell you to write a post while a finished draft sat in Posts one tap from live &#8212; which is the state the weekly auto-draft creates every Wednesday. A waiting draft now wins the banner and sends you to Posts; &quot;a post is due&quot; shows only when nothing is written. The banner is tappable end to end and the Create Blog tile carries a dot, so the nudge survives scrolling past it. Everyone who can open Create Blog sees it, no per-device opt-in, nothing to switch on. Needs Worker v95, which also fixes the two separate bugs that stopped the Wednesday auto-draft running at all. Carries build 108
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 108</strong> &#183; 2026-08-06 &#183; Load Sample Invoice removed. It loaded a fake invoice for demonstrating the app, nobody demonstrates the app, and it sat one tap from Extract looking like a normal option &#8212; a control nobody uses is a wrong turn with a button on it. Its function stays unreferenced rather than unpicking the fixture and risking the real extraction path. Carries build 107
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 107</strong> &#183; 2026-08-06 &#183; Manual Entry no longer demands a name or a price. It was behind a Photos-only checkbox &#8212; a mode you had to remember &#8212; so the form still turned red about a price on a sheet you were about to hand to someone else to price. Nothing publishes from that screen, and both are already enforced at the Shopify push, which names the offenders and refuses. A row needs a quantity; that is all. NEW Handoffs tab replaces Help: every sheet sent for naming and pricing, each carrying its own copy of the items, so sending a second one no longer overwrites the first &#8212; which is why Kelly opened the old sheet. Tap one to open it. Needs Worker v93. Carries build 106
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 106</strong> &#183; 2026-08-06 &#183; THE HANDOFF WAS DESTROYING THE SHEET IT HANDED OVER. Opening the LineSheet archives whatever sheet was left over and clears the active slot &#8212; right for a buyer starting fresh, exactly wrong for someone opening a sheet they were just sent. Kelly tapped her notification and the app filed the sheet away before she could see it, every time. A sheet waiting to be priced is now opened instead. The banner is tappable and takes you straight there. And a photos-only style reads &quot;AWAITING NAME + PRICE&quot; in grey rather than a red error &#8212; the blank is deliberate, and dressing it as a failure teaches people to ignore red. Red is kept for the moment it really blocks a push. Carries build 105
@@ -1618,6 +1622,7 @@ function showMenu(){
   MENU.filter(function(m){ return m.roles.indexOf(SESSION.role) >= 0; }).forEach(function(m){
     var b = document.createElement('button');
     b.className = 'menu-item';
+    b.setAttribute('data-mid', m.id);   // build 109 — lets editCheckDue badge this tile
     b.innerHTML = '<div class="menu-item-icon">'+m.icon+'</div>'+
       '<div><div class="menu-item-label">'+m.label+'</div><div class="menu-item-desc">'+m.desc+'</div></div>'+
       '<div class="menu-item-arrow">&#8250;</div>';
@@ -8345,20 +8350,63 @@ function editPublishNow(){
 
 function editClosePreview(){ el('edit-preview').style.display = 'none'; }
 
-// Weekly nudge: check the last published post; show a banner on the menu when
-// a new one is due. Fails silent — a hiccup never nags. Admin/employee only.
+// Weekly nudge, in the app itself so everyone who can act on it sees it — no
+// phone required, no per-device opt-in, nothing to miss.
+//
+// build 109 — TWO STATES, NOT ONE. Until now this only knew about published
+// posts, so it could tell you to write a post while a finished draft sat in
+// Posts needing one tap. The weekly auto-draft creates exactly that state every
+// Wednesday. A draft waiting now wins, because reviewing one is the smaller job
+// and it is the one actually outstanding; "a post is due" is only shown when
+// there is genuinely nothing written.
+//
+// The banner is tappable end to end (same as the handoff banner) and the menu
+// tile carries a dot, so the nudge survives scrolling past the banner.
+//
+// Shown to the roles that can open Create Blog. Deliberately not wider: build
+// 106 already learned that showing someone a flag they cannot act on is how you
+// teach people to ignore flags.
 function editCheckDue(){
   var banner = el('blog-due-banner');
   if (!banner) return;
+  var dot = document.querySelector('.menu-item-dot');
+  if (dot && dot.parentNode) dot.parentNode.removeChild(dot);
+  banner.className = '';
   if (!SESSION || ['admin','employee'].indexOf(SESSION.role) < 0) { banner.style.display = 'none'; return; }
   api('edit_last_posted', {})
   .then(function(res){
-    if (!res || !res.due) { banner.style.display = 'none'; return; }
-    var msg = res.last_posted
-      ? ('&#128221; A new blog post is due &#8212; last one was ' + (res.days_since || 0) + ' day' + (res.days_since === 1 ? '' : 's') + ' ago.')
-      : '&#128221; No blog posts published yet &#8212; time to create your first.';
-    banner.innerHTML = '<span>' + msg + '</span><button onclick="openView(\'edit\',\'Create Blog\')">Create</button>';
+    if (!res) { banner.style.display = 'none'; return; }
+    var msg, cta, go;
+    if (res.draft_waiting) {
+      // A draft is written and hidden. One tap from live.
+      var n = res.draft_waiting;
+      var title = (res.draft && res.draft.title) ? ' \u2014 \u201c' + esc(res.draft.title) + '\u201d' : '';
+      msg = '\u2705 ' + (n === 1 ? 'A blog draft is ready to review' : n + ' blog drafts are ready to review')
+          + ' and publish' + (n === 1 ? title : '') + '.';
+      cta = 'Review';
+      go  = function(){ openView('edit','Create Blog'); editTab('posts'); };
+      banner.className = 'ready';
+    } else if (res.due) {
+      msg = res.last_posted
+        ? ('\u270D\uFE0F A new blog post is due \u2014 the last one went live ' + (res.days_since || 0) + ' day' + (res.days_since === 1 ? '' : 's') + ' ago.')
+        : '\u270D\uFE0F No blog posts published yet \u2014 time to create your first.';
+      cta = 'Create';
+      go  = function(){ openView('edit','Create Blog'); };
+    } else {
+      banner.style.display = 'none'; return;
+    }
+    banner.innerHTML = '<span class="bdb-txt">' + msg + '</span><button type="button">' + cta + '</button>';
+    banner.querySelector('.bdb-txt').onclick = go;
+    banner.querySelector('button').onclick = go;
     banner.style.display = 'flex';
+    // Same signal on the tile, so it is still visible after the banner scrolls off.
+    var tile = document.querySelector('.menu-item[data-mid="edit"]');
+    if (tile && !tile.querySelector('.menu-item-dot')) {
+      var d = document.createElement('div');
+      d.className = 'menu-item-dot';
+      d.title = cta === 'Review' ? 'A blog draft is waiting' : 'A blog post is due';
+      tile.insertBefore(d, tile.querySelector('.menu-item-arrow'));
+    }
   })
   .catch(function(){ banner.style.display = 'none'; });
 }
