@@ -264,7 +264,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-close:active{background:var(--white);}
 .sp-body{flex:1;overflow-y:auto;padding:16px 24px 90px;-webkit-overflow-scrolling:touch;}
 .sp-hint{font-size:12px;color:var(--gray-text);margin-bottom:14px;line-height:1.55;}
-.sp-foot{flex-shrink:0;padding:12px 24px;border-top:1px solid var(--gray-mid);background:var(--gray-light);display:flex;justify-content:space-between;align-items:center;}
+.sp-foot{flex-shrink:0;padding:12px 24px;border-top:1px solid var(--gray-mid);background:var(--gray-light);display:flex;flex-direction:column;gap:10px;}
+/* build 120 — the msg/count pair used to be the flex row directly; now that
+   the Publish All button sits above them, they get their own inner row. */
+.sp-foot-row{display:flex;justify-content:space-between;align-items:center;}
 .sp-foot-msg{font-size:12px;color:var(--gray-text);}
 .sp-foot-count{font-size:12px;font-weight:600;color:var(--success-fg);}
 .sp-card{border:1px solid var(--gray-mid);margin-bottom:12px;transition:border-color .2s,background .2s;}
@@ -655,6 +658,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-imghint{flex-basis:100%;width:100%;font-size:11px;color:var(--gray-text);margin:0 0 3px;font-family:'DM Sans',sans-serif;line-height:1.4;}
 .sp-cand{display:flex;flex-direction:column;align-items:center;gap:2px;border:1px solid var(--gray-mid);background:#fff;padding:4px;cursor:pointer;font-size:10px;font-family:'DM Sans',sans-serif;}
 .sp-cand img{width:48px;height:64px;object-fit:cover;}
+/* build 122 — wraps a candidate button so its dismiss × (reuses .sp-imgx) can
+   sit in the corner instead of inside the clickable button itself. */
+.sp-candwrap{position:relative;display:inline-block;}
 
 /* build 95 — CORRECT THE PRODUCT LINK.
    Photos come from ONE vendor page. If that page was the wrong item there was
@@ -1374,6 +1380,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 121</strong> &#183; 2026-08-07 &#183; TWO BULK BUTTONS on Review &amp; Push. &#8595; Get Images &amp; Fabric for All Products sits above the product list and fetches vendor photos/fabric for every product that does not already have one, one at a time so it is gentle on the vendor-site lookups &#8212; a card whose match is ambiguous still raises its own picker and the run just moves past it rather than stalling. Publish All to Shopify sits at the bottom and pushes every ready product live, one at a time (never in parallel &#8212; each push is immediate and irreversible, so nothing should be firing at once). Anything already in Shopify, by SKU or by matching name, is deliberately NOT auto-resolved &#8212; it is left sitting on its own Decide button exactly as a single push already leaves it, because add-inventory vs. skip vs. view is a call only a person should make. Both ask for a one-tap confirmation before running and report a summary (pushed / already had photos / need a look / need your decision) when done. No Worker change. Carries build 120
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 120</strong> &#183; 2026-08-07 &#183; TWO FIXES. Opening an archived invoice was showing it mixed with a DIFFERENT vendor&#39;s products (A Shop of Things pulled in Valfre&#39;s styles) &#8212; the archive save on the Worker matched an existing record by invoice number ALONE, so two different vendors with a blank or matching invoice number were treated as the same sheet and had their style lists merged together. The match now also requires the vendor to agree, so a re-save of the SAME invoice still merges correctly but two different vendors never collide. Needs Worker v99. Any archive record already corrupted this way needs a manual look &#8212; open it and use the new delete control below to remove whatever doesn&#39;t belong. SEPARATELY: each product card now has its own Remove control &#8212; a small square &times; in the card&#39;s top-right corner, confirms before deleting, and is deliberately NOT the circular &#8635; regen button in the header (that one only renames). No Worker change needed for this half. Carries build 119
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 119</strong> &#183; 2026-08-07 &#183; CRITICAL FIX &#8212; the photo/fabric fetch on Review &amp; Push was searching &quot;Miss Behavin&#39;&quot; for a private-labeled product&#39;s photos instead of the REAL brand (e.g. Valfre), so it always came back &quot;no product matched&quot; the moment build 117&#39;s private-label checkbox was used. The Get images button, the vendor-website paste-once box, and the candidate search all read the Shopify-facing vendor (correct for what gets pushed and for SEO copy) instead of the true invoice vendor (needed for finding the real product page). Now split: SEO copy and the Shopify push still say Miss Behavin&#39; as before, but every external photo/fabric lookup uses the actual supplier. No Worker change. Carries build 118
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 113</strong> &#183; 2026-08-07 &#183; THE COPY AROUND THE NOTES BOX ARGUED FOR SOMETHING WE STOPPED DOING, AND ONE LINE OF IT WAS FALSE. It was written in build 110, before the research settled how this blog should work, and it sold the box as the thing that makes a post unique &#8212; then warned that without it a post would be &quot;cited by nothing&quot;. That is not what the evidence says: comparison and concrete attributes carry citation and neither needs a first-hand fact. Worse, it promised the writer would flag a missing detail as [CONFIRM], which Worker v97 no longer does &#8212; it writes around the gap or drops the claim. Promising behaviour the code does not have is how a screen stops being believed. The box stays, marked optional, with its placeholder doing the explaining. The subtitle, the hint, the amber warning and the matching note on the draft screen are gone. No Worker change &#8212; runs on v97. Carries build 112
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 112</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 111
@@ -1400,7 +1408,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 120</strong> &#183; 2026-08-07 &#183; TWO FIXES. Opening an archived invoice was showing it mixed with a DIFFERENT vendor&#39;s products (A Shop of Things pulled in Valfre&#39;s styles) &#8212; the archive save on the Worker matched an existing record by invoice number ALONE, so two different vendors with a blank or matching invoice number were treated as the same sheet and had their style lists merged together. The match now also requires the vendor to agree, so a re-save of the SAME invoice still merges correctly but two different vendors never collide. Needs Worker v99. Any archive record already corrupted this way needs a manual look &#8212; open it and use the new delete control below to remove whatever doesn&#39;t belong. SEPARATELY: each product card now has its own Remove control &#8212; a small square &times; in the card&#39;s top-right corner, confirms before deleting, and is deliberately NOT the circular &#8635; regen button in the header (that one only renames). No Worker change needed for this half. Carries build 119</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 122</strong> &#183; 2026-08-07 &#183; THREE FIXES, caught before deploy. (1) The vendor-match picker on Review &amp; Push now carries a dismiss &times; on every candidate photo, so an obviously-wrong match (an ashtray search that came back six different ashtray designs, none of them the right one) can be pruned instead of scanned past &#8212; dismissing the last one points straight at the paste-a-URL box. (2) &quot;Researched words used&quot; could show terms with nothing to do with the product (hair claw clip / phone case terms on an ashtray) &#8212; real researched terms, just for a different item inside the same broad Accessories category. The registry lookup now only surfaces a term that shares an actual word with the product&#39;s own name, type or category; a category with terms that still don&#39;t fit says so plainly instead of dumping its top-scored terms regardless of fit. This never touched the SEO title/description, which read the product facts directly and were already told to use the researched words only when they fit &#8212; that is why those looked right the whole time. Needs Worker v100. (3) The bulk button is now just &quot;Get Images for All Products&quot; &#8212; the &quot;&amp; Fabric&quot; in its name was true of the underlying fetch but read as a promise on non-apparel items, which fabric never applies to. Carries build 121</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1431,11 +1439,21 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
   </div>
   <div class="sp-body">
     <div class="sp-hint">Products are <strong>immediately live</strong> after each push &#8212; no draft step. Review carefully.</div>
+    <!-- build 120 — one tap to fetch vendor photos/fabric for every product
+         below that doesn't already have a photo, instead of tapping "Get
+         images" on each card. -->
+    <button type="button" class="btn btn-outline" id="sp-fetch-all-btn" style="margin:0 0 14px;" onclick="_spFetchAllImages()">&#8595; Get Images for All Products</button>
     <div id="sp-cards"></div>
   </div>
   <div class="sp-foot">
-    <div class="sp-foot-msg" id="sp-progress">Tap Push on each product to go live</div>
-    <div class="sp-foot-count" id="sp-done"></div>
+    <!-- build 120 — one tap to push every ready product live instead of
+         tapping "Push to Shopify" on each card. Anything already in Shopify,
+         or that needs a same-name decision, is left on Decide either way. -->
+    <button type="button" class="btn btn-shopify" id="sp-push-all-btn" style="margin:0;" onclick="_spPushAllCards()">&#128722; Publish All to Shopify</button>
+    <div class="sp-foot-row">
+      <div class="sp-foot-msg" id="sp-progress">Tap Push on each product to go live</div>
+      <div class="sp-foot-count" id="sp-done"></div>
+    </div>
   </div>
 </div>
 
@@ -1739,7 +1757,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 120;   // keep in step with the footer stamp
+var APP_BUILD = 122;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -5913,6 +5931,90 @@ function _spAutoCheckLive() {
   next();
 }
 
+// build 120 — "Get Images & Fabric for All Products". Same sequential,
+// one-at-a-time queue as _spAutoCheckLive above (gentle on the API, and never
+// two vendor-site lookups racing each other). Skips any card that already has
+// at least one photo, so re-running this doesn't clobber a card someone
+// already fetched, dragged their own photo onto, or pasted a URL for. A card
+// that comes back ambiguous still raises its own candidate picker — the run
+// doesn't stop for it, it just moves on and leaves that card waiting.
+function _spFetchAllImages() {
+  if (!_spCards.length) return;
+  showModal(
+    'Get images for every product?',
+    'Fetches vendor photos and fabric for every product below that does not already have a photo. Products that already have photos are left alone. This can take a few minutes on a large invoice.',
+    function() {
+      closeModal();
+      var btn = el('sp-fetch-all-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Fetching images…'; }
+      var i = 0, fetched = 0, skipped = 0, noMatch = 0;
+      function next() {
+        if (i >= _spCards.length) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Get Images for All Products'; }
+          var msg = fetched + ' fetched';
+          if (skipped) msg += ', ' + skipped + ' already had photos';
+          if (noMatch) msg += ', ' + noMatch + ' need a look';
+          toast(msg);
+          return;
+        }
+        var cd = _spCards[i++];
+        if (cd.images && cd.images.length) { skipped++; next(); return; }
+        if (!cd.els || !cd.els.fetchBtn) { next(); return; }   // card has no fetch control to use
+        var before = cd.images ? cd.images.length : 0;
+        _spFetchVendor(cd, function() {
+          if (cd.images && cd.images.length > before) fetched++; else noMatch++;
+          next();
+        });
+      }
+      next();
+    },
+    true, 'Fetch All'
+  );
+}
+
+// build 120 — "Publish All to Shopify". Same one-at-a-time queue, deliberately
+// NOT parallel — pushes go LIVE immediately (see sp-hint), so hammering the
+// Shopify API with N simultaneous creates is both rude and harder to recover
+// from if one fails midway. A card that turns out to already be in Shopify
+// (same SKU or same name) is left on "Decide" rather than resolved
+// automatically — add-inventory vs. skip vs. view is a call only a person
+// should make, so the modal that would normally pop is suppressed here and
+// the card just waits with its Decide button, same as the reopen-invoice
+// pre-check already leaves duplicates sitting.
+function _spPushAllCards() {
+  if (!_spCards.length) return;
+  showModal(
+    'Publish all products?',
+    'Pushes every ready product below to Shopify, one at a time. Each one goes live immediately as it pushes. Anything already in Shopify is left for you to decide instead of being pushed again.',
+    function() {
+      closeModal();
+      var btn = el('sp-push-all-btn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
+      var i = 0, pushed = 0, needsDecision = 0, failed = 0;
+      function next() {
+        if (i >= _spCards.length) {
+          if (btn) { btn.disabled = false; btn.textContent = 'Publish All to Shopify'; }
+          var msg = pushed + ' pushed live';
+          if (needsDecision) msg += ', ' + needsDecision + ' need your decision';
+          if (failed) msg += ', ' + failed + ' failed';
+          toast(msg);
+          return;
+        }
+        var cd = _spCards[i++];
+        if (['success','added','skipped','pushing','checking','restocking','duplicate'].indexOf(cd.state) >= 0) { next(); return; }
+        _spPushCard(cd, true, function() {
+          if (cd.state === 'success' || cd.state === 'added') pushed++;
+          else if (cd.state === 'duplicate') needsDecision++;
+          else if (cd.state === 'error') failed++;
+          next();
+        });
+      }
+      next();
+    },
+    true, 'Publish All'
+  );
+}
+
 function closeShopifyReview() {
   // build 73 - never lose work on close. Saves silently; the explicit
   // Save progress button is for reassurance mid-session.
@@ -6503,7 +6605,7 @@ function _spUpdateProgress() {
   }
 }
 
-function _spPushCard(cd) {
+function _spPushCard(cd, bulk, onDone) {
   cd.nameDup = null;   // v57 — reset the name-duplicate flag on each attempt
   _spSetState(cd, 'checking', 'Checking…', 'Checking…');
 
@@ -6521,7 +6623,12 @@ function _spPushCard(cd) {
     if (res.exists) {
       cd.dupVariant = res.variant;
       _spSetState(cd, 'duplicate', '⚠ In Shopify', '⚠ Already in Shopify — Decide', 'sp-btn-warning');
-      showDupModal(cd);
+      // build 120 — a duplicate needs a human decision (add inventory / skip /
+      // view). "Publish All" can't make that call, so in bulk mode it leaves
+      // the card marked Duplicate — Decide and moves on rather than popping
+      // the modal mid-run; a normal single tap still opens it immediately.
+      if (!bulk) showDupModal(cd);
+      if (onDone) onDone();
       return;
     }
     // v57 — NAME guard: the SKU didn't match, but a product with the SAME NAME
@@ -6537,18 +6644,20 @@ function _spPushCard(cd) {
     }
     if (hit) {
       _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
-      _spNameDupModal(cd, hit);
+      if (!bulk) _spNameDupModal(cd, hit);
+      if (onDone) onDone();
       return;
     }
-    _spDoCreate(cd);
+    _spDoCreate(cd, onDone);
   })
   .catch(function(err) {
     _spSetState(cd, 'error', '✗ Error', '✗ Error — Tap to retry', 'sp-btn-error');
     _spShowErrorDetail(cd, err.message || 'Unknown error');
+    if (onDone) onDone();
   });
 }
 
-function _spDoCreate(cd) {
+function _spDoCreate(cd, onDone) {
   _spSetState(cd, 'pushing', 'Pushing…', 'Pushing…');
 
   // build 59 — SIZE INTEGRITY. Apparel is ALWAYS created with the full
@@ -6666,10 +6775,12 @@ function _spDoCreate(cd) {
       a.textContent = 'View in Shopify ↗';
       foot.appendChild(a);
     }
+    if (onDone) onDone();
   })
   .catch(function(err) {
     _spSetState(cd, 'error', '✗ Failed', '✗ Failed — Tap to retry', 'sp-btn-error');
     _spShowErrorDetail(cd, err.message || 'Push failed');
+    if (onDone) onDone();
   });
 }
 
@@ -7827,7 +7938,7 @@ function _spGenSeo(cd, done){
 var _vendorDomains = {};
 function _vendorKey(v){ return String(v || '').toLowerCase().trim(); }
 
-function _spFetchVendor(cd){
+function _spFetchVendor(cd, onDone){
   // build 119 — the REAL brand, not "Miss Behavin'" post-private-label swap.
   // Miss Behavin' has no vendor catalog to search; that was the whole bug —
   // every private-labeled invoice's photo fetch was searching the store's
@@ -7846,11 +7957,15 @@ function _spFetchVendor(cd){
     if (res.error) throw new Error(res.error);
     if (cd.els.vsite) cd.els.vsite.style.display = 'none';   // known now
     var cands = res.candidates || [];
-    if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; return; }
+    if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; if (onDone) onDone(); return; }
     var want = String(cd.colorObj.color || '').toLowerCase();
     var pick = cands.find(function(c){ return (c.colors || []).some(function(cl){ return String(cl).toLowerCase() === want; }); }) || (cands.length === 1 ? cands[0] : null);
-    if (!pick) { _spCandidatePicker(cd, cands); return; }
-    _spUseCandidate(cd, pick);
+    // build 120 — an ambiguous match still needs a human to pick (the picker
+    // is a row of buttons, not automatable). "Done" here just means this
+    // card's turn is over for a bulk run — the card itself sits waiting on
+    // the picker until it's tapped, same as it always has one at a time.
+    if (!pick) { _spCandidatePicker(cd, cands); if (onDone) onDone(); return; }
+    _spUseCandidate(cd, pick, onDone);
   })
   .catch(function(e){
     cd.els.fetchBtn.disabled = false;
@@ -7861,6 +7976,7 @@ function _spFetchVendor(cd){
     } else {
       cd.els.fetchStatus.textContent = e.message;
     }
+    if (onDone) onDone();
   });
 }
 /* build 95 — name the page these photos came from. Silent when unknown (an
@@ -7923,19 +8039,46 @@ function _spUseProductUrl(cd){
   });
 }
 
+// build 122 — the vendor search sometimes comes back loose (an "ash tray"
+// style match returned six different ash tray designs, none of them a
+// concrete/gray one). Picking the right candidate already keeps the wrong
+// ones off the product; this "×" lets you prune the obviously-wrong ones out
+// of the list itself instead of scanning past them every time, and if
+// dismissing all of them leaves nothing worth picking, it says so and points
+// at the paste-a-URL box right below.
 function _spCandidatePicker(cd, cands){
-  cd.els.fetchStatus.textContent = 'Pick the match:';
-  cd.els.images.innerHTML = '';
-  cands.forEach(function(c){
-    var b = document.createElement('button');
-    b.type = 'button'; b.className = 'sp-cand';
-    b.innerHTML = (c.images && c.images[0] ? '<img src="' + esc(c.images[0]) + '"/>' : '') + '<span>' + esc((c.colors || []).join(', ') || c.title) + '</span>';
-    b.onclick = function(){ _spUseCandidate(cd, c); };
-    cd.els.images.appendChild(b);
-  });
+  cd.els.fetchStatus.textContent = 'Pick the match, or × to dismiss one that is clearly wrong:';
+  var remaining = cands.slice();
+  var redraw = function(){
+    cd.els.images.innerHTML = '';
+    if (!remaining.length) {
+      cd.els.fetchStatus.textContent = 'None of those matched. Paste the exact product URL below, or drop your own photo.';
+      return;
+    }
+    remaining.forEach(function(c){
+      var wrap = document.createElement('div');
+      wrap.className = 'sp-candwrap';
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'sp-cand';
+      b.innerHTML = (c.images && c.images[0] ? '<img src="' + esc(c.images[0]) + '"/>' : '') + '<span>' + esc((c.colors || []).join(', ') || c.title) + '</span>';
+      b.onclick = function(){ _spUseCandidate(cd, c); };
+      var x = document.createElement('button');
+      x.type = 'button'; x.className = 'sp-imgx'; x.textContent = '×';
+      x.title = 'Not this one — remove it from the list';
+      x.onclick = function(e){
+        e.stopPropagation();
+        var i = remaining.indexOf(c);
+        if (i >= 0) remaining.splice(i, 1);
+        redraw();
+      };
+      wrap.appendChild(b); wrap.appendChild(x);
+      cd.els.images.appendChild(wrap);
+    });
+  };
+  redraw();
   cd.els.fetchBtn.disabled = false;
 }
-function _spUseCandidate(cd, cand){
+function _spUseCandidate(cd, cand, onDone){
   var vendor = _spTrueVendor();   // build 119 — same real-brand fix as _spFetchVendor
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;
   cd.els.fetchStatus.textContent = 'Loading details…';
@@ -7960,10 +8103,12 @@ function _spUseCandidate(cd, cand){
       cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
       cd.els.fetchBtn.disabled = false;
       _spGenSeo(cd);
+      if (onDone) onDone();
     })
-    .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; });
+    .catch(function(e){ cd.els.fetchStatus.textContent = e.message; cd.els.fetchBtn.disabled = false; if (onDone) onDone(); });
   } else {
     cd.images = cand.images || []; cd.imagesAll = cd.images; _spRenderImages(cd); cd.els.fetchBtn.disabled = false;
+    if (onDone) onDone();
   }
 }
 // v72 — PHOTO INCLUDE / EXCLUDE / REMOVE.
