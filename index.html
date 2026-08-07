@@ -625,10 +625,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
    never picked up the .sp-l styling and rendered as full-size body text in the
    link colour. Same rule, applied by row, so every label on the card matches. */
 .sp-upc-row .sp-l,.sp-vsku-row .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
-/* v build 67 — upload-your-own photo drop zone. */
-.sp-drop{flex-basis:100%;width:100%;border:1px dashed var(--gray-mid);border-radius:3px;padding:10px;text-align:center;font-size:11px;color:var(--gray-text);cursor:pointer;background:var(--gray-light);margin-top:6px;font-family:'DM Sans',sans-serif;line-height:1.5;}
-.sp-drop:hover,.sp-drop.drag{border-color:var(--black);color:var(--black);background:#fff;}
-.sp-drop.busy{opacity:.6;cursor:default;}
+/* build 67 — upload-your-own photo drop zone. build 116 — folded into
+   .sp-purl (see below); the standalone box and this class are gone. */
 .sp-seo input,.sp-seo textarea{width:100%;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 8px;outline:none;-webkit-appearance:none;resize:vertical;}
 .sp-seo input:focus,.sp-seo textarea:focus{border-color:var(--black);}
 .sp-fetch-btn{width:100%;background:#fff;color:var(--primary);border:1px solid var(--primary);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:13px;cursor:pointer;-webkit-appearance:none;margin-bottom:8px;border-radius:2px;}
@@ -655,11 +653,21 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 /* build 95 — CORRECT THE PRODUCT LINK.
    Photos come from ONE vendor page. If that page was the wrong item there was
    no way to say so: the review card only offered a name search, and Manual
-   Entry never showed what it pulled. Both do now. */
-.sp-purl{margin-top:6px;}
+   Entry never showed what it pulled. Both do now.
+   build 116 — this box now ALSO is the photo drop zone. There were two
+   separate boxes doing overlapping jobs (paste a URL here, drop a file down
+   there); one box now does both — paste a URL and hit Use this page to
+   replace the set, or drag/drop or tap Choose files to add your own. */
+.sp-purl{margin-top:6px;border:1px dashed var(--gray-mid);border-radius:3px;padding:10px;background:var(--gray-light);font-family:'DM Sans',sans-serif;transition:border-color .15s,background .15s;}
+.sp-purl.drag{border-color:var(--black);background:#fff;}
+.sp-purl.busy{opacity:.6;}
 .sp-purl-hint{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;}
 .sp-purl-src{font-size:11px;color:var(--gray-text);margin-top:4px;line-height:1.4;font-family:'DM Sans',sans-serif;word-break:break-all;}
 .sp-purl-src a{color:var(--gray-text);}
+.sp-purl-go{background:#fff;color:var(--black);border:1px solid var(--black);}
+.sp-purl-go:active{background:var(--gray-light);}
+.sp-purl-go:disabled{opacity:.5;}
+.sp-purl-browse{color:var(--black);cursor:pointer;text-decoration:underline;font-weight:600;}
 .man-pulled{border:1px solid var(--gray-mid);background:var(--gray-light);padding:8px;margin-bottom:8px;}
 .man-pulled .mp-head{font-size:11px;color:var(--gray-text);line-height:1.4;font-family:'DM Sans',sans-serif;margin-bottom:6px;word-break:break-all;}
 .man-pulled .mp-head a{color:var(--gray-text);}
@@ -1376,7 +1384,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 115</strong> &#183; 2026-08-07 &#183; AN EDITED VENDOR NAME WAS NOT SURVIVING ITS OWN SAVE. Reopening an already-archived invoice and correcting the vendor field (e.g. an invoice printed the reseller&#39;s name instead of the actual brand) showed &quot;All changes saved,&quot; but the archive row silently kept the old name forever &#8212; the save path always wrote the ORIGINAL, frozen invoice-vendor into the archive, a rule meant only for genuine private-label swaps (Shopify shows Miss Behavin&#39;, archive keeps the real supplier). A plain correction now updates that record too, so it actually sticks on reopen. Private-label vendors are unaffected &#8212; that split is still deliberate. No Worker change. Carries build 114</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 116</strong> &#183; 2026-08-07 &#183; A VENDOR CORRECTION WAS WIPING THE SEO COPY AND THEN JAMMING IT BLANK FOR GOOD. Fixing a vendor name (build 115) correctly clears SEO title/description/body written for the old brand, but a leftover line then marked the invoice as already-current-with-the-new-vendor before the review card reopened it, so the card restored the (now empty) fields as if they were approved copy and refused to ever regenerate them — reopening showed blank SEO fields no matter how many times you tried. Fixed at the source, and the generator no longer treats an empty field as something to protect, so any card already stuck this way heals itself the next time it opens. Also: the &quot;wrong photos&quot; URL box and the separate photo drop zone below it were two boxes doing one job — now one box, and Use this page is a white outline button instead of solid black. No Worker change. Carries build 115</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1715,7 +1723,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 115;   // keep in step with the footer stamp
+var APP_BUILD = 116;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -5921,7 +5929,20 @@ function _spInvalidateSnapshots(inv){
       var snap = st._review[k];
       if (snap && snap.src_vendor !== undefined && snap.src_vendor !== v) {
         snap.seo_title = ''; snap.seo_desc = ''; snap.body = ''; snap.alt = '';
-        snap.src_vendor = v;
+        // build 116 — THE BUG: this used to also do `snap.src_vendor = v` right
+        // here, which made the snapshot look already-current-with-the-new-vendor
+        // before _spRestoreCard ever saw it. _spRestoreCard's own "did the vendor
+        // change" check (src_vendor !== nowVendor) then always came back false,
+        // so it restored the now-EMPTY title/desc/body/alt as if they were
+        // approved copy AND set userEdited = true — which permanently blocks
+        // _spGenSeo from ever refilling them. Every review card on an invoice
+        // whose vendor got corrected (e.g. "A Shop of Things" -> "Valfre") was
+        // left with blank SEO fields that no amount of reopening would fix.
+        // Leaving src_vendor at its OLD value here lets _spRestoreCard correctly
+        // detect the mismatch, skip restoring the blank copy, and — critically —
+        // leave userEdited false so the generator writes fresh copy for the
+        // corrected vendor. The next real save re-stamps src_vendor via
+        // _spSnapshotCard once there is real copy to stamp it with.
         n++;
       }
     });
@@ -7471,12 +7492,13 @@ function _spInitDetails(cd){
     // fixes a wrong link was still effectively hidden.
     '<div class="sp-purl">' +
       '<div class="sp-purl-src"></div>' +
-      '<label class="sp-l">Wrong photos? Paste the exact product page URL</label>' +
+      '<label class="sp-l">Wrong or missing photos? Paste the exact product page URL, or drag &amp; drop image files anywhere in this box</label>' +
       '<div style="display:flex;gap:6px;">' +
         '<input type="text" class="field-input sp-purl-input" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
-        '<button type="button" class="btn btn-black sp-purl-go" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use this page</button>' +
+        '<button type="button" class="btn sp-purl-go" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use this page</button>' +
       '</div>' +
-      '<div class="sp-purl-hint">Replaces every photo on this card, plus fabric and fit, with that page&#8217;s. Your category, tags, sizes and any copy you have already edited stay.</div>' +
+      '<div class="sp-purl-hint">Pasting a URL replaces every photo on this card, plus fabric and fit, with that page&#8217;s &#8212; category, tags, sizes and copy you already edited stay. Dropping files, or <a href="#" class="sp-purl-browse">choosing from this device</a>, adds your own photos instead.</div>' +
+      '<input type="file" accept="image/*" multiple class="sp-purl-file" style="display:none;"/>' +
     '</div>' +
     // v57 — vendor-site registry: appears when the brand has no known website.
     // Paste it once, it saves for this brand and every future scanned product.
@@ -7514,9 +7536,13 @@ function _spInitDetails(cd){
     vsiteInput: wrap.querySelector('.sp-vsite-input'),
     vsiteSave: wrap.querySelector('.sp-vsite-save'),
     // build 95 — the exact-product-URL control (build 96: always open)
+    // build 116 — same box is now also the photo drop zone.
+    purlBox: wrap.querySelector('.sp-purl'),
     purlSrc: wrap.querySelector('.sp-purl-src'),
     purlInput: wrap.querySelector('.sp-purl-input'),
     purlGo: wrap.querySelector('.sp-purl-go'),
+    purlBrowse: wrap.querySelector('.sp-purl-browse'),
+    purlFile: wrap.querySelector('.sp-purl-file'),
     images: wrap.querySelector('.sp-images'),
     kwused: wrap.querySelector('.sp-kwused'),
     title: wrap.querySelector('.sp-seo-title'),
@@ -7572,6 +7598,11 @@ function _spInitDetails(cd){
   cd.els.purlInput.addEventListener('keydown', function(ev){
     if (ev.key === 'Enter'){ ev.preventDefault(); _spUseProductUrl(cd); }
   });
+  // build 116 — the box that used to be a separate "drop images here" zone
+  // (appended below the photo grid, rebuilt on every redraw) is now this same
+  // box: drag/drop and tap-to-browse both live here, so pasting a URL and
+  // adding your own photos are one place instead of two.
+  _spWireDropZone(cd);
   _spShowSource(cd);
   // v57 — save the pasted vendor website, then immediately retry the fetch.
   cd.els.vsiteSave.onclick = function(){
@@ -7626,7 +7657,14 @@ function _spGenSeo(cd, done){
   if (!cd.els) { if (done) done(); return; }
   // build 86 — the userEdited guard used to sit AFTER the API call, so every
   // restored card still paid for a generation that was then thrown away.
-  if (cd.userEdited) { cd.els.title.placeholder = ''; if (done) done(); return; }
+  // build 116 — userEdited only means "protect this," and there is nothing to
+  // protect in an empty field. A vendor-invalidated snapshot (see
+  // _spInvalidateSnapshots) restores with userEdited=true and every field
+  // blank, which used to block generation forever with no way to recover
+  // short of retyping the copy by hand. Only skip when there is real
+  // approved copy sitting in the box.
+  var hasRealCopy = !!(String(cd.els.title.value||'').trim() || String(cd.els.desc.value||'').trim() || String(cd.els.bodyd.value||'').trim());
+  if (cd.userEdited && hasRealCopy) { cd.els.title.placeholder = ''; if (done) done(); return; }
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
   cd.els.title.placeholder = 'Generating…';
   api('generate_seo', {
@@ -7876,7 +7914,9 @@ function _spRenderImages(cd){
     cd.els.images.appendChild(wrap);
   });
   updateHint();
-  cd.els.images.appendChild(_spBuildDropZone(cd));   // build 67 — always offer your own photo
+  // build 116 — the upload drop zone moved up into the "wrong photos" box
+  // (wired once by _spWireDropZone, in _spInitDetails) so it's no longer
+  // rebuilt here on every redraw.
   // v58 — when we filtered to one colorway, offer a toggle to see every color.
   var all = cd.imagesAll || cd.images || [];
   if (all.length > (cd.images || []).length) {
@@ -7943,37 +7983,36 @@ function _spChosenImages(cd){
   return out;
 }
 
-// build 67 — UPLOAD YOUR OWN PHOTO.
-// Vendor pulls fail often (blocked site, no style code, item not on the vendor
-// page). This drop zone is always available so there is never a dead end.
+// build 67 — UPLOAD YOUR OWN PHOTO. build 116 — folded into the "wrong
+// photos" box instead of a second box rebuilt below the photo grid on every
+// redraw (that meant it, and its file input, were being thrown away and
+// recreated on every toggle/remove — harmless for drop/browse, but it was
+// still two visually separate places to fix a photo for one job).
+// Vendor pulls fail often (blocked site, no style code, item not on the
+// vendor page), so this stays available even when a vendor fetch worked.
 // The file is staged through the Worker (shopify_stage_upload -> Shopify
-// stagedUploadsCreate); we keep a local preview for the thumbnail and remember
-// the returned resourceUrl as what actually gets pushed.
-function _spBuildDropZone(cd){
-  var dz = document.createElement('div');
-  dz.className = 'sp-drop';
-  var idle = 'Photo missing or wrong? Drop images here, or tap to choose from this device.';
-  dz.textContent = idle;
-
-  var input = document.createElement('input');
-  input.type = 'file'; input.accept = 'image/*'; input.multiple = true; input.style.display = 'none';
+// stagedUploadsCreate); we keep a local preview for the thumbnail and
+// remember the returned resourceUrl as what actually gets pushed.
+function _spWireDropZone(cd){
+  var box = cd.els.purlBox, input = cd.els.purlFile, status = cd.els.fetchStatus;
+  if (!box || !input) return;
 
   var handle = function(files){
     var list = Array.prototype.slice.call(files || []).filter(function(f){ return /^image\//.test(f.type); });
-    if (!list.length) { dz.textContent = 'That was not an image file.'; setTimeout(function(){ dz.textContent = idle; }, 2500); return; }
-    dz.classList.add('busy');
+    if (!list.length) { if (status) status.textContent = 'That was not an image file.'; return; }
+    box.classList.add('busy');
     var done = 0, failed = 0;
     list.forEach(function(file){
       if (file.size > 20 * 1024 * 1024) {
         failed++; done++;
-        dz.textContent = file.name + ' is over 20MB — resize it first.';
+        if (status) status.textContent = file.name + ' is over 20MB — resize it first.';
         return;
       }
       var reader = new FileReader();
       reader.onload = function(){
         var dataUrl = String(reader.result || '');
         var b64 = dataUrl.split(',')[1] || '';
-        dz.textContent = 'Uploading ' + file.name + '…';
+        if (status) status.textContent = 'Uploading ' + file.name + '…';
         api('shopify_stage_upload', { filename: file.name, mimeType: file.type, data: b64, fileSize: file.size })
         .then(function(res){
           if (res.error) throw new Error(res.error);
@@ -7982,32 +8021,29 @@ function _spBuildDropZone(cd){
           cd.images = (cd.images || []).concat([dataUrl]);
           if (cd._off) delete cd._off[dataUrl];  // uploaded photos start INCLUDED
           done++;
-          if (done === list.length) { dz.classList.remove('busy'); _spRenderImages(cd); }
-          else _spRenderImages(cd);
+          if (done === list.length) box.classList.remove('busy');
+          _spRenderImages(cd);
         })
         .catch(function(e){
           failed++; done++;
-          dz.classList.remove('busy');
-          dz.textContent = 'Upload failed: ' + e.message;
+          box.classList.remove('busy');
+          if (status) status.textContent = 'Upload failed: ' + e.message;
         });
       };
-      reader.onerror = function(){ failed++; done++; dz.classList.remove('busy'); dz.textContent = 'Could not read ' + file.name; };
+      reader.onerror = function(){ failed++; done++; box.classList.remove('busy'); if (status) status.textContent = 'Could not read ' + file.name; };
       reader.readAsDataURL(file);
     });
   };
 
-  dz.onclick = function(){ if (!dz.classList.contains('busy')) input.click(); };
+  if (cd.els.purlBrowse) cd.els.purlBrowse.onclick = function(e){ e.preventDefault(); if (!box.classList.contains('busy')) input.click(); };
   input.onchange = function(){ handle(input.files); input.value = ''; };
   ['dragenter','dragover'].forEach(function(ev){
-    dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.add('drag'); });
+    box.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); box.classList.add('drag'); });
   });
   ['dragleave','drop'].forEach(function(ev){
-    dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag'); });
+    box.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); box.classList.remove('drag'); });
   });
-  dz.addEventListener('drop', function(e){ handle(e.dataTransfer && e.dataTransfer.files); });
-
-  dz.appendChild(input);
-  return dz;
+  box.addEventListener('drop', function(e){ handle(e.dataTransfer && e.dataTransfer.files); });
 }
 
 /* ═══════════════════════════════════════
