@@ -538,6 +538,16 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-chk.warnbox{background:#fffdf2;border:1px solid #dfcf8a;padding:9px 10px;color:#7a6414;}
 .edit-chk.good{color:var(--green,#2a7a3c);font-weight:600;}
 .edit-chk ul{margin:3px 0 0;padding-left:16px;}
+/* build 114 — the action was at the bottom of a grid hundreds of pictures long,
+   which on a phone means scrolling past everything to find out you could have
+   tapped Generate at any point. It now rides along the bottom of the screen. */
+.edit-actionbar{position:sticky;bottom:0;z-index:40;background:var(--white,#fff);border-top:1px solid var(--gray-mid);padding:10px 24px calc(10px + env(safe-area-inset-bottom));margin-top:14px;}
+.edit-actionbar .sel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-text);margin-bottom:7px;display:none;}
+.edit-actionbar .sel.on{display:block;}
+.edit-actionbar .sel b{color:var(--black);}
+.edit-brandwrap{display:flex;gap:8px;align-items:flex-end;}
+.edit-brandwrap select{flex:1;min-width:0;}
+.edit-brandwrap input{flex:1;min-width:0;}
 #edit-facts{width:100%;background:transparent;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;padding:10px;outline:none;color:var(--black);line-height:1.5;resize:vertical;}
 #edit-facts:focus{border-color:var(--black);}
 #blog-due-banner.ready{background:#eef6ee;border-color:#bcd9bc;}
@@ -1064,17 +1074,20 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
       <div class="field">
         <label class="field-label">Featured brand</label>
-        <select class="field-input" id="edit-topic-brand" onchange="editState.brand=this.value;"><option value="">Loading brands&#8230;</option></select>
-        <div class="edit-frozen-note">Any brand you carry can be featured, or choose General for a post not tied to a brand. Frozen brands (Rolla&#8217;s, Gorjana) are excluded automatically.</div>
+        <div class="edit-brandwrap">
+          <select class="field-input" id="edit-topic-brand" onchange="editBrandPick()"><option value="">Loading brands&#8230;</option></select>
+          <input type="text" class="field-input" id="edit-topic-brand-text" placeholder="or type a brand" autocomplete="off" oninput="editBrandType()"/>
+        </div>
+        <div class="edit-frozen-note">Pick one you carry, or type one in &#8212; typing wins if both are filled. Choose General for a post not tied to a brand. Frozen brands (Rolla&#8217;s, Gorjana) are excluded automatically.</div>
       </div>
     </div>
 
     <!-- MODE B: new arrivals / brand drop picker (reuses Social's arrivals feed) -->
     <div id="edit-pane-arrivals" class="edit-pane" style="display:none;">
       <select class="field-input" id="edit-arr-brand" style="margin-bottom:12px;" onchange="editState.filter=this.value;editRenderArrivals();"><option value="all">All eligible brands</option></select>
-      <div class="edit-arr-note">Recent arrivals from Free People and Motel Rocks. Tap to select the pieces this post is about.</div>
+      <div class="edit-arr-note">Arrivals from the last 30 days, newest first. Products with no photograph are not shown. Tap to select the pieces this post is about.</div>
       <div id="edit-arr-grid" class="fc-grid"></div>
-      <div id="edit-arr-empty" class="fc-empty" style="display:none;">No eligible Free People or Motel Rocks arrivals in the last 30 days.</div>
+      <div id="edit-arr-empty" class="fc-empty" style="display:none;">No arrivals with photographs in the last 30 days.</div>
       <div id="edit-arr-loading" class="fc-empty"><span class="spinner"></span> Loading arrivals&#8230;</div>
     </div>
 
@@ -1085,8 +1098,9 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <label class="field-label">What actually happened <span style="font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
       <textarea id="edit-facts" rows="4" placeholder="One per line. What sold out and how fast &#183; who tried something on and what they said &#183; what a customer asked for &#183; what is in the window this week &#183; what you would wear it with"></textarea>
     </div>
-    <div style="padding:0 24px;">
-      <div id="edit-gen-status" class="status"></div>
+    <div style="padding:0 24px;"><div id="edit-gen-status" class="status"></div></div>
+    <div class="edit-actionbar">
+      <div class="sel" id="edit-selcount"></div>
       <button class="btn btn-black" id="edit-gen-btn" onclick="editGenerate()">Generate Draft</button>
     </div>
     </div><!-- /edittab-write -->
@@ -1121,6 +1135,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="field-hint">Repairs the invisible-product bug only: lists ACTIVE products on ZERO sales channels (broken &#8212; not even at POS) with their photo counts, and publishes only the ones you tick. Products already on any channel &#8212; including your POS-only, no-photo items &#8212; are never touched. Needs worker v39.</div>
       <div id="fixch-status" class="status"></div>
       <div id="fixch-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
+
+      <button class="btn btn-outline" id="nophoto-btn" onclick="noPhotoScan()" style="margin-top:14px;">Find no-photo products that are on the website</button>
+      <div class="field-hint">The other half of the rule: a product with no photograph belongs on the register and nowhere else. The button above only ever looked at products on ZERO channels, so it could not see the ones already published everywhere &#8212; which is most of them. This lists ACTIVE products with no usable photograph that are live beyond Point of Sale, and removes only the ones you tick. <strong>Point of Sale is never removed</strong>, so they stay sellable on the floor. Anything still uploading is counted separately &#8212; leave those and re-run later. Needs worker v98.</div>
+      <div id="nophoto-status" class="status"></div>
+      <div id="nophoto-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
 
       <button class="btn btn-outline" id="phch-btn" onclick="phChScan()" style="margin-top:10px;">Photo channel check</button>
       <div class="field-hint">The one case the push cannot catch. Adding an image does not upload it &#8212; it hands Shopify a link and Shopify fetches it later, so a vendor site that blocks the fetch leaves a product that was pushed &quot;with photos&quot; and ends up with none, live on the website. This reads the catalogue as it stands and finds ACTIVE products with no real photo that are showing beyond the register, and it also releases anything that was held and now has a photo. Nothing is pre-ticked. Needs worker v90.</div>
@@ -1332,6 +1351,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 113</strong> &#183; 2026-08-07 &#183; THE COPY AROUND THE NOTES BOX ARGUED FOR SOMETHING WE STOPPED DOING, AND ONE LINE OF IT WAS FALSE. It was written in build 110, before the research settled how this blog should work, and it sold the box as the thing that makes a post unique &#8212; then warned that without it a post would be &quot;cited by nothing&quot;. That is not what the evidence says: comparison and concrete attributes carry citation and neither needs a first-hand fact. Worse, it promised the writer would flag a missing detail as [CONFIRM], which Worker v97 no longer does &#8212; it writes around the gap or drops the claim. Promising behaviour the code does not have is how a screen stops being believed. The box stays, marked optional, with its placeholder doing the explaining. The subtitle, the hint, the amber warning and the matching note on the draft screen are gone. No Worker change &#8212; runs on v97. Carries build 112
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 112</strong> &#183; 2026-08-07 &#183; THE DRAFT SCREEN NOW TELLS YOU WHAT IS WRONG WITH THE DRAFT. The writer was asked to check sixteen rules on itself before returning, which is the kind of promise a small model keeps most of the time and nobody can audit. Nine of those rules are decidable in code, so Worker v97 now checks them after every generate and this screen shows the result above the draft: a frozen brand named, a banned word, an invented URL, a link in the body but not the array, a wrong byline, an over-length meta, a missing hoco in a homecoming title, a first-person claim of having worn something. Nothing is blocked and nothing is auto-edited &#8212; you still decide &#8212; but you are no longer trusting a self-report you cannot see. All-clear says so plainly rather than staying silent, because a check that is invisible when it passes is a check nobody believes. Needs Worker v97. Carries build 111
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 111</strong> &#183; 2026-08-06 &#183; THE POST COULD NEVER HAVE BEEN SPECIFIC, BECAUSE NOTHING SPECIFIC WAS EVER ASKED FOR. The writer is rightly forbidden from inventing fabrics, prices, reviews and numbers, and this screen collected a topic and a brand and nothing else &#8212; so the only thing left to write was advice true of any boutique anywhere, which is exactly the copy readers skim and AI answers never cite. Create Blog now asks WHAT ACTUALLY HAPPENED: what sold out and how fast, who tried something on, what a customer asked for, what is in the window. Those lines reach the writer as the material the post is built from, ahead of everything else. Leaving it blank still works and is never blocked, but it says plainly what you are giving up, and the draft screen tells you afterwards whether the post was written from real detail or from shape alone &#8212; the one thing you can still fix before publishing. Needs Worker v96, which also gives the blog a real voice: a mid-twenties staffer who works the floor and helps buy the range, writing for customers 14 to 28. Carries build 110
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 110</strong> &#183; 2026-08-06 &#183; THE WEEKLY BLOG NUDGE NOW HAPPENS IN THE APP, AND IT KNOWS THE DIFFERENCE BETWEEN WRITE ONE AND PUBLISH THE ONE YOU HAVE. There was never a reminder to miss: the blog had no notification of any kind, only a grey banner that checked published posts, so it could tell you to write a post while a finished draft sat in Posts one tap from live &#8212; which is the state the weekly auto-draft creates every Wednesday. A waiting draft now wins the banner and sends you to Posts; &quot;a post is due&quot; shows only when nothing is written. The banner is tappable end to end and the Create Blog tile carries a dot, so the nudge survives scrolling past it. Everyone who can open Create Blog sees it, no per-device opt-in, nothing to switch on. Needs Worker v95, which also fixes the two separate bugs that stopped the Wednesday auto-draft running at all. Carries build 109
@@ -1356,7 +1376,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 113</strong> &#183; 2026-08-07 &#183; THE COPY AROUND THE NOTES BOX ARGUED FOR SOMETHING WE STOPPED DOING, AND ONE LINE OF IT WAS FALSE. It was written in build 110, before the research settled how this blog should work, and it sold the box as the thing that makes a post unique &#8212; then warned that without it a post would be &quot;cited by nothing&quot;. That is not what the evidence says: comparison and concrete attributes carry citation and neither needs a first-hand fact. Worse, it promised the writer would flag a missing detail as [CONFIRM], which Worker v97 no longer does &#8212; it writes around the gap or drops the claim. Promising behaviour the code does not have is how a screen stops being believed. The box stays, marked optional, with its placeholder doing the explaining. The subtitle, the hint, the amber warning and the matching note on the draft screen are gone. No Worker change &#8212; runs on v97. Carries build 112</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 115</strong> &#183; 2026-08-07 &#183; AN EDITED VENDOR NAME WAS NOT SURVIVING ITS OWN SAVE. Reopening an already-archived invoice and correcting the vendor field (e.g. an invoice printed the reseller&#39;s name instead of the actual brand) showed &quot;All changes saved,&quot; but the archive row silently kept the old name forever &#8212; the save path always wrote the ORIGINAL, frozen invoice-vendor into the archive, a rule meant only for genuine private-label swaps (Shopify shows Miss Behavin&#39;, archive keeps the real supplier). A plain correction now updates that record too, so it actually sticks on reopen. Private-label vendors are unaffected &#8212; that split is still deliberate. No Worker change. Carries build 114</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1695,7 +1715,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 113;   // keep in step with the footer stamp
+var APP_BUILD = 115;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3277,9 +3297,21 @@ function _renderVendorField(inv){
     var v = input.value.trim();
     if (!v) { input.value = (currentInvoice && currentInvoice.vendor) || ''; return; }
     if (!currentInvoice) return;
+    var priv = _isPrivateLabel(v);
     // build 86 — an edit changes what SHOPIFY receives. It never touches
-    // _invoiceVendor, which is the record of what the invoice actually said.
-    currentInvoice.vendor = _isPrivateLabel(v) ? _privateLabels.becomes : v;
+    // _invoiceVendor, which is the record of what the invoice actually said —
+    // that split is deliberate for a real private-label swap (Shopify shows
+    // "Miss Behavin'", the archive keeps the true supplier).
+    currentInvoice.vendor = priv ? _privateLabels.becomes : v;
+    // build 115 — a NON-private-label edit is a correction, not a rebrand
+    // (e.g. extraction read the reseller/marketplace name off the invoice
+    // instead of the actual brand). sbArchiveInvoice() always writes
+    // _invoiceVendor as the archive's vendor, so leaving it frozen at the
+    // original misread meant the correction never survived its own save —
+    // the archive row silently reverted to the wrong name every time the
+    // invoice was reopened, and the field looked broken. A plain correction
+    // now updates the record of the true vendor too, so it actually sticks.
+    if (!priv) currentInvoice._invoiceVendor = v;
     // build 86 — the SEO copy names the brand, so a vendor change makes every
     // saved snapshot stale in exactly the way a rename does.
     _spInvalidateSnapshots(currentInvoice);
@@ -3626,6 +3658,70 @@ function fixChScan() {
   })
   .catch(function(e) { btn.disabled = false; showStatus('fixch-status','error', esc(e.message || 'Scan failed — tap again.')); });
 }
+/* build 114 — the no-photo rule, enforced the other way round. fix_channels
+   above repairs products stuck on zero channels. This finds the opposite and
+   more common fault: no photograph, yet live on the storefront. Nothing is
+   pre-ticked and Point of Sale is never touched, so the worst case of a wrong
+   tick is a product that is still sellable at the register. */
+function noPhotoScan(){
+  var btn = el('nophoto-btn');
+  btn.disabled = true;
+  el('nophoto-review').style.display = 'none';
+  showStatus('nophoto-status','loading','<span class="spinner"></span>Checking every active product&#8230; this reads the whole catalog, give it a moment.');
+  api('photoless_channels', { dry_run: true })
+  .then(function(r){
+    btn.disabled = false;
+    if (r.error) { showStatus('nophoto-status','error', esc(r.error)); return; }
+    if (!r.offender_count) {
+      showStatus('nophoto-status','success','\u2713 Every no-photo product is already on Point of Sale only. Scanned ' + r.scanned + ', ' + r.with_photos + ' have photographs, ' + r.already_pos_only + ' were already correct.');
+      return;
+    }
+    el('nophoto-status').style.display = 'none';
+    _nophotoRender(r);
+  })
+  .catch(function(e){ btn.disabled = false; showStatus('nophoto-status','error', esc(e.message || 'Scan failed — tap again.')); });
+}
+function _nophotoRender(r){
+  var box = el('nophoto-review');
+  var h = '<div class="sp-l" style="margin:0 0 4px;">No photograph, but live beyond the register (' + r.offender_count + ')</div>' +
+    '<div style="font-size:12px;color:#666;margin-bottom:8px;line-height:1.55;">Scanned ' + r.scanned + ' active products. ' + r.with_photos + ' have photographs and were skipped; ' + r.already_pos_only + ' were already correct. Ticking one removes it from the channels listed beside it &#8212; <strong>Point of Sale is never removed</strong>.' +
+    (r.note ? ' <span style="color:#8a6d1f;">' + esc(r.note) + '</span>' : '') + '</div>' +
+    '<div style="margin-bottom:8px;"><button type="button" class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="_nophotoAll(true)">Tick all</button> ' +
+    '<button type="button" class="btn btn-outline" style="padding:6px 10px;font-size:11px;" onclick="_nophotoAll(false)">Clear</button></div>';
+  (r.products || []).forEach(function(p){
+    var pend = p.photos_pending > 0
+      ? '<span style="color:#8a6d1f;font-size:11px;font-weight:600;white-space:nowrap;">' + p.photos_pending + ' UPLOADING</span>'
+      : (p.photos_failed > 0 ? '<span style="color:var(--red,#b05a43);font-size:11px;font-weight:600;white-space:nowrap;">' + p.photos_failed + ' FAILED</span>' : '');
+    h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+         '<input type="checkbox" class="nophoto-ck" value="' + esc(p.id) + '"' + (p.photos_pending > 0 ? '' : '') + '/>' +
+         '<span style="flex:1;">' + esc(p.title) + '</span>' +
+         '<span style="color:#999;font-size:11px;">' + esc(p.vendor || '') + '</span>' +
+         '<span style="color:#666;font-size:11px;white-space:nowrap;">' + esc((p.on_channels || []).join(', ')) + '</span> ' + pend +
+         '</label>';
+  });
+  h += '<button class="btn btn-black" style="margin-top:12px;" onclick="noPhotoApply()">Remove ticked products from those channels</button>' +
+       '<div id="nophoto-apply-status" class="status"></div>';
+  box.innerHTML = h;
+  box.style.display = 'block';
+}
+function _nophotoAll(on){
+  Array.prototype.forEach.call(document.querySelectorAll('.nophoto-ck'), function(c){ c.checked = on; });
+}
+function noPhotoApply(){
+  var ids = Array.prototype.slice.call(document.querySelectorAll('.nophoto-ck:checked')).map(function(c){ return c.value; });
+  if (!ids.length) { showStatus('nophoto-apply-status','error','Nothing ticked.'); return; }
+  if (!confirm('Remove ' + ids.length + ' product' + (ids.length===1?'':'s') + ' from the website and any other non-register channel? They stay sellable at Point of Sale. This can be undone in Shopify.')) return;
+  showStatus('nophoto-apply-status','loading','<span class="spinner"></span>Updating channels&#8230;');
+  api('photoless_channels', { ids: ids })
+  .then(function(r){
+    if (r.error) { showStatus('nophoto-apply-status','error', esc(r.error)); return; }
+    var msg = '\u2713 ' + r.fixed + ' of ' + r.requested + ' moved to Point of Sale only.';
+    if (r.failed && r.failed.length) msg += '<div style="margin-top:6px;font-size:11px;">Could not change: ' + esc(r.failed.join(' · ')) + '</div>';
+    showStatus('nophoto-apply-status', (r.failed && r.failed.length) ? 'error' : 'success', msg);
+  })
+  .catch(function(e){ showStatus('nophoto-apply-status','error', esc(e.message || 'Failed — tap again.')); });
+}
+
 function _fixchRenderReview(r) {
   var box = el('fixch-review');
   var h = '<div class="sp-l" style="margin:0 0 4px;">Stuck on 0 sales channels — tick only what should go live (' + r.zero_count + ')</div>' +
@@ -7939,6 +8035,8 @@ function editReset(){
 function editInit(){
   editReset();
   var fa = el('edit-facts'); if (fa) fa.value = '';
+  var bt = el('edit-topic-brand-text'); if (bt) bt.value = '';
+  editSelCount();
   editTab('write');
   editSetMode('topic');
   editLoadBrands();
@@ -8041,6 +8139,7 @@ function editSetMode(m){
   el('edit-pane-topic').style.display = m === 'topic' ? 'block' : 'none';
   el('edit-pane-arrivals').style.display = m === 'arrivals' ? 'block' : 'none';
   if (m === 'arrivals' && !editState.arrLoaded) editLoadArrivals();
+  editSelCount();
 }
 
 // Brand pickers are dropdowns now (see editLoadBrands / editFillArrFilter).
@@ -8089,9 +8188,33 @@ function editRenderArrivals(){
       if (editState.selected[p.id]) delete editState.selected[p.id];
       else editState.selected[p.id] = p;
       card.classList.toggle('selected', !!editState.selected[p.id]);
+      editSelCount();
     };
     grid.appendChild(card);
   });
+}
+
+// build 114 — the picker and the box are one field with two ways in. Typing
+// wins, because someone who typed a name meant that name; the picker is the
+// shortcut, not the authority.
+function editBrandPick(){
+  var t = el('edit-topic-brand-text'); if (t) t.value = '';
+  editState.brand = el('edit-topic-brand').value;
+}
+function editBrandType(){
+  var typed = el('edit-topic-brand-text').value.trim();
+  editState.brand = typed || el('edit-topic-brand').value;
+}
+
+// Keeps the sticky bar honest about how many pieces are ticked, so you never
+// have to scroll back up the grid to check.
+function editSelCount(){
+  var box = el('edit-selcount'); if (!box) return;
+  if (!editState || editState.mode !== 'arrivals') { box.classList.remove('on'); return; }
+  var n = Object.keys(editState.selected || {}).length;
+  box.innerHTML = n ? ('<b>' + n + '</b> piece' + (n === 1 ? '' : 's') + ' selected')
+                    : 'Tap the pieces this post is about';
+  box.classList.add('on');
 }
 
 function editBuildPayload(){
