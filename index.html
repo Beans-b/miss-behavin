@@ -191,13 +191,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .p-cost-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0eeeb;}
 .p-cost-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
 .p-cost-val{font-size:14px;font-weight:600;color:var(--gray-text);}
-.p-markup-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
-.p-markup-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);width:56px;flex-shrink:0;}
-.p-markup-input{flex:1;border:none;border-bottom:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;padding:3px 0;outline:none;background:transparent;-webkit-appearance:none;min-width:0;}
-.p-markup-input:focus{border-bottom-color:var(--black);}
-.p-markup-input::placeholder{color:var(--gray-mid);font-weight:400;font-size:13px;}
-.mtype-btn{background:var(--gray-light);border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:8px 10px;cursor:pointer;color:var(--gray-text);transition:all .15s;-webkit-appearance:none;flex-shrink:0;}
-.mtype-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+/* build 118 — Markup row removed: nobody was using the %/$ auto-calc, Retail
+   was always typed directly (see the screenshots — Markup sat at 0 on every
+   card while Retail carried the real price). .p-markup-row/.p-markup-label/
+   .p-markup-input/.mtype-btn are gone with it. */
 .p-retail-row{display:flex;align-items:center;gap:8px;}
 .p-retail-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);width:56px;flex-shrink:0;}
 .p-retail-input{flex:1;border:none;border-bottom:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;padding:3px 0;outline:none;background:transparent;color:var(--black);-webkit-appearance:none;min-width:0;}
@@ -1396,7 +1393,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 117</strong> &#183; 2026-08-07 &#183; ONE-CLICK PRIVATE LABEL, for vendors beyond Cotton Candy LA. Getting the Cotton-Candy treatment (Shopify shows Miss Behavin&#39;, the archive keeps the real supplier) for a NEW vendor meant a trip to Settings to register the name first &#8212; on this screen there was no way to say &quot;this one too.&quot; The vendor field now has a Private label checkbox right there: check it and this invoice&#8217;s real vendor is registered the same way Cotton Candy LA is, applies to this invoice immediately, and to every future one from the same vendor with no extra step. Also closes the gap it was covering for: typing the store&#39;s own name straight into the field (with or without the apostrophe) used to be treated as a plain correction, which would have overwritten the archive&#39;s only record of the real vendor &#8212; it&#39;s now routed the same way as the checkbox, so the archive stays correct either way. No Worker change. Carries build 116</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 119</strong> &#183; 2026-08-07 &#183; CRITICAL FIX &#8212; the photo/fabric fetch on Review &amp; Push was searching &quot;Miss Behavin&#39;&quot; for a private-labeled product&#39;s photos instead of the REAL brand (e.g. Valfre), so it always came back &quot;no product matched&quot; the moment build 117&#39;s private-label checkbox was used. The Get images button, the vendor-website paste-once box, and the candidate search all read the Shopify-facing vendor (correct for what gets pushed and for SEO copy) instead of the true invoice vendor (needed for finding the real product page). Now split: SEO copy and the Shopify push still say Miss Behavin&#39; as before, but every external photo/fabric lookup uses the actual supplier. No Worker change. Carries build 118</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1735,7 +1732,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 117;   // keep in step with the footer stamp
+var APP_BUILD = 119;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3268,6 +3265,18 @@ function _isPrivateLabel(name){
 // "Miss Behavin'" are the same brand typed two ways, not two vendors.
 function _vendorNorm(s){ return String(s||'').toLowerCase().replace(/[’'`]/g, '').trim(); }
 
+// build 119 — THE TRUE vendor, as opposed to inv.vendor (what gets PUSHED TO
+// SHOPIFY — "Miss Behavin'" once private-labeled). Anything that reaches out
+// to an external site to find real product photos/fabric needs the true
+// brand: Miss Behavin' is the store's own name, not a supplier with a
+// catalog to search, so searching "Miss Behavin'" for a Valfre tote always
+// came back empty. inv.vendor stays correct for SEO copy and for what
+// actually gets pushed — only the vendor-site lookup needed this.
+function _spTrueVendor(inv){
+  inv = inv || currentInvoice;
+  return (inv && (inv._invoiceVendor || inv.vendor)) || '';
+}
+
 // build 117 — ONE place that flips a vendor's private-label status, used by
 // both the on-the-fly checkbox and the typed-target-name guard below. Saves
 // to the same registry Settings uses (privateLabelSave), so it sticks for
@@ -3513,12 +3522,22 @@ function _styleSizes(style){ return SIZE_RUNS[_styleRunKey(style)].sizes; }
 function buildKelCard(style, idx) {
   var costNum = Number(style.cost||0);
   var cost = costNum.toFixed(2);
-  var markup = style._markup || '';
-  var markupMode = style._markupMode || 'pct';
   var retail = style._retail || '';
+  // build 118 — a one-size colorway with the placeholder name "default" (the
+  // normal case — most styles have exactly one colorway) used to render as
+  // "default   OS:6", naming a color that doesn't exist and repeating the
+  // one-and-only size code nobody needed spelled out. Collapses to a plain
+  // "Quantity  6". A REAL color name (multi-color styles) still shows, and a
+  // multi-size breakdown (XS:1 S:3 M:1 L:1) still shows per size — neither of
+  // those is redundant the way "default"/"OS:" are.
   var colorRows = (style.colors||[]).map(function(c) {
-    var sz = Object.entries(c.sizes||{}).map(function(kv){return kv[0]+':'+kv[1];}).join(' ');
-    return '<div class="p-color-row"><span>'+esc(c.color)+'</span><span>'+sz+'</span></div>';
+    var sizes = c.sizes || {};
+    var keys = Object.keys(sizes);
+    var isOneSize = keys.length === 1 && keys[0] === 'OS';
+    var isDefaultColor = !c.color || String(c.color).toLowerCase() === 'default';
+    var label = isDefaultColor ? (isOneSize ? 'Quantity' : '') : esc(c.color);
+    var val = isOneSize ? String(sizes[keys[0]]) : keys.map(function(k){ return k+':'+sizes[k]; }).join(' ');
+    return '<div class="p-color-row"><span>'+label+'</span><span>'+esc(val)+'</span></div>';
   }).join('');
 
   var card = document.createElement('div');
@@ -3540,14 +3559,10 @@ function buildKelCard(style, idx) {
         return '<option value="'+k+'"'+(k===_styleRunKey(style)?' selected':'')+'>'+esc(SIZE_RUNS[k].label)+'</option>';
       }).join('')+
     '</select></div>'+
+    // build 118 — Markup row removed (label, %/$ toggle, input). Retail is
+    // typed directly; the auto-calc-from-markup path was unused in practice.
     '<div class="p-card-body">'+
       '<div class="p-cost-row"><span class="p-cost-label">Wholesale Cost</span><span class="p-cost-val">'+(costNum>0?'$'+cost:'&#8212;')+'</span></div>'+
-      '<div class="p-markup-row">'+
-        '<span class="p-markup-label">Markup</span>'+
-        '<input class="p-markup-input" type="text" inputmode="decimal" placeholder="0" value="'+esc(markup)+'"/>'+
-        '<button class="mtype-btn'+(markupMode==='pct'?' active':'')+'" data-mode="pct">%</button>'+
-        '<button class="mtype-btn'+(markupMode==='dollar'?' active':'')+'" data-mode="dollar">$</button>'+
-      '</div>'+
       '<div class="p-retail-row">'+
         '<span class="p-retail-label">Retail</span>'+
         '<input class="p-retail-input" type="text" inputmode="decimal" placeholder="$0.00" value="'+esc(retail)+'"/>'+
@@ -3556,49 +3571,22 @@ function buildKelCard(style, idx) {
     '</div>';
 
   var nameInput = card.querySelector('.p-name-input');
-  var markupInput = card.querySelector('.p-markup-input');
   var retailInput = card.querySelector('.p-retail-input');
-  var mtypeBtns = card.querySelectorAll('.mtype-btn');
 
   nameInput.addEventListener('input', function() { scheduleAutosave(); });
 
   card.querySelector('.regen-btn').addEventListener('click', function() { regenName(card, style.code, style.type); });
 
-  mtypeBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      mtypeBtns.forEach(function(b){b.classList.remove('active');});
-      btn.classList.add('active');
-      retailInput.dataset.manual = '';
-      recalcRetail(card);
-      scheduleAutosave();
-    });
-  });
-
-  markupInput.addEventListener('input', function() { recalcRetail(card); scheduleAutosave(); });
   retailInput.addEventListener('input', function() {
     retailInput.dataset.manual = retailInput.value ? 'true' : '';
     scheduleAutosave();
   });
 
   // build 33 — a prefilled retail (pulled brand price or typed in the manual
-  // row) counts as manually set, so markup math never silently overwrites it.
+  // row) counts as manually set.
   if (retail) retailInput.dataset.manual = 'true';
 
   return card;
-}
-
-// Markup math — retail rounds UP to the next $0.50 (unchanged)
-function recalcRetail(card) {
-  var cost = parseFloat(card.dataset.cost)||0;
-  var mi = card.querySelector('.p-markup-input');
-  var ri = card.querySelector('.p-retail-input');
-  var ab = card.querySelector('.mtype-btn.active');
-  var mode = ab ? ab.dataset.mode : 'pct';
-  var val = parseFloat(mi.value)||0;
-  if (val===0 || ri.dataset.manual==='true') return;
-  var retail = mode==='pct' ? cost*(1+val/100) : cost+val;
-  retail = Math.ceil(retail*2)/2;
-  ri.value = '$'+retail.toFixed(2);
 }
 
 /* ── AUTOSAVE (1.5s debounce, unchanged) ── */
@@ -3635,7 +3623,7 @@ function collectCurrentInvoice() {
     // v72 — match by ORIGINAL INDEX first. The old code-only match dropped any
     // style the invoice supplied without a style code: dataset.code became the
     // string "undefined", nothing matched, and every edit on that card (name,
-    // markup, RETAIL PRICE) was silently thrown away on save. That is why a
+    // RETAIL PRICE) was silently thrown away on save. That is why a
     // priced-looking style could still trip the "Prices Missing" gate.
     var code = card.dataset.code;
     var idx = card.dataset.idx === '' ? -1 : parseInt(card.dataset.idx, 10);
@@ -3643,22 +3631,14 @@ function collectCurrentInvoice() {
               : inv.styles.find(function(s){ return s.code === code; });
     if (!style) return;
     style.name = (card.querySelector('.p-name-input')||{}).value || style.name;
-    style._markup = (card.querySelector('.p-markup-input')||{}).value || '';
-    var ab = card.querySelector('.mtype-btn.active');
-    style._markupMode = ab ? ab.dataset.mode : 'pct';
     style._retail = (card.querySelector('.p-retail-input')||{}).value || '';
     // build 87 — remember the chosen size run
     var _runSel = card.querySelector('.p-run-select');
     if (_runSel && _runSel.value) style._sizeRun = _runSel.value;
-    if (!style._retail && style._markup) {
-      var cost = parseFloat(card.dataset.cost)||0;
-      var mval = parseFloat(style._markup)||0;
-      if (mval>0&&cost>0) {
-        var r = style._markupMode==='pct' ? cost*(1+mval/100) : cost+mval;
-        r = Math.ceil(r*2)/2;
-        style._retail = '$'+r.toFixed(2);
-      }
-    }
+    // build 118 — markup row removed from the card; retail is always typed
+    // directly now, so the old markup->retail auto-calc (and _markup/
+    // _markupMode collection) is gone too. Any _markup value on OLDER saved
+    // styles is simply left alone — harmless, unused going forward.
   });
   return inv;
 }
@@ -7568,7 +7548,7 @@ function _spInitDetails(cd){
   var wrap = document.createElement('div');
   wrap.className = 'sp-seo';
   wrap.innerHTML =
-    '<button type="button" class="sp-fetch-btn">&#8595; Get images &amp; fabric from ' + esc((currentInvoice && currentInvoice.vendor) || 'vendor') + '</button>' +
+    '<button type="button" class="sp-fetch-btn">&#8595; Get images &amp; fabric from ' + esc(_spTrueVendor() || 'vendor') + '</button>' +
     '<div class="sp-fetch-status"></div>' +
     // build 95 — CORRECT THE PRODUCT LINK, always available.
     // The only ways in were a name search against the whole vendor catalog and
@@ -7591,7 +7571,7 @@ function _spInitDetails(cd){
     // v57 — vendor-site registry: appears when the brand has no known website.
     // Paste it once, it saves for this brand and every future scanned product.
     '<div class="sp-vsite" style="display:none;margin-top:6px;">' +
-      '<label class="sp-l">Vendor website — paste once, saved for ' + esc((currentInvoice && currentInvoice.vendor) || 'this brand') + '</label>' +
+      '<label class="sp-l">Vendor website — paste once, saved for ' + esc(_spTrueVendor() || 'this brand') + '</label>' +
       '<div style="display:flex;gap:6px;">' +
         '<input class="field-input sp-vsite-input" placeholder="e.g. shakeyourbonbon.com" autocomplete="off"/>' +
         '<button type="button" class="btn btn-black sp-vsite-save" style="width:auto;padding:8px 12px;margin:0;white-space:nowrap;">Use &amp; save</button>' +
@@ -7694,7 +7674,7 @@ function _spInitDetails(cd){
   _spShowSource(cd);
   // v57 — save the pasted vendor website, then immediately retry the fetch.
   cd.els.vsiteSave.onclick = function(){
-    var vendor = (currentInvoice && currentInvoice.vendor) || '';
+    var vendor = _spTrueVendor();   // build 119 — save the REAL brand's site, not "Miss Behavin'"
     var dom = (cd.els.vsiteInput.value || '').trim();
     if (!dom || dom.indexOf('.') < 0) { cd.els.fetchStatus.textContent = 'Enter a valid website, e.g. brand.com'; return; }
     cd.els.vsiteSave.disabled = true;
@@ -7810,7 +7790,11 @@ var _vendorDomains = {};
 function _vendorKey(v){ return String(v || '').toLowerCase().trim(); }
 
 function _spFetchVendor(cd){
-  var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  // build 119 — the REAL brand, not "Miss Behavin'" post-private-label swap.
+  // Miss Behavin' has no vendor catalog to search; that was the whole bug —
+  // every private-labeled invoice's photo fetch was searching the store's
+  // own name and coming back "no product matched" no matter what.
+  var vendor = _spTrueVendor();
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;   // v57 — pass a saved/entered site if we have one
   cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
   cd.els.fetchBtn.disabled = true;
@@ -7914,7 +7898,7 @@ function _spCandidatePicker(cd, cands){
   cd.els.fetchBtn.disabled = false;
 }
 function _spUseCandidate(cd, cand){
-  var vendor = (currentInvoice && currentInvoice.vendor) || '';
+  var vendor = _spTrueVendor();   // build 119 — same real-brand fix as _spFetchVendor
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;
   cd.els.fetchStatus.textContent = 'Loading details…';
   if (cand.handle){
