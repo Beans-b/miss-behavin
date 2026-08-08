@@ -37,7 +37,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--white);color:var(--black)
 
 /* MENU */
 .menu-list{padding:20px 24px;}
+/* build 124 — each tile now sits in a .menu-row next to a drag handle; the
+   row carries the spacing/positioning that .menu-item used to carry alone. */
+.menu-row{display:flex;align-items:stretch;gap:8px;margin-bottom:12px;position:relative;}
+.menu-row.dragging{opacity:.55;z-index:5;}
+.menu-row.drag-over-top{box-shadow:inset 0 2px 0 var(--black);}
+.menu-row.drag-over-bottom{box-shadow:inset 0 -2px 0 var(--black);}
+.menu-drag-handle{flex-shrink:0;width:34px;display:flex;align-items:center;justify-content:center;color:var(--gray-text);font-size:16px;letter-spacing:-2px;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;border:1px solid var(--gray-mid);background:var(--white);border-radius:4px;}
+.menu-drag-handle:active{cursor:grabbing;background:var(--gray-light);}
+.menu-reset-order{display:block;margin:0 0 18px;background:none;border:none;color:var(--gray-text);font-family:'DM Sans',sans-serif;font-size:11px;text-decoration:underline;letter-spacing:.04em;cursor:pointer;padding:0;}
 .menu-item{display:flex;align-items:center;gap:16px;width:100%;border:1px solid var(--gray-mid);background:var(--white);padding:20px 18px;margin-bottom:12px;cursor:pointer;font-family:'DM Sans',sans-serif;text-align:left;min-height:72px;-webkit-appearance:none;transition:border-color .15s;}
+/* .menu-item is reused standalone elsewhere (SEO Copy's product-scan and
+   saved-run lists) where it still needs its own margin-bottom above; inside
+   a main-menu .menu-row that spacing already lives on the row, so cancel the
+   duplicate here rather than removing it from the base rule. */
+.menu-row .menu-item{margin-bottom:0;}
 .menu-item:active{border-color:var(--black);background:var(--gray-light);}
 .menu-item-icon{font-size:26px;flex-shrink:0;width:36px;text-align:center;}
 .menu-item-label{font-size:15px;font-weight:600;letter-spacing:.02em;}
@@ -1410,7 +1424,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 123</strong> &#183; 2026-08-08 &#183; The Posts tab could only Delete a saved or published post &#8212; there was no way back in to fix a typo or update one once it left the Write tab. Posts now carries an Edit button next to Delete: it reopens the post in the Write tab with its real title, body, byline, meta title, meta description and featured image filled in, and Save updates that same post in place (a published post updates live immediately; a draft stays a draft until you publish it). Needs Worker v101. Separately, the blog generator&#39;s hyphen rule is hardened from &quot;use sparingly&quot; to a hard never, and the same tightened rule now applies to the per&#160;product SEO copy generator and the brand/category/product page copy generator, since both carried the old, softer wording. Carries build 122</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 124</strong> &#183; 2026-08-08 &#183; The main menu is reordered (LineSheet, Create Blog, SEO Command Center and SEO Copy now lead, since those are the four screens used daily) and every tile now carries a small drag handle so that order can be changed by hand from either screen. Drag any tile up or down by its handle to reorder the whole list; a &quot;Reset menu order&quot; link appears under the tiles once a custom order is saved. The order is stored per device (like the notification switch just below it), not synced between phones, since there is no reason two staff phones need to agree on tile order. No Worker change. Carries build 123</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1674,24 +1688,71 @@ function enterApp(){
 }
 
 /* ── MENU ── */
+// build 124 — reordered so the four screens used daily lead the list (Brian's
+// call, 2026-08-08): LineSheet, Create Blog, SEO Command Center, SEO Copy,
+// then everything else in its prior order. This is only the DEFAULT order now
+// — orderedMenu() below layers a per-device drag-to-reorder override on top
+// of it, so editing this array only changes what a fresh device sees first.
 var MENU = [
-  { id:'floorcount', icon:'📦', label:'Quick Fix',   desc:'Scan or search to fix one item (manager)', roles:['admin'] },
-  { id:'countmode',  icon:'🧮', label:'Full Count',    desc:'Count every product, with sign-off', roles:['admin','employee'] },
-  { id:'approvals',  icon:'\u2705', label:'Approvals',    desc:'Review & approve submitted counts', roles:['admin'] },
   // build 103 — a Pricer needs BOTH: LineSheet is where a handed-off sheet is
   // named, priced and pushed, and Staff Pricing is the published-price view.
   // Without these she logged in to an empty menu — the role existed and had
   // nowhere to go.
   { id:'linesheet',  icon:'📋', label:'LineSheet',     desc:'Invoices → pricing → Shopify',      roles:['admin','pricer'] },
+  { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
+  { id:'seocommand', icon:'📊', label:'SEO Command Center', desc:'SEO/AEO dashboard — audit, levers, rankings, live sync', roles:['admin','employee'], url:'commandcenter.html' },
+  { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
+  { id:'floorcount', icon:'📦', label:'Quick Fix',   desc:'Scan or search to fix one item (manager)', roles:['admin'] },
+  { id:'countmode',  icon:'🧮', label:'Full Count',    desc:'Count every product, with sign-off', roles:['admin','employee'] },
+  { id:'approvals',  icon:'\u2705', label:'Approvals',    desc:'Review & approve submitted counts', roles:['admin'] },
   { id:'staff',      icon:'💲', label:'Staff Pricing', desc:'Published retail prices + hang tags',          roles:['admin','employee','staff','pricer'] },
   { id:'social',     icon:'📣', label:'Social',        desc:'Post new arrivals to TikTok, Instagram + Facebook', roles:['admin','employee'] },
-  { id:'edit',       icon:'✍️', label:'Create Blog',   desc:'Draft SEO blog posts, save hidden to Shopify', roles:['admin','employee'] },
-  { id:'seocopy',    icon:'🔎', label:'SEO Copy',      desc:'Research a brand, generate page copy to paste', roles:['admin','employee'] },
-  { id:'seocommand', icon:'📊', label:'SEO Command Center', desc:'SEO/AEO dashboard — audit, levers, rankings, live sync', roles:['admin','employee'], url:'commandcenter.html' },
   { id:'categories', icon:'🏷', label:'Categories',    desc:'Bulk category cleanup',                        roles:['admin'] },
   { id:'utilities',  icon:'🧰', label:'Store Utilities', desc:'Whole-catalog repairs — channels, size pickers (admin)', roles:['admin'] },
   { id:'settings',   icon:'⚙️', label:'Settings + Activity Log', desc:'People, store location, change history', roles:['admin'] }
 ];
+
+// build 124 — per-device drag-to-reorder for the menu. Stored as a plain
+// array of ids in localStorage, deliberately per device (like the "Notify me
+// on this phone" switch just below the menu) rather than synced — nothing
+// here is shared state that needs to agree across staff phones.
+var MENU_ORDER_KEY = 'mb_menu_order_v1';
+function getSavedMenuOrder(){
+  try { var raw = localStorage.getItem(MENU_ORDER_KEY); var arr = raw ? JSON.parse(raw) : null; return Array.isArray(arr) ? arr : null; }
+  catch(_) { return null; }
+}
+function saveMenuOrder(ids){ try { localStorage.setItem(MENU_ORDER_KEY, JSON.stringify(ids)); } catch(_) {} }
+function resetMenuOrder(){ try { localStorage.removeItem(MENU_ORDER_KEY); } catch(_) {} showMenu(); toast('Menu order reset.'); }
+
+// Applies any saved drag order on top of MENU's default order, for the tiles
+// this role can actually see. A tile added to MENU later (new build) that was
+// never part of a saved order falls in at its default position rather than
+// vanishing or landing at a random spot.
+function orderedMenu(){
+  var visible = MENU.filter(function(m){ return m.roles.indexOf(SESSION.role) >= 0; });
+  var saved = getSavedMenuOrder();
+  if (!saved || !saved.length) return visible;
+  var byId = {}; visible.forEach(function(m){ byId[m.id] = m; });
+  var out = [];
+  saved.forEach(function(id){ if (byId[id]) { out.push(byId[id]); delete byId[id]; } });
+  visible.forEach(function(m){ if (byId[m.id]) out.push(m); }); // newly added / not yet in saved order
+  return out;
+}
+
+// Reads the CURRENT on-screen order of menu rows and saves it, merging in the
+// ids this role cannot see (other roles' tiles) from whatever was saved
+// before so their relative order survives even though they were not part of
+// this drag.
+function persistMenuOrderFromDom(){
+  var rows = Array.prototype.slice.call(el('menu-list').querySelectorAll('.menu-row[data-mid]'));
+  var visibleIds = rows.map(function(r){ return r.getAttribute('data-mid'); });
+  var visibleSet = {}; visibleIds.forEach(function(id){ visibleSet[id] = true; });
+  var prevSaved = getSavedMenuOrder() || MENU.map(function(m){ return m.id; });
+  var out = visibleIds.slice();
+  prevSaved.forEach(function(id){ if (!visibleSet[id] && out.indexOf(id) === -1) out.push(id); });
+  MENU.forEach(function(m){ if (out.indexOf(m.id) === -1) out.push(m.id); }); // safety net for any id missed above
+  saveMenuOrder(out);
+}
 var VIEWS = ['menu','floorcount','countmode','approvals','linesheet','staff','social','edit','categories','utilities','seocopy','settings'];
 
 function showMenu(){
@@ -1701,16 +1762,36 @@ function showMenu(){
   el('back-row').style.display = 'none';
   var list = el('menu-list');
   list.innerHTML = '';
-  MENU.filter(function(m){ return m.roles.indexOf(SESSION.role) >= 0; }).forEach(function(m){
+  // build 124 — each tile now sits in a .menu-row alongside a drag handle, so
+  // the tile itself keeps working exactly as a plain tap-to-open button while
+  // the handle is the only thing that starts a drag. orderedMenu() applies any
+  // saved per-device order on top of MENU's built-in default order.
+  orderedMenu().forEach(function(m){
+    var row = document.createElement('div');
+    row.className = 'menu-row';
+    row.setAttribute('data-mid', m.id);
+
+    var handle = document.createElement('div');
+    handle.className = 'menu-drag-handle';
+    handle.setAttribute('aria-label', 'Drag to reorder ' + m.label);
+    handle.title = 'Drag to reorder';
+    handle.textContent = '⠿'; // braille-pattern grip glyph, no library needed
+    handle.addEventListener('pointerdown', function(e){ menuDragStart(e, row, handle); });
+    row.appendChild(handle);
+
     var b = document.createElement('button');
+    b.type = 'button';
     b.className = 'menu-item';
     b.setAttribute('data-mid', m.id);   // build 109 — lets editCheckDue badge this tile
     b.innerHTML = '<div class="menu-item-icon">'+m.icon+'</div>'+
       '<div><div class="menu-item-label">'+m.label+'</div><div class="menu-item-desc">'+m.desc+'</div></div>'+
       '<div class="menu-item-arrow">&#8250;</div>';
     b.onclick = m.url ? function(){ window.location.href = m.url; } : function(){ openView(m.id, m.label); };
-    list.appendChild(b);
+    row.appendChild(b);
+
+    list.appendChild(row);
   });
+  if (getSavedMenuOrder()) ensureMenuResetButton();
   // build 103 — this lived in Store Utilities, which is admin-only, so the one
   // person the notification is FOR could not switch it on. It is a per-device
   // setting and belongs where every role can see it.
@@ -1725,6 +1806,75 @@ function showMenu(){
   editCheckDue();
   // staff role: jump straight into pricing (their only destination)
   if (SESSION.role === 'staff') openView('staff', 'Staff Pricing');
+}
+
+// Adds the small "Reset menu order" link under the tiles, once — called the
+// first time a drag actually changes the order, and again on every showMenu()
+// once a saved order exists.
+function ensureMenuResetButton(){
+  var list = el('menu-list');
+  if (list.querySelector('.menu-reset-order')) return;
+  var rs = document.createElement('button');
+  rs.type = 'button';
+  rs.className = 'menu-reset-order';
+  rs.textContent = 'Reset menu order';
+  rs.onclick = resetMenuOrder;
+  list.appendChild(rs); // list only otherwise contains .menu-row elements at this point
+}
+
+// build 124 — drag-to-reorder, mouse + touch, no external library. The handle
+// is a separate element from the tile's own button (pointer capture on the
+// handle only), so a tap on the tile still just opens it as before; only a
+// press-and-drag on the handle itself moves anything.
+var menuDrag = null;
+function menuDragStart(e, row, handle){
+  e.preventDefault();
+  var list = el('menu-list');
+  var rows = Array.prototype.slice.call(list.querySelectorAll('.menu-row[data-mid]'));
+  if (rows.length < 2) return;
+  try { handle.setPointerCapture(e.pointerId); } catch(_) {}
+  var startY = e.clientY;
+  row.classList.add('dragging');
+  menuDrag = { pointerId: e.pointerId, row: row, rows: rows, overRow: null, before: false };
+
+  function onMove(ev){
+    if (!menuDrag || ev.pointerId !== menuDrag.pointerId) return;
+    var y = ev.clientY;
+    row.style.transform = 'translateY(' + (y - startY) + 'px)';
+    // Find which OTHER row the pointer is currently over, and which half of
+    // it, to decide whether the dragged row would land before or after it.
+    var over = null, before = false;
+    for (var i = 0; i < menuDrag.rows.length; i++) {
+      var r = menuDrag.rows[i];
+      if (r === row) continue;
+      var rect = r.getBoundingClientRect();
+      if (y >= rect.top && y <= rect.bottom) { over = r; before = y < (rect.top + rect.height / 2); break; }
+    }
+    menuDrag.rows.forEach(function(r){ r.classList.remove('drag-over-top','drag-over-bottom'); });
+    if (over) over.classList.add(before ? 'drag-over-top' : 'drag-over-bottom');
+    menuDrag.overRow = over;
+    menuDrag.before = before;
+  }
+  function onUp(ev){
+    if (!menuDrag || ev.pointerId !== menuDrag.pointerId) return;
+    try { handle.releasePointerCapture(ev.pointerId); } catch(_) {}
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    document.removeEventListener('pointercancel', onUp);
+    row.classList.remove('dragging');
+    row.style.transform = '';
+    menuDrag.rows.forEach(function(r){ r.classList.remove('drag-over-top','drag-over-bottom'); });
+    if (menuDrag.overRow && menuDrag.overRow !== row) {
+      if (menuDrag.before) list.insertBefore(row, menuDrag.overRow);
+      else list.insertBefore(row, menuDrag.overRow.nextSibling);
+      persistMenuOrderFromDom();
+      ensureMenuResetButton();
+    }
+    menuDrag = null;
+  }
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  document.addEventListener('pointercancel', onUp);
 }
 
 function switchView(name){
@@ -1759,7 +1909,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 123;   // keep in step with the footer stamp
+var APP_BUILD = 124;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
