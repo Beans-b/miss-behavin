@@ -569,6 +569,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-post-title{font-weight:600;font-size:13px;word-break:break-word;}
 .edit-post-when{font-size:11px;color:var(--gray-text);margin-top:3px;}
 .edit-post-del{background:none;border:1px solid var(--gray-mid);color:#a33;font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer;margin-top:8px;}
+.edit-post-edit{background:none;border:1px solid var(--gray-mid);color:var(--black);font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer;margin-top:8px;margin-right:8px;}
+.edit-post-live{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--success-bg);color:var(--success-fg);padding:2px 6px;margin-left:6px;vertical-align:middle;}
 .edit-post-draft{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--gray-light);color:var(--gray-text);padding:2px 6px;margin-left:6px;vertical-align:middle;}
 #soc-composer{position:fixed;inset:0;background:var(--white);z-index:1500;display:none;flex-direction:column;max-width:480px;margin:0 auto;}
 .soc-thumbs{display:flex;gap:8px;overflow-x:auto;padding:12px 24px;-webkit-overflow-scrolling:touch;}
@@ -1135,7 +1137,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     </div><!-- /edittab-write -->
 
     <div id="edittab-posts" style="display:none;">
-      <div class="edit-posts-note">Posts you have saved or published. Published ones link to the live page; drafts wait in Shopify until you publish them.</div>
+      <div class="edit-posts-note">Posts you have saved or published. Published ones link to the live page; drafts wait in Shopify until you publish them. Tap Edit on any post to reopen and change it &#8212; on a published post, Save updates the live page directly.</div>
       <div id="edit-posts-list"><div class="fc-empty"><span class="spinner"></span> Loading&#8230;</div></div>
     </div>
   </div>
@@ -1408,7 +1410,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 122</strong> &#183; 2026-08-07 &#183; THREE FIXES, caught before deploy. (1) The vendor-match picker on Review &amp; Push now carries a dismiss &times; on every candidate photo, so an obviously-wrong match (an ashtray search that came back six different ashtray designs, none of them the right one) can be pruned instead of scanned past &#8212; dismissing the last one points straight at the paste-a-URL box. (2) &quot;Researched words used&quot; could show terms with nothing to do with the product (hair claw clip / phone case terms on an ashtray) &#8212; real researched terms, just for a different item inside the same broad Accessories category. The registry lookup now only surfaces a term that shares an actual word with the product&#39;s own name, type or category; a category with terms that still don&#39;t fit says so plainly instead of dumping its top-scored terms regardless of fit. This never touched the SEO title/description, which read the product facts directly and were already told to use the researched words only when they fit &#8212; that is why those looked right the whole time. Needs Worker v100. (3) The bulk button is now just &quot;Get Images for All Products&quot; &#8212; the &quot;&amp; Fabric&quot; in its name was true of the underlying fetch but read as a promise on non-apparel items, which fabric never applies to. Carries build 121</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 123</strong> &#183; 2026-08-08 &#183; The Posts tab could only Delete a saved or published post &#8212; there was no way back in to fix a typo or update one once it left the Write tab. Posts now carries an Edit button next to Delete: it reopens the post in the Write tab with its real title, body, byline, meta title, meta description and featured image filled in, and Save updates that same post in place (a published post updates live immediately; a draft stays a draft until you publish it). Needs Worker v101. Separately, the blog generator&#39;s hyphen rule is hardened from &quot;use sparingly&quot; to a hard never, and the same tightened rule now applies to the per&#160;product SEO copy generator and the brand/category/product page copy generator, since both carried the old, softer wording. Carries build 122</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1522,8 +1524,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 <div id="edit-preview">
   <div class="sp-head">
     <div>
-      <div class="sp-head-title">Draft &#8212; Blog Post</div>
-      <div class="sp-head-meta">Unpublished. Nothing goes live until you publish it in Shopify admin.</div>
+      <div class="sp-head-title" id="edit-preview-title">Draft &#8212; Blog Post</div>
+      <div class="sp-head-meta" id="edit-preview-meta">Unpublished. Nothing goes live until you publish it in Shopify admin.</div>
     </div>
     <button class="sp-close" onclick="editClosePreview()">Close</button>
   </div>
@@ -1757,7 +1759,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 122;   // keep in step with the footer stamp
+var APP_BUILD = 123;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -8319,7 +8321,7 @@ function editBrandOf(vendor){
 
 var editState = null;
 function editReset(){
-  editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false, savedArticleId:null };
+  editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false, savedArticleId:null, editingPublished:false, editingExisting:false };
   var pv = el('edit-preview'); if (pv) pv.style.display = 'none';
 }
 
@@ -8384,12 +8386,18 @@ function editLoadPosts(){
       var row = document.createElement('div');
       row.className = 'edit-post-row';
       var titleHtml = (p.published && p.public_url)
-        ? '<a href="'+esc(p.public_url)+'" target="_blank" rel="noopener">'+esc(p.title)+'</a>'
+        ? '<a href="'+esc(p.public_url)+'" target="_blank" rel="noopener">'+esc(p.title)+'</a><span class="edit-post-live">Live</span>'
         : '<span class="edit-post-title">'+esc(p.title)+'</span><span class="edit-post-draft">Draft</span>';
       var when = p.published_at
         ? new Date(p.published_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'})
         : 'Not published yet';
       row.innerHTML = titleHtml + '<div class="edit-post-when">'+esc(when)+'</div>';
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'edit-post-edit';
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = function(ev){ ev.stopPropagation(); editEditPost(p, editBtn); };
+      row.appendChild(editBtn);
       var del = document.createElement('button');
       del.type = 'button';
       del.className = 'edit-post-del';
@@ -8421,6 +8429,76 @@ function editDeletePost(p, row){
     row.style.opacity = '1';
     toast('Delete failed: ' + e.message);
   });
+}
+
+// build 123 — open an already-saved or already-published post back up in the
+// Write tab for editing. Fetches the real content (edit_get_article), fills
+// the same fields Generate Draft uses, then carries the post's own article_id
+// forward so Save updates that article in place instead of creating a new one.
+function editEditPost(p, btn){
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  api('edit_get_article', { article_id: p.id })
+  .then(function(res){
+    if (btn) { btn.disabled = false; btn.textContent = 'Edit'; }
+    if (res.error) throw new Error(res.error);
+    editState.draft = {
+      title: res.title || '',
+      body_html: res.body_html || '',
+      author: res.author || '',
+      meta_title: res.meta_title || '',
+      meta_description: res.meta_description || '',
+      links: []
+    };
+    editTab('write');
+    editOpenPreview(); // fills the fields from editState.draft and shows the overlay
+    // editFillFields() (called by editOpenPreview) resets savedArticleId and
+    // featuredImage for a fresh draft — set them AFTER, since this is the
+    // opposite case: an existing article we want Save to update, not duplicate.
+    editState.savedArticleId = res.article_id || String(p.id).split('/').pop();
+    editState.editingPublished = !!res.published;
+    editState.editingExisting = true;
+    // Clear any leftover Generate Draft payload from earlier this session — if
+    // it survived, tapping Regenerate here would overwrite this post's real
+    // content with an unrelated draft. Hiding Regenerate (below) is the main
+    // guard; this is the backstop.
+    editState.lastPayload = null;
+    editState.featuredImage = (res.image && res.image.url) ? { src: res.image.url, alt: res.image.alt || '' } : null;
+    editUpdatePreviewHeader();
+  })
+  .catch(function(e){
+    if (btn) { btn.disabled = false; btn.textContent = 'Edit'; }
+    toast('Could not load post: ' + e.message);
+  });
+}
+
+// Reflects editing state in the preview overlay's header and action bar: a
+// published post says so plainly (editing it updates the live page directly,
+// there is nothing to "publish"), an unpublished draft keeps the normal
+// Save Draft / Publish Now pair, and a brand-new generated draft is unchanged.
+function editUpdatePreviewHeader(){
+  var t = el('edit-preview-title'), m = el('edit-preview-meta');
+  var saveBtn = el('edit-save-btn'), pubBtn = el('edit-publishnow-btn'), regenBtn = el('edit-regen-btn');
+  if (!t || !m || !saveBtn || !pubBtn) return;
+  // Regenerate rewrites from the Generate Draft payload, which an existing
+  // post reopened for editing never has — hide it rather than let it fire on
+  // a stale/unrelated payload from earlier this session.
+  if (regenBtn) regenBtn.style.display = editState.editingExisting ? 'none' : '';
+  if (editState.savedArticleId && editState.editingPublished) {
+    t.textContent = 'Edit Post — Live on your site';
+    m.textContent = 'This post is published. Saving updates the live page immediately — no separate publish step.';
+    saveBtn.textContent = 'Save Changes';
+    pubBtn.style.display = 'none';
+  } else if (editState.savedArticleId) {
+    t.textContent = 'Edit Draft';
+    m.textContent = 'Unpublished draft. Nothing goes live until you publish it.';
+    saveBtn.textContent = 'Save Draft';
+    pubBtn.style.display = '';
+  } else {
+    t.textContent = 'Draft — Blog Post';
+    m.textContent = 'Unpublished. Nothing goes live until you publish it in Shopify admin.';
+    saveBtn.textContent = 'Save Draft';
+    pubBtn.style.display = '';
+  }
 }
 
 function editSetMode(m){
@@ -8641,13 +8719,19 @@ function editFillFields(){
   editRenderLinks(d.links || []);
   editSync();
   // A fresh/regenerated draft is not the saved article anymore — reset publish.
+  // build 123: editEditPost() calls this to prefill an existing post, then
+  // sets savedArticleId/editingPublished itself right after — those two lines
+  // are what make that override possible, do not remove them.
   if (editState) editState.savedArticleId = null;
+  editState.editingPublished = false;
+  editState.editingExisting = false;
   editState.featuredImage = null;
   var ig = el('edit-img-grid'); if (ig) ig.innerHTML = '';
   var ib = el('edit-img-load'); if (ib) { ib.style.display = 'block'; ib.disabled = false; }
   var ist = el('edit-img-status'); if (ist) ist.style.display = 'none';
   var ps = el('edit-publish-status'); if (ps) ps.style.display = 'none';
   var ss = el('edit-save-status'); if (ss) ss.style.display = 'none';
+  editUpdatePreviewHeader();
 }
 
 // Live preview render. Body is trusted admin-authored/Claude HTML; title shown above it.
@@ -8753,7 +8837,8 @@ function editCollectPayload(){
 function editSave(){
   var payload = editCollectPayload();
   if (!payload) return;
-  showStatus('edit-save-status','loading','<span class="spinner"></span>Saving draft&#8230;');
+  var editingLive = !!editState.editingPublished; // build 123 — editing an already-published post
+  showStatus('edit-save-status','loading','<span class="spinner"></span>' + (editingLive ? 'Saving changes&#8230;' : 'Saving draft&#8230;'));
   editScrollStatus('edit-save-status');
   el('edit-save-btn').disabled = true;
   api('edit_save_article', payload)
@@ -8761,9 +8846,11 @@ function editSave(){
     if (res.error) throw new Error(res.error);
     el('edit-save-btn').disabled = false;
     editState.savedArticleId = res.article_id || editState.savedArticleId;
-    showStatus('edit-save-status','success','Saved as a draft. It stays hidden until you publish it. You will find it under the Posts tab.');
+    showStatus('edit-save-status','success', editingLive
+      ? 'Changes saved. Your live post is updated.'
+      : 'Saved as a draft. It stays hidden until you publish it. You will find it under the Posts tab.');
     editScrollStatus('edit-save-status');
-    toast('Draft saved.');
+    toast(editingLive ? 'Changes saved.' : 'Draft saved.');
   })
   .catch(function(e){
     el('edit-save-btn').disabled = false;
