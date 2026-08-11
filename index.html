@@ -342,6 +342,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .dup-opt-icon{font-size:20px;flex-shrink:0;}
 .dup-opt-label{font-size:13px;font-weight:600;display:block;margin-bottom:1px;}
 .dup-opt-desc{font-size:11px;color:var(--gray-text);line-height:1.35;display:block;}
+.dup-blocked{font-size:11px;color:#92400e;line-height:1.45;padding:2px 2px 4px;}
+/* build 125 — dismiss (X) on the review card head */
+.sp-card-x{background:none;border:none;font-size:16px;line-height:1;color:var(--gray-text);cursor:pointer;padding:2px 4px;-webkit-appearance:none;flex-shrink:0;opacity:.55;}
+.sp-card-x:active{opacity:1;}
+.sp-card[data-state="skipped"]{opacity:.55;}
+.sp-card[data-state="skipped"] .sp-card-x{opacity:1;color:var(--accent);}
 .dup-cancel{margin-top:10px;width:100%;background:none;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px;cursor:pointer;color:var(--gray-text);-webkit-appearance:none;min-height:44px;}
 
 /* PRINT */
@@ -1424,7 +1430,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 124</strong> &#183; 2026-08-08 &#183; The main menu is reordered (LineSheet, Create Blog, SEO Command Center and SEO Copy now lead, since those are the four screens used daily) and every tile now carries a small drag handle so that order can be changed by hand from either screen. Drag any tile up or down by its handle to reorder the whole list; a &quot;Reset menu order&quot; link appears under the tiles once a custom order is saved. The order is stored per device (like the notification switch just below it), not synced between phones, since there is no reason two staff phones need to agree on tile order. No Worker change. Carries build 123</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style that is already in Shopify is treated as what it usually is &#8212; a reorder. Before, a card caught by NAME (same style, different code) could only be pushed as a second listing or left flagged; there was no way to add the new units to the product already there. Now the same-name warning looks the product up, says which sizes it will land on and which have no matching variant, and offers Add Inventory, Push as New, or Skip. Every review card also carries an X in its top corner: one tap drops it from this push with nothing else asked, one more tap puts it back, and Publish All leaves dismissed cards alone. Two restock bugs fixed at the same time: a restock only ever sent XS, S, M, L and OS, so every XL, every waist size and every shoe size was silently dropped while the card still reported Inventory Added; and the card reported success on any response, even one where every line failed &#8212; partial restocks now say exactly what landed and what did not. Separately, the bug that emptied saved SEO copy is closed. The review card reads its SEO boxes to save them, but those boxes fill asynchronously, so a save that ran before the copy landed &#8212; the Save progress button, or just closing the overlay, which saves silently &#8212; wrote blanks and REPLACED the good snapshot on the invoice record. Reopening restored the blanks, which marked the card as edited, and a stale second guard in the generator then discarded the fresh copy it had just fetched: that is why the card showed the researched keyword chips with all three copy fields empty and never recovered on its own. A save now carries the previous copy forward when a card has not finished loading, and only records an empty box once the card is genuinely ready, so a deliberate clear still sticks. Cards already blanked will refill themselves the next time the review screen is opened. Needs Worker v102. Carries build 124</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1478,20 +1484,28 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
   <div class="dup-title">&#9888; Already in Shopify</div>
   <div class="dup-desc" id="dup-modal-desc"></div>
   <div class="dup-opts">
-    <button class="dup-opt" onclick="dupDecision('add')">
+    <!-- build 125 — this is the reorder button, and it is first because a style
+         that is already in Shopify is usually a reorder. It is hidden, not left
+         to fail, when there is no variant to add stock to or the signed-in user
+         is not the owner. -->
+    <button class="dup-opt" id="dup-opt-add" onclick="dupDecision('add')">
       <div class="dup-opt-icon">&#128230;</div>
-      <div><span class="dup-opt-label">Add Inventory</span><span class="dup-opt-desc">Add these quantities to the existing product. Use for restocks.</span></div>
+      <div><span class="dup-opt-label">Add Inventory &#183; reorder</span><span class="dup-opt-desc">Add these quantities to the product already in Shopify. Nothing new is created.</span></div>
     </button>
+    <div class="dup-blocked" id="dup-add-blocked" style="display:none"></div>
     <button class="dup-opt" onclick="dupDecision('new')">
       <div class="dup-opt-icon">&#127381;</div>
       <div><span class="dup-opt-label">Push as New</span><span class="dup-opt-desc">Create a second separate listing in Shopify.</span></div>
     </button>
     <button class="dup-opt" onclick="dupDecision('skip')">
-      <div class="dup-opt-icon">&#9197;</div>
-      <div><span class="dup-opt-label">Skip</span><span class="dup-opt-desc">Exclude this style. Handle it manually in Shopify.</span></div>
+      <div class="dup-opt-icon">&#10006;</div>
+      <div><span class="dup-opt-label">Skip &#183; drop this card</span><span class="dup-opt-desc">Take it off this push. Nothing is created, nothing is restocked, nothing else is asked.</span></div>
     </button>
   </div>
-  <button class="dup-cancel" onclick="closeDupModal()">Cancel</button>
+  <!-- build 125 — Cancel now says what it does. It leaves the card flagged and
+       undecided, which is different from Skip, and people were reading the two
+       as the same button. -->
+  <button class="dup-cancel" onclick="closeDupModal()">Decide later &#183; leave it flagged</button>
 </div>
 
 <!-- SOCIAL: GENERATE BAR -->
@@ -1909,7 +1923,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 124;   // keep in step with the footer stamp
+var APP_BUILD = 125;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -6137,7 +6151,7 @@ function _spPushAllCards() {
   if (!_spCards.length) return;
   showModal(
     'Publish all products?',
-    'Pushes every ready product below to Shopify, one at a time. Each one goes live immediately as it pushes. Anything already in Shopify is left for you to decide instead of being pushed again.',
+    'Pushes every ready product below to Shopify, one at a time. Each one goes live immediately as it pushes. Anything already in Shopify — same code or same name — is left for you to decide (restock it as a reorder, push it as new, or X it out) instead of being pushed again. Cards you have already X\'d out are left alone.',
     function() {
       closeModal();
       var btn = el('sp-push-all-btn');
@@ -6185,9 +6199,37 @@ function closeShopifyReview() {
    two-colorway style keeps two independent sets. */
 function _spReviewKey(cd){ return String((cd.colorObj && cd.colorObj.color) || 'default'); }
 
-function _spSnapshotCard(cd){
+// ── build 125 — A SAVE MAY NOT DESTROY COPY IT NEVER HAD ───────────────────
+// THE BUG, in Brian's words: "the content was there originally", then he saved,
+// edited, hit errors, started over — and the SEO title, search description and
+// product description came back empty and stayed empty.
+//
+// The chain: this snapshot reads the SEO boxes straight off the card, and those
+// boxes are filled ASYNCHRONOUSLY — the details panel has to exist and the
+// generate_seo round trip has to land. A save that happens before that (the
+// Save progress button, or closing the overlay, which saves silently) read
+// blank boxes and wrote blank strings. _spSaveAll then REPLACED the whole saved
+// snapshot with that blank one, so the good copy was gone from the invoice
+// record. Reopening restored the blank snapshot, which set userEdited, and the
+// stale second guard in _spGenSeo (also fixed in this build) then threw away
+// the freshly generated replacement — which is why it never came back on its
+// own and only retyping it by hand worked.
+//
+// The fix is to stop writing the damage: a field that is empty ONLY because the
+// card has not finished loading carries the previously saved value forward
+// instead of overwriting it. Once the card is genuinely ready (cd.seoReady —
+// copy generated, restored, or typed) an empty box means the owner emptied it,
+// and that is saved as-is. Deliberate clears still stick; accidental ones stop
+// happening.
+function _spSnapshotCard(cd, prev){
   var e = cd.els || {};
-  var v = function(x){ return x ? String(x.value || '') : ''; };
+  var ready = !!(cd.els && cd.seoReady);
+  var p = prev || {};
+  var v = function(x, prevVal){
+    var val = x ? String(x.value || '') : '';
+    if (!val && !ready && prevVal) return String(prevVal);
+    return val;
+  };
   // Owner-uploaded photos are held as data: URLs for the thumbnail. Persisting
   // those would put megabytes of base64 into the invoice row, and the Shopify
   // staged URL they map to is temporary anyway — so only real image URLs are
@@ -6195,10 +6237,13 @@ function _spSnapshotCard(cd){
   var imgs = (cd.images || []).filter(function(u){ return !/^data:/i.test(u); });
   var droppedUploads = (cd.images || []).length - imgs.length;
   return {
-    title: cd.titleOverride || '',
-    seo_title: v(e.title), seo_desc: v(e.desc), body: v(e.bodyd),
-    cat: v(e.cat), type: v(e.type), alt: v(e.alt), tags: v(e.tags),
-    upc: v(cd.upcInput), vsku: v(cd.vskuInput),
+    // The title override is held on cd, not in a box that loads late, so it is
+    // safe to write directly — but the same rule applies: a card that never
+    // finished loading has not cleared anything.
+    title: (cd.titleOverride || (!ready && p.title) || ''),
+    seo_title: v(e.title, p.seo_title), seo_desc: v(e.desc, p.seo_desc), body: v(e.bodyd, p.body),
+    cat: v(e.cat, p.cat), type: v(e.type, p.type), alt: v(e.alt, p.alt), tags: v(e.tags, p.tags),
+    upc: v(cd.upcInput, p.upc), vsku: v(cd.vskuInput, p.vsku),
     // build 86 — the name the SEO copy was written for. If the product is
     // renamed on the invoice later, the saved copy is stale and must not win.
     src_name: String((cd.style && (cd.style.printed_name || cd.style.name)) || ''),
@@ -6265,6 +6310,12 @@ function _spRestoreCard(cd){
   // A restored card must not be overwritten by the generator — UNLESS the
   // product was renamed, in which case the copy has to be rewritten.
   cd.userEdited = !renamed;
+  // build 125 — only a restore that actually put copy on the card counts as
+  // ready. Restoring an EMPTY snapshot must NOT mark it ready, or the next save
+  // would write those blanks straight back over any copy generated afterwards.
+  cd.seoReady = !!(String((e.title && e.title.value) || '').trim() ||
+                   String((e.desc  && e.desc.value)  || '').trim() ||
+                   String((e.bodyd && e.bodyd.value) || '').trim());
   return true;
 }
 
@@ -6317,7 +6368,9 @@ function _spSaveAll(silent){
     var tgt = (currentInvoice.styles || [])[cd.styleIdx] || cd.style;
     if (!tgt) return;
     if (!tgt._review) tgt._review = {};
-    var snap = _spSnapshotCard(cd);
+    // build 125 — hand the previous snapshot in so a card that has not
+    // finished loading carries its saved copy forward instead of blanking it.
+    var snap = _spSnapshotCard(cd, tgt._review[_spReviewKey(cd)]);
     dropped += snap.droppedUploads || 0;
     tgt._review[_spReviewKey(cd)] = snap;
     cd.style = tgt;                    // re-attach so later saves stay live
@@ -6458,6 +6511,12 @@ function _buildSpReview(inv) {
             '<div class="sp-card-meta">' + esc(style.code) + ' · ' + esc(style.type || 'Item') + '</div>' +
           '</div>' +
           '<div class="sp-badge sb-idle">Ready</div>' +
+          // build 125 — X it out, no questions. The owner's ask: a card he does
+          // not want on this push should take one tap to drop, without opening
+          // a modal or answering anything. Tapping it again puts the card back.
+          // It is deliberately absent once a card is live in Shopify — there is
+          // nothing to dismiss at that point and the tap would only mislead.
+          '<button type="button" class="sp-card-x" title="Drop this product from this push">&#10005;</button>' +
         '</div>' +
         '<div class="sp-card-body">' +
           '<div class="sp-size-grid">' + sizeHtml + '</div>' +
@@ -6498,6 +6557,8 @@ function _buildSpReview(inv) {
 
 function _spWireBtn(cd) {
   cd.card.querySelector('.sp-push-btn').onclick = function() { _spPushCard(cd); };
+  cd.state = cd.state || 'idle';
+  _spWireCardX(cd);   // build 125 — the dismiss X is live from first render
 }
 
 // v72 — PRODUCT TITLE: one builder, used everywhere.
@@ -6741,10 +6802,46 @@ function _spSetState(cd, state, badgeText, btnText, btnExtra) {
   if (state === 'idle' || state === 'error') {
     btn.onclick = function() { _spPushCard(cd); };
   } else if (state === 'duplicate') {
-    btn.onclick = function() { cd.nameDup ? _spNameDupModal(cd, cd.nameDup) : showDupModal(cd); };
+    // build 125 — reopening a name-match decision reuses the product already
+    // looked up instead of hitting Shopify again on every tap.
+    btn.onclick = function() {
+      if (cd.nameDup) {
+        if (cd.nameDupMatch) _spShowNameDup(cd, cd.nameDup, cd.nameDupMatch);
+        else _spNameDupModal(cd, cd.nameDup);
+      } else {
+        showDupModal(cd);
+      }
+    };
   }
 
+  _spWireCardX(cd);
   _spUpdateProgress();
+}
+
+// ── build 125 — THE X ──────────────────────────────────────────────────────
+// One tap drops a card from this push; one more tap puts it back. No modal, no
+// question, no state to unpick — which is the whole point of it. It is hidden
+// once a card has actually reached Shopify (live or restocked) and while a
+// request is in flight, because at those moments there is nothing to dismiss
+// and offering the tap would only suggest it could be undone from here.
+function _spWireCardX(cd) {
+  var x = cd.card.querySelector('.sp-card-x');
+  if (!x) return;
+  var settled = ['success','added','pushing','restocking','checking'].indexOf(cd.state) >= 0;
+  x.style.display = settled ? 'none' : '';
+  x.innerHTML     = (cd.state === 'skipped') ? '&#8634;' : '&#10005;';
+  x.title         = (cd.state === 'skipped') ? 'Put this product back on this push' : 'Drop this product from this push';
+  x.onclick = function(ev) {
+    ev.stopPropagation();
+    if (cd.state === 'skipped') {
+      cd.dismissed = false;
+      _spSetState(cd, 'idle', 'Ready', 'Push to Shopify');
+    } else {
+      cd.dismissed = true;
+      closeDupModal();
+      _spSetState(cd, 'skipped', 'Skipped', 'Skipped');
+    }
+  };
 }
 
 function _spUpdateProgress() {
@@ -6758,7 +6855,12 @@ function _spUpdateProgress() {
 }
 
 function _spPushCard(cd, bulk, onDone) {
+  // build 125 — a card the owner X'd out is not pushed by anything, including
+  // Publish All. The dismissal is the decision; nothing may quietly reverse it.
+  if (cd.dismissed) { if (onDone) onDone(); return; }
   cd.nameDup = null;   // v57 — reset the name-duplicate flag on each attempt
+  cd.nameDupMatch = null;   // build 125 — and the product it resolved to
+  cd.dupKind = null;
   _spSetState(cd, 'checking', 'Checking…', 'Checking…');
 
   var oldErr = cd.card.querySelector('.sp-error-detail');
@@ -6936,26 +7038,164 @@ function _spDoCreate(cd, onDone) {
   });
 }
 
-function _spDoAddInventory(cd) {
-  _spSetState(cd, 'restocking', 'Adding Inventory…', 'Adding…');
+// build 125 — every size on the card, not a hardcoded five.
+//
+// The old list was ['XS','S','M','L','OS'], written before build 87 introduced
+// size RUNS. Since then a restock has silently dropped every XL, every waist
+// size (24–31) and every shoe size (5–11): the card said "Inventory Added" and
+// those units were never added to Shopify. Nothing reported it, because the
+// dropped sizes were never sent, so the worker had nothing to fail on. The run
+// on the card is the only correct source, with OS appended for one-size items.
+function _spRestockSizes(cd) {
+  var run = (SIZE_RUNS[cd.runKey] || SIZE_RUNS.ALPHA).sizes;
+  return run.concat(['OS']).filter(function(sz, i, arr) {
+    return arr.indexOf(sz) === i && cd.activeSizes[sz] > 0;
+  });
+}
 
-  var sizeOrder   = ['XS','S','M','L','OS'];
-  var adjustments = [];
-  sizeOrder.forEach(function(sz) {
-    var qty = cd.activeSizes[sz];
-    if (!qty) return;
-    adjustments.push({ sku: cd.baseSku + '-' + sz, delta: qty });
+// Restock the EXACT-SKU duplicate: our SKUs are the existing product's SKUs.
+function _spDoAddInventory(cd) {
+  var sizes = _spRestockSizes(cd);
+  if (!sizes.length) {
+    _spSetState(cd, 'error', '✗ Nothing to add', '✗ No quantities — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, 'This card has no quantities on it, so there is nothing to restock.');
+    return;
+  }
+
+  _spSetState(cd, 'restocking', 'Adding Inventory…', 'Adding…');
+  var adjustments = sizes.map(function(sz) {
+    return { sku: cd.baseSku + '-' + sz, delta: cd.activeSizes[sz] };
   });
 
   api('shopify_adjust_inventory', { adjustments: adjustments })
   .then(function(res) {
     if (res.error) throw new Error(res.error);
-    _spSetState(cd, 'added', '✓ Restocked', '✓ Inventory Added', 'sp-btn-success');
+    _spReportRestock(cd, res, sizes, []);
   })
   .catch(function(err) {
     _spSetState(cd, 'error', '✗ Failed', '✗ Failed — Tap to retry', 'sp-btn-error');
     _spShowErrorDetail(cd, err.message || 'Adjustment failed');
   });
+}
+
+// ── build 125 — RESTOCK A NAME MATCH ───────────────────────────────────────
+// The reorder case. The title already exists in Shopify under a different style
+// code, so there is no SKU to look up — but the product is right there and the
+// units on this card belong on it. Sizes are matched to the existing product's
+// variants by size option, and the delta is posted against that variant's
+// inventory item id directly (Worker v102).
+//
+// Deliberately strict: a size on this card with no matching variant on the
+// existing product is NOT quietly folded into another size. It is listed on the
+// card as not added, so the shortfall is visible instead of landing on the
+// wrong variant.
+function _spVariantSizeKey(s) {
+  return String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+}
+
+function _spDoAddInventoryTo(cd, match) {
+  var sizes = _spRestockSizes(cd);
+  if (!sizes.length) {
+    _spSetState(cd, 'error', '✗ Nothing to add', '✗ No quantities — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, 'This card has no quantities on it, so there is nothing to restock.');
+    return;
+  }
+
+  var bySize = {};
+  (match.variants || []).forEach(function(v) {
+    var k = _spVariantSizeKey(v.size);
+    if (k && !bySize[k]) bySize[k] = v;
+    var kt = _spVariantSizeKey(v.variant_title);
+    if (kt && !bySize[kt]) bySize[kt] = v;
+  });
+  // A true one-size product often has a single variant Shopify calls "Default
+  // Title". An OS card maps onto it — but only when there is exactly one
+  // variant, so this can never pick a size out of a run by accident.
+  var lone = (match.variants || []).length === 1 ? match.variants[0] : null;
+
+  var adjustments = [], unmatched = [], matchedSizes = [];
+  sizes.forEach(function(sz) {
+    var v = bySize[_spVariantSizeKey(sz)] || (sz === 'OS' ? lone : null);
+    if (!v || !v.inventory_item_id) { unmatched.push(sz + ' ×' + cd.activeSizes[sz]); return; }
+    matchedSizes.push(sz);
+    adjustments.push({
+      inventory_item_id: v.inventory_item_id,
+      delta: cd.activeSizes[sz],
+      label: sz + (v.sku ? ' (' + v.sku + ')' : ''),
+      product_id: match.product_id,
+      item_title: match.title + ' — ' + (v.variant_title || sz)
+    });
+  });
+
+  if (!adjustments.length) {
+    _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
+    _spShowErrorDetail(cd,
+      'Nothing was added. "' + match.title + '" has no variants matching the sizes on this card (' +
+      unmatched.join(', ') + '). Push it as a new product, or add the sizes to the existing product in Shopify first.');
+    return;
+  }
+
+  _spSetState(cd, 'restocking', 'Adding Inventory…', 'Adding…');
+  api('shopify_adjust_inventory', { adjustments: adjustments })
+  .then(function(res) {
+    if (res.error) throw new Error(res.error);
+    cd.restockedInto = match;
+    _spReportRestock(cd, res, matchedSizes, unmatched, match);
+  })
+  .catch(function(err) {
+    _spSetState(cd, 'error', '✗ Failed', '✗ Failed — Tap to retry', 'sp-btn-error');
+    _spShowErrorDetail(cd, err.message || 'Adjustment failed');
+  });
+}
+
+// build 125 — say what actually landed. The old restock reported "Inventory
+// Added" on any non-error response, including one where every individual line
+// came back success:false. Per-line results are read here, and a partial
+// restock is shown as partial rather than as a tick.
+function _spReportRestock(cd, res, attempted, unmatched, match) {
+  var rows   = (res && res.results) || [];
+  var okRows = rows.filter(function(r){ return r.success; });
+  var bad    = rows.filter(function(r){ return !r.success; });
+
+  var where = match ? ' to "' + match.title + '"' : '';
+  var link  = match && match.admin_id
+    ? ' https://admin.shopify.com/store/miss-behavin-2/products/' + match.admin_id : '';
+
+  if (okRows.length && !bad.length && !unmatched.length) {
+    _spSetState(cd, 'added', '✓ Restocked', '✓ Inventory Added', 'sp-btn-success');
+    _spShowErrorDetail(cd, 'Added ' + okRows.length + ' size' + (okRows.length === 1 ? '' : 's') +
+      where + ': ' + attempted.join(', ') + '.', 'color:var(--success-fg);');
+    if (link) _spAddViewLink(cd, match);
+    return;
+  }
+
+  if (okRows.length) {
+    _spSetState(cd, 'added', '✓ Restocked (partial)', '✓ Inventory Added', 'sp-btn-success');
+    var msg = 'Added ' + okRows.length + ' of ' + (rows.length + unmatched.length) + ' size' +
+      ((rows.length + unmatched.length) === 1 ? '' : 's') + where + '. ';
+    if (unmatched.length) msg += 'No matching variant for: ' + unmatched.join(', ') + '. ';
+    if (bad.length) msg += 'Failed: ' + bad.map(function(r){ return r.sku + ' (' + (r.error || 'unknown') + ')'; }).join('; ') + '. ';
+    msg += 'Add those in Shopify by hand.';
+    _spShowErrorDetail(cd, msg);
+    if (link) _spAddViewLink(cd, match);
+    return;
+  }
+
+  _spSetState(cd, 'error', '✗ Nothing added', '✗ Failed — Tap to retry', 'sp-btn-error');
+  _spShowErrorDetail(cd, 'No inventory was added. ' +
+    (bad.length ? bad.map(function(r){ return r.sku + ': ' + (r.error || 'unknown'); }).join('; ') : '') +
+    (unmatched.length ? ' No matching variant for: ' + unmatched.join(', ') + '.' : ''));
+}
+
+function _spAddViewLink(cd, match) {
+  var foot = cd.card.querySelector('.sp-card-foot');
+  if (!foot || foot.querySelector('.sp-view-link')) return;
+  var a = document.createElement('a');
+  a.href = 'https://admin.shopify.com/store/miss-behavin-2/products/' + match.admin_id;
+  a.target = '_blank';
+  a.className = 'sp-view-link';
+  a.textContent = 'View in Shopify ↗';
+  foot.appendChild(a);
 }
 
 function _spShowErrorDetail(cd, msg, extraStyle) {
@@ -6968,15 +7208,32 @@ function _spShowErrorDetail(cd, msg, extraStyle) {
   cd.card.appendChild(div);
 }
 
-/* ── Duplicate Modal (unchanged flow) ── */
+/* ── Duplicate Modal — SKU match ── */
 function showDupModal(cd) {
   _activeDup = cd;
+  cd.dupKind = 'sku';
   var existing = (cd.dupVariant && cd.dupVariant.product)
     ? '"' + cd.dupVariant.product.title + '"'
     : 'an existing product';
+  var sizes = _spRestockSizes(cd);
   el('dup-modal-desc').textContent =
     '"' + _spTitleFor(cd) +   // v72
-    '" matches ' + existing + ' in Shopify. What should happen?';
+    '" matches ' + existing + ' in Shopify. ' +
+    (sizes.length
+      ? 'Add Inventory puts ' + sizes.map(function(sz){ return sz + ' ×' + cd.activeSizes[sz]; }).join(', ') + ' onto it.'
+      : 'This card has no quantities on it.') +
+    ' What should happen?';
+  // build 125 — the SKU path always allows a restock (that is what a SKU match
+  // means), so the option is restored in case a name match had hidden it.
+  var addBtn = el('dup-opt-add');
+  if (addBtn) addBtn.style.display = (sizes.length && SESSION && SESSION.role === 'admin') ? '' : 'none';
+  var addNote = el('dup-add-blocked');
+  if (addNote) {
+    var blocked = (sizes.length && !(SESSION && SESSION.role === 'admin'))
+      ? 'Adding inventory is owner-only. Push as new or skip, and flag the reorder to Brian.' : '';
+    addNote.textContent = blocked;
+    addNote.style.display = blocked ? '' : 'none';
+  }
   el('dup-modal').classList.add('open');
 }
 
@@ -6986,32 +7243,131 @@ function closeDupModal() {
   _activeDup = null;
 }
 
-// v57 — name-based duplicate: the SKU didn't match but the title already exists
-// in Shopify under a different code. "Add inventory" can't apply (no matching
-// SKU), so the choice is Create-anyway or leave it flagged (closing the modal
-// keeps the card in the ⚠ duplicate state so nothing is created silently).
+// ── build 125 — A NAME MATCH IS USUALLY A REORDER ──────────────────────────
+// v57 flagged the name duplicate and stopped there. The modal it raised offered
+// "Create anyway" or nothing, on the reasoning that Add Inventory could not
+// apply because the SKUs differ — which was true of the Worker at the time and
+// wrong about the shop. When a style already in Shopify comes in on a sheet
+// again, it is almost always a REORDER, and the units belong on the product
+// that is already there.
+//
+// So the name match now gets the same three real choices as a SKU match:
+// restock the existing product, push a genuinely separate listing, or drop the
+// card entirely. Worker v102's shopify_find_by_title supplies the product and
+// its variants; the restock posts against those variants' inventory item ids.
+//
+// The lookup runs BEFORE the modal opens so the modal can state what it is
+// about to do — which product, which sizes, and which sizes have no variant to
+// land on. If the lookup fails, the modal still opens without the restock
+// option rather than blocking the other two decisions behind a failed request.
 function _spNameDupModal(cd, existingTitle) {
   cd.nameDup = existingTitle;
+  cd.nameDupMatch = null;
+
+  var badge = cd.card.querySelector('.sp-badge');
+  if (badge) badge.textContent = 'Looking up…';
+
+  api('shopify_find_by_title', { title: existingTitle })
+  .then(function(res) {
+    if (res && res.error) throw new Error(res.error);
+    var matches = (res && res.matches) || [];
+    _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
+    if (matches.length === 1) { _spShowNameDup(cd, existingTitle, matches[0]); return; }
+    if (matches.length > 1) { _spNameDupChooser(cd, existingTitle, matches); return; }
+    _spShowNameDup(cd, existingTitle, null,
+      'The title matches, but the product could not be pulled back from Shopify to add stock to it. Restocking is unavailable here — open it in Shopify, or push this as a separate product.');
+  })
+  .catch(function(err) {
+    _spSetState(cd, 'duplicate', '⚠ Same name', '⚠ Name already in Shopify — Decide', 'sp-btn-warning');
+    _spShowNameDup(cd, existingTitle, null,
+      'Could not look up the existing product (' + (err.message || 'lookup failed') + '), so Add Inventory is unavailable on this card.');
+  });
+}
+
+// Two or more live products share this title. Picking one for the owner is the
+// bug this guard exists to prevent, so he picks.
+function _spNameDupChooser(cd, existingTitle, matches) {
+  var body = matches.map(function(m, i) {
+    var inv = (typeof m.total_inventory === 'number') ? m.total_inventory + ' in stock' : 'stock unknown';
+    return (i + 1) + '. ' + m.title + ' — ' + (m.status || '').toLowerCase() + ', ' +
+           (m.variants || []).length + ' variant' + ((m.variants || []).length === 1 ? '' : 's') + ', ' + inv;
+  }).join('\n');
   showModal(
-    'Already in Shopify?',
-    'A product named "' + existingTitle + '" is already in Shopify (under a different SKU/code). ' +
-    'Create this as a separate product anyway? Close this box to leave it flagged and not create it.',
-    function() { closeModal(); _spDoCreate(cd); },
-    true,
-    'Create anyway'
+    matches.length + ' products share this name',
+    'Shopify has ' + matches.length + ' products titled "' + existingTitle + '":\n\n' + body +
+    '\n\nRestocking cannot choose between them. Open Shopify and merge or rename them first, or push this card as a separate product.',
+    function() { closeModal(); _spShowNameDup(cd, existingTitle, null,
+      'Several products share this title — restocking is unavailable until that is resolved in Shopify.'); },
+    true, 'Got it'
   );
+}
+
+function _spShowNameDup(cd, existingTitle, match, warnNote) {
+  _activeDup = cd;
+  cd.nameDupMatch = match || null;
+
+  var lines = '"' + _spTitleFor(cd) + '" matches "' + existingTitle + '", already in Shopify under a different style code.';
+
+  if (match) {
+    var sizes = _spRestockSizes(cd);
+    var bySize = {};
+    (match.variants || []).forEach(function(v) {
+      var k = _spVariantSizeKey(v.size);       if (k && !bySize[k]) bySize[k] = v;
+      var kt = _spVariantSizeKey(v.variant_title); if (kt && !bySize[kt]) bySize[kt] = v;
+    });
+    var lone = (match.variants || []).length === 1 ? match.variants[0] : null;
+    var will = [], wont = [];
+    sizes.forEach(function(sz) {
+      var v = bySize[_spVariantSizeKey(sz)] || (sz === 'OS' ? lone : null);
+      (v && v.inventory_item_id ? will : wont).push(sz + ' ×' + cd.activeSizes[sz]);
+    });
+    cd.nameDupPlan = { will: will, wont: wont };
+    lines += will.length
+      ? ' Add Inventory puts ' + will.join(', ') + ' onto it.'
+      : ' None of the sizes on this card match a variant on it, so there is nothing to add.';
+    if (wont.length) lines += ' No matching variant for ' + wont.join(', ') + ' — those will not be added.';
+  }
+  if (warnNote) lines += ' ' + warnNote;
+
+  el('dup-modal-desc').textContent = lines;
+
+  // Add Inventory is hidden when it cannot work, rather than shown and failing.
+  var canRestock = !!(match && cd.nameDupPlan && cd.nameDupPlan.will.length) &&
+                   !!(SESSION && SESSION.role === 'admin');
+  var addBtn = el('dup-opt-add');
+  if (addBtn) addBtn.style.display = canRestock ? '' : 'none';
+  var addNote = el('dup-add-blocked');
+  if (addNote) {
+    var blocked = '';
+    if (match && cd.nameDupPlan && cd.nameDupPlan.will.length && !(SESSION && SESSION.role === 'admin')) {
+      blocked = 'Adding inventory is owner-only. Push as new or skip, and flag the reorder to Brian.';
+    }
+    addNote.textContent = blocked;
+    addNote.style.display = blocked ? '' : 'none';
+  }
+
+  cd.dupKind = 'name';
+  el('dup-modal').classList.add('open');
 }
 
 function dupDecision(choice) {
   var cd = _activeDup;
+  var kind = cd && cd.dupKind;
+  var match = cd && cd.nameDupMatch;
   closeDupModal();
   if (!cd) return;
   if (choice === 'skip') {
+    // build 125 — an explicit skip is a decision, and it sticks: the card is
+    // marked Skipped and Publish All steps past it. Nothing else is asked for.
+    cd.dismissed = true;
     _spSetState(cd, 'skipped', 'Skipped', 'Skipped');
   } else if (choice === 'new') {
     _spDoCreate(cd);
   } else if (choice === 'add') {
-    _spDoAddInventory(cd);
+    // build 125 — a name match restocks the product the title resolved to; a
+    // SKU match restocks by SKU, as before.
+    if (kind === 'name' && match) _spDoAddInventoryTo(cd, match);
+    else _spDoAddInventory(cd);
   }
 }
 
@@ -7945,7 +8301,9 @@ function _spInitDetails(cd){
     _spRenderImages(cd);
   }
   ['title','desc','bodyd','cat','alt','tags'].forEach(function(k){
-    cd.els[k].addEventListener('input', function(){ cd.userEdited = true; });
+    // build 125 — typing in a box means the card is loaded and what is in it is
+    // deliberate, including an empty box. seoReady lets a save record that.
+    cd.els[k].addEventListener('input', function(){ cd.userEdited = true; cd.seoReady = true; });
   });
   // build 72 - Type follows Category until you touch Type yourself.
   // build 73 - restore a saved snapshot AFTER the type list exists, so a saved
@@ -8033,7 +8391,7 @@ function _spGenSeo(cd, done){
   // short of retyping the copy by hand. Only skip when there is real
   // approved copy sitting in the box.
   var hasRealCopy = !!(String(cd.els.title.value||'').trim() || String(cd.els.desc.value||'').trim() || String(cd.els.bodyd.value||'').trim());
-  if (cd.userEdited && hasRealCopy) { cd.els.title.placeholder = ''; if (done) done(); return; }
+  if (cd.userEdited && hasRealCopy) { cd.els.title.placeholder = ''; cd.seoReady = true; if (done) done(); return; }
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
   cd.els.title.placeholder = 'Generating…';
   api('generate_seo', {
@@ -8059,7 +8417,25 @@ function _spGenSeo(cd, done){
     // here to make the listing speak the language shoppers type; a product page
     // is not a ranking target and this does not pretend otherwise.
     _spShowKeywords(cd, res.registry);
-    if (cd.userEdited) { if (done) done(); return; }
+    // ── build 125 — THE OTHER HALF OF THE BUILD 116 FIX ──────────────────
+    // Build 116 corrected the guard at the top of this function so an empty
+    // restored card would generate instead of being skipped forever. It left
+    // this second guard alone, and this one still tested userEdited on its
+    // own — so a card restored from an empty snapshot DID call the generator,
+    // DID show the researched words that came back with it, and then threw the
+    // copy away on this line. What you see is a card reading "Restored your
+    // saved edits for this card" with the keyword chips filled in and the SEO
+    // title, search description and product description all blank, with no way
+    // to fill them short of typing them by hand.
+    //
+    // Same test as the top guard, recomputed HERE rather than reused: the
+    // request was in flight, and anything typed into a box while it was away
+    // is real approved copy that must not be overwritten now.
+    var stillHasCopy = !!(String(cd.els.title.value||'').trim() ||
+                          String(cd.els.desc.value||'').trim() ||
+                          String(cd.els.bodyd.value||'').trim());
+    if (cd.userEdited && stillHasCopy) { cd.seoReady = true; if (done) done(); return; }
+    cd.seoReady = true;   // build 125 — the boxes are filled; a save may record them
     cd.els.title.value = j.seo_title || '';
     cd.els.desc.value  = j.seo_description || '';
     cd.els.bodyd.value = j.body_description || '';
