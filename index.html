@@ -183,6 +183,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 /* build 106 — a photos-only style has no price ON PURPOSE. Dressing an
    intentional state as a failure teaches people to ignore red, which is the
    one thing red has to keep meaning. Neutral until it actually blocks a push. */
+/* build 126 — name provenance. Where a style name came from is now visible on
+   the card, because the whole failure mode being fixed is a guessed name that
+   looks exactly like a real one. */
+.p-name-note{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;margin:0 0 8px;border-radius:3px;}
+.p-name-note.src-printed{color:#2c6e49;background:#eaf5ef;}
+.p-name-note.src-suggested{color:#2b5c8a;background:#e9f1f8;}
+.p-name-note.src-unread{color:#8a4b00;background:#fdf0e2;}
+.p-card.p-name-unread .p-name-input{border-color:#d98324;background:#fffaf3;}
 .p-card.p-awaiting .p-card-header::after{content:'AWAITING NAME + PRICE';font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--gray-text);white-space:nowrap;}
 .p-card.p-missing{border-color:var(--red);border-width:2px;background:#fff5f5;}
 .p-card.p-missing .p-retail-input{background:#ffe9e9;}
@@ -1402,6 +1410,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style already in Shopify is treated as a reorder: the same-name warning looks the product up and offers Add Inventory, Push as New, or Skip. Every review card gained an X to drop it from this push. Fixed a restock that only ever sent XS-XL and OS (dropping every waist and shoe size) and reported success even when every line failed, plus the async save that blanked stored SEO copy. Needs Worker v102. Carries build 124
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 121</strong> &#183; 2026-08-07 &#183; TWO BULK BUTTONS on Review &amp; Push. &#8595; Get Images &amp; Fabric for All Products sits above the product list and fetches vendor photos/fabric for every product that does not already have one, one at a time so it is gentle on the vendor-site lookups &#8212; a card whose match is ambiguous still raises its own picker and the run just moves past it rather than stalling. Publish All to Shopify sits at the bottom and pushes every ready product live, one at a time (never in parallel &#8212; each push is immediate and irreversible, so nothing should be firing at once). Anything already in Shopify, by SKU or by matching name, is deliberately NOT auto-resolved &#8212; it is left sitting on its own Decide button exactly as a single push already leaves it, because add-inventory vs. skip vs. view is a call only a person should make. Both ask for a one-tap confirmation before running and report a summary (pushed / already had photos / need a look / need your decision) when done. No Worker change. Carries build 120
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 120</strong> &#183; 2026-08-07 &#183; TWO FIXES. Opening an archived invoice was showing it mixed with a DIFFERENT vendor&#39;s products (A Shop of Things pulled in Valfre&#39;s styles) &#8212; the archive save on the Worker matched an existing record by invoice number ALONE, so two different vendors with a blank or matching invoice number were treated as the same sheet and had their style lists merged together. The match now also requires the vendor to agree, so a re-save of the SAME invoice still merges correctly but two different vendors never collide. Needs Worker v99. Any archive record already corrupted this way needs a manual look &#8212; open it and use the new delete control below to remove whatever doesn&#39;t belong. SEPARATELY: each product card now has its own Remove control &#8212; a small square &times; in the card&#39;s top-right corner, confirms before deleting, and is deliberately NOT the circular &#8635; regen button in the header (that one only renames). No Worker change needed for this half. Carries build 119
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 119</strong> &#183; 2026-08-07 &#183; CRITICAL FIX &#8212; the photo/fabric fetch on Review &amp; Push was searching &quot;Miss Behavin&#39;&quot; for a private-labeled product&#39;s photos instead of the REAL brand (e.g. Valfre), so it always came back &quot;no product matched&quot; the moment build 117&#39;s private-label checkbox was used. The Get images button, the vendor-website paste-once box, and the candidate search all read the Shopify-facing vendor (correct for what gets pushed and for SEO copy) instead of the true invoice vendor (needed for finding the real product page). Now split: SEO copy and the Shopify push still say Miss Behavin&#39; as before, but every external photo/fabric lookup uses the actual supplier. No Worker change. Carries build 118
@@ -1430,7 +1439,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style that is already in Shopify is treated as what it usually is &#8212; a reorder. Before, a card caught by NAME (same style, different code) could only be pushed as a second listing or left flagged; there was no way to add the new units to the product already there. Now the same-name warning looks the product up, says which sizes it will land on and which have no matching variant, and offers Add Inventory, Push as New, or Skip. Every review card also carries an X in its top corner: one tap drops it from this push with nothing else asked, one more tap puts it back, and Publish All leaves dismissed cards alone. Two restock bugs fixed at the same time: a restock only ever sent XS, S, M, L and OS, so every XL, every waist size and every shoe size was silently dropped while the card still reported Inventory Added; and the card reported success on any response, even one where every line failed &#8212; partial restocks now say exactly what landed and what did not. Separately, the bug that emptied saved SEO copy is closed. The review card reads its SEO boxes to save them, but those boxes fill asynchronously, so a save that ran before the copy landed &#8212; the Save progress button, or just closing the overlay, which saves silently &#8212; wrote blanks and REPLACED the good snapshot on the invoice record. Reopening restored the blanks, which marked the card as edited, and a stale second guard in the generator then discarded the fresh copy it had just fetched: that is why the card showed the researched keyword chips with all three copy fields empty and never recovered on its own. A save now carries the previous copy forward when a card has not finished loading, and only records an empty box once the card is genuinely ready, so a deliberate clear still sticks. Cards already blanked will refill themselves the next time the review screen is opened. Needs Worker v102. Carries build 124</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 126</strong> &#183; 2026-08-11 &#183; THE APP NO LONGER GUESSES A STYLE NAME. Extraction used to be told, in one prompt, to invent a fun flirty name for every style AND to copy the invoice&#39;s printed wording verbatim into a second field. Those two jobs fought each other and the invention won: names came back with added words and quietly corrected spelling, and on the 2026-08-11 import about 60% had to be retyped. Worker v103 takes naming out of extraction entirely and returns a name_read verdict of clear, unsure or absent. A name it could not read now arrives BLANK and the card says so in amber &#8212; Could not read the printed name, type it from the invoice &#8212; and the existing blank-name gate stops Publish All until someone does. A style the invoice simply never named is filled from the separate generate_name call, which never sees the invoice, and the card labels it Suggested. A name read cleanly off the invoice is labelled As printed. Extraction now also reports how many names need a person instead of finishing with a green tick over a sheet of guesses. Separately: clearing a name box now sticks. collectCurrentInvoice read the box as value || style.name, so deleting a wrong name silently restored it on the next save &#8212; the same defect closed for SEO copy in build 125, and it would have quietly defeated the new gate. Needs Worker v103, which also switches extraction from Haiku 4.5 to Sonnet 5 and reads the first TEXT content block rather than block zero, since Sonnet 5 runs thinking always on. Carries build 125</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1923,7 +1932,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 125;   // keep in step with the footer stamp
+var APP_BUILD = 126;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3710,6 +3719,25 @@ function _styleRunKey(style){
 }
 function _styleSizes(style){ return SIZE_RUNS[_styleRunKey(style)].sizes; }
 
+// build 126 — where did this style's name come from? Reads v103's name_read,
+// and falls back defensively for invoices saved before v103 (no name_read at
+// all), so reopening an old sheet never shows a badge it cannot justify.
+function _nameSourceOf(style) {
+  if (!style) return '';
+  if (style._nameSource) return style._nameSource;
+  var nr = style.name_read;
+  if (nr === 'clear'  && String(style.printed_name || '').trim()) return 'printed';
+  if (nr === 'unsure') return 'unread';
+  if (nr === 'absent') return String(style.name || '').trim() ? 'suggested' : 'noname';
+  return '';   // pre-v103 invoice: say nothing rather than guess
+}
+var _NAME_NOTE = {
+  printed:   ['src-printed',   '\u2713 Name as printed on the invoice'],
+  suggested: ['src-suggested', 'Suggested name \u00b7 the invoice printed none'],
+  unread:    ['src-unread',    'Could not read the printed name \u00b7 type it from the invoice'],
+  noname:    ['src-unread',    'No name on the invoice \u00b7 type one or tap \u21bb']
+};
+
 function buildKelCard(style, idx) {
   var costNum = Number(style.cost||0);
   var cost = costNum.toFixed(2);
@@ -3733,7 +3761,13 @@ function buildKelCard(style, idx) {
 
   var card = document.createElement('div');
   // build 106 — _needsName / _needsPrice are set by a photos-only Manual Entry.
-  card.className = 'p-card' + ((style._needsPrice || style._needsName) ? ' p-awaiting' : '');
+  // build 126 — an unreadable name arrives BLANK on purpose. v103 returns
+  // printed_name null for name_read 'unsure', and the push gate in
+  // openShopifyReview() already blocks a blank name, so the card cannot be
+  // published until a person types what the invoice actually says.
+  var _nameSrc = _nameSourceOf(style);
+  card.className = 'p-card' + ((style._needsPrice || style._needsName) ? ' p-awaiting' : '')
+                            + ((_nameSrc === 'unread' || _nameSrc === 'noname') ? ' p-name-unread' : '');
   card.dataset.code = style.code;
   card.dataset.idx  = (idx === undefined || idx === null) ? '' : String(idx);   // v72 — the reliable card↔style link
   card.dataset.run  = _styleRunKey(style);   // build 87
@@ -3741,9 +3775,14 @@ function buildKelCard(style, idx) {
   card.innerHTML =
     '<div class="p-card-header">'+
       '<div class="p-code-wrap"><div class="p-code">'+esc(style.code)+'</div><div class="p-type">'+esc(style.type)+'</div></div>'+
-      '<input class="p-name-input" type="text" value="'+esc(style.printed_name||style.name||'')+'" placeholder="Style name"/>'+
+      // build 126 — belt and braces: if the read was 'unsure' the box is EMPTY
+      // no matter what came back. v103 nulls both name fields on unsure, but a
+      // model ignoring its instructions is the exact failure this build exists
+      // to catch, so the UI does not rely on the model having obeyed.
+      '<input class="p-name-input" type="text" value="'+(_nameSrc==='unread'?'':esc(style.printed_name||style.name||''))+'" placeholder="'+(_nameSrc==='unread'?'Type the name from the invoice':(_nameSrc==='noname'?'Name this style':'Style name'))+'"/>'+
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
+    (_NAME_NOTE[_nameSrc] ? '<div class="p-name-note '+_NAME_NOTE[_nameSrc][0]+'">'+_NAME_NOTE[_nameSrc][1]+'</div>' : '')+
     // build 87 — size run, editable. Detected value is preselected.
     '<div class="p-run-row"><label class="sp-l">Size run</label><select class="p-run-select">'+
       SIZE_RUN_ORDER.map(function(k){
@@ -3852,7 +3891,12 @@ function collectCurrentInvoice() {
     var style = (idx >= 0 && inv.styles[idx]) ? inv.styles[idx]
               : inv.styles.find(function(s){ return s.code === code; });
     if (!style) return;
-    style.name = (card.querySelector('.p-name-input')||{}).value || style.name;
+    // build 126 — read the box as it actually is. The old `|| style.name`
+    // meant CLEARING a wrong name silently restored it on the next save, the
+    // same defect class as the SEO blanking bug closed in build 125 — and it
+    // would have quietly defeated the unreadable-name gate.
+    var _nameEl = card.querySelector('.p-name-input');
+    if (_nameEl) style.name = _nameEl.value;
     style._retail = (card.querySelector('.p-retail-input')||{}).value || '';
     // build 87 — remember the chosen size run
     var _runSel = card.querySelector('.p-run-select');
@@ -4602,13 +4646,25 @@ function processPage(idx, invoiceMeta) {
       return;
     }
     currentInvoice = Object.assign({}, invoiceMeta, {styles: allExtractedStyles});
+    // build 126 — name the styles the invoice never named, in a SEPARATE call
+    // from the one that read the invoice. See _fillAbsentNames.
+    showStatus('extract-status','loading','<span class="spinner"></span>Naming the styles the invoice did not name...');
+    _fillAbsentNames(allExtractedStyles, function(){
     showStatus('extract-status','loading','<span class="spinner"></span>Saving the scanned invoice...');
     storeScannedFiles(invoiceMeta, function(files){
       currentInvoice.files = files;
       renderKelCards(currentInvoice);
-      showStatus('extract-status','success','✓ ' + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.');
+      // build 126 — say out loud how many names need a person. Silence here is
+      // what let a sheet of guessed names look finished.
+      var _unread = allExtractedStyles.filter(function(s){
+        var src = _nameSourceOf(s); return src === 'unread' || src === 'noname';
+      }).length;
+      showStatus('extract-status', _unread ? 'error' : 'success',
+        (_unread ? '\u26a0 ' : '\u2713 ') + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.' +
+        (_unread ? ' ' + _unread + ' need a name typed in \u2014 they are flagged below and cannot be published until you do.' : ''));
       el('extract-btn').disabled = false;
       el('pricing-section').scrollIntoView({behavior:'smooth'});
+    });
     });
     return;
   }
@@ -5977,6 +6033,58 @@ function _openNameChoices(card, code, type, nameInput) {
   load();
 }
 
+// build 126 — fill a name ONLY for styles the invoice never named (name_read
+// 'absent'). This is the other half of Worker v103: extraction no longer
+// invents names, so the suggestion now comes from generate_name, a separate
+// call that never sees the invoice and therefore cannot bleed invented wording
+// into a transcription. One call per product type (names are type-shaped:
+// "Winnie Skirt", not "Winnie Dress"), batched, with everything already used
+// excluded so two styles never land on the same name.
+// Deliberately does NOT touch name_read 'unsure' — an unreadable name must stay
+// blank so a person retypes it from the invoice. Suggesting there would be
+// exactly the guess this whole build exists to stop.
+function _fillAbsentNames(styles, cb) {
+  var need = (styles || []).filter(function(s) {
+    return s && s.name_read === 'absent'
+        && !String(s.name || '').trim()
+        && !String(s.printed_name || '').trim();
+  });
+  if (!need.length) { cb(0); return; }
+  ensureShopifyNames(function() {
+    var byType = {};
+    need.forEach(function(s) { var t = s.type || 'Other'; (byType[t] = byType[t] || []).push(s); });
+    var types = Object.keys(byType);
+    var used = _shopifyExistingNames.slice(0, 200);
+    var filled = 0, ti = 0;
+    function nextType() {
+      if (ti >= types.length) { cb(filled); return; }
+      var t = types[ti++], queue = byType[t].slice(), rounds = 0;
+      function batch() {
+        // Cap the rounds. If the generator keeps returning names we have already
+        // used, stop and leave the rest blank — a blank is honest and the card
+        // says so; a duplicate name creates a second Shopify product that no
+        // collection groups with the first.
+        if (!queue.length || rounds >= 4) { nextType(); return; }
+        rounds++;
+        _fetchNames(queue[0].code || '', t, used, function(names) {
+          names = (names || []).filter(function(n) { return used.indexOf(n) < 0; });
+          if (!names.length) { nextType(); return; }
+          names.forEach(function(n) {
+            if (!queue.length) return;
+            var st = queue.shift();
+            st.name = n;
+            st._nameSource = 'suggested';
+            used.push(n); filled++;
+          });
+          batch();
+        });
+      }
+      batch();
+    }
+    nextType();
+  });
+}
+
 // Regenerate button → ensure the Shopify name list is loaded, then show choices.
 function regenName(card, code, type) {
   var nameInput = card.querySelector('.p-name-input');
@@ -6010,12 +6118,16 @@ function openShopifyReview() {
   // published under its machine code (MAN-08052310-1), which reads enough like
   // a name to survive a glance and is then live on the website. The price guard
   // below has named its offenders since v72; this does the same.
-  var unnamed = [];
+  var unnamed = [], _unreadable = 0;
   (inv.styles || []).forEach(function(s, i) {
-    if (!String(s.name || '').trim()) unnamed.push(s.code || 'a style with no code');
+    if (!String(s.name || '').trim()) {
+      unnamed.push(s.code || 'a style with no code');
+      if (_nameSourceOf(s) === 'unread') _unreadable++;   // build 126
+    }
   });
   if (unnamed.length) {
     showModal('Names Missing',
+      (_unreadable ? _unreadable + ' of these could not be read off the invoice, so they were deliberately left blank rather than guessed \u2014 type what the invoice actually says. ' : '') +
       unnamed.length + ' item' + (unnamed.length > 1 ? 's have' : ' has') + ' no name yet' +
       (_handoff && _handoff.state === 'needs_pricing' ? ' — this sheet is still waiting on ' + (_handoff.to_name || 'Kelly') + '.' : '.') +
       ' Name them on the sheet behind this box, then push.', null, false);
