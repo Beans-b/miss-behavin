@@ -365,6 +365,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
   #print-area { position: fixed; left: 0; top: 0; width: 100%; }
   .no-print { display: none !important; }
 }
+
 .label-grid{display:grid;grid-template-columns:repeat(auto-fill,2in);gap:0.15in;padding:16px 24px;justify-content:start;}
 .hang-tag{width:2in;min-height:3in;border:1px solid #111;padding:12px 10px;display:flex;flex-direction:column;justify-content:space-between;background:#fff;page-break-inside:avoid;break-inside:avoid;}
 .hang-tag-store{font-size:7px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray-text);border-bottom:1px solid var(--gray-mid);padding-bottom:6px;margin-bottom:8px;}
@@ -1023,11 +1024,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       </div>
       <div class="print-bar no-print">
         <span class="print-bar-label">Print hang tags</span>
-        <div class="print-mode">
-          <button id="pm-unit" class="active" onclick="setPrintMode('unit')">1 per item + barcode</button>
-          <button id="pm-style" onclick="setPrintMode('style')">1 per style</button>
-        </div>
-        <button class="print-btn" onclick="printLabels()">&#128424; Print Labels</button>
+        <button class="print-btn" onclick="printLabels()">&#128424; Print Hang Tags</button>
+      </div>
+      <!-- build 126 - barcode labels are Shopify's job now. The app used to
+           print its own, which meant maintaining a second label format that
+           never matched the Retail Barcode Labels output, on stock it was never
+           sized for. Every product is pushed to Shopify before it needs a
+           label, and a barcode printed before the product exists has nothing to
+           scan against, so there was no case the app's own printer served. -->
+      <div class="print-bar no-print" style="border-top:1px solid var(--gray-mid);">
+        <span class="print-bar-label">Barcode labels print from Shopify, where the barcodes actually resolve.</span>
+        <button class="print-btn" onclick="openShopifyLabels()">&#127991; Barcode Labels in Shopify</button>
       </div>
       <div style="padding:0 24px;margin-top:12px;" id="staff-cards"></div>
       <div id="print-area" style="display:none;">
@@ -1439,7 +1446,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 126</strong> &#183; 2026-08-11 &#183; THE APP NO LONGER GUESSES A STYLE NAME. Extraction used to be told, in one prompt, to invent a fun flirty name for every style AND to copy the invoice&#39;s printed wording verbatim into a second field. Those two jobs fought each other and the invention won: names came back with added words and quietly corrected spelling, and on the 2026-08-11 import about 60% had to be retyped. Worker v103 takes naming out of extraction entirely and returns a name_read verdict of clear, unsure or absent. A name it could not read now arrives BLANK and the card says so in amber &#8212; Could not read the printed name, type it from the invoice &#8212; and the existing blank-name gate stops Publish All until someone does. A style the invoice simply never named is filled from the separate generate_name call, which never sees the invoice, and the card labels it Suggested. A name read cleanly off the invoice is labelled As printed. Extraction now also reports how many names need a person instead of finishing with a green tick over a sheet of guesses. Separately: clearing a name box now sticks. collectCurrentInvoice read the box as value || style.name, so deleting a wrong name silently restored it on the next save &#8212; the same defect closed for SEO copy in build 125, and it would have quietly defeated the new gate. Needs Worker v103, which also switches extraction from Haiku 4.5 to Sonnet 5 and reads the first TEXT content block rather than block zero, since Sonnet 5 runs thinking always on. Carries build 125</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 126</strong> &#183; 2026-08-11 &#183; TWO THINGS. FIRST, THE APP NO LONGER GUESSES A STYLE NAME. Extraction used to be told, in one prompt, to invent a fun flirty name for every style AND to copy the invoice&#39;s printed wording verbatim into a second field. Those two jobs fought each other and invention won: names came back with added words and quietly corrected spelling, and on the 2026-08-11 import about 60% had to be retyped. Worker v103 takes naming out of extraction and returns a name_read verdict of clear, unsure or absent. A name it could not read now arrives BLANK, the card says so in amber, and the existing blank-name gate stops Publish All until someone types it. A style the invoice never named is filled from the separate generate_name call, which never sees the invoice, and is labelled Suggested. A name read cleanly is labelled As printed. SECOND, THE APP STOPPED PRINTING ITS OWN BARCODE LABELS. It was drawing 2x3in hang tags onto 1in x 2-1/8in DYMO stock with no @page rule at all, so the name clipped mid-word, the price fell off, and Chrome added its own date header and page numbers across 20 sheets. Rather than maintain a second label format that never matched Shopify&#39;s, barcode labels now hand off: a Barcode Labels in Shopify button opens the product list filtered to this sheet&#39;s vendor, and staff run More actions, Print barcode labels. Every product is pushed to Shopify before it needs a label, and a barcode printed before the product exists has nothing to scan against, so the app&#39;s own printer served no case. The 1-per-style hang tag stays and now declares its page size, so Chrome stops adding furniture to it. The cdnjs barcode library fetch is gone with it, which is what failed in the store on 2026-08-11 and printed 20 barcode-less labels rather than stopping. Separately: clearing a name box now sticks. collectCurrentInvoice read it as value || style.name, so deleting a wrong name silently restored it on the next save. Needs Worker v103. Carries build 125</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -7489,29 +7496,51 @@ function dupDecision(choice) {
    (CODE-COLOR-SIZE), matching what LineSheet writes to Shopify.
    "1 per style": the original tag, no barcode.
    ═══════════════════════════════════════ */
-var _printMode = 'unit';
+// build 126 - defaults to 'style'. The unit/barcode mode is retired and its
+// toggle buttons are gone from the UI, so leaving this on 'unit' would have
+// sent every Print Hang Tags press into the retired branch.
+var _printMode = 'style';
 var MAX_TAGS = 400;
 
-function setPrintMode(m){
-  _printMode = m;
-  el('pm-unit').classList.toggle('active', m==='unit');
-  el('pm-style').classList.toggle('active', m==='style');
+// build 126 - open Shopify's product list filtered to this sheet's vendor,
+// newest first, so staff can select the styles just pushed and run
+// More actions > Print barcode labels. Shopify's Retail Barcode Labels is a
+// first-party app with no public API for generating a sheet, and its print
+// URLs carry a JWT it signs itself, so a direct deep link is not possible -
+// this is the closest hand-off available.
+var SHOPIFY_STORE_HANDLE = 'miss-behavin-2';   // from SHOPIFY_DOMAIN in the Worker
+function openShopifyLabels() {
+  var inv = (typeof currentInvoice !== 'undefined' && currentInvoice) ? currentInvoice : null;
+  var vendor = (inv && inv.vendor) ? String(inv.vendor).trim() : '';
+  var url = 'https://admin.shopify.com/store/' + SHOPIFY_STORE_HANDLE + '/products'
+          + (vendor ? '?query=' + encodeURIComponent('vendor:"' + vendor + '"') : '');
+  showModal(
+    'Print barcode labels in Shopify',
+    'This opens your Shopify products' + (vendor ? ', filtered to ' + esc(vendor) : '') + '.\n\n' +
+    '1. Tick the styles from this sheet\n' +
+    '2. More actions \u2192 Print barcode labels\n' +
+    '3. Choose your label size and print\n\n' +
+    'Only products already pushed to Shopify appear here. Anything still sitting on the Review and Push screen has no barcode to print yet.',
+    function() { closeModal(); window.open(url, '_blank', 'noopener'); },
+    true, 'Open Shopify'
+  );
 }
 
-function loadJsBarcode(cb){
-  if (window.JsBarcode) { cb(); return; }
-  var s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.code128.min.js';
-  s.onload = cb;
-  s.onerror = function(){ toast('Barcode library failed to load — printing without barcodes.'); cb(); };
-  document.head.appendChild(s);
-}
+// build 126 - the unit/barcode mode is retired (see openShopifyLabels), so the
+// only thing this screen prints is the 1-per-style hang tag. Kept as a function
+// so any older caller still resolves instead of throwing.
+function setPrintMode(m){ _printMode = 'style'; }
+
+// build 126 - loadJsBarcode() removed. It injected a <script> from cdnjs at
+// print time; the library is now inlined in <head>, so there is no runtime
+// fetch and no way for the store network to break label printing.
 
 function printLabels() {
   var grid = el('label-grid');
   var printArea = el('print-area');
   if (!grid || !printArea) return;
   grid.innerHTML = '';
+  grid.className = 'label-grid';
 
   sbGetActive(function(row) {
     var styles = (row && row.invoice && row.invoice.styles) || [];
@@ -7544,56 +7573,36 @@ function printLabels() {
       return;
     }
 
-    // One tag per physical unit, each with a scannable Code 128
-    outer:
-    for (var si = 0; si < styles.length; si++) {
-      var style = styles[si];
-      var retail = style._retail || '—';
-      var colors = style.colors || [];
-      for (var ci = 0; ci < colors.length; ci++) {
-        var c = colors[ci];
-        var sizes = c.sizes || {};
-        var szKeys = Object.keys(sizes);
-        for (var zi = 0; zi < szKeys.length; zi++) {
-          var sz = szKeys[zi];
-          var qty = sizes[sz] || 0;
-          if (qty <= 0) continue;
-          var sku = style.code + '-' + _spColorSlug(c.color) + '-' + sz;
-          for (var u = 0; u < qty; u++) {
-            if (count >= MAX_TAGS) { truncated = true; break outer; }
-            var tag = document.createElement('div');
-            tag.className = 'hang-tag';
-            tag.innerHTML =
-              '<div class="hang-tag-store">Miss Behavin&#39;</div>' +
-              '<div class="hang-tag-name">' + esc(style.name || style.code) + '</div>' +
-              '<div class="hang-tag-code">' + esc(c.color) + ' &#183; ' + esc(sz) + '</div>' +
-              '<div class="hang-tag-price">' + esc(retail) + '</div>' +
-              '<div class="hang-tag-barcode"><svg data-code="' + esc(sku) + '"></svg></div>';
-            grid.appendChild(tag);
-            count++;
-          }
-        }
-      }
-    }
-    if (truncated) alert('Capped at ' + MAX_TAGS + ' tags for this print run. Print again for the rest.');
-
-    loadJsBarcode(function(){
-      if (window.JsBarcode) {
-        grid.querySelectorAll('svg[data-code]').forEach(function(svg){
-          try {
-            JsBarcode(svg, svg.getAttribute('data-code'), {
-              format: 'CODE128', displayValue: true,
-              fontSize: 9, height: 36, width: 1.2, margin: 0
-            });
-          } catch(e) { console.error('Barcode render failed:', e); }
-        });
-      }
-      showPrint(printArea);
-    });
+    // build 126 - the per-unit barcode branch is gone. It drew its own Code
+    // 128 labels; that is Shopify's job now (openShopifyLabels), because a
+    // barcode is only useful once the product exists in Shopify to scan
+    // against. _printMode is pinned to 'style', so this line is unreachable
+    // and exists only so an unexpected mode fails loudly instead of silently
+    // printing nothing.
+    alert('Barcode labels now print from Shopify - use the Barcode Labels in Shopify button.');
+    return;
   });
 }
 
+// build 126 - @page did not exist anywhere in this file. Without a declared
+// size Chrome falls back to the printer default, and without margin:0 it adds
+// its own header (date, title) and footer (URL, page x of y). Both were on the
+// 2026-08-11 misprint. Injected per mode because the two label stocks need
+// different pages and @page cannot be switched any other way.
+function _applyPrintPage(mode) {
+  var st = el('mb-print-page');
+  if (!st) {
+    st = document.createElement('style');
+    st.id = 'mb-print-page';
+    document.head.appendChild(st);
+  }
+  st.textContent = (mode === 'unit')
+    ? '@page{size:1in 2.125in;margin:0;}'
+    : '@page{size:letter;margin:0.25in;}';
+}
+
 function showPrint(printArea){
+  _applyPrintPage(_printMode);   // build 126
   printArea.style.display = 'block';
   setTimeout(function() {
     window.print();
