@@ -233,7 +233,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 /* STAFF CARD */
 .s-card{border:1px solid var(--gray-mid);margin-bottom:10px;display:flex;align-items:center;padding:12px 16px;gap:12px;}
-.s-code{font-size:10px;color:var(--gray-text);font-weight:600;flex-shrink:0;width:68px;}
+.s-code{font-size:10px;color:var(--gray-text);font-weight:600;flex-shrink:0;width:78px;overflow-wrap:anywhere;word-break:break-word;line-height:1.25;}
 .s-name{font-family:'DM Sans',sans-serif;font-style:normal;font-weight:500;font-size:15px;flex:1;}
 .s-retail{font-size:18px;font-weight:700;flex-shrink:0;}
 
@@ -1446,7 +1446,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 126</strong> &#183; 2026-08-11 &#183; TWO THINGS. FIRST, THE APP NO LONGER GUESSES A STYLE NAME. Extraction used to be told, in one prompt, to invent a fun flirty name for every style AND to copy the invoice&#39;s printed wording verbatim into a second field. Those two jobs fought each other and invention won: names came back with added words and quietly corrected spelling, and on the 2026-08-11 import about 60% had to be retyped. Worker v103 takes naming out of extraction and returns a name_read verdict of clear, unsure or absent. A name it could not read now arrives BLANK, the card says so in amber, and the existing blank-name gate stops Publish All until someone types it. A style the invoice never named is filled from the separate generate_name call, which never sees the invoice, and is labelled Suggested. A name read cleanly is labelled As printed. SECOND, THE APP STOPPED PRINTING ITS OWN BARCODE LABELS. It was drawing 2x3in hang tags onto 1in x 2-1/8in DYMO stock with no @page rule at all, so the name clipped mid-word, the price fell off, and Chrome added its own date header and page numbers across 20 sheets. Rather than maintain a second label format that never matched Shopify&#39;s, barcode labels now hand off: a Barcode Labels in Shopify button opens the product list filtered to this sheet&#39;s vendor, and staff run More actions, Print barcode labels. Every product is pushed to Shopify before it needs a label, and a barcode printed before the product exists has nothing to scan against, so the app&#39;s own printer served no case. The 1-per-style hang tag stays and now declares its page size, so Chrome stops adding furniture to it. The cdnjs barcode library fetch is gone with it, which is what failed in the store on 2026-08-11 and printed 20 barcode-less labels rather than stopping. Separately: clearing a name box now sticks. collectCurrentInvoice read it as value || style.name, so deleting a wrong name silently restored it on the next save. Needs Worker v103. Carries build 125</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 127</strong> &#183; 2026-08-11 &#183; Long style codes (#SKTCH_BOOK_...) overflowed their fixed 68px column on the staff pricing list and ran underneath the product name; the column now wraps instead of overlapping. Group headings said ACCESSORYS and JEWELRYS because the code appended a bare s to the type name. Carries build 126, which did TWO THINGS. FIRST, THE APP NO LONGER GUESSES A STYLE NAME. Extraction used to be told, in one prompt, to invent a fun flirty name for every style AND to copy the invoice&#39;s printed wording verbatim into a second field. Those two jobs fought each other and invention won: names came back with added words and quietly corrected spelling, and on the 2026-08-11 import about 60% had to be retyped. Worker v103 takes naming out of extraction and returns a name_read verdict of clear, unsure or absent. A name it could not read now arrives BLANK, the card says so in amber, and the existing blank-name gate stops Publish All until someone types it. A style the invoice never named is filled from the separate generate_name call, which never sees the invoice, and is labelled Suggested. A name read cleanly is labelled As printed. SECOND, THE APP STOPPED PRINTING ITS OWN BARCODE LABELS. It was drawing 2x3in hang tags onto 1in x 2-1/8in DYMO stock with no @page rule at all, so the name clipped mid-word, the price fell off, and Chrome added its own date header and page numbers across 20 sheets. Rather than maintain a second label format that never matched Shopify&#39;s, barcode labels now hand off: a Barcode Labels in Shopify button opens the product list filtered to this sheet&#39;s vendor, and staff run More actions, Print barcode labels. Every product is pushed to Shopify before it needs a label, and a barcode printed before the product exists has nothing to scan against, so the app&#39;s own printer served no case. The 1-per-style hang tag stays and now declares its page size, so Chrome stops adding furniture to it. The cdnjs barcode library fetch is gone with it, which is what failed in the store on 2026-08-11 and printed 20 barcode-less labels rather than stopping. Separately: clearing a name box now sticks. collectCurrentInvoice read it as value || style.name, so deleting a wrong name silently restored it on the next save. Needs Worker v103. Carries build 125</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1939,7 +1939,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 126;   // keep in step with the footer stamp
+var APP_BUILD = 127;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3666,7 +3666,7 @@ function renderKelCards(inv) {
   Object.keys(groups).forEach(function(type) {
     var h = document.createElement('div');
     h.style.cssText = 'font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);padding:16px 0 8px;border-bottom:1px solid var(--black);margin-bottom:10px;';
-    h.textContent = type + 's';
+    h.textContent = _pluralType(type);
     container.appendChild(h);
     groups[type].forEach(function(g) {
       container.appendChild(buildKelCard(g.style, g.idx));   // v72
@@ -4487,6 +4487,13 @@ function showStaff() {
   });
 }
 
+// build 127 - group headings did type+'s', which printed ACCESSORYS and
+// JEWELRYS. Only the types the app actually emits are handled; anything else
+// falls back to the old behaviour rather than guessing at English.
+var _TYPE_PLURAL = { Accessory:'Accessories', Jewelry:'Jewelry', Shoe:'Shoes', Bottom:'Bottoms',
+                     Dress:'Dresses', Top:'Tops', Jumpsuit:'Jumpsuits', Bag:'Bags', Other:'Other' };
+function _pluralType(t){ return _TYPE_PLURAL[t] || (String(t||'Other') + 's'); }
+
 function renderStaffView(inv) {
   el('staff-empty').style.display = 'none';
   el('staff-content').style.display = 'block';
@@ -4502,7 +4509,7 @@ function renderStaffView(inv) {
   Object.keys(groups).forEach(function(type) {
     var h = document.createElement('div');
     h.style.cssText = 'font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-text);padding:14px 0 8px;border-bottom:1px solid var(--black);margin-bottom:8px;';
-    h.textContent = type+'s';
+    h.textContent = _pluralType(type);
     container.appendChild(h);
 
     groups[type].forEach(function(style) {
