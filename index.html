@@ -360,9 +360,21 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 
 /* PRINT */
 @media print {
-  body * { visibility: hidden; }
-  #print-area, #print-area * { visibility: visible; }
-  #print-area { position: fixed; left: 0; top: 0; width: 100%; }
+  /* build 129 - the old rule hid everything with visibility and made
+     #print-area position:fixed at width:100%. Three problems on a 1in x 2-1/8in
+     page: a fixed element cannot paginate, so page-break-after was ignored;
+     width:100% resolved to the 1in page while each label is itself 1in, so the
+     grid's 8px padding pushed every label past the edge and clipped it; and
+     visibility:hidden leaves the hidden boxes occupying layout, so the whole
+     app still contributed to the page. Now the app is display:none and the
+     print area is an ordinary static block with no padding, so each label is
+     exactly one page. */
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; width: auto !important; }
+  body > * { display: none !important; }
+  body > #print-area { display: block !important; position: static !important;
+                       margin: 0 !important; padding: 0 !important; width: auto !important; }
+  #print-area .dymo-grid { display: block !important; padding: 0 !important; gap: 0 !important; }
+  #print-area .dymo-label { display: block !important; border: none !important; margin: 0 !important; }
   .no-print { display: none !important; }
 }
 
@@ -1259,6 +1271,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="field-hint">Products with only one variant stop showing a size dropdown online. True One Size products fix automatically; products hiding behind a single fake size (a lone "S" &#8212; the old Emi Jay intakes) are listed with checkboxes so you confirm each one. No variant is deleted, no inventory moves; prices, SKUs, and barcodes are untouched. Needs worker v38.</div>
       <div id="fixos-status" class="status"></div>
       <div id="fixos-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
+
+      <div class="section-title" style="margin-top:18px;">Image alt text</div>
+      <button class="btn btn-outline" id="altbf-btn" onclick="altBackfillScan()">Backfill missing / generic image alt</button>
+      <div class="field-hint">Reads every active product and lists the ones whose photos have blank or generic alt text &#8212; alt that is empty, just the product title, the same line repeated on every photo, or a filename. Ticked products get fresh per-photo vision alt written through the SAME rules and validator the Products tab uses; photos that already have good, unique alt are left untouched, so hand-written alt is never overwritten. Products added before 20 Jul 2026 (when the app began writing alt) are listed first. Runs in small batches so it cannot time out. Needs worker v105.</div>
+      <div id="altbf-status" class="status"></div>
+      <div id="altbf-review" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;"></div>
     </div>
   </div>
 
@@ -1466,7 +1484,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 128</strong> &#183; 2026-08-11 &#183; LABEL PRINTING FIXED, AND THE CAUSE WAS THE PAGE MARGIN. Chrome only suppresses its own header, date and page-number footer when the @page margin is ZERO. Build 126 set margin 0 for barcode labels but 0.25in for hang tags, then dropped the barcode path, so every remaining print carried browser furniture even with 30336 selected in the dialog &#8212; that is the 8/11/26 12:08 header and the h. 1/2 footer. Its size:letter also fought the 30336 stock. Every print path is now @page{size:1in 2.125in;margin:0}. The store prints to a DYMO LabelWriter 550 and nothing else, so the 2x3in card-stock hang tag was unprintable on this hardware and could never match. The app now prints ONE thing: a 30336 label per physical unit, laid out like the Shopify Retail Barcode Labels output &#8212; price, name, Code 128 barcode, SKU, stacked across the label width so each gets the full 2-1/8in as a single line. Verified in headless Chromium at true dimensions. JsBarcode is inlined, never fetched at runtime: the cdnjs fetch is what failed in the store and printed 20 barcode-less labels rather than stopping. It now REFUSES to print if a barcode cannot be generated. The Barcode Labels in Shopify hand-off stays as a second route for anything already pushed. Carries build 127 (long style codes no longer overlap the product name on the staff list; ACCESSORYS fixed) and build 126 (extraction stops guessing style names, name provenance badges, blank unreadable names blocked from Publish All). Needs Worker v103</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 130</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL. Store Utilities gains a &quot;Backfill missing / generic image alt&quot; button (worker v105): it lists active products whose photos have blank or generic alt, and writes fresh per-photo vision alt to the ticked ones in small batches, leaving good alt untouched. Carries build 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1959,7 +1977,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 128;   // keep in step with the footer stamp
+var APP_BUILD = 130;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4241,6 +4259,92 @@ function phChApply() {
     showStatus('phch-status', ((r.failed||[]).length || r.not_found) ? 'error' : 'success', msg);
   })
   .catch(function(e) { btn.disabled = false; showStatus('phch-status','error', esc(e.message || 'Failed — tap again.')); });
+}
+
+/* ── app build 130 — image-alt backfill (worker v105) ─────────────────
+   Dry-run lists active products with blank/generic photo alt; apply sends the
+   ticked ids to the worker in small chunks and shows progress. The worker
+   reuses the Products-tab engine, so bulk alt matches per-product alt. */
+function altBackfillScan() {
+  var btn = el('altbf-btn');
+  btn.disabled = true;
+  el('altbf-review').style.display = 'none';
+  showStatus('altbf-status','loading','<span class="spinner"></span>Reading the catalogue&#8230; this paces itself so Shopify does not cut it off.');
+  api('seo_alt_backfill', { dry_run: true })
+  .then(function(r){
+    btn.disabled = false;
+    if (r.error) { showStatus('altbf-status','error', esc(r.error)); return; }
+    if (!r.need_count) {
+      var clean = '✓ Every active product with photos already has real, unique alt text. Scanned ' + (r.scanned||0) + '.';
+      if (r.truncated) clean += ' &#8212; ' + esc(r.note||'the scan stopped early.');
+      showStatus('altbf-status', r.truncated ? 'error' : 'success', clean);
+      return;
+    }
+    el('altbf-status').style.display = 'none';
+    _altBfRenderReview(r);
+  })
+  .catch(function(e){ btn.disabled = false; showStatus('altbf-status','error', esc(e.message||'Scan failed — tap again.')); });
+}
+function _altBfRenderReview(r) {
+  var box = el('altbf-review'); var h = '';
+  if (r.truncated) h += '<div style="font-size:12px;color:var(--red,#b05a43);margin-bottom:8px;font-weight:600;">' + esc(r.note||'The scan did not reach the whole catalogue.') + '</div>';
+  h += '<div style="font-size:12px;color:#666;margin-bottom:8px;">Scanned ' + (r.scanned||0) + ' active products. ' + r.need_count + ' need alt on ' + (r.images_to_fix||0) + ' photo(s). Pre-20 Jul intake is listed first. Fresh alt is written only to the blank/generic photos; good alt is left alone.</div>';
+  h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;font-weight:600;cursor:pointer;"><input type="checkbox" id="altbf-all" checked/> <span>Select all</span></label>';
+  (r.products||[]).forEach(function(p){
+    var tags = [];
+    if (p.blank) tags.push(p.blank + ' blank');
+    if (p.generic) tags.push(p.generic + ' generic');
+    h += '<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:13px;border-top:1px solid #f0f0f0;cursor:pointer;">' +
+           '<input type="checkbox" class="altbf-ck" value="' + esc(p.id) + '" checked/>' +
+           '<span style="flex:1;">' + esc(p.title) + (p.pre_cutoff ? ' <span style="color:#999;font-size:11px;">(pre-cutoff)</span>' : '') + '</span>' +
+           '<span style="color:var(--red,#b05a43);font-size:11px;white-space:nowrap;">' + esc(tags.join(' · ')) + '</span>' +
+         '</label>';
+  });
+  h += '<button type="button" class="btn btn-black" id="altbf-go" style="margin-top:12px;">Fix <span id="altbf-n">0</span> product(s)</button>' +
+       '<button type="button" class="btn btn-outline" id="altbf-cancel" style="margin-top:8px;">Cancel</button>' +
+       '<div id="altbf-prog" style="display:none;margin-top:12px;"><div style="height:6px;background:var(--border,#e4e0da);border-radius:3px;overflow:hidden;"><div id="altbf-bar" style="height:100%;width:2%;background:var(--primary,#1a1a1a);transition:width .4s;"></div></div><div id="altbf-prog-txt" style="font-size:12px;color:#666;margin-top:6px;"></div></div>';
+  box.innerHTML = h; box.style.display = 'block';
+  var upd = function(){ var n = box.querySelectorAll('.altbf-ck:checked').length; el('altbf-n').textContent = n; el('altbf-go').disabled = (n === 0); };
+  Array.prototype.forEach.call(box.querySelectorAll('.altbf-ck'), function(ck){ ck.addEventListener('change', upd); });
+  el('altbf-all').addEventListener('change', function(){ var c = this.checked; Array.prototype.forEach.call(box.querySelectorAll('.altbf-ck'), function(ck){ ck.checked = c; }); upd(); });
+  el('altbf-go').onclick = altBackfillRun;
+  el('altbf-cancel').onclick = function(){ box.style.display = 'none'; el('altbf-status').style.display = 'none'; };
+  upd();
+}
+function altBackfillRun() {
+  var box = el('altbf-review');
+  var ids = Array.prototype.map.call(box.querySelectorAll('.altbf-ck:checked'), function(ck){ return ck.value; });
+  if (!ids.length) return;
+  el('altbf-go').disabled = true; el('altbf-cancel').disabled = true;
+  Array.prototype.forEach.call(box.querySelectorAll('.altbf-ck, #altbf-all'), function(ck){ ck.disabled = true; });
+  el('altbf-prog').style.display = 'block';
+  var total = ids.length, done = 0, prodOk = 0, imgs = 0, fails = [];
+  var CHUNK = 5;   // worker caps at 8 per call; stay under it
+  var run = function(i){
+    if (i >= ids.length) {
+      var msg = '✓ Wrote alt on ' + imgs + ' photo(s) across ' + prodOk + ' product(s).';
+      if (fails.length) msg += ' ' + fails.length + ' had problems: ' + esc(fails.slice(0,3).join(' · '));
+      box.style.display = 'none';
+      showStatus('altbf-status', fails.length ? 'error' : 'success', msg);
+      el('altbf-btn').disabled = false;
+      return;
+    }
+    var chunk = ids.slice(i, i + CHUNK);
+    el('altbf-prog-txt').innerHTML = 'Writing&#8230; ' + done + ' of ' + total + ' done';
+    api('seo_alt_backfill', { ids: chunk })
+    .then(function(r){
+      if (r.error) { fails.push(r.error); }
+      else {
+        prodOk += (r.fixed_products||0); imgs += (r.fixed_images||0);
+        (r.results||[]).forEach(function(x){ if (!x.ok) fails.push((x.title||x.id) + ': ' + (x.note||'failed')); });
+      }
+      done += chunk.length;
+      el('altbf-bar').style.width = Math.round(done/total*100) + '%';
+      run(i + CHUNK);
+    })
+    .catch(function(e){ fails.push(e.message||'chunk failed'); done += chunk.length; el('altbf-bar').style.width = Math.round(done/total*100) + '%'; run(i + CHUNK); });
+  };
+  run(0);
 }
 
 /* ── build 69 — private-label vendor list (worker v75) ────────────────
@@ -7682,6 +7786,12 @@ function _applyPrintPage(mode) {
 
 function showPrint(printArea){
   _applyPrintPage(_printMode);   // build 126
+  // build 129 - #print-area lives three levels deep inside #staff-content, so
+  // the print rule "body > * { display:none }" would have hidden its own
+  // ancestor and printed a blank page. Reparent it to <body> so it really is a
+  // top-level child while printing. appendChild MOVES the node, so this is safe
+  // to run every time and there is never a second copy.
+  if (printArea.parentNode !== document.body) document.body.appendChild(printArea);
   printArea.style.display = 'block';
   setTimeout(function() {
     window.print();
