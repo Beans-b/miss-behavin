@@ -755,6 +755,12 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .man-shots .ms-w{position:relative;width:52px;height:70px;}
 .man-shots img{width:52px;height:70px;object-fit:cover;border:1px solid var(--gray-mid);background:#fff;display:block;}
 .man-shots .ms-x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;line-height:18px;padding:0;margin:0;border-radius:50%;border:1px solid var(--gray-mid);background:#fff;font-size:12px;cursor:pointer;color:var(--black);}
+/* build 142 — whose turn is it, on the Archive row. */
+.arch-turn{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;margin-top:5px;font-family:'DM Sans',sans-serif;border:1px solid;}
+.arch-turn.t-you{background:#111;color:#fff;border-color:#111;}
+.arch-turn.t-them{background:#fff;color:var(--gray-text);border-color:var(--gray-mid);}
+.arch-hist{font-size:11px;color:var(--gray-text);margin-top:4px;font-family:'DM Sans',sans-serif;line-height:1.4;}
+.tab-count{display:inline-block;min-width:17px;padding:0 4px;margin-left:5px;border-radius:9px;background:#111;color:#fff;font-size:10px;line-height:17px;text-align:center;font-weight:700;}
 
 /* v2 — name pick-list under the pricing card header */
 .name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
@@ -892,7 +898,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div class="tab-bar">
       <button class="tab-btn active" onclick="kelTab('invoice')">Invoice</button>
       <button class="tab-btn" onclick="kelTab('archive')">Archive</button>
-      <button class="tab-btn" onclick="kelTab('handoff')">Handoffs</button>
+      <button class="tab-btn" onclick="kelTab('handoff')">Handoffs<span class="tab-count" id="ktab-handoff-count" style="display:none;"></span></button>
     </div>
 
     <div id="ktab-invoice">
@@ -1542,7 +1548,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 141</strong> &#183; 2026-08-14 &#183; MANUAL ENTRY CAN TAKE PHOTOGRAPHS. This was never a bug. There has NEVER been a photo upload on Manual Entry: the row carried a name, a category, a size run, a colour, a price and quantities, and the only way a photograph had ever reached a manually entered style was the vendor-URL Pull. The box being tapped was UPLOAD INVOICE at the top of the screen, which feeds the invoice READER &#8212; a large camera icon sitting directly above Manual Entry, so product photographs went into the scan queue and were dropped, and nothing was ever attached to a style to show on the next card, to save, to archive or to hand to Kelly. Reported four times as photos not saving; four builds of real adjacent faults were fixed while this one went unbuilt. Every row now carries its own Add photos box: tap to use the camera or the camera roll, or drag files in. It uploads through the SAME store_product_photo path the review card uses and keeps the short r2: ref, so these photographs are ordinary photographs everywhere downstream and inherit the build 133 durability and the build 140 save guard rather than being a second weaker mechanism. Pulled and phone photos share one strip, a re-pull no longer deletes the ones you took yourself, and the invoice box now says out loud that it is for the paperwork. Needs Worker v108 for the upload and v109 so Kelly can see the result. Carries build 140</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 142</strong> &#183; 2026-08-14 &#183; THE ARCHIVE SAYS WHOSE TURN IT IS. A sheet sitting in Kelly&#39;s queue and a sheet finished a fortnight ago looked identical in the Archive: vendor, date, totals, and nothing about the handoff. The queue knew all along; the Archive was never told. Every row now carries a live chip while something is owed &#8212; WAITING ON KELLY, or YOUR TURN with what she said and how many more are stacked behind it &#8212; and a permanent grey line afterwards recording who priced it and when, which is the both-halves Brian asked for. Matching is on vendor PLUS invoice number, because vendor alone is ambiguous the moment a brand is bought twice, and that is why Worker v110 adds invoice_number to the queue and backfills it from the snapshot every row already carries rather than making the vendor do a job it cannot do. Whose-turn uses the same rule the banner has used since build 105, so the two screens cannot disagree about one question. The open count now sits on the Handoffs tab itself, next to the thing it counts, rather than in another bar at the top &#8212; a queue with its own badge reads as work, and one more banner is what makes it read as a notification. The queue is fetched before the list is drawn, so no row paints unlabelled and then jumps, and a failed read still renders the Archive exactly as build 141 did. Needs Worker v110. Carries build 141</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2043,7 +2049,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 141;   // keep in step with the footer stamp
+var APP_BUILD = 142;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3594,6 +3600,7 @@ function sbGetActive(cb) {
       _handoff = res.data.handoff || null;
       _handoffOpenCount = res.data.handoff_open_count || 0;   // build 107
       _handoffOpenList  = res.data.handoff_open_list || [];   // build 132
+      _archSyncHandoffCount(_handoffOpenCount);               // build 142
       renderHandoffBanner();
     }
     if (res.data && res.data.invoice) {
@@ -3675,9 +3682,99 @@ function kelTab(name) {
    shown whichever sheet happened to be sitting there. Each handoff now carries
    its own copy. This is the list of them. */
 var _openHandoffId = null;
+
+/* ── build 142 — WHOSE ACTION ITEM IS THIS SHEET ────────────────────────────
+   Brian: "when i send to kelly and she does or does not send back it should be
+   labled somehow in the archieve - so we know whos action item it is."
+
+   The Archive listed vendor, date and totals and said nothing at all about the
+   handoff, so a sheet sitting in Kelly's queue and a sheet finished a fortnight
+   ago looked identical. The queue knew; the Archive was simply never told.
+
+   Matching is on vendor + invoice number, both normalised, because vendor alone
+   is ambiguous the moment a brand is bought twice — which is exactly why Worker
+   v110 adds invoice_number to the queue rather than trying to make the vendor do
+   a job it cannot do. A row with no invoice number falls back to vendor + the
+   day it started, which is imperfect and is why it is the fallback rather than
+   the rule.
+
+   Brian asked for BOTH halves: a live chip while something is owed, and a
+   permanent line afterwards recording who priced it. */
+var _archHandoffIdx = null;     // { key -> {open:[], closed:[]} }
+function _archKey(vendor, invNo){
+  var v = String(vendor || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  var n = String(invNo  || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  return v + '|' + n;
+}
+function _archBuildHandoffIdx(open, recent){
+  var idx = {};
+  var add = function(row, bucket){
+    if (!row) return;
+    var k = _archKey(row.vendor, row.invoice_number);
+    if (!idx[k]) idx[k] = { open: [], closed: [] };
+    idx[k][bucket].push(row);
+  };
+  (open || []).forEach(function(r){ add(r, 'open'); });
+  (recent || []).forEach(function(r){ add(r, 'closed'); });
+  _archHandoffIdx = idx;
+}
+/* The live chip. Reuses _hName and the same "is this mine" rule the banner has
+   used since build 105, so the Archive cannot disagree with the banner about
+   whose turn it is — two screens answering one question two ways is the bug
+   this whole area keeps producing. */
+function _archTurn(inv){
+  if (!_archHandoffIdx) return null;
+  var hit = _archHandoffIdx[_archKey(inv.vendor, inv.invoice_number)];
+  var open = (hit && hit.open) || [];
+  if (!open.length) return null;
+  var h  = open[0];
+  var me = _hName(SESSION && SESSION.name);
+  var to = _hName(h.to_name), from = _hName(h.from_name);
+  var mine = (to && to === me) || (!!me && from !== me);
+  var what = (h.state === 'question') ? 'has a question'
+           : (h.state === 'needs_review') ? 'sent it back to review'
+           : 'to name and price';
+  var extra = open.length > 1 ? ' (+' + (open.length - 1) + ')' : '';
+  return mine
+    ? { cls: 't-you',  text: 'Your turn \u2014 ' + (h.from_name || 'someone') + ' ' + what + extra }
+    : { cls: 't-them', text: 'Waiting on ' + (h.to_name || 'someone') + ' \u2014 ' + what + extra };
+}
+/* The permanent line. Only states what actually happened: who finished it and
+   when. A cancelled handoff says so rather than being dressed up as work done. */
+function _archHistory(inv){
+  if (!_archHandoffIdx) return '';
+  var hit = _archHandoffIdx[_archKey(inv.vendor, inv.invoice_number)];
+  var closed = (hit && hit.closed) || [];
+  if (!closed.length) return '';
+  var done = closed.filter(function(r){ return r.state !== 'cancelled'; });
+  if (!done.length) return 'Handoff cancelled.';
+  var last = done[0];
+  var who  = last.finished_by || last.to_name || 'someone';
+  var when = '';
+  try {
+    var d = new Date(last.finished_at || last.started_at);
+    if (!isNaN(d.getTime())) when = (d.getMonth()+1) + '/' + d.getDate();
+  } catch (e) {}
+  var n = done.length;
+  return '\u21bb Priced by ' + who + (when ? ' \u00b7 ' + when : '') +
+         (n > 1 ? ' \u00b7 ' + n + ' handoffs' : '');
+}
+/* build 142 — say HOW MANY are open, in the one place that is always on screen
+   while you are in LineSheet. Brian: "i want it to be clear how many are open at
+   a time." Deliberately the tab and not a new banner: the count belongs next to
+   the thing it counts, and another bar at the top is what makes a queue read as
+   a notification rather than as work. */
+function _archSyncHandoffCount(n){
+  var b = el('ktab-handoff-count');
+  if (!b) return;
+  if (n > 0) { b.textContent = String(n); b.style.display = ''; }
+  else b.style.display = 'none';
+}
+
 function loadHandoffs(){
   var wrap = el('handoff-list');
   if (!wrap) return;
+  _archHandoffIdx = null;   // build 142 — the Archive re-reads rather than trusting a stale index
   wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">Loading&#8230;</div>';
   api('handoff_list', {})
   .then(function(r){
@@ -3726,6 +3823,7 @@ function loadHandoffs(){
       });
     }
     wrap.innerHTML = h;
+    _archSyncHandoffCount((res.open || []).length);   // build 142 — from the freshest read there is
     wrap.querySelectorAll('[data-open]').forEach(function(rowEl){
       rowEl.onclick = function(){ openHandoff(rowEl.getAttribute('data-open')); };
     });
@@ -5343,6 +5441,14 @@ function loadArchive() {
     var liveNum = (activeRow && activeRow.published && activeRow.invoice) ? (activeRow.invoice.invoice_number || '') : null;
     sheetLive = liveNum !== null;
     _archLiveNum = liveNum;
+    // build 142 — the queue is fetched BEFORE the list is drawn, so a row is
+    // never painted unlabelled and then relabelled a moment later. It is a small
+    // read and a failure is survivable: the Archive still renders, just without
+    // the turn chips, which is what it did up to build 141 anyway.
+    api('handoff_list')
+    .then(function(hr){ _archBuildHandoffIdx(hr && hr.open, hr && hr.recent); })
+    .catch(function(){ _archHandoffIdx = _archHandoffIdx || {}; })
+    .then(function(){
     sbLoadArchive(function(invoices) {
       _archAll = invoices || [];
       if (!_archAll.length) {
@@ -5362,6 +5468,7 @@ function loadArchive() {
       };
       archApplyFilters();
     });
+    });   // build 142 — closes the handoff_list pre-fetch
   });
 }
 
@@ -5577,11 +5684,16 @@ function renderArchiveList(invoices, liveNum) {
         '<button class="delete-btn">&#128465;</button>';
     // v56 — a link to the stored scan for this archived sheet (if any).
     var archScan = invoiceScanLinksHtml(inv.files);
+    // build 142 — whose action item, and who has touched it. Both from the queue.
+    var _turn = _archTurn(inv);
+    var _hist = _archHistory(inv);
     item.innerHTML =
       '<div class="archive-item-info">'+
         '<div class="archive-file-name">'+esc(fileName)+'<button type="button" class="arch-vendor-edit" title="Correct the vendor on this archived sheet">&#9998;</button></div>'+
         '<div class="archive-meta">'+esc(metaBits.join(' · '))+'</div>'+
         (archScan ? '<div class="archive-scan" style="font-size:12px;margin-top:3px;">📄 '+archScan+'</div>' : '')+
+        (_turn ? '<div class="arch-turn '+_turn.cls+'">'+esc(_turn.text)+'</div>' : '')+
+        (_hist ? '<div class="arch-hist">'+esc(_hist)+'</div>' : '')+
       '</div>'+
       '<div class="archive-right">'+rightHtml+'</div>';
     item.querySelector('.archive-item-info').addEventListener('click', function() { loadArchivedInvoice(inv); });
