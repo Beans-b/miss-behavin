@@ -1526,7 +1526,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 139</strong> &#183; 2026-08-14 &#183; THE UPLOADED PHOTOS STOP DISAPPEARING, AND KELLY CAN SEE THEM. Reproduced against the real file rather than guessed at: build 125 taught the snapshot that a card which has not finished loading has not CLEARED anything, but it taught it only about the text boxes. The photo list had no such guard, so opening a sheet and then saving, handing it to Kelly, or simply closing the overlay before the async restore had run wrote an EMPTY photo list over the snapshot holding every uploaded photo &#8212; which is why the SEO copy came back and the pictures did not. Photos, the on/off choices and the source link now carry forward until the card has actually had its chance to load, and the two lists are unioned rather than replaced so a photo uploaded into that gap is kept as well. Second: Kelly opening a handoff landed on the pricing cards, which show neither photographs nor copy &#8212; the data was reaching her intact all along, the screen holding it just never opened. A handoff now opens the photo/SEO cards the same way Archive does. Third: Manual Entry opens that screen the same way too, with the private-label list loaded first, so the build 134 stale-copy guard cannot judge fresh copy stale. Fourth: a silent save now still files the Archive copy &#8212; suppressing the confirmation message was never meant to also skip the archive write, which left the archived sheet holding the copy from before the photographs went on. No Worker change &#8212; runs on v108. Carries build 138</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 140</strong> &#183; 2026-08-14 &#183; THE PHOTO GUARD, ROUND THE RIGHT WAY. Build 139 set the _loaded flag BEFORE restoring a card, so that an exception inside the restore could not freeze the photo list. That was backwards: the flag is what switches OFF the guard protecting saved photos, so a throw left the card holding only its vendor seed with the guard already disabled, and the next save wrote that seed over every uploaded photo &#8212; the exact fault 139 exists to stop. It is now set only after a restore that actually completed, so a failure leaves the guard ON and photos can be added but never blanked. Also: a manual style code now carries seconds and a random tail. A manual sheet numbers itself MANUAL-&lt;YYYYMMDD&gt;, the same string all day, and the archive upsert folds one brand&#39;s manual buys for that day into a single row and merges styles BY CODE with incoming winning &#8212; so two manual sheets for one brand started in the same minute shared a code and the second silently replaced the first, photos and copy included. Found while chasing the photo report, not reported, and not reproduced against live data. No Worker change &#8212; runs on v108, and v109 is the one that lets Kelly SEE a photo at all. Carries build 139</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2027,7 +2027,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 139;   // keep in step with the footer stamp
+var APP_BUILD = 140;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -6457,8 +6457,20 @@ function _manCommit(){
   // with every other first manual item ever pushed (the "Baggu bag matches
   // Big Effing Clip" duplicate warning). Date+time makes them one-of-a-kind.
   var _cd = new Date();
+  // build 36 — date+time makes a manual code one-of-a-kind across sheets.
+  // build 140 — SECONDS AND A RANDOM TAIL, because minutes were not enough.
+  // A manual sheet's invoice_number is MANUAL-<YYYYMMDD>, the same string all
+  // day, so the Worker's archive upsert (invoice_number + vendor) folds two
+  // manual buys from one brand on one day into a single row and merges their
+  // styles BY CODE, incoming winning. Two manual sheets for the same brand
+  // started in the same minute produced the same MAN-<MMDDHHMM>-1 code, so the
+  // second silently replaced the first in the archive — taking its photos and
+  // its SEO copy with it. Not what Brian reported, and not reproduced against
+  // his data; found while chasing it and cheap to close.
   var _stamp = String(_cd.getMonth()+1).padStart(2,'0') + String(_cd.getDate()).padStart(2,'0') +
-               String(_cd.getHours()).padStart(2,'0') + String(_cd.getMinutes()).padStart(2,'0');
+               String(_cd.getHours()).padStart(2,'0') + String(_cd.getMinutes()).padStart(2,'0') +
+               String(_cd.getSeconds()).padStart(2,'0') +
+               '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
   Array.prototype.forEach.call(rows, function(row, i){
     var name = row.querySelector('.man-name').value.trim();
     var type = row.querySelector('.man-type').value;
@@ -9408,11 +9420,27 @@ function _spInitDetails(cd){
   // overwriting the copy you already approved (see the guard in _spGenSeo).
   ensureShopifyTypes(function(){
     _spPopulateType(cd, true);
-    // build 139 — this card has now had its chance to load its saved snapshot.
-    // Set BEFORE the restore so an exception inside it cannot leave the card
-    // permanently marked unloaded, which would freeze its photo list forever.
-    cd._loaded = true;
-    if (_spRestoreCard(cd) && cd.els.fetchStatus) {
+    // build 140 — _loaded is set AFTER the restore, not before it.
+    //
+    // Build 139 set it first, reasoning that a throw inside _spRestoreCard must
+    // not freeze the photo list forever. That had the priority backwards. The
+    // flag is what switches OFF the guard protecting saved photos, so setting it
+    // before the restore means a throw leaves the card holding only its vendor
+    // seed with the guard already disabled — and the next save writes that seed
+    // over every uploaded photo. Exactly the bug 139 exists to stop.
+    //
+    // Left false on a throw, the guard stays on and photos can only be ADDED,
+    // never blanked. That is the right way round: a card stuck unable to drop a
+    // photo is a visible annoyance, a card that silently deletes them is what
+    // Brian has been chasing for two days. Preservation wins.
+    var _restored = false;
+    try {
+      _restored = _spRestoreCard(cd);
+      cd._loaded = true;                 // reached only if the restore completed
+    } catch (e) {
+      console.error('_spRestoreCard failed; photo guard left ON for this card', e);
+    }
+    if (_restored && cd.els.fetchStatus) {
       cd.els.fetchStatus.textContent = cd._renamedSince
         ? (cd._staleReason || 'Product name') + ' changed — SEO copy is being rewritten. Your category, tags and photo choices were kept.'
         : 'Restored your saved edits for this card.';
