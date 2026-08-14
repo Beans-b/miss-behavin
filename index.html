@@ -1472,6 +1472,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 132</strong> &#183; 2026-08-14 &#183; THE HANDOFF GOES BOTH WAYS, AND THE NOTIFICATION LANDS ON THE RIGHT SHEET. Two faults, one cause: there is exactly ONE active-sheet row per store, and build 106 made this screen load it whenever anything was waiting. So tapping the notification opened whichever invoice had been saved to that shared row most recently, by anybody, on any device &#8212; Kelly tapped a notification about the sheet she had been sent and got the invoice Brian was working on at his computer, because his autosave had written the shared row after her handoff. A sheet waiting on YOU is now opened from its own snapshot by id: one waiting opens it, more than one shows the queue so you pick rather than being picked for. Opening a queued sheet no longer copies it into the shared slot and its edits save into its own row, so two people can work two sheets at once without meeting. SEPARATELY, the way back: the only thing the person handed a sheet could say was &quot;done&quot;, so finished-look-before-it-goes-live and I-am-stuck both went back to being a text message. A bar under the cards now offers Send back for review, Ask a question, and Done &#8212; close it out. A return is a new queue row addressed to whoever sent the sheet, carrying it as priced, and the queue labels which way every row is going. The push wording is generic now rather than always saying &quot;name and price it&quot;, which was wrong on every sheet coming back; the text message still names the sheet, the person and the reason. Needs Worker v107 and the build 132 sw.js re-uploaded. Carries build 131
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 131</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL processes one product per call (worker v106). Build 130 sent 5 products per Worker invocation and hit Cloudflare&#39;s &quot;Too many subrequests&quot; cap once two 20-photo products stacked their image fetches, failing the rest of the batch. It now sends one id per call. Carries build 130 (image-alt backfill added to Store Utilities) and 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style already in Shopify is treated as a reorder: the same-name warning looks the product up and offers Add Inventory, Push as New, or Skip. Every review card gained an X to drop it from this push. Fixed a restock that only ever sent XS-XL and OS (dropping every waist and shoe size) and reported success even when every line failed, plus the async save that blanked stored SEO copy. Needs Worker v102. Carries build 124
@@ -1503,7 +1504,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 134</strong> &#183; 2026-08-14 &#183; THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED. The pricing card filled its name box from the invoice wording in preference to the name on the style, so a style you had named Farrah reopened reading DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS. That default was right in build 56, when the name on the style was a machine guess and the invoice wording was the better one; build 126 ended name invention and the order was never flipped to match. It was not cosmetic: the save reads that box back and writes it to the style, so reopening a sheet and saving it replaced every name you had typed with the invoice wording, and once saved there was nothing to recover it from. The box now shows the name a person put there and falls back to the invoice wording only when nothing has been typed, which is exactly the case the old default was written for. A renamed style also stops claiming the badge &quot;Name as printed on the invoice&quot; and says &quot;Your name&quot; instead. ALSO, hardening rather than a reported fault: whether saved SEO copy is treated as stale is decided by comparing the vendor it was written for against the sheet vendor, and on a private-label sheet those are two different names reconciled only after the private-label list has loaded from the server. Reaching the review screen before that arrived read it as a vendor change, dropped the copy, and blanked it in the record on the next save. The comparison now accepts either name, so a slow fetch can no longer destroy copy. No Worker change &#8212; runs on v108. Carries build 133</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1996,7 +1997,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 133;   // keep in step with the footer stamp
+var APP_BUILD = 134;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -4050,17 +4051,35 @@ function _styleSizes(style){ return SIZE_RUNS[_styleRunKey(style)].sizes; }
 // build 126 — where did this style's name come from? Reads v103's name_read,
 // and falls back defensively for invoices saved before v103 (no name_read at
 // all), so reopening an old sheet never shows a badge it cannot justify.
+/* build 134 — what belongs in the name box.
+   A name a person put there wins over the invoice wording, always. Falling back
+   to printed_name only when nothing has been typed keeps the build 56 behaviour
+   for a freshly extracted sheet, which is the case that default was written for. */
+function _nameBoxValue(style){
+  if (!style) return '';
+  var typed = String(style.name || '').trim();
+  if (typed) return typed;
+  return String(style.printed_name || '');
+}
+
 function _nameSourceOf(style) {
   if (!style) return '';
   if (style._nameSource) return style._nameSource;
   var nr = style.name_read;
-  if (nr === 'clear'  && String(style.printed_name || '').trim()) return 'printed';
+  // build 134 — a renamed style is no longer "as printed on the invoice", and a
+  // badge that says so over a name somebody typed is the app asserting something
+  // untrue about its own contents.
+  var _typed = String(style.name || '').trim();
+  var _printed = String(style.printed_name || '').trim();
+  if (_typed && _printed && _typed !== _printed) return 'renamed';
+  if (nr === 'clear'  && _printed) return 'printed';
   if (nr === 'unsure') return 'unread';
   if (nr === 'absent') return String(style.name || '').trim() ? 'suggested' : 'noname';
   return '';   // pre-v103 invoice: say nothing rather than guess
 }
 var _NAME_NOTE = {
   printed:   ['src-printed',   '\u2713 Name as printed on the invoice'],
+  renamed:   ['src-suggested', 'Your name \u00b7 the invoice says something else'],   // build 134
   suggested: ['src-suggested', 'Suggested name \u00b7 the invoice printed none'],
   unread:    ['src-unread',    'Could not read the printed name \u00b7 type it from the invoice'],
   noname:    ['src-unread',    'No name on the invoice \u00b7 type one or tap \u21bb']
@@ -4107,7 +4126,21 @@ function buildKelCard(style, idx) {
       // no matter what came back. v103 nulls both name fields on unsure, but a
       // model ignoring its instructions is the exact failure this build exists
       // to catch, so the UI does not rely on the model having obeyed.
-      '<input class="p-name-input" type="text" value="'+(_nameSrc==='unread'?'':esc(style.printed_name||style.name||''))+'" placeholder="'+(_nameSrc==='unread'?'Type the name from the invoice':(_nameSrc==='noname'?'Name this style':'Style name'))+'"/>'+
+      // build 134 — THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED.
+      //
+      // This read `style.printed_name || style.name` — printed wins. That was
+      // right in build 56, when `name` was a machine-generated guess and the
+      // wording actually on the invoice was the better default. Build 126 ended
+      // name invention: extraction now returns name = null always, and naming
+      // moved to the generate_name call. So `name` today is the name a PERSON
+      // typed or generated, and the precedence was never flipped to match.
+      //
+      // The cost was not cosmetic. collectCurrentInvoice reads this box back as
+      // it stands and writes it to style.name, so reopening a sheet and saving
+      // it replaced every name you had typed with the invoice wording — "Farrah"
+      // became "DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS" — and once
+      // saved there was nothing left to recover it from.
+      '<input class="p-name-input" type="text" value="'+(_nameSrc==='unread'?'':esc(_nameBoxValue(style)))+'" placeholder="'+(_nameSrc==='unread'?'Type the name from the invoice':(_nameSrc==='noname'?'Name this style':'Style name'))+'"/>'+
       '<button class="regen-btn" title="Generate new name">&#8635;</button>'+
     '</div>'+
     (_NAME_NOTE[_nameSrc] ? '<div class="p-name-note '+_NAME_NOTE[_nameSrc][0]+'">'+_NAME_NOTE[_nameSrc][1]+'</div>' : '')+
@@ -6815,6 +6848,12 @@ function _spSnapshotCard(cd, prev){
     // build 86 — the SEO copy names the BRAND too, so the vendor is part of
     // what makes it current.
     src_vendor: String((currentInvoice && currentInvoice.vendor) || ''),
+    // build 134 — stamp the TRUE invoice vendor alongside the Shopify-facing
+    // one. On a private-label sheet these differ ("Sky to Moon" on the invoice,
+    // "Miss Behavin'" to Shopify), and the archive stores the true one — so a
+    // snapshot stamped with only the display name looked like a vendor change
+    // the moment the sheet was reopened from Archive. See _spVendorMatches.
+    src_vendor_true: String((currentInvoice && (currentInvoice._invoiceVendor || currentInvoice.vendor)) || ''),
     images: imgs,
     // build 95 — the vendor page these photos came from, so a reopened card can
     // still say which link it used.
@@ -6826,6 +6865,52 @@ function _spSnapshotCard(cd, prev){
     droppedUploads: droppedUploads,
     saved_at: new Date().toISOString()
   };
+}
+
+/* build 134 — DID THE VENDOR ACTUALLY CHANGE? Hardening, not a reported fault.
+   Stated plainly because the first version of this comment claimed otherwise:
+   this is NOT what discarded Brian's SEO copy on 2026-08-14. That was checked
+   against the live data and the guard comes out FALSE, because "Sky to Moon" is
+   a registered private label, so _renderVendorField rewrites inv.vendor to
+   "Miss Behavin'" on reopen and the stamp matches after all.
+   What is real is the RACE underneath it. A snapshot is stamped with
+   currentInvoice.vendor — on a private-label sheet the SHOPIFY-facing name —
+   while the archive deliberately stores the TRUE vendor (sbArchiveInvoice has
+   written `inv._invoiceVendor || inv.vendor` since build 71). The two are only
+   reconciled by _renderVendorField, and only once _privateLabels has arrived
+   from the Worker, which is an async fetch fired when the LineSheet screen
+   opens. Reopen an archived private-label sheet and reach the review overlay
+   before that lands and inv.vendor is still "Sky to Moon": the guard reads a
+   vendor change, drops every SEO title, description, body and alt, and
+   _spInvalidateSnapshots BLANKS them in the record so the next save writes the
+   loss in permanently. A network hiccup should not be able to destroy copy.
+   A snapshot now counts as current if its stamp matches EITHER name, so the
+   answer no longer depends on whether a fetch has returned yet. Sheets saved
+   before this build carry only src_vendor, so both sides of the OR are checked
+   against it. */
+function _spVendorMatches(snap, inv){
+  if (!snap || snap.src_vendor === undefined || snap.src_vendor === '') return true;  // nothing stamped: nothing to contradict
+  // NOT KNOWING IS NOT EVIDENCE OF STALENESS. Until the private-label list has
+  // arrived, "Sky to Moon" and "Miss Behavin'" are indistinguishable here, and
+  // answering wrong in this direction DELETES copy. Answering wrong the other
+  // way shows copy that is one vendor-correction out of date, which the next
+  // save fixes. Only one of those is recoverable, so the unknown case defers.
+  if (!_privateLabels || !(_privateLabels.vendors || []).length) return true;
+  // Both sides through the same rewrite, so the comparison is between two names
+  // for the same brand rather than between a display name and a real one.
+  var canon = function(x){
+    var v = String(x || '').trim();
+    if (!v) return '';
+    return _isPrivateLabel(v) ? String(_privateLabels.becomes || v) : v;
+  };
+  var shown = canon((inv && inv.vendor) || '');
+  var real  = canon((inv && (inv._invoiceVendor || inv.vendor)) || '');
+  if (!shown && !real) return true;
+  var stamps = [snap.src_vendor, snap.src_vendor_true].filter(Boolean).map(canon);
+  for (var i = 0; i < stamps.length; i++) {
+    if (stamps[i] && (stamps[i] === shown || stamps[i] === real)) return true;
+  }
+  return false;
 }
 
 function _spRestoreCard(cd){
@@ -6841,9 +6926,11 @@ function _spRestoreCard(cd){
   // generator writes fresh copy. Everything else — category, tags, UPC, vendor
   // SKU, photo choices — is still yours and is restored either way.
   var nowName   = String((cd.style && (cd.style.printed_name || cd.style.name)) || '');
-  var nowVendor = String((currentInvoice && currentInvoice.vendor) || '');
   var nameChanged   = st.src_name   !== undefined && st.src_name   !== '' && nowName   !== '' && st.src_name   !== nowName;
-  var vendorChanged = st.src_vendor !== undefined && st.src_vendor !== '' && nowVendor !== '' && st.src_vendor !== nowVendor;
+  // build 134 — see _spVendorMatches. This test used to compare the snapshot's
+  // stamp against currentInvoice.vendor ALONE, which threw away the SEO copy on
+  // every private-label sheet, every time it was reopened.
+  var vendorChanged = !_spVendorMatches(st, currentInvoice);
   var renamed = nameChanged || vendorChanged;   // build 86
   cd._renamedSince = renamed;
   cd._staleReason = vendorChanged ? 'Vendor' : 'Product name';
@@ -6903,7 +6990,10 @@ function _spInvalidateSnapshots(inv){
     if (!st || !st._review) return;
     Object.keys(st._review).forEach(function(k){
       var snap = st._review[k];
-      if (snap && snap.src_vendor !== undefined && snap.src_vendor !== v) {
+      // build 134 — the same comparison, on the side that DESTROYS the copy
+      // rather than merely hiding it: this blanks the SEO fields in the record.
+      // It is the reason the race above is worth closing rather than tolerating.
+      if (snap && !_spVendorMatches(snap, inv)) {
         snap.seo_title = ''; snap.seo_desc = ''; snap.body = ''; snap.alt = '';
         // build 116 — THE BUG: this used to also do `snap.src_vendor = v` right
         // here, which made the snapshot look already-current-with-the-new-vendor
