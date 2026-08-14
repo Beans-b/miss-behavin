@@ -1481,6 +1481,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 135</strong> &#183; 2026-08-14 &#183; THE ARCHIVE NOW LEADS WITH WHAT YOU WORKED ON LAST. &quot;Newest first&quot; sorted by the date printed on the invoice, which is a date a vendor typed on a piece of paper, not a record of anything this app did. So a sheet worked on this morning sat fifth in the list behind invoices dated weeks earlier, and one Valfre invoice mistyped 2028-12-12 pinned itself to the top permanently. Whoever opens this tab &#8212; Kelly, most of all &#8212; wants the sheet that was just being worked on. The default is now <strong>Last worked on</strong>, which reads the timestamp the server writes every time a sheet is saved to the archive, falling back to when it was scanned and then to the invoice date for older sheets that carry neither. <strong>Recently scanned</strong> is its own option, and invoice date is still there under two entries that say plainly that is what they are. Vendor A&ndash;Z now also leads with the most recently worked sheet inside each vendor rather than an arbitrary order. Each row says &quot;worked on&quot; with the date, or the time if it was today, so the order the list is in is legible rather than something you have to take on trust &#8212; shown only when it differs from the scan, since a sheet archived the minute it was scanned has nothing to add. No Worker change &#8212; runs on v108. Carries build 134
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 134</strong> &#183; 2026-08-14 &#183; THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED. The pricing card filled its name box from the invoice wording in preference to the name on the style, so a style you had named Farrah reopened reading DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS. That default was right in build 56, when the name on the style was a machine guess and the invoice wording was the better one; build 126 ended name invention and the order was never flipped to match. It was not cosmetic: the save reads that box back and writes it to the style, so reopening a sheet and saving it replaced every name you had typed with the invoice wording, and once saved there was nothing to recover it from. The box now shows the name a person put there and falls back to the invoice wording only when nothing has been typed, which is exactly the case the old default was written for. A renamed style also stops claiming the badge &quot;Name as printed on the invoice&quot; and says &quot;Your name&quot; instead. ALSO, hardening rather than a reported fault: whether saved SEO copy is treated as stale is decided by comparing the vendor it was written for against the sheet vendor, and on a private-label sheet those are two different names reconciled only after the private-label list has loaded from the server. Reaching the review screen before that arrived read it as a vendor change, dropped the copy, and blanked it in the record on the next save. The comparison now accepts either name, so a slow fetch can no longer destroy copy. No Worker change &#8212; runs on v108. Carries build 133
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132
@@ -1515,7 +1516,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 137</strong> &#183; 2026-08-14 &#183; SEND TO KELLY, AND SAVE, FROM THE BOTTOM OF THE REVIEW SCREEN. Both controls lived only in the header, and that screen is long &#8212; with five products you are hundreds of pixels away from them by the time the photos are on. Handing the sheet over is the actual next step once photos are added, and it existed only on the pricing screen behind the overlay, so it meant closing out of the work to reach it. Send to Kelly SAVES FIRST and then hands over, in that order, because the photographs and SEO copy live on the review cards until a save writes them onto the sheet &#8212; handing over without saving would have sent her the invoice as it was before the photos went on, which is the exact work the handoff exists to pass along. It then closes the review screen and puts you back on the invoice, where the &quot;Waiting on Kelly&quot; banner is, rather than leaving a push screen open over a sheet that is now hers. The save confirmation now appears on whichever Save button you actually pressed. No Worker change &#8212; runs on v108. Carries build 136</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1553,9 +1554,16 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div id="sp-cards"></div>
   </div>
   <div class="sp-foot">
-    <!-- build 120 — one tap to push every ready product live instead of
-         tapping "Push to Shopify" on each card. Anything already in Shopify,
-         or that needs a same-name decision, is left on Decide either way. -->
+    <!-- build 137 — Save and Send to Kelly, at the BOTTOM. This screen is long:
+         with five products you are hundreds of pixels from the header by the
+         time you have finished adding photos, and both of the things you do
+         next lived up there. Handing the sheet over from here is the actual
+         step in the workflow (photos on, then over to Kelly to name and price),
+         and it was only ever on the pricing screen behind the overlay. -->
+    <div style="display:flex;gap:8px;margin:0 0 10px;">
+      <button type="button" class="btn btn-outline" id="sp-save-btn-foot" style="flex:1;margin:0;" onclick="saveShopifyReview()">Save progress</button>
+      <button type="button" class="btn btn-black" id="sp-handoff-btn" style="flex:1;margin:0;" onclick="spSendToKelly()">Send to Kelly &#8594;</button>
+    </div>
     <button type="button" class="btn btn-shopify" id="sp-push-all-btn" style="margin:0;" onclick="_spPushAllCards()">&#128722; Publish All to Shopify</button>
     <div class="sp-foot-row">
       <div class="sp-foot-msg" id="sp-progress">Tap Push on each product to go live</div>
@@ -2008,7 +2016,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 136;   // keep in step with the footer stamp
+var APP_BUILD = 137;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -6876,6 +6884,28 @@ function _spPushAllCards() {
   );
 }
 
+/* build 137 — hand the sheet over from the review screen.
+   The ORDER matters and is the whole reason this is not just handoffSend(). The
+   photographs and SEO copy you have just been adding live on the review cards
+   and are only written onto the sheet by _spSaveAll — handoffSend takes its
+   snapshot from the sheet, so handing over without saving first would send
+   Kelly the invoice as it was BEFORE the photos went on, which is precisely the
+   work the handoff exists to pass along. Save, then hand over. */
+function spSendToKelly(){
+  if (!currentInvoice) { toast('No sheet open to hand over.'); return; }
+  var saved = _spSaveAll(true);   // silent: no "Saved N cards" flash over the prompt
+  if (!saved) { toast('Nothing on this sheet to hand over.'); return; }
+  handoffSend();
+  // Back to the invoice screen, where the "Waiting on Kelly" banner lives. The
+  // sheet is hers now; leaving the push screen open over it invites a push that
+  // was meant to happen after she has priced it. Closed WITHOUT the usual
+  // save-on-close: the snapshot was taken two lines ago and handoffSend is
+  // mid-flight with it, so saving again here would only race its own write.
+  var o = el('shopify-overlay');
+  if (o) o.style.display = 'none';
+  closeDupModal();
+}
+
 function closeShopifyReview() {
   // build 73 - never lose work on close. Saves silently; the explicit
   // Save progress button is for reassurance mid-session.
@@ -7132,17 +7162,21 @@ function _spSaveAll(silent){
   // on another device is the copy you just saved.
   saveCurrentInvoice(!silent);
   if (!silent) {
-    var btn = el('sp-save-btn');
-    if (btn) {
+    // build 137 — there are two Save buttons now, one in the header and one at
+    // the foot. Confirming on only the one you did not press is not confirming.
+    // build 133 — `dropped` now only ever counts photos uploaded BEFORE this
+    // build that are still sitting on an open card. A photo uploaded from here
+    // on is stored in R2 and saved like any other.
+    var _msg = '\u2713 Saved ' + n + ' card' + (n === 1 ? '' : 's') +
+      (dropped ? ' (' + dropped + ' older uploaded photo' + (dropped === 1 ? '' : 's') +
+                 ' could not be saved \u2014 re-upload ' + (dropped === 1 ? 'it' : 'them') + ')' : '');
+    ['sp-save-btn', 'sp-save-btn-foot'].forEach(function(id){
+      var btn = el(id);
+      if (!btn) return;
       var was = btn.textContent;
-      // build 133 — `dropped` now only ever counts photos uploaded BEFORE this
-      // build that are still sitting on an open card. A photo uploaded from here
-      // on is stored in R2 and saved like any other.
-      btn.textContent = '\u2713 Saved ' + n + ' card' + (n === 1 ? '' : 's') +
-        (dropped ? ' (' + dropped + ' older uploaded photo' + (dropped === 1 ? '' : 's') +
-                   ' could not be saved \u2014 re-upload ' + (dropped === 1 ? 'it' : 'them') + ')' : '');
+      btn.textContent = _msg;
       setTimeout(function(){ btn.textContent = was; }, 3200);
-    }
+    });
   }
   return n;
 }
