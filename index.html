@@ -953,6 +953,23 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="inv-details" id="kel-inv-details"></div>
         </div>
         <div style="padding:16px 24px 0;" id="kel-cards"></div>
+        <!-- build 132 - THE WAY BACK. Shown only while a sheet opened from the
+             Handoffs tab is on screen. Until now the only thing the person who
+             was handed a sheet could say was "done", so "finished, look at it
+             before it goes live" and "I am stuck on this one" both went back to
+             being a text message - which is the arrangement the handoff exists
+             to replace. It sits directly under the cards, above Publish and
+             Push, because sending it back is the ordinary end of this screen. -->
+        <div class="action-section" id="handoff-actions" style="display:none;">
+          <div class="action-title" id="ha-title">Sent to you</div>
+          <div class="action-note" id="ha-note"></div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-black" id="ha-review" onclick="handoffReturn('review')" style="flex:2;min-width:190px;">Send it back</button>
+            <button class="btn btn-outline" id="ha-question" onclick="handoffReturn('question')" style="flex:1;min-width:150px;">Ask a question</button>
+            <button class="btn btn-outline" id="ha-done" onclick="handoffFinish()" style="flex:1;min-width:150px;">Done &#8212; close it out</button>
+          </div>
+          <div class="status" id="handoff-action-status"></div>
+        </div>
         <div class="action-section">
           <div class="action-title">Ready to share?</div>
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
@@ -1016,7 +1033,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div id="ktab-handoff" style="display:none;">
       <div class="section">
         <div class="section-title">Sheets sent for naming &amp; pricing</div>
-        <div class="field-hint" style="margin-bottom:10px;">Every sheet handed over, with its own copy of the items &#8212; sending a second one does not disturb the first. Tap one to open it, fill in the names and prices, then push it to Shopify and mark it done.</div>
+        <div class="field-hint" style="margin-bottom:10px;">Every sheet handed over, with its own copy of the items &#8212; sending a second one does not disturb the first, and editing one cannot reach any other invoice. Sheets travel both ways: <strong>TO PRICE</strong> is one sent out to be named and priced, <strong>FOR REVIEW</strong> and <strong>QUESTION</strong> are ones sent back. Tap any row to open it.</div>
         <div id="handoff-list"><div style="font-size:13px;color:var(--gray-text);">Loading&#8230;</div></div>
       </div>
     </div>
@@ -1455,6 +1472,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 131</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL processes one product per call (worker v106). Build 130 sent 5 products per Worker invocation and hit Cloudflare&#39;s &quot;Too many subrequests&quot; cap once two 20-photo products stacked their image fetches, failing the rest of the batch. It now sends one id per call. Carries build 130 (image-alt backfill added to Store Utilities) and 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style already in Shopify is treated as a reorder: the same-name warning looks the product up and offers Add Inventory, Push as New, or Skip. Every review card gained an X to drop it from this push. Fixed a restock that only ever sent XS-XL and OS (dropping every waist and shoe size) and reported success even when every line failed, plus the async save that blanked stored SEO copy. Needs Worker v102. Carries build 124
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 121</strong> &#183; 2026-08-07 &#183; TWO BULK BUTTONS on Review &amp; Push. &#8595; Get Images &amp; Fabric for All Products sits above the product list and fetches vendor photos/fabric for every product that does not already have one, one at a time so it is gentle on the vendor-site lookups &#8212; a card whose match is ambiguous still raises its own picker and the run just moves past it rather than stalling. Publish All to Shopify sits at the bottom and pushes every ready product live, one at a time (never in parallel &#8212; each push is immediate and irreversible, so nothing should be firing at once). Anything already in Shopify, by SKU or by matching name, is deliberately NOT auto-resolved &#8212; it is left sitting on its own Decide button exactly as a single push already leaves it, because add-inventory vs. skip vs. view is a call only a person should make. Both ask for a one-tap confirmation before running and report a summary (pushed / already had photos / need a look / need your decision) when done. No Worker change. Carries build 120
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 120</strong> &#183; 2026-08-07 &#183; TWO FIXES. Opening an archived invoice was showing it mixed with a DIFFERENT vendor&#39;s products (A Shop of Things pulled in Valfre&#39;s styles) &#8212; the archive save on the Worker matched an existing record by invoice number ALONE, so two different vendors with a blank or matching invoice number were treated as the same sheet and had their style lists merged together. The match now also requires the vendor to agree, so a re-save of the SAME invoice still merges correctly but two different vendors never collide. Needs Worker v99. Any archive record already corrupted this way needs a manual look &#8212; open it and use the new delete control below to remove whatever doesn&#39;t belong. SEPARATELY: each product card now has its own Remove control &#8212; a small square &times; in the card&#39;s top-right corner, confirms before deleting, and is deliberately NOT the circular &#8635; regen button in the header (that one only renames). No Worker change needed for this half. Carries build 119
@@ -1484,7 +1502,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 131</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL processes one product per call (worker v106). Build 130 sent 5 products per Worker invocation and hit Cloudflare&#39;s &quot;Too many subrequests&quot; cap once two 20-photo products stacked their image fetches, failing the rest of the batch. It now sends one id per call. Carries build 130 (image-alt backfill added to Store Utilities) and 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 132</strong> &#183; 2026-08-14 &#183; THE HANDOFF GOES BOTH WAYS, AND THE NOTIFICATION LANDS ON THE RIGHT SHEET. Two faults, one cause: there is exactly ONE active-sheet row per store, and build 106 made this screen load it whenever anything was waiting. So tapping the notification opened whichever invoice had been saved to that shared row most recently, by anybody, on any device &#8212; Kelly tapped a notification about the sheet she had been sent and got the invoice Brian was working on at his computer, because his autosave had written the shared row after her handoff. A sheet waiting on YOU is now opened from its own snapshot by id: one waiting opens it, more than one shows the queue so you pick rather than being picked for. Opening a queued sheet no longer copies it into the shared slot and its edits save into its own row, so two people can work two sheets at once without meeting. SEPARATELY, the way back: the only thing the person handed a sheet could say was &quot;done&quot;, so finished-look-before-it-goes-live and I-am-stuck both went back to being a text message. A bar under the cards now offers Send back for review, Ask a question, and Done &#8212; close it out. A return is a new queue row addressed to whoever sent the sheet, carrying it as priced, and the queue labels which way every row is going. The push wording is generic now rather than always saying &quot;name and price it&quot;, which was wrong on every sheet coming back; the text message still names the sheet, the person and the reason. Needs Worker v107 and the build 132 sw.js re-uploaded. Carries build 131</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1977,7 +1995,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 131;   // keep in step with the footer stamp
+var APP_BUILD = 132;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -2020,7 +2038,34 @@ window.addEventListener('DOMContentLoaded', function(){
   loadSession();
   if (SESSION) enterApp();
   checkForUpdate();
+  // build 132 — the notification landed here. sw.js opens the app on ?h=1, and
+  // the LineSheet screen works out for itself which sheet is waiting on this
+  // person; the flag only says "you got here by tapping a notification, so go
+  // to the sheets rather than the menu".
+  try {
+    if (SESSION && /[?&]h=1(&|$)/.test(location.search)) {
+      openView('linesheet', 'LineSheet');
+      // Drop the marker so a later reload does not re-route out of whatever the
+      // person went on to do.
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    }
+  } catch (e) { /* never let this stop the app loading */ }
 });
+
+/* build 132 — the app was ALREADY OPEN when the notification was tapped.
+   sw.js focuses this window and posts a message rather than navigating, because
+   navigating reloads the page and reloading somebody mid-way through pricing a
+   sheet, in order to show them that sheet, is not a fix. Anything unsaved is
+   flushed first for the same reason. */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', function(ev){
+    var d = ev && ev.data;
+    if (!d || d.type !== 'mb-notification-click') return;
+    if (!SESSION) return;
+    try { if (currentInvoice) saveCurrentInvoice(); } catch (e) {}
+    openView('linesheet', 'LineSheet');
+  });
+}
 // Re-check when the app comes back to the foreground — the common iPhone case
 // is an app left open for days, never reloaded.
 document.addEventListener('visibilitychange', function(){
@@ -3123,7 +3168,10 @@ function saveNotifSettings(){
 function renderHandoffBanner(){
   var id = 'handoff-banner';
   var b = el(id);
-  var waiting = _handoff && _handoff.state === 'needs_pricing';
+  // build 132 — three open states now, not one. A sheet sent BACK is every bit
+  // as much "somebody owes somebody something" as one sent out, and testing for
+  // needs_pricing alone made the return trip invisible.
+  var waiting = _handoff && ['needs_pricing','needs_review','question'].indexOf(_handoff.state) >= 0;
   if (!waiting) { if (b) b.remove(); return; }
   if (!b) {
     b = document.createElement('div');
@@ -3134,8 +3182,11 @@ function renderHandoffBanner(){
     // on a phone means hunting through a menu with the answer on screen.
     b.onclick = function(ev){
       if (ev.target && ev.target.tagName === 'BUTTON') return;   // the buttons do their own thing
+      // build 132 — via the pending flag. openView('linesheet') runs
+      // loadActiveInvoiceForKel, which now routes by itself, so setting the tab
+      // here directly would immediately be overruled by it.
+      _pendingHandoffTab = true;
       openView('linesheet', 'LineSheet');
-      kelTab('handoff');   // build 107 — the list, so you pick which sheet
     };
     document.body.insertBefore(b, document.body.firstChild);
   }
@@ -3148,23 +3199,49 @@ function renderHandoffBanner(){
   // The handoff record already knows who sent it. If that is me, I am waiting.
   // If it is not me and I can actually price a sheet, it is my turn. Anyone who
   // cannot price one is not shown a job they cannot do.
-  var _norm  = function(x){ return String(x || '').trim().toLowerCase(); };
-  var _iSent = _norm(SESSION && SESSION.name) === _norm(_handoff.from_name);
+  //
+  // build 132 — it now picks the row it is describing instead of being handed
+  // one. It used to render whatever get_active called "the" handoff: the oldest
+  // open row in the store. With sheets travelling both ways that row is
+  // routinely somebody else's, so a person could be shown "waiting on Kelly"
+  // while a sheet Kelly had sent back sat unmentioned. Mine first; if nothing is
+  // mine, the oldest thing I am waiting on.
+  var _me = _hName(SESSION && SESSION.name);
   var _canPrice = SESSION && (SESSION.role === 'pricer' || SESSION.role === 'admin');
-  if (!_iSent && !_canPrice) { if (b) b.remove(); return; }
-  var mine = !_iSent && _canPrice;
-  var when = _handoff.started_at ? new Date(_handoff.started_at) : null;
-  var ago  = when ? when.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
-  var n    = _handoff.item_count || 0;
-  var more = (_handoffOpenCount > 1) ? (' (+' + (_handoffOpenCount - 1) + ' more waiting)') : '';
-  var who  = esc(_handoff.from_name || 'The buyer');
-  var note = _handoff.note ? ' &#8212; &ldquo;' + esc(_handoff.note) + '&rdquo;' : '';
-  b.innerHTML = mine
-    ? '<span style="flex:1;"><strong>' + who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') +
-      ' to name and price.</strong>' + more + ' ' + esc(ago) + note + '</span>' +
-      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish()">I&#39;m done</button>'
-    : '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'whoever prices these') + ' to name and price ' +
-      (n || 'these') + ' item' + (n === 1 ? '' : 's') + ' &#8212; sent ' + esc(ago) + note + '</span>' +
+  var _mineList = _handoffMine();
+  var _fmt = function(x){
+    var when = x ? new Date(x) : null;
+    try { return when ? when.toLocaleString([], { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : ''; }
+    catch (e) { return ''; }
+  };
+
+  if (_mineList.length) {
+    var m    = _mineList[0];
+    var n    = m.item_count || 0;
+    var more = (_mineList.length > 1) ? (' (+' + (_mineList.length - 1) + ' more waiting on you)') : '';
+    var who  = esc(m.from_name || 'The buyer');
+    var note = m.note ? ' &#8212; &ldquo;' + esc(m.note) + '&rdquo;' : '';
+    var what = (m.state === 'question')
+      ? who + ' has a question about ' + (n || 'a') + ' item' + (n === 1 ? '' : 's') + '.'
+      : (m.state === 'needs_review')
+        ? who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') + ' back for you to review.'
+        : who + ' sent ' + (n || 'some') + ' item' + (n === 1 ? '' : 's') + ' to name and price.';
+    b.innerHTML = '<span style="flex:1;"><strong>' + what + '</strong>' + more + ' ' + esc(_fmt(m.started_at)) + note + '</span>' +
+      '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" ' +
+      'onclick="goToHandoff(\'' + esc(m.id) + '\')">Open it</button>';
+    return;
+  }
+
+  // Nothing is mine. If I sent the oldest open one, say who I am waiting on.
+  // Anyone who can neither price a sheet nor sent this one is shown nothing —
+  // a job you cannot do is noise.
+  var _iSent = !!_me && _me === _hName(_handoff.from_name);
+  if (!_iSent) { if (b) b.remove(); return; }
+  var n2   = _handoff.item_count || 0;
+  var note2 = _handoff.note ? ' &#8212; &ldquo;' + esc(_handoff.note) + '&rdquo;' : '';
+  b.innerHTML = '<span style="flex:1;">Waiting on ' + esc(_handoff.to_name || 'whoever prices these') + ' ' +
+      esc(_handoffVerb(_handoff.state)) + ' ' + (n2 || 'these') + ' item' + (n2 === 1 ? '' : 's') +
+      ' &#8212; sent ' + esc(_fmt(_handoff.started_at)) + note2 + '</span>' +
       '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish(true)">Cancel the handoff</button>';
 }
 
@@ -3185,20 +3262,19 @@ function handoffSend(){
     if (!ok) { toast('Could not save the sheet — nothing was sent.'); return; }
     // build 107 — the sheet travels WITH the handoff. It used to be read back
     // out of the shared active slot, so a second handoff overwrote the first.
-    api('handoff_start', { note: note, to: 'Kelly', item_count: count, invoice: inv })
+    // build 132 — from_handoff closes the row this sheet ARRIVED on. Handing on
+    // a sheet that was handed to you otherwise leaves the old row open forever
+    // and the waiting count never comes down.
+    api('handoff_start', { note: note, to: 'Kelly', item_count: count, invoice: inv, from_handoff: _openHandoffId || '' })
     .then(function(r){
       if (r.error) { toast(r.error); return; }
+      _openHandoffId = null; _openHandoffRow = null; renderHandoffActions();
       _handoff = { id:r.id, state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:'Kelly',
                    note:note, item_count:count, started_at:r.started_at };
       renderHandoffBanner();
       // Say which channels actually fired. "Sent" when nothing was configured
       // is the lie that makes a notification system untrustworthy.
-      var d = r.delivery || {};
-      var bits = [];
-      if (d.sms === 'sent') bits.push('texted');
-      else if (d.sms && d.sms !== 'not configured') bits.push('text ' + d.sms);
-      if (/sent/.test(String(d.push || ''))) bits.push('pushed');
-      else if (d.push && d.push !== 'not configured') bits.push('push: ' + d.push);
+      var bits = _deliveryWords(r.delivery);
       toast(bits.length ? 'Handed off \u2014 ' + bits.join(', ') + '.'
                         : 'Handed off. NOTHING WAS SENT \u2014 no text or push is set up yet, so tell her yourself.');
       _handoffTextLink(count);
@@ -3227,12 +3303,85 @@ function handoffFinish(cancelled){
   api('handoff_done', { id: id, cancelled: !!cancelled })
   .then(function(r){
     if (r.error) { toast(r.error); return; }
-    if (_openHandoffId === id) _openHandoffId = null;
-    if (_handoff && _handoff.id === id) { _handoff = null; renderHandoffBanner(); }
+    if (_openHandoffId === id) { _openHandoffId = null; _openHandoffRow = null; renderHandoffActions(); }
+    if (_handoff && _handoff.id === id) { _handoff = null; }
+    // build 132 — re-read rather than patch the local copy. The queue is the
+    // truth and it has just changed; guessing at the new state on the client is
+    // how a banner ends up describing a sheet that is no longer there.
+    sbGetActive(function(){});
     toast(cancelled ? 'Handoff cancelled.' : 'Done \u2014 that sheet is no longer waiting on anyone.');
     if (el('ktab-handoff') && el('ktab-handoff').style.display !== 'none') loadHandoffs();
   })
   .catch(function(e){ toast(e.message); });
+}
+
+/* ── build 132 — SEND IT BACK ─────────────────────────────────────────
+   The return trip. mode 'review' means finished, have a look before it goes
+   live. mode 'question' means not finished, stuck, needs an answer. Both write
+   a NEW queue row addressed to whoever sent the sheet, carrying the sheet as it
+   stands right now, and close the row it came in on. */
+function handoffReturn(mode){
+  if (!_openHandoffId) { toast('No handed-over sheet is open.'); return; }
+  var q = (mode === 'question');
+  var them = (_openHandoffRow && _openHandoffRow.from_name) || 'them';
+  var note = prompt(q ? ('What do you need to ask ' + them + '?')
+                      : ('Anything to tell ' + them + ' about these? (optional)'), '');
+  if (note === null) return;                      // backed out
+  note = String(note).trim();
+  // A question with no question in it is a notification that wastes a trip.
+  if (q && !note) { toast('Type the question first \u2014 nothing was sent.'); return; }
+
+  var inv = collectCurrentInvoice() || currentInvoice;
+  var count = 0;
+  ((inv && inv.styles) || []).forEach(function(st){ count += ((st.colors || []).length || 1); });
+
+  showStatus('handoff-action-status','loading','<span class="spinner"></span>Sending it back\u2026');
+  api('handoff_return', { id: _openHandoffId, mode: (q ? 'question' : 'review'), note: note,
+                          invoice: inv, item_count: count })
+  .then(function(r){
+    if (r.error) { showStatus('handoff-action-status','error', esc(r.error)); return; }
+    var bits = _deliveryWords(r.delivery);
+    showStatus('handoff-action-status','success',
+      '\u2713 ' + (q ? 'Question sent to ' : 'Sent back to ') + esc(r.to_name || them) +
+      (bits.length ? ' \u2014 ' + esc(bits.join(', ')) + '.'
+                   : '. NOTHING WAS SENT \u2014 no text or push is set up yet, so tell ' + esc(them) + ' yourself.'));
+    // It is no longer mine. Clear the screen rather than leaving an editable
+    // copy of a sheet that now belongs to somebody else.
+    _openHandoffId = null; _openHandoffRow = null;
+    currentInvoice = null;
+    renderHandoffActions();
+    setAutosave('');
+    if (el('pricing-section')) el('pricing-section').style.display = 'none';
+    if (el('kel-empty')) el('kel-empty').style.display = 'block';
+    sbGetActive(function(){});
+    kelTab('handoff');
+  })
+  .catch(function(e){ showStatus('handoff-action-status','error', esc(e.message)); });
+}
+
+// The bar under the cards. Present only while a queued sheet is open, and it
+// names the person rather than saying "the sender" — the whole point of the
+// handoff is that the arrangement stops living in somebody's head.
+function renderHandoffActions(){
+  var box = el('handoff-actions');
+  if (!box) return;
+  if (!_openHandoffId || !_openHandoffRow) { box.style.display = 'none'; return; }
+  var r  = _openHandoffRow;
+  var st = String(r.state || 'needs_pricing');
+  var them = String(r.from_name || '').trim() || 'whoever sent it';
+  box.style.display = 'block';
+  el('ha-title').innerHTML =
+      (st === 'question')     ? ('Question from ' + esc(them))
+    : (st === 'needs_review') ? ('Sent back by ' + esc(them) + ' for review')
+    : ('Sent to you by ' + esc(them));
+  el('ha-note').innerHTML =
+      (st === 'needs_pricing')
+        ? ('Name and price these, then send the sheet back to ' + esc(them) +
+           ' \u2014 or close it out yourself if you have already pushed it to Shopify. ' +
+           'Everything you type saves into this sheet only.')
+        : ('Everything you type saves into this sheet only. Send it on when you are done, or close it out.');
+  el('ha-review').innerHTML   = 'Send back to ' + esc(them);
+  el('ha-question').innerHTML = 'Question for ' + esc(them);
 }
 
 /* ── build 102 — PUSH, per device ─────────────────────────────────────
@@ -3301,12 +3450,76 @@ var sheetLive = false;   // replaces the old live-bar DOM check — true while t
 
 // D1-backed persistence (same actions as before, now authenticated)
 var _handoff = null, _handoffPending = false, _handoffOpenCount = 0;
+// build 132 — the WHOLE open queue (ids and labels, no sheet blobs), plus the
+// row for the sheet currently open on screen. "The oldest open handoff" stopped
+// being a usable answer the moment sheets could travel both ways: with one out
+// to Kelly and one back from her, the oldest row is regularly the other
+// person's, and every screen that reasoned from it reasoned about the wrong
+// sheet.
+var _handoffOpenList = [], _openHandoffRow = null;
+// build 132 — an explicit pick, parked until the LineSheet screen is up. The
+// screen loads itself on open and now routes by itself; without somewhere to
+// leave the choice, opening the screen in order to show one sheet would land on
+// whichever sheet the screen picked instead.
+var _pendingHandoffOpen = null, _pendingHandoffTab = false;
+function goToHandoff(id){ _pendingHandoffOpen = id; openView('linesheet', 'LineSheet'); }
+
+// One spelling of a name, everywhere. Access codes carry a typed name and the
+// handoff carries a typed name, and "Kelly" / "kelly " should not be two people.
+function _hName(x){ return String(x == null ? '' : x).trim().toLowerCase(); }
+
+/* build 132 — WHICH OF THESE IS WAITING ON ME.
+   Answered on the client, not the Worker, because the two facts it needs — who
+   I am and whether I can price a sheet — already live here, and teaching the
+   Worker to match a free-text name against a session would put identity
+   guessing somewhere it cannot be seen.
+   Two rules, in order. An exact name match on to_name is the sheet addressed to
+   me. Failing that, anything I did not send myself is mine — the same rule the
+   banner has used since build 105, and the one that keeps working when the
+   access code reads "Kel" and the sheet was addressed to "Kelly". */
+function _handoffMine(){
+  var me = _hName(SESSION && SESSION.name);
+  var canPrice = SESSION && (SESSION.role === 'pricer' || SESSION.role === 'admin');
+  if (!me || !canPrice) return [];
+  return (_handoffOpenList || []).filter(function(h){
+    var to = _hName(h.to_name), from = _hName(h.from_name);
+    if (to && to === me) return true;
+    return from !== me;
+  });
+}
+
+// What a state means in a sentence, in one place, so the banner, the queue and
+// the return bar cannot drift into describing the same row three ways.
+function _handoffVerb(state){
+  if (state === 'needs_review') return 'sent back for review';
+  if (state === 'question')     return 'a question';
+  return 'to name and price';
+}
+function _handoffChip(state){
+  if (state === 'needs_review') return 'FOR REVIEW';
+  if (state === 'question')     return 'QUESTION';
+  if (state === 'handed_back')  return 'passed on';
+  if (state === 'cancelled')    return 'cancelled';
+  return 'TO PRICE';
+}
+// Which channels actually fired. "Sent" when nothing was configured is the lie
+// that makes a notification system untrustworthy, so this never says it.
+function _deliveryWords(d){
+  d = d || {};
+  var bits = [];
+  if (d.sms === 'sent') bits.push('texted');
+  else if (d.sms && d.sms !== 'not configured') bits.push('text ' + d.sms);
+  if (/sent/.test(String(d.push || ''))) bits.push('pushed');
+  else if (d.push && d.push !== 'not configured' && !/suppressed/.test(String(d.push))) bits.push('push: ' + d.push);
+  return bits;
+}
 function sbGetActive(cb) {
   api('get_active')
   .then(function(res) {
     if (res.data) {
       _handoff = res.data.handoff || null;
       _handoffOpenCount = res.data.handoff_open_count || 0;   // build 107
+      _handoffOpenList  = res.data.handoff_open_list || [];   // build 132
       renderHandoffBanner();
     }
     if (res.data && res.data.invoice) {
@@ -3405,10 +3618,19 @@ function loadHandoffs(){
     if (open.length) {
       h += '<div class="sp-l" style="margin:0 0 6px;">Waiting (' + open.length + ')</div>';
       open.forEach(function(o){
+        // build 132 — which WAY it is going, and who it is waiting on. A queue
+        // that shows six identical rows when three are outbound and three came
+        // back is a queue you have to open every row of to read.
+        var chip = _handoffChip(o.state);
+        var back = (o.state === 'needs_review' || o.state === 'question');
         h += '<div class="code-row" style="cursor:pointer;align-items:flex-start;" data-open="' + esc(o.id) + '">' +
                '<div style="flex:1;">' +
-                 '<div style="font-size:14px;">' + esc(o.vendor || 'Sheet') + ' &#183; ' + (o.item_count || 0) + ' item' + (o.item_count === 1 ? '' : 's') + '</div>' +
-                 '<div style="font-size:11px;color:var(--gray-text);margin-top:2px;">from ' + esc(o.from_name || '') + ' &#183; ' + esc(when(o.started_at)) +
+                 '<div style="font-size:14px;">' +
+                   '<span style="display:inline-block;font-size:9px;letter-spacing:.08em;padding:2px 6px;margin-right:6px;border-radius:2px;vertical-align:1px;' +
+                     (back ? 'background:#111;color:#fff;' : 'background:#eee;color:#555;') + '">' + esc(chip) + '</span>' +
+                   esc(o.vendor || 'Sheet') + ' &#183; ' + (o.item_count || 0) + ' item' + (o.item_count === 1 ? '' : 's') + '</div>' +
+                 '<div style="font-size:11px;color:var(--gray-text);margin-top:2px;">from ' + esc(o.from_name || '') +
+                   (o.to_name ? ' &#8594; ' + esc(o.to_name) : '') + ' &#183; ' + esc(when(o.started_at)) +
                    (o.note ? ' &#183; &ldquo;' + esc(o.note) + '&rdquo;' : '') + '</div>' +
                '</div>' +
                '<button type="button" class="btn btn-shopify" style="width:auto;padding:6px 12px;margin:0;font-size:12px;">Open</button>' +
@@ -3422,7 +3644,9 @@ function loadHandoffs(){
                '<div style="flex:1;">' +
                  '<div style="font-size:13px;">' + esc(o.vendor || 'Sheet') + ' &#183; ' + (o.item_count || 0) + ' item' + (o.item_count === 1 ? '' : 's') + '</div>' +
                  '<div style="font-size:11px;color:var(--gray-text);margin-top:2px;">' +
-                   (o.state === 'cancelled' ? 'cancelled' : ('done by ' + esc(o.finished_by || ''))) +
+                   (o.state === 'cancelled' ? 'cancelled'
+                     : o.state === 'handed_back' ? ('passed on by ' + esc(o.finished_by || ''))
+                     : ('done by ' + esc(o.finished_by || ''))) +
                    ' &#183; ' + esc(when(o.finished_at)) + '</div>' +
                '</div></div>';
       });
@@ -3444,15 +3668,29 @@ function openHandoff(id){
     var d = r.data || {};
     if (!d.invoice || !(d.invoice.styles||[]).length) throw new Error('That handoff has no items on it.');
     _openHandoffId = d.id;
+    _openHandoffRow = d;            // build 132 — the return bar reads this
     currentInvoice = d.invoice;
     sheetLive = false;
     kelTab('invoice');
     renderKelCards(currentInvoice);
     try { _renderVendorField(currentInvoice); } catch (e) {}
-    // Put it in the active slot too, so autosave and the push work exactly as
-    // they always have. The snapshot in the queue stays untouched as the record.
-    sbSetActive(false, currentInvoice, function(){});
-    showStatus('extract-status','success','\u2713 Opened ' + esc(d.vendor || 'the sheet') + ' from ' + esc(d.from_name || '') + '. Fill in the names and prices, then push to Shopify and mark it done.');
+    renderHandoffActions();
+    // build 132 — THE LINE THAT USED TO BE HERE IS THE BUG.
+    //
+    // It read: sbSetActive(false, currentInvoice, ...) — copy this sheet into
+    // the active slot "so autosave and the push work exactly as they always
+    // have". There is exactly ONE active_invoice row per store, so that made
+    // every opened handoff overwrite whatever the other person had in progress,
+    // and every autosave after it kept overwriting. Brian pricing an invoice on
+    // his computer and Kelly opening a handed-over sheet on her phone were
+    // writing to the same row, last save wins — and because the app LOADS that
+    // row on open, tapping the notification landed on whichever invoice had been
+    // touched most recently rather than on the sheet the notification was about.
+    // That is the reported fault, exactly.
+    //
+    // The sheet now stays in its own queue row and saves there (handoff_save).
+    // The active slot is left alone for whoever is actually using it.
+    showStatus('extract-status','success','\u2713 Opened ' + esc(d.vendor || 'the sheet') + ' from ' + esc(d.from_name || '') + '. Everything you type saves into this sheet only \u2014 it cannot land on anyone else\u2019s invoice. Send it back when you are done.');
     try { el('pricing-section').scrollIntoView({ behavior:'smooth' }); } catch (e) {}
   })
   .catch(function(e){ toast(e.message); });
@@ -3469,22 +3707,59 @@ function loadActiveInvoiceForKel() {
   // she had just been sent and cleared the active slot before she could look at
   // it — showing her an empty page with no explanation. Nothing was lost (it
   // went to Archive) but the handoff was, every single time.
+  //
+  // build 132 — AND THIS IS WHERE THE WRONG INVOICE CAME FROM.
+  //
+  // Build 106 added the exception above as `if (waiting && hasSheet) load
+  // row.invoice` — where row.invoice is the STORE-WIDE ACTIVE SLOT, one row for
+  // everybody. So the moment anything was waiting, this screen loaded whatever
+  // sheet had been saved into that slot last, by anybody, on any device. Kelly
+  // tapped the notification about the sheet she had been sent and got the
+  // invoice Brian happened to be working on at his computer, because his
+  // autosave had written the shared row more recently than her handoff had.
+  //
+  // A sheet that is waiting on ME is now loaded from ITS OWN snapshot, by id.
+  // One waiting: open it. More than one: show the queue and let the person
+  // choose, rather than picking for them and being wrong half the time. The
+  // active slot is only ever consulted when nothing is waiting on me at all.
   currentInvoice = null;
+  _openHandoffId = null; _openHandoffRow = null; renderHandoffActions();
   el('kel-empty').style.display = 'block';
   el('pricing-section').style.display = 'none';
+
+  // An explicit pick beats anything worked out here.
+  if (_pendingHandoffOpen) {
+    var _pid = _pendingHandoffOpen; _pendingHandoffOpen = null; _pendingHandoffTab = false;
+    sbGetActive(function(){});          // keeps the banner current
+    openHandoff(_pid);
+    return;
+  }
+  if (_pendingHandoffTab) {
+    _pendingHandoffTab = false;
+    sbGetActive(function(){});
+    kelTab('handoff');
+    return;
+  }
+
   sbGetActive(function(row) {
     sheetLive = !!(row && row.published);
     var _hasSheet = !!(row && row.invoice && (row.invoice.styles||[]).length);
-    // sbGetActive refreshes _handoff before this callback runs.
-    var _waiting  = !!(_handoff && _handoff.state === 'needs_pricing');
-    if (_waiting && _hasSheet) {
-      currentInvoice = row.invoice;
-      kelTab('invoice');
-      renderKelCards(currentInvoice);
-      try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
-      return;
-    }
+    // sbGetActive refreshes _handoff and _handoffOpenList before this runs.
+    var _mine = _handoffMine();
+    if (_mine.length === 1) { openHandoff(_mine[0].id); return; }
+    if (_mine.length > 1)   { kelTab('handoff'); return; }
     if (_hasSheet) {
+      // build 106, kept: a sheet still out for pricing is not leftovers. The
+      // sender reopening this screen should still see what he handed over, not
+      // an empty page — the snapshot in the queue is the record, this is just
+      // his copy of it.
+      if (_handoffOpenCount > 0) {
+        currentInvoice = row.invoice;
+        kelTab('invoice');
+        renderKelCards(currentInvoice);
+        try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
+        return;
+      }
       sbArchiveInvoice(row.invoice, function(){});
       if (!row.published) sbSetActive(false, null, function(){});
     }
@@ -3960,6 +4235,19 @@ function saveCurrentInvoice() {
   if (!inv) return;
   currentInvoice = inv;
   setAutosave('saving');
+  // build 132 — a sheet opened from the Handoffs tab saves into ITS OWN row and
+  // never into the store-wide active slot. This is the other half of the
+  // collision fix: without it every keystroke here would still be overwriting
+  // whatever the other person has open.
+  if (_openHandoffId) {
+    api('handoff_save', { id: _openHandoffId, invoice: inv })
+    .then(function(r){
+      if (r && r.error) { setAutosave('unsaved'); toast(r.error); return; }
+      setAutosave('saved');
+    })
+    .catch(function(e){ console.error('handoff_save error:', e); setAutosave('unsaved'); });
+    return;
+  }
   var published = sheetLive;
   var syncArchive = _vendorArchiveSync; _vendorArchiveSync = false;
   sbSetActive(published, inv, function(ok) {
