@@ -913,6 +913,16 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div id="man-rows"></div>
           <div id="man-next" style="font-size:12px;color:var(--gray-text);margin-top:12px;display:none;"></div>
           <button class="btn btn-black" id="man-start-btn" style="margin-top:10px;opacity:0.4;cursor:not-allowed;" disabled onclick="manualStart()">Review &amp; publish &#8594;</button>
+          <!-- build 138 — the other two endings. "Review & publish" was the only
+               way out of this form, which made every manual entry a trip to the
+               push screen even when the next step was to stop, or to hand the
+               sheet to whoever prices it. Both sit under it, both gated on the
+               same "is this row complete" check, and both build the sheet first
+               so the cards exist before anything is saved or sent. -->
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-outline" id="man-save-btn" style="flex:1;margin:0;opacity:0.4;cursor:not-allowed;" disabled onclick="manualSave(this)">Save</button>
+            <button class="btn btn-shopify hoff-label" id="man-handoff-btn" data-arrow="1" style="flex:1;margin:0;opacity:0.4;cursor:not-allowed;" disabled onclick="manualSendToKelly()">Send to Kelly &#8594;</button>
+          </div>
           <!-- build 92 — a way out. Backing out of the whole tab was the only
                way to start over; this empties the pane and leaves one clean row. -->
           <button class="btn btn-outline" id="man-reset-btn" style="margin-top:8px;font-size:11px;" onclick="manualClearAll(this)">Clear &amp; start over</button>
@@ -975,7 +985,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
           <div style="display:flex;gap:10px;margin-top:12px;">
             <button class="btn btn-outline" onclick="saveCurrentInvoice(true)" style="flex:1;">Save</button>
-            <button class="btn btn-shopify" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
+            <button class="btn btn-shopify hoff-label" id="kel-handoff-btn" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
             <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
           </div>
           <div id="bottom-save-status" style="font-size:11px;color:#666;margin-top:6px;text-align:center;"></div>
@@ -1516,7 +1526,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 137</strong> &#183; 2026-08-14 &#183; SEND TO KELLY, AND SAVE, FROM THE BOTTOM OF THE REVIEW SCREEN. Both controls lived only in the header, and that screen is long &#8212; with five products you are hundreds of pixels away from them by the time the photos are on. Handing the sheet over is the actual next step once photos are added, and it existed only on the pricing screen behind the overlay, so it meant closing out of the work to reach it. Send to Kelly SAVES FIRST and then hands over, in that order, because the photographs and SEO copy live on the review cards until a save writes them onto the sheet &#8212; handing over without saving would have sent her the invoice as it was before the photos went on, which is the exact work the handoff exists to pass along. It then closes the review screen and puts you back on the invoice, where the &quot;Waiting on Kelly&quot; banner is, rather than leaving a push screen open over a sheet that is now hers. The save confirmation now appears on whichever Save button you actually pressed. No Worker change &#8212; runs on v108. Carries build 136</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 138</strong> &#183; 2026-08-14 &#183; MANUAL ENTRY GETS SAVE AND SEND TO KELLY, AND LOSES THE WHOLESALE COST BOX. &quot;Review &amp; publish&quot; was the only way out of the Manual Entry form, so putting counts in and stopping, and putting counts and photos in and handing the sheet to whoever prices it, both meant going to the Shopify push screen and backing out of it &#8212; on the one screen where neither of those is a push. Save and Send now sit under it, gated on the same completeness check, and BOTH BUILD THE SHEET FIRST: Send hands over through the rendered cards the way build 137 does, because handing over a form that is not yet a sheet hands over nothing. The wholesale cost box is gone &#8212; optional, never sent to staff or Shopify, and in practice always empty, so it was one more money box to skip past on a phone while unpacking a box; manual styles now carry cost 0, which the pricing card has handled since build 33. And the handoff target is no longer the hardcoded string &quot;Kelly&quot;: signed in as Kelly the buttons read Send to Brian and the sheet is addressed to Brian, because a sheet Kelly addresses to Kelly waits on nobody. No Worker change &#8212; runs on v108. Carries build 137</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1562,7 +1572,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
          and it was only ever on the pricing screen behind the overlay. -->
     <div style="display:flex;gap:8px;margin:0 0 10px;">
       <button type="button" class="btn btn-outline" id="sp-save-btn-foot" style="flex:1;margin:0;" onclick="saveShopifyReview()">Save progress</button>
-      <button type="button" class="btn btn-black" id="sp-handoff-btn" style="flex:1;margin:0;" onclick="spSendToKelly()">Send to Kelly &#8594;</button>
+      <button type="button" class="btn btn-black hoff-label" id="sp-handoff-btn" data-arrow="1" style="flex:1;margin:0;" onclick="spSendToKelly()">Send to Kelly &#8594;</button>
     </div>
     <button type="button" class="btn btn-shopify" id="sp-push-all-btn" style="margin:0;" onclick="_spPushAllCards()">&#128722; Publish All to Shopify</button>
     <div class="sp-foot-row">
@@ -1790,6 +1800,7 @@ function enterApp(){
   setTimeout(function(){ el('gate').style.display='none'; }, 400);
   el('app').style.display='block';
   el('header-name').textContent = SESSION.name;
+  _syncHandoffLabels();   // build 138 — the session is what decides the target
   showMenu();
   startQueue();
 }
@@ -2016,7 +2027,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 137;   // keep in step with the footer stamp
+var APP_BUILD = 138;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3266,6 +3277,31 @@ function renderHandoffBanner(){
       '<button type="button" class="btn btn-outline" style="width:auto;padding:6px 12px;margin:0;font-size:12px;background:#fff;" onclick="handoffFinish(true)">Cancel the handoff</button>';
 }
 
+/* ── build 138 — WHO IS ON THE OTHER END ──────────────────────────────────
+   The target was the string 'Kelly', hardcoded in handoffSend and printed on
+   three buttons. That was fine while only Brian ever sent a sheet, but Kelly is
+   an admin now (the build 105 note saw this coming) and the Manual Entry form
+   is exactly where she would start one — and a sheet Kelly addresses to Kelly
+   is a sheet waiting on nobody, sitting in the queue with a notification that
+   went to her own phone.
+
+   So the target is the OTHER person. Matched on the session name, exactly, and
+   only for 'Kel'/'Kelly' — a prefix test would have sent Kelsey's sheets to
+   Brian. Everyone else, including staff and anyone new, still hands to Kelly,
+   which is the behaviour every existing button had. The Worker takes `to` as
+   free text (v108 handoffStart, 60 chars), so this needs no Worker change. */
+function _handoffTargetName(){
+  var me = _hName(SESSION && SESSION.name);
+  return /^kel(ly)?$/.test(me) ? 'Brian' : 'Kelly';
+}
+// One place, so a button can never disagree with where the sheet actually goes.
+function _syncHandoffLabels(){
+  var who = _handoffTargetName();
+  Array.prototype.forEach.call(document.querySelectorAll('.hoff-label'), function(b){
+    b.textContent = 'Send to ' + who + (b.dataset.arrow ? ' \u2192' : '');
+  });
+}
+
 // Hand it over. The sheet is saved FIRST — a notification that arrives before
 // the work does is worse than no notification.
 function handoffSend(){
@@ -3277,7 +3313,8 @@ function handoffSend(){
   // red is still on screen. Handing off is the answer to that message, not a
   // continuation of it.
   document.querySelectorAll('.p-card.p-missing').forEach(function(c){ c.classList.remove('p-missing'); });
-  var note = prompt('Anything to tell her about these? (optional)', '') || '';
+  var _to = _handoffTargetName();   // build 138
+  var note = prompt('Anything to tell ' + _to + ' about these? (optional)', '') || '';
   currentInvoice = inv;
   sbSetActive(sheetLive, inv, function(ok){
     if (!ok) { toast('Could not save the sheet — nothing was sent.'); return; }
@@ -3286,18 +3323,18 @@ function handoffSend(){
     // build 132 — from_handoff closes the row this sheet ARRIVED on. Handing on
     // a sheet that was handed to you otherwise leaves the old row open forever
     // and the waiting count never comes down.
-    api('handoff_start', { note: note, to: 'Kelly', item_count: count, invoice: inv, from_handoff: _openHandoffId || '' })
+    api('handoff_start', { note: note, to: _to, item_count: count, invoice: inv, from_handoff: _openHandoffId || '' })
     .then(function(r){
       if (r.error) { toast(r.error); return; }
       _openHandoffId = null; _openHandoffRow = null; renderHandoffActions();
-      _handoff = { id:r.id, state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:'Kelly',
+      _handoff = { id:r.id, state:'needs_pricing', from_name:(SESSION&&SESSION.name)||'', to_name:_to,
                    note:note, item_count:count, started_at:r.started_at };
       renderHandoffBanner();
       // Say which channels actually fired. "Sent" when nothing was configured
       // is the lie that makes a notification system untrustworthy.
       var bits = _deliveryWords(r.delivery);
       toast(bits.length ? 'Handed off \u2014 ' + bits.join(', ') + '.'
-                        : 'Handed off. NOTHING WAS SENT \u2014 no text or push is set up yet, so tell her yourself.');
+                        : 'Handed off. NOTHING WAS SENT \u2014 no text or push is set up yet, so tell ' + _to + ' yourself.');
       _handoffTextLink(count);
     })
     .catch(function(e){ toast('Handed off locally, but the notification failed: ' + e.message); });
@@ -6000,7 +6037,6 @@ function manualPull(){
         row.querySelector('.man-name').value.trim() ||
         row.querySelector('.man-color').value.trim() ||
         row.querySelector('.man-retail').value ||
-        row.querySelector('.man-cost').value ||
         (row.querySelector('.man-upc') && row.querySelector('.man-upc').value.trim()) ||   // build 39
         Object.keys(_manRowSizes(row)).some(function(sz){ return _manRowSizes(row)[sz] > 0; }) ||
         !!(row.querySelector('.man-sz-OS') && row.querySelector('.man-sz-OS').value);   // build 88
@@ -6132,7 +6168,7 @@ function manualOpen(){
   var opening = pane.style.display === 'none';
   pane.style.display = opening ? 'block' : 'none';
   if (opening && !el('man-rows').querySelectorAll('.man-row').length) manualAddRow();
-  if (opening) manualFormChanged();
+  if (opening) { _syncHandoffLabels(); manualFormChanged(); }
 }
 
 /* build 35 — one visible action at a time, and the app SAYS what's missing.
@@ -6173,7 +6209,7 @@ function manualFormChanged(){
   var started = !vendEmpty;
   Array.prototype.forEach.call(rows, function(row){
     if (started) return;
-    ['.man-name','.man-color','.man-retail','.man-cost','.man-upc'].forEach(function(sel){
+    ['.man-name','.man-color','.man-retail','.man-upc'].forEach(function(sel){
       var e = row.querySelector(sel); if (e && String(e.value).trim()) started = true;
     });
     var z = _manRowSizes(row);
@@ -6243,6 +6279,15 @@ function manualFormChanged(){
   btn.disabled = !ok;
   btn.style.opacity = ok ? '1' : '0.4';
   btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+  // build 138 — Save and Send ride the SAME gate. A row with no quantity on it
+  // is not a sheet, and a handoff of one is a notification with nothing behind
+  // it — the one failure mode the handoff was built to end.
+  ['man-save-btn','man-handoff-btn'].forEach(function(id){
+    var b2 = el(id); if (!b2) return;
+    b2.disabled = !ok;
+    b2.style.opacity = ok ? '1' : '0.4';
+    b2.style.cursor = ok ? 'pointer' : 'not-allowed';
+  });
   if (ok && wasDisabled) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -6321,9 +6366,12 @@ function manualAddRow(){
       _manSizeInputs('ALPHA') +
       '<button class="btn btn-outline" style="width:auto;padding:8px 10px;margin:0;font-size:12px;" onclick="this.closest(\'.man-row\').remove();manualFormChanged();">&#10005;</button>' +
     '</div>' +
-    '<div style="display:flex;gap:8px;margin-top:6px;align-items:center;">' +
-      '<div style="flex:1;"><label class="sp-l">Your wholesale cost $ (optional &#8212; only for margin tracking)</label><input type="text" inputmode="decimal" placeholder="0.00" class="field-input man-cost" onblur="manMoneyBlur(this)"/></div>' +
-    '</div>' +
+    // build 138 — the wholesale-cost box is gone from Manual Entry. It was
+    // optional, never left the app (it is stripped before Publish to Staff and
+    // never sent to Shopify), and in practice sat empty — so it was one more
+    // money box to skip past on a phone while unpacking a box. Cost on a
+    // manually entered style is simply 0 now, which the pricing card already
+    // handles: build 33 made it show units rather than a misleading $0.00.
     // build 101 — the UPC row is gone from Manual Entry. Barcodes are automatic
     // (barcode = SKU, unique per colourway and size). A manufacturer GTIN is a
     // different thing, cannot be generated, and is worth capturing only with the
@@ -6354,11 +6402,26 @@ function manualScanUpc(btn){
 function _manPhotosOnly(){ return false; }
 function manPhotosOnlyChanged(){ manualFormChanged(); }
 
-function manualStart(){
+/* ── build 138 — MANUAL ENTRY GETS SAVE AND SEND TO KELLY ─────────────────
+   Until now the only way out of the Manual Entry form was "Review & publish",
+   which builds the sheet and throws you straight onto the Shopify push screen.
+   That is one ending for three different situations. The person unpacking a box
+   often wants to put the counts in and stop (Save), or put the counts and
+   photos in and hand it to whoever prices it (Send) — neither of which is a
+   push, and both of which meant going to the push screen and backing out of it.
+   The Invoice and Archive paths have had both buttons for builds; this closes
+   the gap on the third way a sheet gets started.
+
+   All three run the SAME builder first. _manCommit turns the form into the live
+   sheet and RENDERS THE CARDS, and it has to, because handoffSend takes its
+   snapshot from collectCurrentInvoice, which reads the rendered cards — the
+   same ordering that build 137 got right on the review screen. Sending before
+   the cards exist would hand over an empty sheet. */
+function _manCommit(){
   var vendor = el('man-vendor').value.trim();
-  if (!vendor){ showStatus('man-status','error','Vendor is required (exact brand spelling).'); return; }
+  if (!vendor){ showStatus('man-status','error','Vendor is required (exact brand spelling).'); return false; }
   var rows = el('man-rows').querySelectorAll('.man-row');
-  if (!rows.length){ showStatus('man-status','error','Add at least one style row.'); return; }
+  if (!rows.length){ showStatus('man-status','error','Add at least one style row.'); return false; }
   var styles = [], bad = 0;
   // build 36 — manual style codes must be UNIQUE ACROSS SHEETS. They used to
   // restart at MAN-1 every time, so the SKU of any first manual item collided
@@ -6375,7 +6438,9 @@ function manualStart(){
     var _rowRun = (_runSel && _runSel.value) || row.dataset.run || _manRunForCategory(type);
     var color = (row.querySelector('.man-color').value.split(',')[0] || '').trim() || 'Default';   // build 99
     var retail = _manMoney(row.querySelector('.man-retail').value);            // build 92 — tolerant parse
-    var cost = _manMoney(row.querySelector('.man-cost').value) || 0;   // build 33 — optional, margin tracking only
+    // build 138 — the box is gone; read it only if an old row still has one.
+    var _costEl = row.querySelector('.man-cost');
+    var cost = _costEl ? (_manMoney(_costEl.value) || 0) : 0;
     var sizes = {};
     // build 88 — read the row's own run instead of a fixed list
     var _rowSizes = _manRowSizes(row);
@@ -6423,7 +6488,7 @@ function manualStart(){
     }
     styles.push(s);
   });
-  if (!styles.length){ showStatus('man-status','error','Every row needs at least one quantity. Name and price are optional \u2014 fill them in here or hand the sheet on.'); return; }
+  if (!styles.length){ showStatus('man-status','error','Every row needs at least one quantity. Name and price are optional \u2014 fill them in here or hand the sheet on.'); return false; }
   if (bad) showStatus('man-status','error', bad + ' row(s) skipped \u2014 a row needs at least one quantity.');
   else el('man-status').style.display = 'none';
   var d = new Date();
@@ -6444,10 +6509,38 @@ function manualStart(){
   el('kel-manual').style.display = 'none';
   resetManualPane();   // build 31 — next manual buy starts with a clean form
   setAutosave('unsaved');
-  // build 34 — prices are already set, so skip the pricing sheet and go
-  // STRAIGHT to the Shopify review screen. The sheet (with Publish to
-  // Staff) is what he lands on when he closes that screen.
-  openShopifyReview();
+  return true;
+}
+
+/* build 34 — prices are already set, so skip the pricing sheet and go STRAIGHT
+   to the Shopify review screen. The sheet (with Publish to Staff) is what he
+   lands on when he closes that screen. */
+function manualStart(){
+  if (_manCommit()) openShopifyReview();
+}
+
+/* build 138 — SAVE, and stay where you are. Deliberately NOT a trip to the push
+   screen: the whole reason for this button is that the counts are in and the
+   naming, pricing and photos are somebody else's job or a later job. It lands
+   on the pricing sheet, which is the sheet, with the counts visible — so you can
+   see what you just saved rather than being asked to publish it. */
+function manualSave(btn){
+  if (!_manCommit()) return;
+  saveCurrentInvoice(true);   // explicit — archives the sheet as well as saving it
+  var st = el('bottom-save-status');
+  if (st) { st.textContent = '\u2713 Saved \u2014 this sheet is on the Archive tab.'; setTimeout(function(){ if (st) st.textContent = ''; }, 4000); }
+  toast('Saved.');
+}
+
+/* build 138 — hand it straight over from Manual Entry.
+   Build first, THEN hand over, in that order and for the same reason build 137
+   saves before it sends: handoffSend snapshots the sheet through
+   collectCurrentInvoice, which reads the rendered cards. Calling handoffSend
+   against a form that has not been turned into a sheet yet would hand over
+   nothing at all, or worse, whatever sheet happened to be open before. */
+function manualSendToKelly(){
+  if (!_manCommit()) return;
+  handoffSend();
 }
 
 /* build 31 — clear the Manual Entry form. Keeps the C-<code> image copies
