@@ -925,6 +925,15 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         <div id="pages-summary" style="display:none;padding:10px 0;font-size:13px;font-weight:600;text-align:center;color:var(--success-fg);"></div>
         <button class="btn btn-black" id="extract-btn" onclick="extractAllPages()" disabled>Extract All with Claude</button>
         <div class="status" id="extract-status"></div>
+        <!-- build 145 — Brian: "there is no way to clear existing hung up data."
+             Correct. A chosen file, the file list and the extract message lived
+             on screen with no control that removed them, and the working area
+             resetting underneath (see loadActiveInvoiceForKel) cleared the SHEET
+             without touching any of them — so the screen went on saying "3 styles
+             extracted from 1 file" over the words "No active sheet". Shown only
+             when there is something to clear, so it is not one more button in the
+             way on an empty screen. -->
+        <button class="btn btn-outline" id="inv-clear-btn" style="display:none;margin-top:8px;font-size:11px;" onclick="clearInvoiceStaging()">Clear this screen &#8212; start fresh</button>
         <button class="btn btn-outline" onclick="manualOpen()" style="margin-top:8px;font-size:12px;">Manual Entry (No Invoice)</button>
         <div id="kel-manual" style="display:none;border:1px solid var(--gray-mid);border-radius:10px;padding:14px;margin-top:10px;" oninput="manualFormChanged()">
           <div class="field"><label class="field-label">Vendor (exact brand spelling)</label>
@@ -1555,7 +1564,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 144</strong> &#183; 2026-08-14 &#183; THE PRICE CAN BE TYPED ON THE SCREEN THAT ASKS FOR IT. Reported: opening a sheet from Archive gives you no way to edit the price. Correct, and it is the direct consequence of builds 136 and 139 landing Archive and handoff opens on Review &amp; Push: the price input has always lived on the PRICING cards behind the overlay, so the one screen you now arrive on could stamp a card NEEDS A PRICE and give you nowhere to type one, and fixing it meant leaving the photographs and copy you came there for. The price on each review card is now a field. It writes THROUGH to the pricing card behind the overlay rather than only onto itself, which is the part that had to be right: collectCurrentInvoice rebuilds every _retail by reading those pricing cards and runs on every save, every autosave and every handoff, so a price typed only here would have been read back off a card still saying $0.00 and silently reverted &#8212; the same shape as the photo bug and indistinguishable from outside. Every colourway card of the same style updates with it, since retail is per style. The footer count now recounts as you type, because filling in the last price and still being told one is missing is how a screen loses your trust. Money parsing was fixed on the way: _spParseRetail stripped every non-digit, so &quot;24,99&quot; became 2499 &#8212; a $2,499 bracelet pushed without a murmur. Survivable while the only way in was the pricing card, whose own parser has handled decimal commas since build 92; putting a money box on this screen made the gap reachable, so it now uses the same rule. &quot;$24&quot;, &quot;24,99&quot; and a stray space all land correctly, &quot;$1,299.00&quot; still reads 1299, and a mistyped -5 still fails rather than becoming $5. No Worker change &#8212; runs on v110. Carries build 143</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 145</strong> &#183; 2026-08-14 &#183; THE HANDOFFS TAB WORKS AGAIN, AND THE SCREEN CAN BE CLEARED. Build 142 added one line to the queue renderer that read &quot;res&quot; where the callback parameter is &quot;r&quot;. It threw a ReferenceError AFTER the list had been built, so the catch replaced the finished list with the words &quot;res is not defined&quot; and the row click handlers on the very next line never ran &#8212; the whole tab dead from one wrong identifier, and reading to anyone not holding the source like an empty queue. Fixed; an empty queue now clears the tab badge rather than leaving a stale count, and a real failure says the LIST failed to draw and the sheets are safe instead of showing a bare exception. Second, reported the same day: no way to clear hung-up data. Also correct. The chosen file, the file list, the extract result and the upload prompt are four elements that were only ever written to, never cleared together &#8212; and loadActiveInvoiceForKel blanks the SHEET on every entry to the screen without touching any of them, so an extraction that had just been discarded went on announcing &quot;3 styles extracted from 1 file&quot; directly above &quot;No active sheet&quot;. Two contradictory claims on one screen, which is exactly what stale data looks like. One function now clears all four, the app calls it quietly whenever it resets the working area, and a Clear this screen button appears whenever there is anything to clear. It never touches an open sheet: clearing the screen must not be a way to lose one. No Worker change &#8212; runs on v110. Carries build 144</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1767,6 +1776,10 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'
    wedges the screen. Loading/success banners behave exactly as before. */
 function showStatus(id,type,msg){
   var e=el(id);if(!e)return;
+  // build 145 — the Clear control appears the moment the invoice area has
+  // anything on it, so it can never be the case that there is something to clear
+  // and no way to clear it. Wrapped and deferred: a status write must never throw.
+  if (id === 'extract-status') { try { setTimeout(function(){ try { _syncInvClearBtn(); } catch(e2){} }, 0); } catch (e1) {} }
   e.style.display='block';e.className='status '+type;
   e.innerHTML=(type==='error')?msg+' <span style="text-decoration:underline;cursor:pointer;font-weight:600;">Dismiss</span>':msg;
   if(type==='error'){e.onclick=function(){e.style.display='none';e.onclick=null;};}
@@ -2056,7 +2069,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 144;   // keep in step with the footer stamp
+var APP_BUILD = 145;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3806,6 +3819,7 @@ function loadHandoffs(){
     var open = r.open || [], recent = r.recent || [];
     if (!open.length && !recent.length) {
       wrap.innerHTML = '<div style="font-size:13px;color:var(--gray-text);">Nothing has been handed over yet. Build a sheet on the Invoice tab, then tap <strong>Send to Kelly</strong>.</div>';
+      _archSyncHandoffCount(0);   // build 145 — an empty queue must clear the badge
       return;
     }
     var h = '';
@@ -3847,12 +3861,25 @@ function loadHandoffs(){
       });
     }
     wrap.innerHTML = h;
-    _archSyncHandoffCount((res.open || []).length);   // build 142 — from the freshest read there is
+    // build 145 — `res` was written here in build 142 against a callback whose
+    // parameter is `r`. It threw a ReferenceError AFTER the list had been built,
+    // so the catch below replaced the finished list with the words "res is not
+    // defined" and the row click handlers on the next line never ran: the whole
+    // Handoffs tab, dead, from one wrong identifier. `open` is already in scope
+    // and is the same array, so it is used directly rather than reaching for the
+    // response again.
+    _archSyncHandoffCount(open.length);
     wrap.querySelectorAll('[data-open]').forEach(function(rowEl){
       rowEl.onclick = function(){ openHandoff(rowEl.getAttribute('data-open')); };
     });
   })
-  .catch(function(e){ wrap.innerHTML = '<div style="font-size:13px;color:var(--red);">' + esc(e.message) + '</div>'; });
+  // build 145 — name the tab in the error. "res is not defined" on its own reads
+  // as "there are no handoffs" to anyone who is not holding the source.
+  .catch(function(e){
+    console.error('loadHandoffs failed:', e);
+    wrap.innerHTML = '<div style="font-size:13px;color:var(--red);">Could not load the handoff queue: ' + esc(e.message) +
+      '<br><span style="color:var(--gray-text);">Your sheets are safe \u2014 this is the list failing to draw, not the queue emptying. Pull down to reload the app and try again.</span></div>';
+  });
 }
 
 // Load ONE handed-over sheet into the working area, from its own snapshot —
@@ -3951,6 +3978,14 @@ function loadActiveInvoiceForKel() {
   _openHandoffId = null; _openHandoffRow = null; renderHandoffActions();
   el('kel-empty').style.display = 'block';
   el('pricing-section').style.display = 'none';
+  // build 145 — AND THE MESSAGE ABOVE IT. This blanks the sheet on every entry
+  // to the screen, but the invoice staging area is four other elements it never
+  // touched, so an extraction that had just been thrown away went on announcing
+  // itself: "1 file ready", "1 file selected: download.pdf", "3 styles extracted
+  // from 1 file" — sitting directly above "No active sheet". Two contradictory
+  // claims on one screen, and the reason it read as data that would not clear.
+  // Quiet: this is the app tidying up after itself, not something Brian did.
+  try { clearInvoiceStaging(true); } catch (e) { /* never block the load */ }
 
   // An explicit pick beats anything worked out here.
   if (_pendingHandoffOpen) {
@@ -5243,6 +5278,40 @@ function readFileB64(file, cb){   // raw base64, no compression — for PDFs
   } catch(err){ cb(null, null, 'Read error: ' + err.message); }
 }
 
+/* ── build 145 — EMPTY THE STAGING AREA, AND SAY SO ─────────────────────────
+   The chosen file, the file-list line, the extract result and the upload prompt
+   are four separate elements that were only ever written to, never cleared
+   together. This is the one function that clears all four, so no caller has to
+   remember the list — which is exactly how they drifted apart in the first
+   place. It deliberately does NOT touch currentInvoice: an open sheet is not
+   staging, and clearing the screen must never be a way to lose one. */
+function clearInvoiceStaging(quiet){
+  selectedFiles = [];
+  allExtractedStyles = [];
+  var fi = el('file-input'); if (fi) fi.value = '';
+  var ps = el('pages-summary'); if (ps) { ps.style.display = 'none'; ps.textContent = ''; }
+  var st = el('extract-status'); if (st) { st.style.display = 'none'; st.innerHTML = ''; }
+  var eb = el('extract-btn'); if (eb) { eb.disabled = true; eb.textContent = 'Extract All with Claude'; }
+  var ua = el('upload-area');
+  if (ua) {
+    var t = ua.querySelector('.upload-text'), hnt = ua.querySelector('.upload-hint');
+    if (t) t.textContent = 'Tap to select invoice photos or PDFs';
+    if (hnt) hnt.textContent = 'Photos or a PDF invoice — one or multiple files';
+  }
+  _syncInvClearBtn();
+  if (!quiet) toast('Cleared. Nothing was deleted \u2014 your sheets are all on the Archive tab.');
+}
+/* Shown only when there is something to clear. */
+function _syncInvClearBtn(){
+  var b = el('inv-clear-btn');
+  if (!b) return;
+  var ps = el('pages-summary'), st = el('extract-status');
+  var something = (selectedFiles && selectedFiles.length) ||
+                  (ps && ps.style.display !== 'none' && ps.textContent) ||
+                  (st && st.style.display !== 'none' && st.innerHTML);
+  b.style.display = something ? '' : 'none';
+}
+
 function handleFiles(e) {
   var raw = Array.from(e.target.files);
   el('file-input').value = '';
@@ -5259,6 +5328,7 @@ function handleFiles(e) {
     setTimeout(function(){ el('extract-status').style.display='none'; }, 3000);
   }
 
+  _syncInvClearBtn();   // build 145
   var summary = el('pages-summary');
   summary.style.display = 'block';
   summary.textContent = selectedFiles.length + ' file' + (selectedFiles.length > 1 ? 's' : '') + ' selected: ' + selectedFiles.map(function(f){
