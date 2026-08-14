@@ -1018,9 +1018,18 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
         </div>
         <div class="arch-f">
           <label class="sp-l" for="arch-sort">Sort</label>
+          <!-- build 135 — the default is now LAST TOUCHED, not the date printed
+               on the invoice. "Newest first" sorted by invoice_date, which is a
+               date a vendor typed on a piece of paper: a sheet worked on this
+               morning sat below one whose invoice was dated weeks earlier, and a
+               Valfre invoice mistyped 2028-12-12 pinned itself to the top of the
+               list permanently. Whoever opens this tab wants the sheet they were
+               just working on. Invoice date is still available, named as such. -->
           <select id="arch-sort">
-            <option value="new">Newest first</option>
-            <option value="old">Oldest first</option>
+            <option value="new">Last worked on</option>
+            <option value="scanned">Recently scanned</option>
+            <option value="invnew">Invoice date &ndash; newest</option>
+            <option value="old">Invoice date &ndash; oldest</option>
             <option value="az">Vendor A&ndash;Z</option>
           </select>
         </div>
@@ -1472,6 +1481,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 134</strong> &#183; 2026-08-14 &#183; THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED. The pricing card filled its name box from the invoice wording in preference to the name on the style, so a style you had named Farrah reopened reading DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS. That default was right in build 56, when the name on the style was a machine guess and the invoice wording was the better one; build 126 ended name invention and the order was never flipped to match. It was not cosmetic: the save reads that box back and writes it to the style, so reopening a sheet and saving it replaced every name you had typed with the invoice wording, and once saved there was nothing to recover it from. The box now shows the name a person put there and falls back to the invoice wording only when nothing has been typed, which is exactly the case the old default was written for. A renamed style also stops claiming the badge &quot;Name as printed on the invoice&quot; and says &quot;Your name&quot; instead. ALSO, hardening rather than a reported fault: whether saved SEO copy is treated as stale is decided by comparing the vendor it was written for against the sheet vendor, and on a private-label sheet those are two different names reconciled only after the private-label list has loaded from the server. Reaching the review screen before that arrived read it as a vendor change, dropped the copy, and blanked it in the record on the next save. The comparison now accepts either name, so a slow fetch can no longer destroy copy. No Worker change &#8212; runs on v108. Carries build 133
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 132</strong> &#183; 2026-08-14 &#183; THE HANDOFF GOES BOTH WAYS, AND THE NOTIFICATION LANDS ON THE RIGHT SHEET. Two faults, one cause: there is exactly ONE active-sheet row per store, and build 106 made this screen load it whenever anything was waiting. So tapping the notification opened whichever invoice had been saved to that shared row most recently, by anybody, on any device &#8212; Kelly tapped a notification about the sheet she had been sent and got the invoice Brian was working on at his computer, because his autosave had written the shared row after her handoff. A sheet waiting on YOU is now opened from its own snapshot by id: one waiting opens it, more than one shows the queue so you pick rather than being picked for. Opening a queued sheet no longer copies it into the shared slot and its edits save into its own row, so two people can work two sheets at once without meeting. SEPARATELY, the way back: the only thing the person handed a sheet could say was &quot;done&quot;, so finished-look-before-it-goes-live and I-am-stuck both went back to being a text message. A bar under the cards now offers Send back for review, Ask a question, and Done &#8212; close it out. A return is a new queue row addressed to whoever sent the sheet, carrying it as priced, and the queue labels which way every row is going. The push wording is generic now rather than always saying &quot;name and price it&quot;, which was wrong on every sheet coming back; the text message still names the sheet, the person and the reason. Needs Worker v107 and the build 132 sw.js re-uploaded. Carries build 131
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 131</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL processes one product per call (worker v106). Build 130 sent 5 products per Worker invocation and hit Cloudflare&#39;s &quot;Too many subrequests&quot; cap once two 20-photo products stacked their image fetches, failing the rest of the batch. It now sends one id per call. Carries build 130 (image-alt backfill added to Store Utilities) and 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103
@@ -1504,7 +1514,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 134</strong> &#183; 2026-08-14 &#183; THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED. The pricing card filled its name box from the invoice wording in preference to the name on the style, so a style you had named Farrah reopened reading DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS. That default was right in build 56, when the name on the style was a machine guess and the invoice wording was the better one; build 126 ended name invention and the order was never flipped to match. It was not cosmetic: the save reads that box back and writes it to the style, so reopening a sheet and saving it replaced every name you had typed with the invoice wording, and once saved there was nothing to recover it from. The box now shows the name a person put there and falls back to the invoice wording only when nothing has been typed, which is exactly the case the old default was written for. A renamed style also stops claiming the badge &quot;Name as printed on the invoice&quot; and says &quot;Your name&quot; instead. ALSO, hardening rather than a reported fault: whether saved SEO copy is treated as stale is decided by comparing the vendor it was written for against the sheet vendor, and on a private-label sheet those are two different names reconciled only after the private-label list has loaded from the server. Reaching the review screen before that arrived read it as a vendor change, dropped the copy, and blanked it in the record on the next save. The comparison now accepts either name, so a slow fetch can no longer destroy copy. No Worker change &#8212; runs on v108. Carries build 133</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 135</strong> &#183; 2026-08-14 &#183; THE ARCHIVE NOW LEADS WITH WHAT YOU WORKED ON LAST. &quot;Newest first&quot; sorted by the date printed on the invoice, which is a date a vendor typed on a piece of paper, not a record of anything this app did. So a sheet worked on this morning sat fifth in the list behind invoices dated weeks earlier, and one Valfre invoice mistyped 2028-12-12 pinned itself to the top permanently. Whoever opens this tab &#8212; Kelly, most of all &#8212; wants the sheet that was just being worked on. The default is now <strong>Last worked on</strong>, which reads the timestamp the server writes every time a sheet is saved to the archive, falling back to when it was scanned and then to the invoice date for older sheets that carry neither. <strong>Recently scanned</strong> is its own option, and invoice date is still there under two entries that say plainly that is what they are. Vendor A&ndash;Z now also leads with the most recently worked sheet inside each vendor rather than an arbitrary order. Each row says &quot;worked on&quot; with the date, or the time if it was today, so the order the list is in is legible rather than something you have to take on trust &#8212; shown only when it differs from the scan, since a sheet archived the minute it was scanned has nothing to add. No Worker change &#8212; runs on v108. Carries build 134</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1997,7 +2007,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 134;   // keep in step with the footer stamp
+var APP_BUILD = 135;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -5291,13 +5301,46 @@ function _archBuildVendorOptions(){
 // "05/15/2026" from manual entry, and older sheets have none at all. Returns a
 // comparable Date, falling back to when the sheet was scanned.
 function _archDate(inv){
+  if (!inv) return null;   // build 135 — a missing row is not a crash
   var raw = String(inv.invoice_date || inv.date || '').trim();
   var m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(raw);
   if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-  m = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/.exec(raw);
-  if (m) return new Date(+m[3], +m[1] - 1, +m[2]);
+  // build 135 — the year may be TWO digits. "07/27/26" is an ordinary way to
+  // date an invoice and this regex demanded four, so it silently fell through to
+  // the scan date below: the Sunday Brunch sheet dated 07/27/26 sorted and
+  // filtered as 8/13, the day it was scanned. A two-digit year reads as 20xx,
+  // which is right for every invoice this shop will ever receive.
+  // FOUR digits first in the alternation. With (\d{2}|\d{4}) the regex engine
+  // takes the first branch that matches, so "07/29/2026" matched "20" and every
+  // four-digit year silently became 2020 — which reordered the whole archive.
+  m = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4}|\d{2})(?!\d)/.exec(raw);
+  if (m) {
+    var y = +m[3];
+    if (m[3].length === 2) y += 2000;
+    return new Date(y, +m[1] - 1, +m[2]);
+  }
   if (inv.created_at) { var d = new Date(inv.created_at); if (!isNaN(d.getTime())) return d; }
   return null;
+}
+
+/* build 135 — WHEN WAS THIS SHEET LAST TOUCHED.
+   _archDate answers a different question — what date is printed on the invoice —
+   and that is the wrong question for "show me what I was just working on". The
+   archive row carries updated_at (rewritten on every archive write) and
+   created_at (when the sheet was scanned in), and both are real timestamps
+   written by the Worker rather than transcribed off a vendor's paperwork. */
+function _archStamp(inv, which){
+  var order = (which === 'scanned')
+    ? [inv && inv.created_at, inv && inv.updated_at]
+    : [inv && inv.updated_at, inv && inv.created_at];
+  for (var i = 0; i < order.length; i++) {
+    if (!order[i]) continue;
+    var d = new Date(order[i]);
+    if (!isNaN(d.getTime())) return d;
+  }
+  // Nothing stamped: fall back to the invoice date so a pre-timestamp sheet
+  // still lands somewhere sensible instead of at the very bottom forever.
+  return _archDate(inv);
 }
 
 function archApplyFilters(){
@@ -5324,10 +5367,23 @@ function archApplyFilters(){
     if (sort === 'az') {
       var c = String(a.vendor||'').localeCompare(String(b.vendor||''), undefined, { sensitivity:'base' });
       if (c) return c;
+      // build 135 — inside one vendor, still lead with what was worked on last.
+      var va = _archStamp(a), vb = _archStamp(b);
+      return (vb ? vb.getTime() : 0) - (va ? va.getTime() : 0);
     }
-    var da = _archDate(a), db = _archDate(b);
+    // build 135 — 'new' and 'scanned' read the Worker's own timestamps; the two
+    // invoice-date orders read the date printed on the paperwork. They are
+    // different questions and the menu now says which one it is answering.
+    var byStamp = (sort === 'new' || sort === 'scanned');
+    var da = byStamp ? _archStamp(a, sort) : _archDate(a);
+    var db = byStamp ? _archStamp(b, sort) : _archDate(b);
     var ta = da ? da.getTime() : 0, tb = db ? db.getTime() : 0;
-    return sort === 'old' ? ta - tb : tb - ta;
+    if (ta !== tb) return sort === 'old' ? ta - tb : tb - ta;
+    // A tie on the sort key is common (a sheet scanned and archived in the same
+    // second). Break it on the other stamp so the order is at least stable
+    // between renders rather than left to the sort's whim.
+    var fa = _archStamp(a), fb = _archStamp(b);
+    return (fb ? fb.getTime() : 0) - (fa ? fa.getTime() : 0);
   });
 
   var note = rows.length + ' of ' + _archAll.length + ' sheet' + (_archAll.length === 1 ? '' : 's');
@@ -5402,6 +5458,21 @@ function renderArchiveList(invoices, liveNum) {
     // show scanned date only when it adds info (a printed invoice date exists,
     // so `when` isn't already the scan date)
     if (scannedOn && hadPrintedDate) metaBits.push('scanned ' + scannedOn);
+    // build 135 — say when it was last worked on, so the order the list is in is
+    // legible instead of mysterious. Only when it actually adds something: a
+    // sheet archived once, the minute it was scanned, has nothing to add here.
+    if (inv.updated_at) {
+      var udt = new Date(inv.updated_at);
+      var cdt = inv.created_at ? new Date(inv.created_at) : null;
+      var moved = !cdt || isNaN(cdt.getTime()) || Math.abs(udt.getTime() - cdt.getTime()) > 6e4;
+      if (!isNaN(udt.getTime()) && moved) {
+        var today = new Date();
+        var sameDay = udt.getFullYear() === today.getFullYear() && udt.getMonth() === today.getMonth() && udt.getDate() === today.getDate();
+        metaBits.push('worked on ' + (sameDay
+          ? 'today ' + udt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+          : (udt.getMonth()+1)+'/'+udt.getDate()+'/'+udt.getFullYear()));
+      }
+    }
     metaBits.push((inv.styles||[]).length + (((inv.styles||[]).length===1)?' style':' styles'));
     if (namesTxt) metaBits.push(namesTxt);
     // build 33 — sheets entered without wholesale costs show units instead of a misleading $0.00
