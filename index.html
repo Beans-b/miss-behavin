@@ -974,7 +974,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="action-title">Ready to share?</div>
           <div class="action-note">Staff will see style names and retail prices only &#8212; no wholesale costs.</div>
           <div style="display:flex;gap:10px;margin-top:12px;">
-            <button class="btn btn-outline" onclick="saveCurrentInvoice()" style="flex:1;">Save</button>
+            <button class="btn btn-outline" onclick="saveCurrentInvoice(true)" style="flex:1;">Save</button>
             <button class="btn btn-shopify" onclick="handoffSend()" style="flex:1;">Send to Kelly</button>
             <button class="btn btn-black" onclick="publishToStaff()" style="flex:2;">Publish to Staff</button>
           </div>
@@ -1472,6 +1472,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 </div><!-- /app -->
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 132</strong> &#183; 2026-08-14 &#183; THE HANDOFF GOES BOTH WAYS, AND THE NOTIFICATION LANDS ON THE RIGHT SHEET. Two faults, one cause: there is exactly ONE active-sheet row per store, and build 106 made this screen load it whenever anything was waiting. So tapping the notification opened whichever invoice had been saved to that shared row most recently, by anybody, on any device &#8212; Kelly tapped a notification about the sheet she had been sent and got the invoice Brian was working on at his computer, because his autosave had written the shared row after her handoff. A sheet waiting on YOU is now opened from its own snapshot by id: one waiting opens it, more than one shows the queue so you pick rather than being picked for. Opening a queued sheet no longer copies it into the shared slot and its edits save into its own row, so two people can work two sheets at once without meeting. SEPARATELY, the way back: the only thing the person handed a sheet could say was &quot;done&quot;, so finished-look-before-it-goes-live and I-am-stuck both went back to being a text message. A bar under the cards now offers Send back for review, Ask a question, and Done &#8212; close it out. A return is a new queue row addressed to whoever sent the sheet, carrying it as priced, and the queue labels which way every row is going. The push wording is generic now rather than always saying &quot;name and price it&quot;, which was wrong on every sheet coming back; the text message still names the sheet, the person and the reason. Needs Worker v107 and the build 132 sw.js re-uploaded. Carries build 131
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 131</strong> &#183; 2026-08-13 &#183; IMAGE-ALT BACKFILL processes one product per call (worker v106). Build 130 sent 5 products per Worker invocation and hit Cloudflare&#39;s &quot;Too many subrequests&quot; cap once two 20-photo products stacked their image fetches, failing the rest of the batch. It now sends one id per call. Carries build 130 (image-alt backfill added to Store Utilities) and 129 (LABELS PRINT CORRECTLY). Build 128 sized the label right but still printed it misaligned and clipped, because the print CSS itself was wrong and had been since long before any of this. It hid the app with visibility:hidden, which leaves every hidden box still occupying layout, and made #print-area position:fixed at width:100%. On a 1in x 2-1/8in page that broke three ways: a fixed element cannot paginate, so page-break-after was ignored; width:100% resolved to the 1in page while each label is itself 1in, so the grid padding pushed every label past the edge; and the rest of the app still contributed to the page box. The app is now display:none while printing, #print-area is an ordinary static block with no padding, and it is reparented to body first &#8212; it sits three levels inside staff-content, so hiding top-level siblings would otherwise have hidden its own ancestor and printed nothing. Verified by rendering the actual PRINT output to PDF, not the screen: three labels produce three pages of exactly 1.000in x 2.127in, one label per page, all content inside the trim, no browser header or page numbers. Every previous attempt was checked on screen only, which is why the sizing looked right and printed wrong. Carries build 128 (DYMO 30336 labels, inlined barcode library, refuses to print unscannable labels), 127 (style codes no longer overlap the product name; ACCESSORYS fixed) and 126 (extraction stops guessing style names). Needs Worker v103
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 125</strong> &#183; 2026-08-11 &#183; A style already in Shopify is treated as a reorder: the same-name warning looks the product up and offers Add Inventory, Push as New, or Skip. Every review card gained an X to drop it from this push. Fixed a restock that only ever sent XS-XL and OS (dropping every waist and shoe size) and reported success even when every line failed, plus the async save that blanked stored SEO copy. Needs Worker v102. Carries build 124
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 121</strong> &#183; 2026-08-07 &#183; TWO BULK BUTTONS on Review &amp; Push. &#8595; Get Images &amp; Fabric for All Products sits above the product list and fetches vendor photos/fabric for every product that does not already have one, one at a time so it is gentle on the vendor-site lookups &#8212; a card whose match is ambiguous still raises its own picker and the run just moves past it rather than stalling. Publish All to Shopify sits at the bottom and pushes every ready product live, one at a time (never in parallel &#8212; each push is immediate and irreversible, so nothing should be firing at once). Anything already in Shopify, by SKU or by matching name, is deliberately NOT auto-resolved &#8212; it is left sitting on its own Decide button exactly as a single push already leaves it, because add-inventory vs. skip vs. view is a call only a person should make. Both ask for a one-tap confirmation before running and report a summary (pushed / already had photos / need a look / need your decision) when done. No Worker change. Carries build 120
@@ -1502,7 +1503,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 132</strong> &#183; 2026-08-14 &#183; THE HANDOFF GOES BOTH WAYS, AND THE NOTIFICATION LANDS ON THE RIGHT SHEET. Two faults, one cause: there is exactly ONE active-sheet row per store, and build 106 made this screen load it whenever anything was waiting. So tapping the notification opened whichever invoice had been saved to that shared row most recently, by anybody, on any device &#8212; Kelly tapped a notification about the sheet she had been sent and got the invoice Brian was working on at his computer, because his autosave had written the shared row after her handoff. A sheet waiting on YOU is now opened from its own snapshot by id: one waiting opens it, more than one shows the queue so you pick rather than being picked for. Opening a queued sheet no longer copies it into the shared slot and its edits save into its own row, so two people can work two sheets at once without meeting. SEPARATELY, the way back: the only thing the person handed a sheet could say was &quot;done&quot;, so finished-look-before-it-goes-live and I-am-stuck both went back to being a text message. A bar under the cards now offers Send back for review, Ask a question, and Done &#8212; close it out. A return is a new queue row addressed to whoever sent the sheet, carrying it as priced, and the queue labels which way every row is going. The push wording is generic now rather than always saying &quot;name and price it&quot;, which was wrong on every sheet coming back; the text message still names the sheet, the person and the reason. Needs Worker v107 and the build 132 sw.js re-uploaded. Carries build 131</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1995,7 +1996,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 132;   // keep in step with the footer stamp
+var APP_BUILD = 133;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3760,8 +3761,15 @@ function loadActiveInvoiceForKel() {
         try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
         return;
       }
-      sbArchiveInvoice(row.invoice, function(){});
-      if (!row.published) sbSetActive(false, null, function(){});
+      // build 133 — WAIT for the archive write before clearing the slot. These
+      // two fired together, so a failed archive write left the sheet in neither
+      // place: gone from the active slot, never written to the archive. It is
+      // also why the Archive tab could be opened a moment later and still show
+      // the old copy. Nothing is cleared until the archive says it has it.
+      sbArchiveInvoice(row.invoice, function(okA){
+        if (okA && !row.published) sbSetActive(false, null, function(){});
+        else if (!okA) toast('Could not file that sheet in the Archive, so it has been left where it was.');
+      });
     }
   });
 }
@@ -4194,7 +4202,9 @@ function setAutosave(state) {
 function scheduleAutosave() {
   setAutosave('unsaved');
   if (autosaveTimer) clearTimeout(autosaveTimer);
-  autosaveTimer = setTimeout(saveCurrentInvoice, 1500);
+  // build 133 — wrapped, so the explicit flag can never arrive by accident from
+  // a timer argument. An autosave writes the active sheet only.
+  autosaveTimer = setTimeout(function(){ saveCurrentInvoice(); }, 1500);
 }
 
 function collectCurrentInvoice() {
@@ -4230,7 +4240,19 @@ function collectCurrentInvoice() {
 }
 
 var _vendorArchiveSync = false;   // build 86
-function saveCurrentInvoice() {
+/* build 133 — THE ARCHIVE COPY WAS NEVER UPDATED BY A SAVE.
+   THE BUG, reported 2026-08-14: "when we open the archived invoice saved
+   progress there are no images and the new titles and names i saved are not
+   there its the original invoice." Exactly right. This function wrote the ACTIVE
+   sheet and then archived only `if (published || syncArchive)` — so the archive
+   row was refreshed on Publish to Staff, on a vendor correction, on Close Sheet,
+   and when the LineSheet screen tidied a leftover away, but never on Save. Press
+   Save, walk to another device, open the sheet from Archive, and you are reading
+   whatever the archive last happened to be given: the original.
+   An EXPLICIT save now writes both. The 1.5-second autosave still writes only
+   the active sheet, because archiving on every pause in typing is a database
+   write every second and a half for no one's benefit. Pressing Save means save. */
+function saveCurrentInvoice(explicit) {
   var inv = collectCurrentInvoice();
   if (!inv) return;
   currentInvoice = inv;
@@ -4254,7 +4276,8 @@ function saveCurrentInvoice() {
     setAutosave(ok ? 'saved' : 'unsaved');
     // build 86 — archive on publish as before, OR whenever the vendor was just
     // edited, so the archive record never drifts from the invoice.
-    if (ok && (published || syncArchive)) sbArchiveInvoice(inv, function(){});
+    // build 133 — OR whenever this was a save the owner actually asked for.
+    if (ok && (published || syncArchive || explicit)) sbArchiveInvoice(inv, function(){});
   });
 }
 
@@ -4862,8 +4885,12 @@ function closeSheet() {
   var msg = 'It stays saved under Archive — reopen it from there anytime.' + (sheetLive ? ' It is currently live for staff and will be taken down.' : '');
   showModal('Close this sheet?', msg, function() {
     closeModal();
-    sbArchiveInvoice(inv, function(){});
-    sbSetActive(false, null, function(){});
+    // build 133 — same race as the leftover path: archive first, clear only on
+    // confirmation. Closing a sheet is exactly when losing it would hurt most.
+    sbArchiveInvoice(inv, function(okA){
+      if (okA) sbSetActive(false, null, function(){});
+      else toast('Could not file that sheet in the Archive — it has been left open rather than cleared.');
+    });
     sheetLive = false;
     currentInvoice = null;
     if (autosaveTimer) clearTimeout(autosaveTimer);
@@ -6914,13 +6941,19 @@ function _spSaveAll(silent){
     cd.style = tgt;                    // re-attach so later saves stay live
     n++;
   });
-  saveCurrentInvoice();
+  // build 133 — an explicit save writes the Archive too, so the copy you reopen
+  // on another device is the copy you just saved.
+  saveCurrentInvoice(!silent);
   if (!silent) {
     var btn = el('sp-save-btn');
     if (btn) {
       var was = btn.textContent;
+      // build 133 — `dropped` now only ever counts photos uploaded BEFORE this
+      // build that are still sitting on an open card. A photo uploaded from here
+      // on is stored in R2 and saved like any other.
       btn.textContent = '\u2713 Saved ' + n + ' card' + (n === 1 ? '' : 's') +
-        (dropped ? ' (' + dropped + ' uploaded photo' + (dropped === 1 ? '' : 's') + ' not saved)' : '');
+        (dropped ? ' (' + dropped + ' older uploaded photo' + (dropped === 1 ? '' : 's') +
+                   ' could not be saved \u2014 re-upload ' + (dropped === 1 ? 'it' : 'them') + ')' : '');
       setTimeout(function(){ btn.textContent = was; }, 3200);
     }
   }
@@ -9244,6 +9277,18 @@ function _spUseCandidate(cd, cand, onDone){
 // checkbox (green tick = uploads) and an × (drop it from the list entirely),
 // with a live count above the strip. State is keyed by image URL in cd._off /
 // cd._removed so it survives a re-render, including the show-all-colors toggle.
+/* build 133 — a saved photo is stored as "r2:<key>", which is not something an
+   <img> can render. This turns it into a URL for THIS session; the ref itself is
+   what gets persisted, so a rotated session token can never strand a photo the
+   way a saved signed URL would. */
+function _spImgSrc(u){
+  var s = String(u || '');
+  if (s.indexOf('r2:') !== 0) return s;
+  return PROXY_URL + '?action=get_invoice_file&store_id=' + encodeURIComponent(STORE_ID) +
+         '&key=' + encodeURIComponent(s.slice(3)) +
+         '&token=' + encodeURIComponent((SESSION && SESSION.token) || '');
+}
+
 function _spRenderImages(cd){
   cd.els.images.innerHTML = '';
   cd._removed = cd._removed || {};
@@ -9267,7 +9312,11 @@ function _spRenderImages(cd){
     var im  = document.createElement('img');
     var box = document.createElement('span');
     var x   = document.createElement('button');
-    im.src = u;
+    // build 133 — dataset.u is the value that gets SAVED and pushed; im.src is
+    // only what this browser renders. They differ for a saved photo, and reading
+    // the wrong one back is how a stored ref would turn into a broken URL.
+    im.dataset.u = u;
+    im.src = _spImgSrc(u);
     box.className = 'sp-imgbox';
     x.type = 'button'; x.className = 'sp-imgx'; x.textContent = '×';
     x.title = 'Remove this photo (it will not upload and disappears from the list)';
@@ -9357,9 +9406,16 @@ function _spChosenImages(cd){
   var out = [];
   // build 67 — an owner-uploaded photo shows a local preview but must be PUSHED
   // as the Shopify staged resourceUrl. cd._pushUrl maps preview -> real URL.
+  // build 133 — read dataset.u, the SAVED value, not im.src, the rendered one.
+  // A stored photo renders through a tokenised Worker URL that Shopify could
+  // never fetch; the Worker resolves the "r2:" ref itself at push time. The
+  // _pushUrl map is kept for any photo uploaded before this build that is still
+  // sitting on an open card.
   var map = cd._pushUrl || {};
   if (cd.card) cd.card.querySelectorAll('.sp-images .sp-img').forEach(function(im){
-    if (im.dataset.on === '1') out.push(map[im.src] || im.src);
+    if (im.dataset.on !== '1') return;
+    var u = im.dataset.u || im.src;
+    out.push(map[u] || u);
   });
   return out;
 }
@@ -9394,16 +9450,35 @@ function _spWireDropZone(cd){
         var dataUrl = String(reader.result || '');
         var b64 = dataUrl.split(',')[1] || '';
         if (status) status.textContent = 'Uploading ' + file.name + '…';
-        api('shopify_stage_upload', { filename: file.name, mimeType: file.type, data: b64, fileSize: file.size })
+        // build 133 — THE PHOTO NOW GOES SOMEWHERE THAT SURVIVES A SAVE.
+        //
+        // It used to go straight to shopify_stage_upload, and the card kept the
+        // data: URL for the thumbnail plus the returned staged resourceUrl in
+        // cd._pushUrl — in memory, and only there. _spSnapshotCard strips every
+        // data: URL before saving (correctly: megabytes of base64 do not belong
+        // in the invoice row), so the photo was gone the moment the page closed,
+        // and the screen said so: "25 uploaded photos not saved". Keeping the
+        // staged URL instead would not have helped either — a staged upload
+        // target is temporary by design.
+        //
+        // It now goes to R2 and the card stores a short "r2:<key>" ref, which is
+        // safe to persist, carries no session token, and is resolved back to a
+        // real Shopify URL by the Worker at push time.
+        api('store_product_photo', {
+          image: b64, media_type: file.type, name: file.name,
+          invoice_number: (currentInvoice && currentInvoice.invoice_number) || '',
+          code: (cd.style && cd.style.code) || ''
+        })
         .then(function(res){
           if (res.error) throw new Error(res.error);
-          cd._pushUrl = cd._pushUrl || {};
-          cd._pushUrl[dataUrl] = res.url;        // preview -> Shopify resourceUrl
-          cd.images = (cd.images || []).concat([dataUrl]);
-          if (cd._off) delete cd._off[dataUrl];  // uploaded photos start INCLUDED
+          var ref = res.ref;
+          if (!ref) throw new Error('The photo saved but came back with no reference.');
+          cd.images = (cd.images || []).concat([ref]);
+          if (cd._off) delete cd._off[ref];      // uploaded photos start INCLUDED
           done++;
           if (done === list.length) box.classList.remove('busy');
           _spRenderImages(cd);
+          if (status) status.textContent = 'Saved ' + file.name + ' \u2014 it will still be here next time you open this sheet.';
         })
         .catch(function(e){
           failed++; done++;
