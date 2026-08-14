@@ -327,7 +327,14 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-size-cell{text-align:center;min-width:26px;}
 .sp-sz-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);}
 .sp-sz-qty{font-size:17px;font-weight:700;color:var(--black);}
-.sp-retail{font-size:22px;font-weight:700;color:var(--black);white-space:nowrap;flex-shrink:0;}
+.sp-retail{font-size:22px;font-weight:700;color:var(--black);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:1px;}
+/* build 144 — editable, and it has to LOOK editable on a phone or nobody finds
+   it. Underlined rather than boxed so it still reads as the price it replaces. */
+.sp-retail .sp-retail-input{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--black);
+  border:none;border-bottom:1px solid var(--gray-mid);background:transparent;outline:none;width:5.2em;text-align:right;
+  padding:1px 0;-webkit-appearance:none;}
+.sp-retail .sp-retail-input:focus{border-bottom-color:var(--black);}
+.sp-card[data-state="blocked"] .sp-retail .sp-retail-input{background:#fff8e6;border-bottom-color:#d97706;}
 .sp-card-foot{padding:10px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;align-items:center;}
 .sp-push-btn{flex:1;background:var(--primary);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 14px;cursor:pointer;-webkit-appearance:none;text-align:center;transition:background .15s;min-height:44px;}
 .sp-push-btn:active:not(:disabled){background:var(--primary-deep);}
@@ -1548,7 +1555,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 143</strong> &#183; 2026-08-14 &#183; TWO SHEETS SENT, TWO SHEETS IN THE ARCHIVE. Reported: two sheets sent to Kelly, only one in the Archive. Reproduced, and it was worse &#8212; NEITHER was there. Handing a sheet over wrote the ACTIVE SLOT and the queue and nothing else, and there is exactly one active slot, so the second handoff overwrote the first one&#39;s only copy outside the queue. Nothing was lost, every handoff carries its own snapshot and both were intact in the Handoffs tab, but the Archive is the list that gets read and it was empty. A handoff now files the sheet in the Archive as it sends it, fire-and-forget so a filing error can never block the handover, and it says so rather than failing silently. Second and just as load-bearing: every manual sheet built on one day numbered itself MANUAL-&lt;YYYYMMDD&gt;, and the archive upsert matches on invoice number plus vendor &#8212; so a second manual buy from the same brand on the same day was not a second sheet, it was an EDIT of the first one&#39;s row. That is why one row read &quot;1 style &#183; Zoey Bracelet- Black&quot; with &quot;(+1)&quot; hanging off it instead of showing the Black sheet and the White sheet as the two separate things they were. The sheet number now carries the time AND a random tail &#8212; seconds alone were not enough either, which the test suite caught by building two sheets inside one second and watching them merge straight back into one row. Exactly what build 140 learned for the style codes, one level up. No Worker change &#8212; runs on v110. Carries build 142</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 144</strong> &#183; 2026-08-14 &#183; THE PRICE CAN BE TYPED ON THE SCREEN THAT ASKS FOR IT. Reported: opening a sheet from Archive gives you no way to edit the price. Correct, and it is the direct consequence of builds 136 and 139 landing Archive and handoff opens on Review &amp; Push: the price input has always lived on the PRICING cards behind the overlay, so the one screen you now arrive on could stamp a card NEEDS A PRICE and give you nowhere to type one, and fixing it meant leaving the photographs and copy you came there for. The price on each review card is now a field. It writes THROUGH to the pricing card behind the overlay rather than only onto itself, which is the part that had to be right: collectCurrentInvoice rebuilds every _retail by reading those pricing cards and runs on every save, every autosave and every handoff, so a price typed only here would have been read back off a card still saying $0.00 and silently reverted &#8212; the same shape as the photo bug and indistinguishable from outside. Every colourway card of the same style updates with it, since retail is per style. The footer count now recounts as you type, because filling in the last price and still being told one is missing is how a screen loses your trust. Money parsing was fixed on the way: _spParseRetail stripped every non-digit, so &quot;24,99&quot; became 2499 &#8212; a $2,499 bracelet pushed without a murmur. Survivable while the only way in was the pricing card, whose own parser has handled decimal commas since build 92; putting a money box on this screen made the gap reachable, so it now uses the same rule. &quot;$24&quot;, &quot;24,99&quot; and a stray space all land correctly, &quot;$1,299.00&quot; still reads 1299, and a mistyped -5 still fails rather than becoming $5. No Worker change &#8212; runs on v110. Carries build 143</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2049,7 +2056,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 143;   // keep in step with the footer stamp
+var APP_BUILD = 144;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -7755,9 +7762,20 @@ function _spParseRetail(str) {
   // warning anywhere. Every caller already tests `<= 0`, so preserving the sign
   // makes a negative fail those tests instead of quietly becoming a real price.
   // Only a leading minus counts; "1-2" is still read as 1, exactly as before.
+  // build 144 — A DECIMAL COMMA IS NOT A THOUSANDS SEPARATOR. This stripped
+  // every character that was not a digit or a dot, so "24,99" became "2499" —
+  // a $2,499 bracelet, pushed without a murmur. It was survivable while the only
+  // way in was the pricing card, whose own parser (_manMoney, build 92) has
+  // handled this since June; build 144 puts a money box on the review screen and
+  // makes the gap reachable, so it is closed here with the SAME rule rather than
+  // a second one: a lone comma with one or two trailing digits is a decimal
+  // comma, anything else is a thousands separator. "$1,299.00" still reads 1299.
   var raw = String(str == null ? '' : str).trim();
   var neg = /^-/.test(raw);
-  var n = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+  var body = raw.replace(/[^0-9.,]/g, '');
+  if (body.indexOf('.') === -1 && /^\d{1,3},\d{1,2}$/.test(body)) body = body.replace(',', '.');
+  body = body.replace(/,/g, '');
+  var n = parseFloat(body) || 0;
   return neg ? -n : n;
 }
 
@@ -7869,7 +7887,16 @@ function _buildSpReview(inv) {
         '</div>' +
         '<div class="sp-card-body">' +
           '<div class="sp-size-grid">' + sizeHtml + '</div>' +
-          '<div class="sp-retail">$' + retail.toFixed(2) + '</div>' +
+          // ── build 144 — THE PRICE IS EDITABLE HERE ─────────────────────
+          // Brian: "there is no way to edit the price out when clicking from
+          // archive." Correct, and it is the direct consequence of build 136
+          // and 139 landing Archive and handoff opens on THIS screen: the price
+          // input has always lived on the pricing cards behind the overlay, so
+          // the one screen you now arrive on could tell you NEEDS A PRICE and
+          // give you nowhere to type one. Going "back to invoice" to fix it
+          // means leaving the photographs and copy you came here for.
+          '<div class="sp-retail">$<input type="text" inputmode="decimal" class="sp-retail-input" placeholder="0.00" value="' +
+            (retail > 0 ? retail.toFixed(2) : '') + '"/></div>' +
         '</div>' +
         upcHtml +
         vskuHtml +
@@ -7889,6 +7916,7 @@ function _buildSpReview(inv) {
       _spCards.push(cd);
       container.appendChild(card);
       _spWireBtn(cd);
+      _spWireRetail(cd);      // build 144 — type the price without leaving this screen
       _spWireTitleEdit(cd);   // v72 — pencil-to-edit product title
       _spWireUpc(cd);
       // v56 — vendor SKU field (all cards), prefilled from the invoice.
@@ -7925,6 +7953,89 @@ function _spMarkIncomplete(cd){
   var need = _spWhatsMissing(cd);
   if (!need.length) { if (cd.state === 'blocked') _spSetState(cd, 'idle', 'Ready', 'Push to Shopify'); return; }
   _spSetState(cd, 'blocked', 'Needs ' + need.join(' + '), 'Needs ' + need.join(' + '), 'sp-btn-warning');
+}
+
+/* ── build 144 — ONE PRICE, TWO VIEWS OF IT ──────────────────────────────────
+   The pricing card's .p-retail-input stays the source of truth and this field
+   writes THROUGH to it. That is not tidiness: collectCurrentInvoice() rebuilds
+   every style's _retail by reading the pricing cards, and it runs on every save,
+   every autosave and every handoff. A price typed only onto the review card
+   would be read back off a pricing card that still said $0.00 and silently
+   reverted — the same shape of bug as the photographs, and it would have looked
+   identical from the outside.
+
+   So each edit writes three places that must agree: the pricing input behind the
+   overlay, the live style on currentInvoice, and cd.retail (which is what the
+   push actually sends). Sibling colourway cards of the same style are refreshed
+   too, because retail is per STYLE — one price, however many colours. */
+function _spSyncRetail(cd, n){
+  var live = (currentInvoice && (currentInvoice.styles || [])[cd.styleIdx]) || cd.style;
+  var txt  = '$' + n.toFixed(2);
+  cd.retail = n;
+  if (live) live._retail = txt;
+  if (cd.style && cd.style !== live) cd.style._retail = txt;
+  // through to the pricing card, so the next collect cannot undo this
+  var pc = document.querySelector('.p-card[data-idx="' + cd.styleIdx + '"]');
+  var pi = pc && pc.querySelector('.p-retail-input');
+  if (pi) { pi.value = n > 0 ? n.toFixed(2) : ''; pi.dataset.manual = n > 0 ? 'true' : ''; }
+  // every card showing this style agrees, including the one being typed in
+  _spCards.forEach(function(o){
+    if (o.styleIdx !== cd.styleIdx) return;
+    o.retail = n;
+    if (o !== cd) {
+      var f = o.card && o.card.querySelector('.sp-retail-input');
+      if (f) f.value = n > 0 ? n.toFixed(2) : '';
+    }
+    _spMarkIncomplete(o);
+  });
+  _spRefreshEntryNote();
+  scheduleAutosave();
+}
+/* The footer line counts what is still missing, and it was written once when the
+   screen opened. Filling in the last price and still being told one needs a
+   price is how a screen loses your trust. */
+function _spRefreshEntryNote(){
+  var el2 = el('sp-progress');
+  if (!el2 || !currentInvoice) return;
+  var unnamed = 0, unpriced = 0;
+  (currentInvoice.styles || []).forEach(function(st){
+    if (!String(st.name || '').trim()) unnamed++;
+    if (_spParseRetail(st._retail) <= 0) unpriced++;
+  });
+  if (!unnamed && !unpriced) {
+    _spEntryNote = '';
+    el2.textContent = 'Tap Push on each product to go live';
+    return;
+  }
+  var bits = [];
+  if (unnamed)  bits.push(unnamed + ' still need' + (unnamed === 1 ? 's' : '') + ' a name');
+  if (unpriced) bits.push(unpriced + ' need' + (unpriced === 1 ? 's' : '') + ' a price');
+  _spEntryNote = bits.join(' \u00b7 ') + ' \u2014 those cards will not push until they are filled in' +
+    (_handoff && _handoff.state === 'needs_pricing'
+      ? ', and this sheet is still waiting on ' + (_handoff.to_name || 'Kelly') + '.'
+      : '.');
+  el2.textContent = _spEntryNote;
+}
+function _spWireRetail(cd){
+  var f = cd.card.querySelector('.sp-retail-input');
+  if (!f) return;
+  cd.retailInput = f;
+  // Typed money is messy on a phone: "$24", "24,99" and " 24.99 " all mean the
+  // same thing. _spParseRetail is the app's one parser and KEEPS a leading minus
+  // (build 136), so a mistyped -5 fails the > 0 test instead of becoming $5.
+  var read = function(){
+    var n = _spParseRetail(f.value);
+    if (!isFinite(n)) n = 0;
+    _spSyncRetail(cd, n > 0 ? n : 0);
+  };
+  f.addEventListener('input', read);
+  f.addEventListener('blur', function(){
+    var n = _spParseRetail(f.value);
+    f.value = (isFinite(n) && n > 0) ? n.toFixed(2) : '';
+    read();
+  });
+  // Enter should not submit anything on this screen; it should just commit.
+  f.addEventListener('keydown', function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); f.blur(); } });
 }
 
 function _spWireBtn(cd) {
