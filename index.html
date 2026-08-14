@@ -1526,7 +1526,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 138</strong> &#183; 2026-08-14 &#183; MANUAL ENTRY GETS SAVE AND SEND TO KELLY, AND LOSES THE WHOLESALE COST BOX. &quot;Review &amp; publish&quot; was the only way out of the Manual Entry form, so putting counts in and stopping, and putting counts and photos in and handing the sheet to whoever prices it, both meant going to the Shopify push screen and backing out of it &#8212; on the one screen where neither of those is a push. Save and Send now sit under it, gated on the same completeness check, and BOTH BUILD THE SHEET FIRST: Send hands over through the rendered cards the way build 137 does, because handing over a form that is not yet a sheet hands over nothing. The wholesale cost box is gone &#8212; optional, never sent to staff or Shopify, and in practice always empty, so it was one more money box to skip past on a phone while unpacking a box; manual styles now carry cost 0, which the pricing card has handled since build 33. And the handoff target is no longer the hardcoded string &quot;Kelly&quot;: signed in as Kelly the buttons read Send to Brian and the sheet is addressed to Brian, because a sheet Kelly addresses to Kelly waits on nobody. No Worker change &#8212; runs on v108. Carries build 137</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 139</strong> &#183; 2026-08-14 &#183; THE UPLOADED PHOTOS STOP DISAPPEARING, AND KELLY CAN SEE THEM. Reproduced against the real file rather than guessed at: build 125 taught the snapshot that a card which has not finished loading has not CLEARED anything, but it taught it only about the text boxes. The photo list had no such guard, so opening a sheet and then saving, handing it to Kelly, or simply closing the overlay before the async restore had run wrote an EMPTY photo list over the snapshot holding every uploaded photo &#8212; which is why the SEO copy came back and the pictures did not. Photos, the on/off choices and the source link now carry forward until the card has actually had its chance to load, and the two lists are unioned rather than replaced so a photo uploaded into that gap is kept as well. Second: Kelly opening a handoff landed on the pricing cards, which show neither photographs nor copy &#8212; the data was reaching her intact all along, the screen holding it just never opened. A handoff now opens the photo/SEO cards the same way Archive does. Third: Manual Entry opens that screen the same way too, with the private-label list loaded first, so the build 134 stale-copy guard cannot judge fresh copy stale. Fourth: a silent save now still files the Archive copy &#8212; suppressing the confirmation message was never meant to also skip the archive write, which left the archived sheet holding the copy from before the photographs went on. No Worker change &#8212; runs on v108. Carries build 138</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2027,7 +2027,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 138;   // keep in step with the footer stamp
+var APP_BUILD = 139;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3733,6 +3733,35 @@ function openHandoff(id){
     renderKelCards(currentInvoice);
     try { _renderVendorField(currentInvoice); } catch (e) {}
     renderHandoffActions();
+    /* ── build 139 — SHE SEES THE PHOTOGRAPHS AND THE COPY ──────────────────
+       Build 136 changed reopening from Archive to land on the photo/SEO cards
+       and deliberately left this path alone, reasoning that Kelly is here to
+       name and price and the pricing cards are that job. Brian's report says
+       that reasoning was wrong: "when i send to kelly it also needs to show her
+       the pictures and seo". It is obvious in hindsight — you cannot name a
+       garment you cannot see, and the photographs and the SEO copy are the
+       whole content of what was handed over. The pricing cards show neither.
+
+       Checked before changing it: the data was ALREADY reaching her intact —
+       the handoff snapshot carries style._review with the r2: photo refs and
+       the SEO fields. Nothing was lost in transit. It was only ever that the
+       screen holding them never opened. So this is a routing fix, not a data
+       fix, and it needed no Worker change.
+
+       Same shape as loadArchivedInvoice: deferred a tick so the pricing cards
+       are in the DOM first (openShopifyReview reads them through
+       collectCurrentInvoice, and running before they exist hands it an empty
+       sheet), and the private-label list is fetched on the way in because the
+       build 134 stale-copy guard reads it and must not be asked before it has
+       arrived. Wrapped so a failure here can never cost her the sheet. */
+    setTimeout(function(){
+      try {
+        loadPrivateLabels(function(){
+          try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
+          openShopifyReview();
+        });
+      } catch (e) { /* she still has the sheet on the pricing cards */ }
+    }, 0);
     // build 132 — THE LINE THAT USED TO BE HERE IS THE BUG.
     //
     // It read: sbSetActive(false, currentInvoice, ...) — copy this sheet into
@@ -6514,9 +6543,32 @@ function _manCommit(){
 
 /* build 34 — prices are already set, so skip the pricing sheet and go STRAIGHT
    to the Shopify review screen. The sheet (with Publish to Staff) is what he
-   lands on when he closes that screen. */
+   lands on when he closes that screen.
+   build 139 — opened the SAME way Archive opens one, which is what Brian asked
+   for ("it should be set up like when i click the archive and view or add an
+   invoice"). It was a bare openShopifyReview() call: no tick, and no private
+   labels. The missing private-label load is the one that bites — the build 134
+   stale-copy guard (_spVendorMatches) reads _privateLabels, so on a
+   private-label sheet a card could judge its own freshly written copy stale and
+   blank it. See _manOpenReview. */
 function manualStart(){
-  if (_manCommit()) openShopifyReview();
+  if (_manCommit()) _manOpenReview();
+}
+
+/* build 139 — one way in to the photo/SEO screen from Manual Entry, matching
+   loadArchivedInvoice line for line. Deferred a tick so the pricing cards are
+   in the DOM first: openShopifyReview reads them through collectCurrentInvoice
+   and would otherwise be handed an empty sheet. Wrapped so a failure here can
+   never cost the sheet that was just built. */
+function _manOpenReview(){
+  setTimeout(function(){
+    try {
+      loadPrivateLabels(function(){
+        try { _renderVendorField(currentInvoice); } catch (e) { /* cosmetic */ }
+        openShopifyReview();
+      });
+    } catch (e) { /* the sheet is on the pricing cards either way */ }
+  }, 0);
 }
 
 /* build 138 — SAVE, and stay where you are. Deliberately NOT a trip to the push
@@ -7054,6 +7106,38 @@ function _spSnapshotCard(cd, prev){
   // saved, and the count of dropped ones is reported.
   var imgs = (cd.images || []).filter(function(u){ return !/^data:/i.test(u); });
   var droppedUploads = (cd.images || []).length - imgs.length;
+  // ── build 139 — THE PHOTOS SURVIVE A SAVE THAT LANDS TOO EARLY ────────────
+  // Build 125 taught this function that a card which has not finished loading
+  // has not CLEARED anything — but it taught it only about the text boxes. The
+  // photo list had no such guard, so the sequence below destroyed uploads:
+  //
+  //   open a sheet (Archive now lands straight on this screen, build 136)
+  //   -> the restore pass is async: it waits on ensureShopifyTypes
+  //   -> press Save, or Send to Kelly (build 137 put both at the foot), or
+  //      simply close the overlay, which saves silently
+  //   -> cd.images is still the empty seed, and that empty seed is written
+  //      over the snapshot holding every uploaded photo.
+  //
+  // Reproduced against this file, not theorised: the saved r2: ref came back
+  // as [] while the SEO title survived, because the copy had the build 125
+  // guard and the photos did not.
+  //
+  // _loaded is set once the restore pass has actually run (see _spBuildCard),
+  // whether or not it found a snapshot — so it means "this card has had its
+  // chance to load", which is the real question. seoReady could not be used:
+  // a card where you upload a photo and type nothing is legitimately not ready,
+  // and guarding on it would have thrown away the new photo instead.
+  //
+  // Before that point the two lists are UNIONED rather than replaced. You
+  // cannot have removed a photo on a card that has not drawn yet, so there is
+  // nothing to honour by dropping one — while a photo uploaded into the gap is
+  // real and must be kept. Order is preserved: saved photos first.
+  if (!cd._loaded && p.images && p.images.length) {
+    var seen = {};
+    var merged = [];
+    p.images.concat(imgs).forEach(function(u){ if (u && !seen[u]) { seen[u] = 1; merged.push(u); } });
+    imgs = merged;
+  }
   return {
     // The title override is held on cd, not in a box that loads late, so it is
     // safe to write directly — but the same rule applies: a card that never
@@ -7077,10 +7161,17 @@ function _spSnapshotCard(cd, prev){
     images: imgs,
     // build 95 — the vendor page these photos came from, so a reopened card can
     // still say which link it used.
-    src_url: cd.sourceUrl || '',
-    src_label: cd.sourceLabel || '',
-    off: Object.keys(cd._off || {}).filter(function(u){ return !/^data:/i.test(u); }),
-    removed: Object.keys(cd._removed || {}).filter(function(u){ return !/^data:/i.test(u); }),
+    src_url: cd.sourceUrl || (!cd._loaded && p.src_url) || '',
+    src_label: cd.sourceLabel || (!cd._loaded && p.src_label) || '',
+    // build 139 — same rule for WHICH photos are switched off and which were
+    // removed. A card that has not loaded has made no such choice, so writing
+    // its empty sets would silently switch every deselected photo back on.
+    off: (!cd._loaded && p.off && p.off.length && !Object.keys(cd._off || {}).length)
+           ? p.off.slice()
+           : Object.keys(cd._off || {}).filter(function(u){ return !/^data:/i.test(u); }),
+    removed: (!cd._loaded && p.removed && p.removed.length && !Object.keys(cd._removed || {}).length)
+           ? p.removed.slice()
+           : Object.keys(cd._removed || {}).filter(function(u){ return !/^data:/i.test(u); }),
     typeTouched: !!cd._typeTouched,
     droppedUploads: droppedUploads,
     saved_at: new Date().toISOString()
@@ -7253,7 +7344,19 @@ function _spSaveAll(silent){
   });
   // build 133 — an explicit save writes the Archive too, so the copy you reopen
   // on another device is the copy you just saved.
-  saveCurrentInvoice(!silent);
+  //
+  // build 139 — but `silent` was doing two jobs, and only one of them was its
+  // own. It suppresses the "✓ Saved N cards" confirmation, which is right when
+  // a prompt is about to open over it — and it was ALSO deciding whether the
+  // Archive got written. So closing the review screen (a silent save) and
+  // handing the sheet to Kelly (build 137, also silent) both wrote the active
+  // slot and left the archive row holding the copy from before the photographs
+  // went on. That is build 133's Fault 2 exactly, surviving in the two places
+  // that save without being asked to. Every save through this function is a
+  // save of real work, so every one of them files the Archive copy; `silent`
+  // now only governs the message. The 1.5-second autosave is untouched and
+  // still writes the active slot alone.
+  saveCurrentInvoice(true);
   if (!silent) {
     // build 137 — there are two Save buttons now, one in the header and one at
     // the foot. Confirming on only the one you did not press is not confirming.
@@ -9305,6 +9408,10 @@ function _spInitDetails(cd){
   // overwriting the copy you already approved (see the guard in _spGenSeo).
   ensureShopifyTypes(function(){
     _spPopulateType(cd, true);
+    // build 139 — this card has now had its chance to load its saved snapshot.
+    // Set BEFORE the restore so an exception inside it cannot leave the card
+    // permanently marked unloaded, which would freeze its photo list forever.
+    cd._loaded = true;
     if (_spRestoreCard(cd) && cd.els.fetchStatus) {
       cd.els.fetchStatus.textContent = cd._renamedSince
         ? (cd._staleReason || 'Product name') + ' changed — SEO copy is being rewritten. Your category, tags and photo choices were kept.'
