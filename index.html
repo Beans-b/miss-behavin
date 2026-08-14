@@ -1548,7 +1548,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 142</strong> &#183; 2026-08-14 &#183; THE ARCHIVE SAYS WHOSE TURN IT IS. A sheet sitting in Kelly&#39;s queue and a sheet finished a fortnight ago looked identical in the Archive: vendor, date, totals, and nothing about the handoff. The queue knew all along; the Archive was never told. Every row now carries a live chip while something is owed &#8212; WAITING ON KELLY, or YOUR TURN with what she said and how many more are stacked behind it &#8212; and a permanent grey line afterwards recording who priced it and when, which is the both-halves Brian asked for. Matching is on vendor PLUS invoice number, because vendor alone is ambiguous the moment a brand is bought twice, and that is why Worker v110 adds invoice_number to the queue and backfills it from the snapshot every row already carries rather than making the vendor do a job it cannot do. Whose-turn uses the same rule the banner has used since build 105, so the two screens cannot disagree about one question. The open count now sits on the Handoffs tab itself, next to the thing it counts, rather than in another bar at the top &#8212; a queue with its own badge reads as work, and one more banner is what makes it read as a notification. The queue is fetched before the list is drawn, so no row paints unlabelled and then jumps, and a failed read still renders the Archive exactly as build 141 did. Needs Worker v110. Carries build 141</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 143</strong> &#183; 2026-08-14 &#183; TWO SHEETS SENT, TWO SHEETS IN THE ARCHIVE. Reported: two sheets sent to Kelly, only one in the Archive. Reproduced, and it was worse &#8212; NEITHER was there. Handing a sheet over wrote the ACTIVE SLOT and the queue and nothing else, and there is exactly one active slot, so the second handoff overwrote the first one&#39;s only copy outside the queue. Nothing was lost, every handoff carries its own snapshot and both were intact in the Handoffs tab, but the Archive is the list that gets read and it was empty. A handoff now files the sheet in the Archive as it sends it, fire-and-forget so a filing error can never block the handover, and it says so rather than failing silently. Second and just as load-bearing: every manual sheet built on one day numbered itself MANUAL-&lt;YYYYMMDD&gt;, and the archive upsert matches on invoice number plus vendor &#8212; so a second manual buy from the same brand on the same day was not a second sheet, it was an EDIT of the first one&#39;s row. That is why one row read &quot;1 style &#183; Zoey Bracelet- Black&quot; with &quot;(+1)&quot; hanging off it instead of showing the Black sheet and the White sheet as the two separate things they were. The sheet number now carries the time AND a random tail &#8212; seconds alone were not enough either, which the test suite caught by building two sheets inside one second and watching them merge straight back into one row. Exactly what build 140 learned for the style codes, one level up. No Worker change &#8212; runs on v110. Carries build 142</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2049,7 +2049,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 142;   // keep in step with the footer stamp
+var APP_BUILD = 143;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -3340,6 +3340,23 @@ function handoffSend(){
   currentInvoice = inv;
   sbSetActive(sheetLive, inv, function(ok){
     if (!ok) { toast('Could not save the sheet — nothing was sent.'); return; }
+    /* ── build 143 — AND FILE IT IN THE ARCHIVE ────────────────────────────
+       Reported: two sheets sent to Kelly, one in the Archive. Reproduced —
+       it was worse than that, NEITHER was there. Handing a sheet over wrote
+       the ACTIVE SLOT and the queue and nothing else, and there is exactly one
+       active slot, so the second handoff overwrote the first one's only copy
+       outside the queue. The Archive is the list Brian actually reads, and a
+       sheet he has just sent someone is precisely the kind he goes looking for.
+       Not a data loss — every handoff carries its own snapshot and both were
+       intact in the queue — but the Archive is where he looks, and it was empty.
+       Deliberately fire-and-forget: the handoff must not be blocked by an
+       archive write, because the queue snapshot is the authoritative copy and a
+       sheet that is handed over but unarchived is recoverable, while a sheet
+       that failed to hand over because of a filing error is just broken. It
+       does say so rather than failing silently. */
+    sbArchiveInvoice(inv, function(okA){
+      if (!okA) toast('Handed over, but it could not be filed in the Archive — it is still in the Handoffs tab.');
+    });
     // build 107 — the sheet travels WITH the handoff. It used to be read back
     // out of the shared active slot, so a second handoff overwrote the first.
     // build 132 — from_handoff closes the row this sheet ARRIVED on. Handing on
@@ -6840,9 +6857,26 @@ function _manCommit(){
   if (bad) showStatus('man-status','error', bad + ' row(s) skipped \u2014 a row needs at least one quantity.');
   else el('man-status').style.display = 'none';
   var d = new Date();
+  // build 143 — THE TIME, NOT JUST THE DAY. Every manual sheet built on one day
+  // numbered itself MANUAL-<YYYYMMDD>, and the Worker's archive upsert matches on
+  // invoice number + vendor — so a second manual buy from the same brand on the
+  // same day was not a second sheet, it was an EDIT of the first one's archive
+  // row. Two sheets sent to Kelly therefore shared one row, one line of style
+  // names, and one place for a turn chip to land, which is why a row read
+  // "1 style · Zoey Bracelet- Black" with "(+1)" hanging off it instead of
+  // showing the Black sheet and the White sheet as the two separate things they
+  // were. Build 140 gave the STYLE codes seconds and a random tail for exactly
+  // this reason and stopped one level short: the sheet number needed it too.
+  // ...and a random tail, because SECONDS ARE NOT ENOUGH EITHER. Caught by the
+  // test suite, not by reasoning: two sheets built in the same second collided
+  // and merged straight back into one row, which is the very fault this line
+  // exists to fix. Exactly what build 140 learned for the style codes, one level
+  // up. Three base-36 characters is ~46,000 combinations inside one second.
+  var _hhmmss = String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0') + String(d.getSeconds()).padStart(2,'0') +
+                '-' + Math.random().toString(36).slice(2, 5).toUpperCase();
   var manual = {
     vendor: vendor,
-    invoice_number: 'MANUAL-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0'),
+    invoice_number: 'MANUAL-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + '-' + _hhmmss,
     date: (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear(),
     invoice_date: (d.getMonth()+1) + '/' + d.getDate() + '/' + d.getFullYear(),   // build 31 — archives were logging manual sheets with no date
     styles: styles
