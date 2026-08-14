@@ -744,6 +744,17 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .man-pulled .mp-fix{margin-top:7px;}
 .man-pulled .mp-fix .field-input{font-size:13px;padding:7px 8px;}
 .man-pulled .mp-status{font-size:11px;margin-top:5px;line-height:1.4;font-family:'DM Sans',sans-serif;color:var(--gray-text);}
+/* build 141 — ADD PHOTOS on a Manual Entry row. */
+.man-photos{border:1px dashed var(--gray-mid);background:var(--gray-light);padding:10px;margin-top:8px;text-align:center;transition:background .15s,border-color .15s;}
+.man-photos.drag{border-color:var(--black);background:#fff;}
+.man-photos.busy{opacity:.6;pointer-events:none;}
+.man-photos .mph-t{font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--black);}
+.man-photos .mph-s{font-size:11px;color:var(--gray-text);font-family:'DM Sans',sans-serif;margin-top:3px;line-height:1.4;}
+.man-photos .mph-status{font-size:11px;margin-top:6px;font-family:'DM Sans',sans-serif;color:var(--gray-text);line-height:1.4;}
+.man-shots{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;justify-content:center;}
+.man-shots .ms-w{position:relative;width:52px;height:70px;}
+.man-shots img{width:52px;height:70px;object-fit:cover;border:1px solid var(--gray-mid);background:#fff;display:block;}
+.man-shots .ms-x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;line-height:18px;padding:0;margin:0;border-radius:50%;border:1px solid var(--gray-mid);background:#fff;font-size:12px;cursor:pointer;color:var(--black);}
 
 /* v2 — name pick-list under the pricing card header */
 .name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
@@ -891,6 +902,11 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
           <div class="upload-icon">&#128247;</div>
           <div class="upload-text">Tap to select invoice photos or PDFs</div>
           <div class="upload-hint">Photos or a PDF invoice &#8212; one or multiple files</div>
+          <!-- build 141 — this box reads the PAPERWORK. It sits directly above
+               Manual Entry behind a large camera icon, so it looks exactly like
+               "add photos here", and product photographs tapped in here were
+               handed to the invoice reader and silently dropped. Says so now. -->
+          <div class="upload-hint" style="margin-top:6px;font-weight:600;color:var(--black);">This is for the paper invoice, not photos of the products. To photograph a style, use Manual Entry below &#8212; each style has its own Add photos box.</div>
         </div>
         <input type="file" id="file-input" accept="image/*,application/pdf,.pdf" multiple style="display:none;" onchange="handleFiles(event)"/>
         <div id="pages-summary" style="display:none;padding:10px 0;font-size:13px;font-weight:600;text-align:center;color:var(--success-fg);"></div>
@@ -1526,7 +1542,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 140</strong> &#183; 2026-08-14 &#183; THE PHOTO GUARD, ROUND THE RIGHT WAY. Build 139 set the _loaded flag BEFORE restoring a card, so that an exception inside the restore could not freeze the photo list. That was backwards: the flag is what switches OFF the guard protecting saved photos, so a throw left the card holding only its vendor seed with the guard already disabled, and the next save wrote that seed over every uploaded photo &#8212; the exact fault 139 exists to stop. It is now set only after a restore that actually completed, so a failure leaves the guard ON and photos can be added but never blanked. Also: a manual style code now carries seconds and a random tail. A manual sheet numbers itself MANUAL-&lt;YYYYMMDD&gt;, the same string all day, and the archive upsert folds one brand&#39;s manual buys for that day into a single row and merges styles BY CODE with incoming winning &#8212; so two manual sheets for one brand started in the same minute shared a code and the second silently replaced the first, photos and copy included. Found while chasing the photo report, not reported, and not reproduced against live data. No Worker change &#8212; runs on v108, and v109 is the one that lets Kelly SEE a photo at all. Carries build 139</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 141</strong> &#183; 2026-08-14 &#183; MANUAL ENTRY CAN TAKE PHOTOGRAPHS. This was never a bug. There has NEVER been a photo upload on Manual Entry: the row carried a name, a category, a size run, a colour, a price and quantities, and the only way a photograph had ever reached a manually entered style was the vendor-URL Pull. The box being tapped was UPLOAD INVOICE at the top of the screen, which feeds the invoice READER &#8212; a large camera icon sitting directly above Manual Entry, so product photographs went into the scan queue and were dropped, and nothing was ever attached to a style to show on the next card, to save, to archive or to hand to Kelly. Reported four times as photos not saving; four builds of real adjacent faults were fixed while this one went unbuilt. Every row now carries its own Add photos box: tap to use the camera or the camera roll, or drag files in. It uploads through the SAME store_product_photo path the review card uses and keeps the short r2: ref, so these photographs are ordinary photographs everywhere downstream and inherit the build 133 durability and the build 140 save guard rather than being a second weaker mechanism. Pulled and phone photos share one strip, a re-pull no longer deletes the ones you took yourself, and the invoice box now says out loud that it is for the paperwork. Needs Worker v108 for the upload and v109 so Kelly can see the result. Carries build 140</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2027,7 +2043,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 140;   // keep in step with the footer stamp
+var APP_BUILD = 141;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -6033,12 +6049,16 @@ function manualPull(){
       var rows = el('man-rows').querySelectorAll('.man-row');
       var row = rows[rows.length-1];
       _manPullN++;
-      var key = 'PULL-' + _manPullN;
+      // build 141 — reuse the row's existing key if it already has one, so a row
+      // he photographed BEFORE pasting a vendor URL keeps those photographs
+      // instead of being handed a fresh empty entry.
+      var key = row.dataset.imgkey || ('PULL-' + _manPullN);
+      var _own = (((_manImages[key] || {}).images) || []).filter(function(u){ return String(u).indexOf('r2:') === 0; });
       row.dataset.imgkey = key;
       // build 95 — remember WHICH page these photos came from. It is shown on
       // the row and carried to the review card, so a wrong link is visible
       // where it happens instead of two screens later.
-      _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null,
+      _manImages[key] = { images: _own.concat(res.images || []), fabric: res.fabric || null, fit: res.fit || null,
                           src_url: url, src_title: String(res.title || '').trim() };
       var nm = String(res.title || '').trim();
       if (c){
@@ -6063,6 +6083,7 @@ function manualPull(){
     // user began typing in, even partially, stays)
     Array.prototype.forEach.call(el('man-rows').querySelectorAll('.man-row'), function(row){
       var hasData = row.dataset.imgkey ||
+        (row.querySelector('.man-shots') && row.querySelector('.man-shots').children.length) ||   // build 141
         row.querySelector('.man-name').value.trim() ||
         row.querySelector('.man-color').value.trim() ||
         row.querySelector('.man-retail').value ||
@@ -6112,7 +6133,13 @@ function _manRenderPulled(row){
   if (old) old.remove();
   var key = row.dataset.imgkey;
   var data = key && _manImages[key];
-  if (!data) return;
+  // build 141 — the thumbnails moved OUT of this block and into the row's own
+  // strip, because there are now two ways a photograph gets onto a row and one
+  // strip showing both is the honest picture. This block is now only the
+  // "pulled from <page>" header and the re-pull box, and it is drawn only when
+  // there actually WAS a pull.
+  _manRenderShots(row);
+  if (!data || !data.src_url) return;
   var imgs = data.images || [];
   var host = '';
   try { host = new URL(data.src_url).hostname.replace(/^www\./, ''); } catch (e) {}
@@ -6126,11 +6153,7 @@ function _manRenderPulled(row){
         ? '<a href="' + esc(data.src_url) + '" target="_blank" rel="noopener">' + esc(label) + '</a>'
         : esc(label || 'the vendor page')) +
       (data.fabric ? ' &#183; fabric: ' + esc(data.fabric) : '') +
-      '<br>These are the photos that go to Shopify. Wrong item? Paste the correct product URL below.' +
-    '</div>' +
-    '<div class="mp-strip">' +
-      imgs.slice(0, 12).map(function(u){ return '<img src="' + esc(u) + '" alt=""/>'; }).join('') +
-      (imgs.length > 12 ? '<span class="mp-more">+' + (imgs.length - 12) + ' more</span>' : '') +
+      '<br>Wrong item? Paste the correct product URL below \u2014 it replaces the pulled photos.' +
     '</div>' +
     '<div class="mp-fix" style="display:flex;gap:6px;">' +
       '<input type="text" class="field-input mp-url" placeholder="https://brand.com/products/&#8230;" autocomplete="off" style="flex:1;"/>' +
@@ -6139,6 +6162,44 @@ function _manRenderPulled(row){
     '<div class="mp-status"></div>';
   box.querySelector('.mp-go').onclick = function(){ manualRepull(row); };
   row.insertBefore(box, row.firstChild);
+}
+
+/* build 141 — ONE STRIP, BOTH SOURCES. Photographs pulled from a vendor page
+   and photographs taken on a phone sit in the same list and are shown together,
+   because by the time this row becomes a product they ARE one list — the review
+   card, the sheet, the archive and Kelly all see a single set. Rendering them
+   apart here would have been the only screen in the app that disagreed.
+   A saved photo is an "r2:<key>" ref, which no <img> can render, so it goes
+   through _spImgSrc for display exactly as the review card does. The REF is what
+   is kept; the tokenised URL is never stored anywhere. */
+function _manRenderShots(row){
+  var wrap = row.querySelector('.man-shots');
+  if (!wrap) return;
+  var key  = row.dataset.imgkey;
+  var data = key && _manImages[key];
+  var imgs = (data && data.images) || [];
+  wrap.innerHTML = '';
+  imgs.forEach(function(u){
+    var w = document.createElement('div');
+    w.className = 'ms-w';
+    var im = document.createElement('img');
+    im.dataset.u = u;                       // the ref, never the rendered URL
+    im.src = (typeof _spImgSrc === 'function') ? _spImgSrc(u) : u;
+    im.alt = '';
+    var x = document.createElement('button');
+    x.type = 'button'; x.className = 'ms-x'; x.textContent = '\u00d7';
+    x.title = 'Remove this photo';
+    x.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); manualDropPhoto(row, u); };
+    w.appendChild(im); w.appendChild(x);
+    wrap.appendChild(w);
+  });
+  var box = row.querySelector('.man-photos');
+  if (box) {
+    var t = box.querySelector('.mph-t');
+    if (t) t.innerHTML = imgs.length
+      ? '&#128247; ' + imgs.length + ' photo' + (imgs.length === 1 ? '' : 's') + ' on this style'
+      : '&#128247; Add photos of this style';
+  }
 }
 
 /* build 95 — replace THIS row's photos from a corrected product URL. The row
@@ -6161,7 +6222,14 @@ function manualRepull(row){
     if (res.error) throw new Error(res.error);
     var key = row.dataset.imgkey;
     if (!key){ _manPullN++; key = 'PULL-' + _manPullN; row.dataset.imgkey = key; }
-    _manImages[key] = { images: res.images || [], fabric: res.fabric || null, fit: res.fit || null,
+    // build 141 — a re-pull replaces the VENDOR's photos, never the ones he
+    // took himself. Those are an r2: ref, they cost him a trip to the stockroom
+    // with a phone, and no amount of "replaces every photo on this card" in the
+    // hint text makes deleting them acceptable as a side effect of correcting a
+    // link. Keeping them is also what the pull is for: fixing a wrong vendor
+    // page has nothing to do with the photograph of the actual item.
+    var _mine = (((_manImages[key] || {}).images) || []).filter(function(u){ return String(u).indexOf('r2:') === 0; });
+    _manImages[key] = { images: _mine.concat(res.images || []), fabric: res.fabric || null, fit: res.fit || null,
                         src_url: url, src_title: String(res.title || '').trim() };
     var colors = (res.colors && res.colors.length) ? res.colors : [];
     var nm = String(res.title || '').trim();
@@ -6408,8 +6476,135 @@ function manualAddRow(){
     // The hidden input stays so the invoice path, which DOES extract a printed
     // UPC, has somewhere to put it without a special case.
     '<input type="hidden" class="man-upc"/>' +
-    '<div class="man-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>';
+    '<div class="man-upc-hint" style="display:none;font-size:11px;margin-top:4px;"></div>' +
+    /* ── build 141 — ADD PHOTOS, HERE, ON THE ROW ──────────────────────────
+       Brian has asked for this four times, describing it each time as "the
+       first card", and it was read each time as a bug on the review screen.
+       It was not a bug. THERE HAS NEVER BEEN A PHOTO UPLOAD ON MANUAL ENTRY:
+       the row carried a name, a category, a size run, a colour, a price and
+       quantities, and the only way a photograph had ever reached a manually
+       entered style was the vendor-URL Pull at the top of the pane. Nothing
+       he tapped here uploaded anything, so nothing arrived on the next card,
+       and nothing was in the sheet to save or to archive or to hand to Kelly.
+       Every fault found on the way here was real and worth fixing, and none
+       of them was this one.
+       It goes on the ROW rather than the pane because photographs belong to a
+       style: one row is one product, and a sheet of five styles needs five
+       sets. The upload path is deliberately the SAME one the review card uses
+       — store_product_photo into R2, keeping the short r2: ref — so these
+       photographs are the same kind of object as every other photograph in
+       the app and inherit the build 133 durability and the build 140 guard
+       rather than being a second, weaker mechanism. */
+    '<div class="man-photos">' +
+      '<div class="mph-t">&#128247; Add photos of this style</div>' +
+      '<div class="mph-s">Tap to take a picture or choose from your camera roll &#8212; or drag files in. They ride through to the SEO card, the sheet and Kelly.</div>' +
+      '<button type="button" class="btn btn-outline mph-go" style="width:auto;padding:8px 14px;margin:8px auto 0;font-size:12px;">Choose photos</button>' +
+      '<input type="file" accept="image/*" multiple class="mph-file" style="display:none;"/>' +
+      '<div class="man-shots"></div>' +
+      '<div class="mph-status"></div>' +
+    '</div>';
   el('man-rows').appendChild(row);
+  _manWirePhotos(row);          // build 141
+}
+
+/* ── build 141 — the row's photo store ──────────────────────────────────────
+   One key per row, shared with the Pull. A row that was pulled already has an
+   imgkey and its uploads join that same entry, so pulled and own photographs
+   end up in ONE list — which is what _manCommit carries onto the style as
+   vendor_images, and therefore what the review card seeds itself from. That
+   reuse is the whole reason this works end to end without a new pipeline. */
+function _manRowImgKey(row){
+  var key = row.dataset.imgkey;
+  if (!key) { _manPullN++; key = 'OWN-' + _manPullN; row.dataset.imgkey = key; }
+  if (!_manImages[key]) _manImages[key] = { images: [], fabric: null, fit: null, src_url: '', src_title: '' };
+  if (!_manImages[key].images) _manImages[key].images = [];
+  return key;
+}
+// The sheet does not exist yet, so the storage key uses the invoice number this
+// sheet WILL have. It is only an R2 path; nothing downstream reads it back out
+// of the name, and the ref returned is what actually matters.
+function _manProvisionalInvoice(){
+  var d = new Date();
+  return 'MANUAL-' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+}
+
+function _manWirePhotos(row){
+  var box = row.querySelector('.man-photos');
+  if (!box || box.dataset.wired) return;
+  box.dataset.wired = '1';
+  var input = box.querySelector('.mph-file');
+  var go    = box.querySelector('.mph-go');
+  if (go) go.onclick = function(e){ e.preventDefault(); if (!box.classList.contains('busy')) input.click(); };
+  input.onchange = function(){ manualUploadPhotos(row, input.files); input.value = ''; };
+  ['dragenter','dragover'].forEach(function(ev){
+    box.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); box.classList.add('drag'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    box.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); box.classList.remove('drag'); });
+  });
+  box.addEventListener('drop', function(e){ manualUploadPhotos(row, e.dataTransfer && e.dataTransfer.files); });
+}
+
+/* build 141 — upload straight to R2 and keep the ref, exactly as the review
+   card does. Nothing is held as a data: URL: that is what made an uploaded
+   photo vanish on save before build 133, and repeating it here would have
+   rebuilt the same bug on a new screen. */
+function manualUploadPhotos(row, files){
+  var box = row.querySelector('.man-photos');
+  var st  = box.querySelector('.mph-status');
+  var list = Array.prototype.slice.call(files || []).filter(function(f){ return /^image\//.test(f.type); });
+  if (!list.length) { if (st) st.textContent = 'That was not an image file.'; return; }
+  var key = _manRowImgKey(row);
+  box.classList.add('busy');
+  var done = 0, ok = 0, failed = 0;
+  var finish = function(){
+    if (done < list.length) return;
+    box.classList.remove('busy');
+    st.textContent = failed
+      ? (ok ? ok + ' added, ' + failed + ' failed.' : 'Upload failed \u2014 nothing was added.')
+      : '\u2713 ' + ok + ' photo' + (ok === 1 ? '' : 's') + ' added. They will be on the SEO card and on the sheet.';
+    manualFormChanged();
+  };
+  list.forEach(function(file){
+    if (file.size > 20 * 1024 * 1024) {
+      failed++; done++; if (st) st.textContent = file.name + ' is over 20MB \u2014 resize it first.';
+      finish(); return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(){
+      var b64 = String(reader.result || '').split(',')[1] || '';
+      if (st) st.textContent = 'Uploading ' + file.name + '\u2026';
+      api('store_product_photo', {
+        image: b64, media_type: file.type, name: file.name,
+        invoice_number: _manProvisionalInvoice(), code: key
+      })
+      .then(function(res){
+        if (res.error) throw new Error(res.error);
+        if (!res.ref) throw new Error('saved but came back with no reference');
+        _manImages[key].images.push(res.ref);
+        ok++; done++;
+        _manRenderPulled(row);
+        finish();
+      })
+      .catch(function(e){
+        failed++; done++;
+        if (st) st.textContent = 'Upload failed: ' + e.message;
+        finish();
+      });
+    };
+    reader.onerror = function(){ failed++; done++; if (st) st.textContent = 'Could not read ' + file.name; finish(); };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* build 141 — drop one photo from a row before the sheet is built. */
+function manualDropPhoto(row, url){
+  var key = row.dataset.imgkey;
+  var d = key && _manImages[key];
+  if (!d) return;
+  d.images = (d.images || []).filter(function(u){ return u !== url; });
+  _manRenderPulled(row);
+  manualFormChanged();
 }
 
 /* build 39 — camera-scan a UPC into a manual row */
@@ -9402,7 +9597,12 @@ function _spInitDetails(cd){
     cd.fabric = (cd.style && cd.style.vendor_fabric) || (_mk && _mk.fabric) || cd.fabric || null;
     cd.fit    = (cd.style && cd.style.vendor_fit)    || (_mk && _mk.fit)    || cd.fit || null;
     _spRenderImages(cd);
-    if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) from the vendor page' + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
+    // build 141 — Manual Entry can now supply photographs taken on a phone, so
+    // "from the vendor page" is no longer true of every seeded photo. Say which.
+    var _ownN = _vimgs.filter(function(u){ return String(u).indexOf('r2:') === 0; }).length;
+    var _srcWords = (_ownN === _vimgs.length) ? 'you added'
+                  : (_ownN ? (_ownN + ' of them yours, the rest from the vendor page') : 'from the vendor page');
+    if (cd.els.fetchStatus) cd.els.fetchStatus.textContent = _vimgs.length + ' photo(s) ' + _srcWords + (cd.fabric ? ' \u00b7 fabric: ' + cd.fabric : '') + ' \u2014 tap to toggle.';
   } else {
     // build 67 \u2014 render even with zero photos so the upload drop zone is there
     // from the start. A failed vendor pull (blocked site, no style code) used to
