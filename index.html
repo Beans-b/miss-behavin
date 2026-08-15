@@ -958,7 +958,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
                same "is this row complete" check, and both build the sheet first
                so the cards exist before anything is saved or sent. -->
           <div style="display:flex;gap:8px;margin-top:8px;">
-            <button class="btn btn-outline" id="man-save-btn" style="flex:1;margin:0;opacity:0.4;cursor:not-allowed;" disabled onclick="manualSave(this)">Save</button>
+            <button class="btn btn-outline" id="man-save-btn" style="flex:1;margin:0;opacity:0.4;cursor:not-allowed;" disabled onclick="manualSave(this)">Save &amp; add photos</button>
             <button class="btn btn-shopify hoff-label" id="man-handoff-btn" data-arrow="1" style="flex:1;margin:0;opacity:0.4;cursor:not-allowed;" disabled onclick="manualSendToKelly()">Send to Kelly &#8594;</button>
           </div>
           <!-- build 92 — a way out. Backing out of the whole tab was the only
@@ -1564,7 +1564,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 147</strong> &#183; 2026-08-15 &#183; A SCANNED INVOICE LANDS WHERE EVERY OTHER SHEET LANDS. Extracting an invoice stopped on the pricing cards and waited for Review &amp; publish, while Manual Entry (build 139), reopening from Archive (build 136) and opening a handoff (build 139) all went straight through to the photo and SEO cards. The same sheet put you in two different places depending on how it got there, and the extra tap sat in front of the screen where the work actually happens. It now uses the SAME opener as the other three: _manOpenReview is renamed _openReviewCards, one function with four callers. The pricing cards are still rendered first and still sit behind the overlay &#8212; Back to invoice reaches them, and openShopifyReview READS them through collectCurrentInvoice, which is why the opener defers a tick instead of running inline. Private labels are loaded on the way in, so the build 134 stale-copy guard cannot judge fresh copy stale. The scroll to a section about to be covered is dropped. No Worker change &#8212; runs on v111. Carries build 146</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 148</strong> &#183; 2026-08-15 &#183; AND SAVE LANDS THERE TOO. Build 147 sent a scanned invoice straight to the photo and SEO cards, which left Save on Manual Entry as the one control in the app that put you somewhere different &#8212; it stopped on the pricing sheet. Build 138 chose that on purpose, reasoning that the point of Save is counts in and stop, but the reasoning does not survive build 136: photographs go on BEFORE anything is named or priced, so the screen you want straight after entering counts is the one with the photo box on it. All four routes now land on the same screen. The save itself is unchanged and still happens first &#8212; this only chooses where you end up. The confirmation moved to a toast because bottom-save-status sits on the pricing sheet, which the overlay is about to cover, and confirming a save onto a screen nobody is looking at is the same fault build 137 fixed for the two Save buttons on the review screen. The button now reads Save &amp; add photos, so the label says what it does. Send to Kelly is deliberately NOT changed: it hands the sheet over, and build 137 closes the review screen on purpose rather than leaving a push screen open over a sheet that is now hers. No Worker change &#8212; runs on v111. Carries build 147</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2069,7 +2069,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 147;   // keep in step with the footer stamp
+var APP_BUILD = 148;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -7021,9 +7021,21 @@ function _openReviewCards(){
 function manualSave(btn){
   if (!_manCommit()) return;
   saveCurrentInvoice(true);   // explicit — archives the sheet as well as saving it
-  var st = el('bottom-save-status');
-  if (st) { st.textContent = '\u2713 Saved \u2014 this sheet is on the Archive tab.'; setTimeout(function(){ if (st) st.textContent = ''; }, 4000); }
-  toast('Saved.');
+  // build 148 — AND LAND WHERE EVERYTHING ELSE LANDS. Build 138 deliberately
+  // kept Save on the pricing sheet, reasoning that its whole point is "counts
+  // in, stop". Build 147 then made a scanned invoice go straight through to the
+  // photo and SEO cards, which left Save as the ONE control in the app that put
+  // you somewhere different — and the reasoning no longer holds anyway, because
+  // photographs go on before anything is named or priced (build 136), so the
+  // screen you want after entering counts is the one with the photo box on it.
+  // Brian: "it also need to work the same way for manual entry."
+  // The save is already done above; this only chooses the screen.
+  // The confirmation moves to a toast: bottom-save-status lives on the pricing
+  // sheet, which is about to be covered by the overlay, so writing there would
+  // be confirming a save onto a screen nobody is looking at — the same fault
+  // build 137 fixed for the two Save buttons on the review screen.
+  toast('\u2713 Saved \u2014 this sheet is on the Archive tab. Add photos here, or Back to invoice for the counts.');
+  _openReviewCards();
 }
 
 /* build 138 — hand it straight over from Manual Entry.
