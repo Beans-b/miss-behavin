@@ -1564,7 +1564,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 146</strong> &#183; 2026-08-14 &#183; A SWIMSUIT STOPS BEING NAMED SUNGLASSES. Reported: the same Sunday Brunch swimwear invoice read twice gave &quot;Iris Scrunchie Set&quot; and &quot;Rio Beach Tote&quot; on one run and &quot;Iris Clutch&quot;, &quot;Remy Scarf&quot; and &quot;Olive Sunglasses&quot; on the next &#8212; three product categories for the same three bikinis, none of them swimwear. The app was not being unreliable, it was being asked to do the impossible. The extraction enum had no value for swimwear, so a swimsuit fell to &quot;Other&quot;; this screen then asked the Worker for a name sending ONLY that type, and the Worker was told every name is a first name plus THE ITEM TYPE. With no noun it supplied one, and because that prompt shuffles the alphabet for variety it supplied a different one every call. The randomness was ours, not the model&#39;s. The invoice said &quot;Swim Suit, Knit&quot; on every line, and nothing was passing it along. The request now carries the invoice OWN words plus fabric and colour, and Worker v111 REFUSES to name what it cannot identify rather than guessing &#8212; a refusal comes back as a reason, the card says &quot;the invoice does not say what this item is, set the Category and the suggestions come back&quot; instead of the useless &quot;tap More to try again&quot;, and the backfill stops retrying a question that cannot be answered by asking it again. A blank name was already flagged and explained by builds 102 and 126; a wrong one reaches the live shop as a false description of the garment. Needs Worker v111. Carries build 145</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 147</strong> &#183; 2026-08-15 &#183; A SCANNED INVOICE LANDS WHERE EVERY OTHER SHEET LANDS. Extracting an invoice stopped on the pricing cards and waited for Review &amp; publish, while Manual Entry (build 139), reopening from Archive (build 136) and opening a handoff (build 139) all went straight through to the photo and SEO cards. The same sheet put you in two different places depending on how it got there, and the extra tap sat in front of the screen where the work actually happens. It now uses the SAME opener as the other three: _manOpenReview is renamed _openReviewCards, one function with four callers. The pricing cards are still rendered first and still sit behind the overlay &#8212; Back to invoice reaches them, and openShopifyReview READS them through collectCurrentInvoice, which is why the opener defers a tick instead of running inline. Private labels are loaded on the way in, so the build 134 stale-copy guard cannot judge fresh copy stale. The scroll to a section about to be covered is dropped. No Worker change &#8212; runs on v111. Carries build 146</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2069,7 +2069,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 146;   // keep in step with the footer stamp
+var APP_BUILD = 147;   // keep in step with the footer stamp
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -5442,7 +5442,13 @@ function processPage(idx, invoiceMeta) {
         (_unread ? '\u26a0 ' : '\u2713 ') + allExtractedStyles.length + ' styles extracted from ' + selectedFiles.length + ' file' + (selectedFiles.length>1?'s':'') + '.' +
         (_unread ? ' ' + _unread + ' need a name typed in \u2014 they are flagged below and cannot be published until you do.' : ''));
       el('extract-btn').disabled = false;
-      el('pricing-section').scrollIntoView({behavior:'smooth'});
+      // build 147 — straight through to the photo and SEO cards, the same way
+      // Manual Entry, Archive and a handoff already open. The pricing cards are
+      // rendered above and stay behind the overlay: Back to invoice reaches them,
+      // and openShopifyReview READS them, which is why the opener defers a tick
+      // rather than running here. Scrolling to a section about to be covered was
+      // the old behaviour and is dropped.
+      _openReviewCards();
     });
     });
     return;
@@ -6980,17 +6986,23 @@ function _manCommit(){
    labels. The missing private-label load is the one that bites — the build 134
    stale-copy guard (_spVendorMatches) reads _privateLabels, so on a
    private-label sheet a card could judge its own freshly written copy stale and
-   blank it. See _manOpenReview. */
+   blank it. See _openReviewCards. */
 function manualStart(){
-  if (_manCommit()) _manOpenReview();
+  if (_manCommit()) _openReviewCards();
 }
 
-/* build 139 — one way in to the photo/SEO screen from Manual Entry, matching
-   loadArchivedInvoice line for line. Deferred a tick so the pricing cards are
-   in the DOM first: openShopifyReview reads them through collectCurrentInvoice
-   and would otherwise be handed an empty sheet. Wrapped so a failure here can
-   never cost the sheet that was just built. */
-function _manOpenReview(){
+/* build 139 — one way in to the photo/SEO screen, matching loadArchivedInvoice
+   line for line. Deferred a tick so the pricing cards are in the DOM first:
+   openShopifyReview reads them through collectCurrentInvoice and would otherwise
+   be handed an empty sheet. Wrapped so a failure here can never cost the sheet
+   that was just built.
+   build 147 — renamed from _manOpenReview and now shared with the INVOICE path.
+   Scanning an invoice was the last route that stopped on the pricing cards while
+   Manual Entry, Archive and the handoff queue all went through to the photo and
+   SEO cards, so the same sheet landed you in two different places depending on
+   how it got there. Brian: "can it skip the first card and just go to the
+   second". One opener, four callers, one landing. */
+function _openReviewCards(){
   setTimeout(function(){
     try {
       loadPrivateLabels(function(){
