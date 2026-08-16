@@ -589,7 +589,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-img-cap{font-size:10px;line-height:1.35;padding:5px 6px 0;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .edit-img-cap .v{color:var(--gray-text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .edit-img-note{font-size:11px;color:var(--gray-text);margin-top:6px;line-height:1.4;}
-/* build 149 — brand / category / search controls for the photo picker. Two
+/* build 150 — brand / category / search controls for the photo picker. Two
    columns on the selects, full width for the search box and the button, so it
    stays usable one-handed on a phone. */
 .edit-img-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
@@ -1571,7 +1571,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 149</strong> &#183; 2026-08-16 &#183; THE BLOG PHOTO PICKER CAN BE ASKED FOR SOMETHING. It took one argument &#8212; whichever brand the Generate Draft payload happened to hold &#8212; and returned a fixed 24 photos with no control anywhere to ask for anything else. An evergreen post has no brand, so it fell through to the newest 24 photos in the store: on 16 August that put bracelets and cropped pants in front of a homecoming-dress post, and the post published with no image at all. The picker now carries its own <strong>brand</strong>, <strong>category</strong> and <strong>search</strong> controls, and a Load more that keeps paging instead of stopping at 24. Category is the Shopify product type, the same field Manual Entry calls Category, and the list is built from what is actually in the catalogue so it can never offer one that returns nothing. ALSO: the controls sit INSIDE the editor, not on the Write tab, which is the fix for the second half of the report. The Write tab&#8217;s Featured brand box is only reachable before a draft exists, so a post reopened for editing &#8212; published or not &#8212; had no way to change which brand its photos came from. It does now. Frozen brands are still dropped however they are reached: an explicit frozen brand is refused, and a frozen vendor arrived at through a category or a text search is skipped. Needs <strong>Worker v113</strong> &#8212; build 149 calls edit_photo_facets and passes category, q and cursor to edit_images, none of which v112 knows. Deploy the Worker first. Carries build 148</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 150</strong> &#183; 2026-08-16 &#183; THE BLOG PHOTO PICKER CAN BE ASKED FOR SOMETHING. It took one argument &#8212; whichever brand the Generate Draft payload happened to hold &#8212; and returned a fixed 24 photos with no control anywhere to ask for anything else. An evergreen post has no brand, so it fell through to the newest 24 photos in the store: on 16 August that put bracelets and cropped pants in front of a homecoming-dress post, and the post published with no image at all. The picker now carries its own <strong>brand</strong>, <strong>category</strong> and <strong>search</strong> controls, and a Load more that keeps paging instead of stopping at 24. Category is the Shopify product type, the same field Manual Entry calls Category, and the list is built from what is actually in the catalogue so it can never offer one that returns nothing. ALSO: the controls sit INSIDE the editor, not on the Write tab, which is the fix for the second half of the report. The Write tab&#8217;s Featured brand box is only reachable before a draft exists, so a post reopened for editing &#8212; published or not &#8212; had no way to change which brand its photos came from. It does now. Frozen brands are still dropped however they are reached: an explicit frozen brand is refused, and a frozen vendor arrived at through a category or a text search is skipped. Needs <strong>Worker v113</strong> &#8212; build 150 calls edit_photo_facets and passes category, q and cursor to edit_images, none of which v112 knows. Deploy the Worker first. Carries build 148</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1720,7 +1720,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <div class="edit-field">
       <label class="field-label">Product photos</label>
       <div class="edit-img-note">Tap a photo to drop it into the post at your cursor. The first photo you add becomes the article&#8217;s featured image (shown on the blog page and in link previews), unless the post already has one.</div>
-      <!-- build 149 — brand, category and search live HERE, inside the editor,
+      <!-- build 150 — brand, category and search live HERE, inside the editor,
            rather than only on the Write tab. The Write tab's Featured brand box
            is only reachable before a draft exists, so a post reopened for
            editing had no way to change which brand the photos came from. -->
@@ -7927,6 +7927,20 @@ function _spColorSlug(color) {
   return String(color).toUpperCase().replace(/\s+/g, '-').replace(/[^A-Z0-9\-]/g, '');
 }
 
+// build 150 - the COLOUR has always been slugged. The vendor's style CODE never
+// was, and it rides into the SKU and, at push, into the Shopify Barcode field.
+// Real codes are not clean: "BK26110- BRN" carries a space, "#SKTCH_BOOK_873"
+// starts with a hash. Retail Barcode Labels then refuses the variant ("use only
+// letters, numbers, and basic symbols") and no label can be printed for it.
+// Verified live 2026-08-16: Jade Swimsuit - BROWN, 5 variants, plus 6
+// accessories. Fold anything outside A-Z 0-9 to a hyphen, collapse runs, trim.
+function _spCodeSlug(code) {
+  var out = String(code == null ? '' : code).toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return out || 'ITEM';
+}
+
 function _buildSpReview(inv) {
   var container = el('sp-cards');
   container.innerHTML = '';
@@ -7937,7 +7951,7 @@ function _buildSpReview(inv) {
 
     (style.colors || []).forEach(function(colorObj) {
       var slug    = _spColorSlug(colorObj.color);
-      var baseSku = style.code + '-' + slug;
+      var baseSku = _spCodeSlug(style.code) + '-' + slug;   // build 150 - scrubbed, see _spCodeSlug
 
       // build 59 — gather quantities across all apparel sizes (incl. XL) + OS.
       // build 87 - the style's own run (+OS, which can appear on any style)
@@ -9112,7 +9126,7 @@ function printLabels() {
           var sz = szKeys[zi];
           var qty = sizes[sz] || 0;
           if (qty <= 0) continue;
-          var sku = style.code + '-' + _spColorSlug(c.color) + '-' + sz;
+          var sku = _spCodeSlug(style.code) + '-' + _spColorSlug(c.color) + '-' + sz;   // build 150 - matches the pushed SKU
           for (var u = 0; u < qty; u++) {
             if (count >= MAX_TAGS) { truncated = true; break outer; }
             var tag = document.createElement('div');
@@ -10761,7 +10775,7 @@ function editEditPost(p, btn){
     // guard; this is the backstop.
     editState.lastPayload = null;
     editState.featuredImage = (res.image && res.image.url) ? { src: res.image.url, alt: res.image.alt || '' } : null;
-    // build 149 — a reopened post has no Generate Draft payload, so the photo
+    // build 150 — a reopened post has no Generate Draft payload, so the photo
     // picker opens on All brands instead of inheriting whichever brand happened
     // to be sitting in a payload from earlier this session. Brand, category and
     // search are all changeable from inside the editor now, published or not.
@@ -11029,7 +11043,7 @@ function editFillFields(){
   editState.editingPublished = false;
   editState.editingExisting = false;
   editState.featuredImage = null;
-  // build 149 — the photo picker resets with the fields and seeds its brand from
+  // build 150 — the photo picker resets with the fields and seeds its brand from
   // the draft that was just generated. editEditPost() re-seeds it straight after,
   // the same way it re-sets savedArticleId, because a reopened post has no
   // payload and must not inherit an unrelated brand from earlier in the session.
@@ -11070,7 +11084,7 @@ function editRenderLinks(links){
 
 // ── IMAGE PICKER: real product photos, tap to insert. First insert = featured image.
 //
-// build 149 — the picker now carries its own brand, category and search controls
+// build 150 — the picker now carries its own brand, category and search controls
 // and pages properly. Before this it took whichever brand the Generate Draft
 // payload happened to hold and showed a fixed 24 photos with no way to ask for
 // anything else. An evergreen post has no brand, so it fell through to the newest
