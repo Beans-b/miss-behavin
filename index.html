@@ -631,6 +631,8 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
    buttons were unreachable. Scoped to #edit-preview so the Write tab keeps the
    build-114 behaviour and the editor gets its own back, above both bars. */
 #edit-preview .edit-actionbar{position:fixed;bottom:0;left:0;right:0;margin:0 auto;z-index:1900;padding:12px 24px calc(12px + env(safe-area-inset-bottom));}
+/* build 152 - the removed header used to supply the top spacing. */
+#edit-preview .edit-prev-body{padding-top:16px;}
 /* Neither bar may ever sit on top of the buttons again. */
 body.editor-open #queue-bar{bottom:76px;}
 body.editor-open #update-banner{bottom:76px !important;}
@@ -651,7 +653,7 @@ body.editor-open #update-banner{bottom:76px !important;}
     grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
     align-content:start;
     column-gap:10px;
-    padding:0 0 92px;
+    padding:16px 0 92px;   /* build 152 - the removed header used to supply the top spacing */
   }
   #edit-preview [data-ed="kw"]        {grid-column:1 / -1; grid-row:1;}
   #edit-preview [data-ed="title"]     {grid-column:1; grid-row:2;}
@@ -1621,7 +1623,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 151</strong> &#183; 2026-08-16 &#183; THE SAVE AND PUBLISH BUTTONS WERE THERE ALL ALONG AND NOTHING COULD REACH THEM. Three faults stacked into one. (1) <strong>APP_BUILD had drifted to 149 while this footer said 150</strong>, which is the build-97 bug returning verbatim: every load read 150 off its own footer, saw 150 is greater than 149, and raised &quot;Update available &#8212; build 150&quot; on a build already running, and dismissing it did nothing because the next load repeated the comparison. (2) That banner is <strong>z-index 9999</strong>. (3) The editor&#8217;s action bar had been knocked from position:fixed / z-index:1600 down to <strong>position:sticky / z-index:40</strong> by the build-114 rule, which was written for the Write tab and reused the same class name. So the permanent banner sat on top of Save Draft and Publish Now. Edits to the 16 August hoco post looked like partial saves; in fact <strong>no save ever committed</strong> &#8212; three link edits and a spelling fix were all still absent from the live page. The action bar rule is now scoped to #edit-preview, so the Write tab keeps build 114 and the editor gets its fixed bar back above both bottom bars, and body.editor-open lifts the queue bar and the update banner clear of it. ALSO, DESKTOP IS ONE PAGE NOW. The app is a 480px mobile column and the editor was a fixed overlay clamped to the same 480px, so on a laptop every field queued up in a narrow strip behind three separate inner scrollbars. At 900px and up the editor is a single wide two-column page &#8212; title and body on the left, preview, photos, meta and links on the right, no nested scroll boxes. <strong>Below 900px nothing changed and the phone layout is untouched.</strong> ALSO, THE CHARACTER COUNTERS NOW WARN. They only compared against the maxlength block ceiling, so 159/160 read as fine; RULES v1.2.0 warns outside 110&#8211;155 for a description and 30&#8211;60 for a title. The title box also adds the 16 characters the theme appends as &quot; &#8211; Miss Behavin&#39;&quot;, because a 48-character meta title renders at 64 and truncates. Runs on Worker v113+; no Worker change in this build. Carries build 150</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1748,13 +1750,14 @@ body.editor-open #update-banner{bottom:76px !important;}
 
 <!-- THE EDIT: DRAFT PREVIEW OVERLAY (editable before save) -->
 <div id="edit-preview">
-  <div class="sp-head">
-    <div>
-      <div class="sp-head-title" id="edit-preview-title">Draft &#8212; Blog Post</div>
-      <div class="sp-head-meta" id="edit-preview-meta">Unpublished. Nothing goes live until you publish it in Shopify admin.</div>
-    </div>
-    <button class="sp-close" onclick="editClosePreview()">Close</button>
-  </div>
+  <!-- build 152 - THE HEADER BANNER IS GONE. It repeated in words what the button
+       now says in one line, and on a laptop it was a third of the chrome above a
+       screen that is meant to be one page. Close moved into the action bar, so the
+       editor has exactly one bar and it is always in reach. The two elements this
+       used to hold (#edit-preview-title / #edit-preview-meta) no longer exist;
+       editUpdatePreviewHeader() null-checks them individually rather than bailing
+       out when they are absent, because bailing out would have silently stopped
+       relabelling the Save button. -->
   <div class="edit-prev-body">
     <div class="sp-kwused" id="edit-kwused" data-ed="kw" style="padding:12px 24px 0;"></div>
     <div class="edit-field" data-ed="title">
@@ -1812,9 +1815,10 @@ body.editor-open #update-banner{bottom:76px !important;}
     </div>
   </div>
   <div class="edit-actionbar">
+    <button class="btn btn-outline" id="edit-close-btn" style="flex:1;" onclick="editClosePreview()" title="Close without saving">Close</button>
     <button class="btn btn-outline" id="edit-regen-btn" style="flex:1;" onclick="editRegenerate()" title="New variation">&#8635;</button>
-    <button class="btn btn-outline" id="edit-save-btn" style="flex:2;" onclick="editSave()">Save Draft</button>
-    <button class="btn btn-black" id="edit-publishnow-btn" style="flex:2;" onclick="editPublishNow()">Publish Now</button>
+    <button class="btn btn-outline" id="edit-save-btn" style="flex:3;" onclick="editSave()">Save Draft</button>
+    <button class="btn btn-black" id="edit-publishnow-btn" style="flex:3;" onclick="editPublishNow()">Publish Now</button>
   </div>
 </div>
 
@@ -2138,7 +2142,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 151;   // keep in step with the footer stamp
+var APP_BUILD = 152;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -10851,27 +10855,35 @@ function editEditPost(p, btn){
 // there is nothing to "publish"), an unpublished draft keeps the normal
 // Save Draft / Publish Now pair, and a brand-new generated draft is unchanged.
 function editUpdatePreviewHeader(){
+  // build 152 - the header banner was removed, so t and m are normally null now.
+  // They are null-checked one at a time and the function carries on: the old
+  // combined guard returned early the moment either was missing, which would
+  // have stopped the Save button being relabelled at all.
   var t = el('edit-preview-title'), m = el('edit-preview-meta');
   var saveBtn = el('edit-save-btn'), pubBtn = el('edit-publishnow-btn'), regenBtn = el('edit-regen-btn');
-  if (!t || !m || !saveBtn || !pubBtn) return;
+  if (!saveBtn || !pubBtn) return;
+  function setHead(a, b){ if (t) t.textContent = a; if (m) m.textContent = b; }
   // Regenerate rewrites from the Generate Draft payload, which an existing
   // post reopened for editing never has — hide it rather than let it fire on
   // a stale/unrelated payload from earlier this session.
   if (regenBtn) regenBtn.style.display = editState.editingExisting ? 'none' : '';
   if (editState.savedArticleId && editState.editingPublished) {
-    t.textContent = 'Edit Post — Live on your site';
-    m.textContent = 'This post is published. Saving updates the live page immediately — no separate publish step.';
-    saveBtn.textContent = 'Save Changes';
+    setHead('Edit Post', 'Published post.');
+    // build 152 - "Save Changes" understated it. On an already-published post the
+    // save IS the publish, and the banner that used to explain that is gone, so
+    // the button has to carry the meaning on its own.
+    saveBtn.textContent = 'Save and Publish';
+    saveBtn.classList.remove('btn-outline'); saveBtn.classList.add('btn-black');
     pubBtn.style.display = 'none';
   } else if (editState.savedArticleId) {
-    t.textContent = 'Edit Draft';
-    m.textContent = 'Unpublished draft. Nothing goes live until you publish it.';
+    setHead('Edit Draft', 'Unpublished draft.');
     saveBtn.textContent = 'Save Draft';
+    saveBtn.classList.remove('btn-black'); saveBtn.classList.add('btn-outline');
     pubBtn.style.display = '';
   } else {
-    t.textContent = 'Draft — Blog Post';
-    m.textContent = 'Unpublished. Nothing goes live until you publish it in Shopify admin.';
+    setHead('Draft — Blog Post', 'Unpublished.');
     saveBtn.textContent = 'Save Draft';
+    saveBtn.classList.remove('btn-black'); saveBtn.classList.add('btn-outline');
     pubBtn.style.display = '';
   }
 }
