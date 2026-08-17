@@ -597,6 +597,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-img-filters input{grid-column:1 / -1;}
 .edit-img-filters button{grid-column:1 / -1;margin-top:0;}
 .edit-charcount.over{color:var(--red);}
+.edit-charcount.warn{color:#8a6d14;font-weight:600;}   /* build 151 - warn band, not just the block ceiling */
 .edit-links{padding:14px 24px 0;}
 .edit-link-item{font-size:12px;color:#444;padding:6px 0;border-bottom:1px solid var(--gray-light);word-break:break-word;line-height:1.4;}
 .edit-link-item .lk{color:var(--accent);}
@@ -622,6 +623,55 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-actionbar .sel{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--gray-text);margin-bottom:7px;display:none;}
 .edit-actionbar .sel.on{display:block;}
 .edit-actionbar .sel b{color:var(--black);}
+/* build 151 - CLASS-NAME COLLISION, FIXED BY SCOPING. The build-114 rule above
+   was written for the Write tab's action bar and reused the same class name, so
+   it also overrode the EDITOR's action bar from position:fixed / z-index:1600
+   down to position:sticky / z-index:40. The update banner (9999) and the queue
+   bar (1800) then painted straight over Save Draft and Publish Now, and the
+   buttons were unreachable. Scoped to #edit-preview so the Write tab keeps the
+   build-114 behaviour and the editor gets its own back, above both bars. */
+#edit-preview .edit-actionbar{position:fixed;bottom:0;left:0;right:0;margin:0 auto;z-index:1900;padding:12px 24px calc(12px + env(safe-area-inset-bottom));}
+/* Neither bar may ever sit on top of the buttons again. */
+body.editor-open #queue-bar{bottom:76px;}
+body.editor-open #update-banner{bottom:76px !important;}
+
+/* build 151 - DESKTOP: ONE PAGE, NOT WINDOWS INSIDE WINDOWS.
+   The app is a 480px mobile column (body max-width, line 15) and the editor was a
+   fixed overlay clamped to the same 480px, so on a laptop every field queued up in
+   a narrow strip behind three separate inner scrollbars. At 900px and up the editor
+   is one wide page: writing on the left, everything you check it against on the
+   right. Rows and columns are stated explicitly and every box is addressed by its
+   own data-ed hook - NOT by nth-of-type, which counts divs rather than .edit-field
+   divs and would silently map the wrong boxes the next time a div is added.
+   BELOW 900px NOTHING HERE APPLIES AND THE PHONE LAYOUT IS UNTOUCHED. */
+@media (min-width:900px){
+  #edit-preview{max-width:1180px;}
+  #edit-preview .edit-prev-body{
+    display:grid;
+    grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);
+    align-content:start;
+    column-gap:10px;
+    padding:0 0 92px;
+  }
+  #edit-preview [data-ed="kw"]        {grid-column:1 / -1; grid-row:1;}
+  #edit-preview [data-ed="title"]     {grid-column:1; grid-row:2;}
+  #edit-preview [data-ed="body"]      {grid-column:1; grid-row:3 / 9;}
+  #edit-preview [data-ed="prevlabel"] {grid-column:2; grid-row:2;}
+  #edit-preview .edit-render          {grid-column:2; grid-row:3;}
+  #edit-preview [data-ed="photos"]    {grid-column:2; grid-row:4;}
+  #edit-preview [data-ed="author"]    {grid-column:2; grid-row:5;}
+  #edit-preview [data-ed="metatitle"] {grid-column:2; grid-row:6;}
+  #edit-preview [data-ed="metadesc"]  {grid-column:2; grid-row:7;}
+  #edit-preview .edit-links           {grid-column:2; grid-row:8;}
+  #edit-preview [data-ed="status"]    {grid-column:1 / -1;}
+  /* the body box is the point of the screen, so it gets the height */
+  #edit-preview .edit-body-area{min-height:62vh;resize:vertical;}
+  /* no more scrollbox-inside-a-scrollbox for the two boxes that had one */
+  #edit-preview .edit-render{max-height:none;height:auto;min-height:200px;overflow-y:auto;}
+  #edit-preview #edit-f-metadesc{min-height:82px;resize:vertical;}
+  #edit-preview .edit-img-grid{max-height:32vh;overflow-y:auto;}
+  #edit-preview .edit-actionbar{max-width:1180px;}
+}
 .edit-brandwrap{display:flex;gap:8px;align-items:flex-end;}
 .edit-brandwrap select{flex:1;min-width:0;}
 .edit-brandwrap input{flex:1;min-width:0;}
@@ -1571,7 +1621,7 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 150</strong> &#183; 2026-08-16 &#183; THE BLOG PHOTO PICKER CAN BE ASKED FOR SOMETHING. It took one argument &#8212; whichever brand the Generate Draft payload happened to hold &#8212; and returned a fixed 24 photos with no control anywhere to ask for anything else. An evergreen post has no brand, so it fell through to the newest 24 photos in the store: on 16 August that put bracelets and cropped pants in front of a homecoming-dress post, and the post published with no image at all. The picker now carries its own <strong>brand</strong>, <strong>category</strong> and <strong>search</strong> controls, and a Load more that keeps paging instead of stopping at 24. Category is the Shopify product type, the same field Manual Entry calls Category, and the list is built from what is actually in the catalogue so it can never offer one that returns nothing. ALSO: the controls sit INSIDE the editor, not on the Write tab, which is the fix for the second half of the report. The Write tab&#8217;s Featured brand box is only reachable before a draft exists, so a post reopened for editing &#8212; published or not &#8212; had no way to change which brand its photos came from. It does now. Frozen brands are still dropped however they are reached: an explicit frozen brand is refused, and a frozen vendor arrived at through a category or a text search is skipped. Needs <strong>Worker v113</strong> &#8212; build 150 calls edit_photo_facets and passes category, q and cursor to edit_images, none of which v112 knows. Deploy the Worker first. Carries build 148</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 151</strong> &#183; 2026-08-16 &#183; THE SAVE AND PUBLISH BUTTONS WERE THERE ALL ALONG AND NOTHING COULD REACH THEM. Three faults stacked into one. (1) <strong>APP_BUILD had drifted to 149 while this footer said 150</strong>, which is the build-97 bug returning verbatim: every load read 150 off its own footer, saw 150 is greater than 149, and raised &quot;Update available &#8212; build 150&quot; on a build already running, and dismissing it did nothing because the next load repeated the comparison. (2) That banner is <strong>z-index 9999</strong>. (3) The editor&#8217;s action bar had been knocked from position:fixed / z-index:1600 down to <strong>position:sticky / z-index:40</strong> by the build-114 rule, which was written for the Write tab and reused the same class name. So the permanent banner sat on top of Save Draft and Publish Now. Edits to the 16 August hoco post looked like partial saves; in fact <strong>no save ever committed</strong> &#8212; three link edits and a spelling fix were all still absent from the live page. The action bar rule is now scoped to #edit-preview, so the Write tab keeps build 114 and the editor gets its fixed bar back above both bottom bars, and body.editor-open lifts the queue bar and the update banner clear of it. ALSO, DESKTOP IS ONE PAGE NOW. The app is a 480px mobile column and the editor was a fixed overlay clamped to the same 480px, so on a laptop every field queued up in a narrow strip behind three separate inner scrollbars. At 900px and up the editor is a single wide two-column page &#8212; title and body on the left, preview, photos, meta and links on the right, no nested scroll boxes. <strong>Below 900px nothing changed and the phone layout is untouched.</strong> ALSO, THE CHARACTER COUNTERS NOW WARN. They only compared against the maxlength block ceiling, so 159/160 read as fine; RULES v1.2.0 warns outside 110&#8211;155 for a description and 30&#8211;60 for a title. The title box also adds the 16 characters the theme appends as &quot; &#8211; Miss Behavin&#39;&quot;, because a 48-character meta title renders at 64 and truncates. Runs on Worker v113+; no Worker change in this build. Carries build 150</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1706,18 +1756,18 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
     <button class="sp-close" onclick="editClosePreview()">Close</button>
   </div>
   <div class="edit-prev-body">
-    <div class="sp-kwused" id="edit-kwused" style="padding:12px 24px 0;"></div>
-    <div class="edit-field">
+    <div class="sp-kwused" id="edit-kwused" data-ed="kw" style="padding:12px 24px 0;"></div>
+    <div class="edit-field" data-ed="title">
       <label class="field-label">Title</label>
       <input type="text" id="edit-f-title" oninput="editSync()"/>
     </div>
-    <div class="section-title" style="padding:16px 24px 4px;">Preview</div>
+    <div class="section-title" data-ed="prevlabel" style="padding:16px 24px 4px;">Preview</div>
     <div class="edit-render" id="edit-render"></div>
-    <div class="edit-field">
+    <div class="edit-field" data-ed="body">
       <label class="field-label">Body (HTML) &#8212; edit freely</label>
       <textarea class="edit-body-area" id="edit-f-body" oninput="editSync()"></textarea>
     </div>
-    <div class="edit-field">
+    <div class="edit-field" data-ed="photos">
       <label class="field-label">Product photos</label>
       <div class="edit-img-note">Tap a photo to drop it into the post at your cursor. The first photo you add becomes the article&#8217;s featured image (shown on the blog page and in link previews), unless the post already has one.</div>
       <!-- build 150 — brand, category and search live HERE, inside the editor,
@@ -1736,16 +1786,16 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="edit-img-note" id="edit-img-count" style="display:none;"></div>
       <button type="button" class="edit-img-load" id="edit-img-more" style="display:none;" onclick="editLoadImages(false)">Load more photos</button>
     </div>
-    <div class="edit-field">
+    <div class="edit-field" data-ed="author">
       <label class="field-label">Author byline</label>
       <input type="text" id="edit-f-author"/>
     </div>
-    <div class="edit-field">
+    <div class="edit-field" data-ed="metatitle">
       <label class="field-label">Meta title</label>
       <input type="text" id="edit-f-metatitle" maxlength="70" oninput="editCount('metatitle',70)"/>
       <div class="edit-charcount" id="edit-cc-metatitle"></div>
     </div>
-    <div class="edit-field">
+    <div class="edit-field" data-ed="metadesc">
       <label class="field-label">Meta description</label>
       <textarea id="edit-f-metadesc" rows="2" maxlength="160" oninput="editCount('metadesc',160)"></textarea>
       <div class="edit-charcount" id="edit-cc-metadesc"></div>
@@ -1754,10 +1804,10 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
       <div class="section-title" style="padding:0 0 6px;">Suggested internal links</div>
       <div id="edit-links-list"></div>
     </div>
-    <div style="padding:14px 24px 0;">
+    <div data-ed="status" style="padding:14px 24px 0;">
       <div id="edit-save-status" class="status"></div>
     </div>
-    <div style="padding:12px 24px 0;">
+    <div data-ed="status" style="padding:12px 24px 0;">
       <div id="edit-publish-status" class="status"></div>
     </div>
   </div>
@@ -2088,7 +2138,14 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 149;   // keep in step with the footer stamp
+var APP_BUILD = 151;   // keep in step with the footer stamp
+/* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
+   The footer said 150 while this said 149, so every load read 150 off its own
+   footer, saw 150 > 149, and raised "Update available - build 150" forever.
+   Dismissing did nothing because the next load repeated the comparison.
+   That banner is z-index 9999 and it was covering the editor's Save and
+   Publish buttons, which is why edits appeared not to save: they never did.
+   ANY future build MUST bump this line and the footer stamp together. */
 
 function _buildNumFromHtml(html){
   // Scope to the footer FIRST. The file contains older "build 39/42/48"
@@ -10635,6 +10692,7 @@ var editState = null;
 function editReset(){
   editState = { mode:'topic', brand:'Free People', filter:'all', arrivals:[], selected:{}, draft:null, arrLoaded:false, savedArticleId:null, editingPublished:false, editingExisting:false };
   var pv = el('edit-preview'); if (pv) pv.style.display = 'none';
+  document.body.classList.remove('editor-open');   // build 151
 }
 
 function editInit(){
@@ -11020,6 +11078,7 @@ function editOpenPreview(){
   editFillFields();
   var pv = el('edit-preview');
   pv.style.display = 'flex';
+  document.body.classList.add('editor-open');   // build 151 - lifts the queue bar and the update banner clear of Save / Publish
   el('edit-save-status').style.display = 'none';
   pv.querySelector('.edit-prev-body').scrollTop = 0;
 }
@@ -11060,13 +11119,38 @@ function editSync(){
   el('edit-render').innerHTML = (title ? '<h2>'+title+'</h2>' : '') + body;
 }
 
+/* build 151 - THE COUNTER WAS GREEN ON A META IT SHOULD HAVE WARNED ABOUT.
+   It only ever compared against the maxlength BLOCK ceiling, so a 159/160 meta
+   and a 48/70 title both read as fine. missb_metadata_RULES_v1.json v1.2.0 has
+   two bands, not one: title blocks outside 15-70 but WARNS outside 30-60, and
+   description blocks outside 50-160 but WARNS outside 110-155. The 08-16 hoco
+   post shipped a 159-character meta straight past this box.
+   Second half: Shopify's theme appends " - <shop name>" to the page title, so a
+   48-character meta title renders at 64 and truncates in the SERP. The box now
+   shows what actually renders. TITLE_SUFFIX_LEN is the separator plus the shop
+   name; change it here if the theme's title template ever changes. */
+var TITLE_SUFFIX_LEN = 16;   // " \u2013 Miss Behavin'" as the theme renders it
+var META_BANDS = {
+  metatitle: { warnMin: 30, warnMax: 60, suffix: true },
+  metadesc:  { warnMin: 110, warnMax: 155, suffix: false }
+};
 function editCount(field, limit){
   // build 93 - code points after NFC, per the counting block in the rules file.
   // .length counts UTF-16 units, so a curly apostrophe or an emoji miscounted.
   var v = [...String(el('edit-f-' + field).value || '').normalize('NFC')].length;
   var cc = el('edit-cc-' + field);
-  cc.textContent = v + ' / ' + limit;
-  cc.classList.toggle('over', v > limit);
+  var band = META_BANDS[field];
+  if (!band) { cc.textContent = v + ' / ' + limit; cc.classList.toggle('over', v > limit); return; }
+  var rendered = band.suffix ? v + TITLE_SUFFIX_LEN : v;
+  var txt = v + ' / ' + limit;
+  if (band.suffix) txt += ' \u00b7 renders ' + rendered;
+  var over = rendered > limit || v > limit;
+  var warn = !over && (rendered < band.warnMin || rendered > band.warnMax);
+  if (over)      txt += ' \u00b7 OVER the hard limit';
+  else if (warn) txt += ' \u00b7 outside ' + band.warnMin + '\u2013' + band.warnMax + ', will truncate or read thin';
+  cc.textContent = txt;
+  cc.classList.toggle('over', over);
+  cc.classList.toggle('warn', warn);
 }
 
 function editRenderLinks(links){
@@ -11308,7 +11392,7 @@ function editPublishNow(){
   });
 }
 
-function editClosePreview(){ el('edit-preview').style.display = 'none'; }
+function editClosePreview(){ el('edit-preview').style.display = 'none'; document.body.classList.remove('editor-open'); }
 
 // Weekly nudge, in the app itself so everyone who can act on it sees it — no
 // phone required, no per-device opt-in, nothing to miss.
