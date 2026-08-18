@@ -1622,8 +1622,9 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 153</strong> &#183; 2026-08-18 &#183; A SET WAS BEING FILED WHERE NO COLLECTION COULD SEE IT. The Category picker label <strong>&quot;Sets &amp; Co-ords&quot; is now &quot;Sets&quot;</strong>, and it no longer ships that label to the taxonomy. The old one resolved to the node <strong>Outfit Sets</strong> (worker CATEGORY_GIDS aa-1-11) - cleanly, with no warning - and no collection in this store matches Outfit Sets, so every set pushed through it landed in nothing. Silent, which is why it survived several builds. Live proof: Harper Swimsuit sits on Outfit Sets and appears in no swim page; Coral Lace Bikini Suit sits in ZERO collections. The picker now separates the two questions it was conflating - <strong>Category says where a product lives, the tag says what it is</strong>. 'Sets' and 'Swimwear' both send the taxonomy node Swimwear, which is the exact node /collections/swimwear matches; only 'Sets' adds the <strong>bikini-set</strong> tag, which is what /collections/bikini-sets reads. A new entry may carry category: to ship a taxonomy name that differs from its label. Three enum gaps closed in _typeMap: <strong>Set</strong> and <strong>Bag</strong> had no key and were passed through verbatim, publishing the raw enum word as the product type (that is where Coral Lace's type &quot;Set&quot; came from), and <strong>Swim</strong> wrote a type of &quot;Swimwear&quot; when no product in the catalogue carries that value - the live type is &quot;Swim&quot; on 13 products. Adding the Set key also fixes a second bug: with no key the review card opened with NO category preselected, which is the actual mechanism that orphaned these products. The Categories bulk tool's co-ord keyword rule is <strong>removed</strong> rather than renamed: it fed its label straight to shopify_resolve_category, so it could only ever file a product on Outfit Sets, and the Worker's CATEGORY_ALIASES maps 'set' and 'sets' back to that same dead node - renaming it would have changed nothing. A swim set is already caught by the suit-set rule and goes to Swimwear; a non-swim co-ord now matches nothing and is left for a person. Outerwear and Activewear stay as passthroughs on purpose - the store carries neither, so one arriving should stop and be looked at. One stale comment corrected: build 78 claimed Complete the Look matched on Type is equal to Accessories; the live rule is Category-based, so nothing in this store routes on product type. <strong>Worker unchanged, runs on v113+</strong> - 'Swimwear' is already in CATEGORY_GIDS at aa-1-20. Carries build 152</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2142,7 +2143,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 152;   // keep in step with the footer stamp
+var APP_BUILD = 153;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -5997,7 +5998,18 @@ var _typeMap = {
   'Bottom':   { shopify: 'Bottoms',     tag: 'bottoms' },
   'Skirt':    { shopify: 'Bottoms',     tag: 'bottoms' },
   'Shorts':   { shopify: 'Bottoms',     tag: 'bottoms' },
-  'Swim':     { shopify: 'Swimwear',    tag: 'swimwear' },
+  // build 153 - 'Swim' wrote a Shopify product type of "Swimwear". NO product
+  // in the store carries that value; the live type is "Swim" on 13 products,
+  // so the app was one push away from inventing a 14th type nobody uses.
+  'Swim':     { shopify: 'Swim',        tag: 'swimwear',   cat: 'Swimwear' },
+  // build 153 - 'Set' and 'Bag' are values the invoice extraction enum returns
+  // and _typeMap had no key for either, so the fallback below published the raw
+  // enum word as the Shopify product type. "Coral Lace Bikini Suit" is the live
+  // proof: type "Set", tags "Coral, set", and it sits in ZERO collections. A set
+  // is swimwear in this store; what makes it a SET is the bikini-set tag, which
+  // is what /collections/bikini-sets actually reads.
+  'Set':      { shopify: 'Swim',        tag: 'bikini-set', cat: 'Sets' },
+  'Bag':      { shopify: 'Bags',        tag: 'bags' },
   'Shoe':     { shopify: 'Shoes',       tag: 'shoes' }
 };
 
@@ -6019,9 +6031,17 @@ var _CAT_TO_TYPE = {
   'Bodysuits':           { shopify: 'Tops',        tag: 'top' },
   'Shorts':              { shopify: 'Bottoms',     tag: 'bottoms' },
   'Rompers & Jumpsuits': { shopify: 'Rompers',     tag: 'dress' },
-  'Sets & Co-ords':      { shopify: 'Sets',        tag: 'sets' },
+  // build 153 - RENAMED from 'Sets & Co-ords' and REPOINTED. The old label
+  // resolved to the taxonomy node "Outfit Sets" (worker CATEGORY_GIDS aa-1-11).
+  // It resolved cleanly, raised no warning, and NO collection in this store
+  // matches Outfit Sets - so every set filed here was orphaned silently, which
+  // is harder to notice than a resolve error. "Harper Swimsuit - GRNSTRIPE" is
+  // the live proof. Now the Category says where it LIVES (Swimwear) and the tag
+  // says what it IS (bikini-set). See the category override where the product
+  // object is built: the label 'Sets' is not a taxonomy node and never ships.
+  'Sets':                { shopify: 'Swim',        tag: 'bikini-set', category: 'Swimwear' },
   'Outerwear':           { shopify: 'Outerwear',   tag: 'outerwear' },
-  'Swimwear':            { shopify: 'Swimwear',    tag: 'swimwear' },
+  'Swimwear':            { shopify: 'Swim',        tag: 'swimwear' },   // build 153 - see the _typeMap note on 'Swim'
   'Activewear':          { shopify: 'Activewear',  tag: 'activewear' },
   'Jewelry':             { shopify: 'Jewelry',     tag: 'jewelry' },
   'Bags':                { shopify: 'Bags',        tag: 'bags' },
@@ -8322,7 +8342,7 @@ var _CATEGORY_LABELS = [
   // Bottoms
   'Pants','Jeans','Skirts','Skorts','Shorts',
   // everything else
-  'Sets & Co-ords','Swimwear','Jewelry','Bags','Accessories','Shoes'];
+  'Sets','Swimwear','Jewelry','Bags','Accessories','Shoes'];
 
 // build 86 — CORRECTION. Build 85 flagged Tops, Sets & Co-ords and Swimwear as
 // having no collection. That was wrong: the Collections screenshot was
@@ -8345,10 +8365,14 @@ function _spPopulateType(cd, force){
     var te = _typeMap[cd.style.type || ''];
     // seed from the invoice type, translated back to a taxonomy label
     if (te) {
-      var back = { 'Bottoms':'Pants', 'Rompers':'Rompers & Jumpsuits', 'Sets':'Sets & Co-ords',
+      // build 153 - te.cat wins. Two invoice types now share a Shopify type of
+      // "Swim" ('Set' and 'Swim'), so keying the label off te.shopify alone can
+      // no longer tell a matched set from a separate. te.cat names the label
+      // outright; back[] still covers every entry that does not carry one.
+      var back = { 'Bottoms':'Pants', 'Rompers':'Rompers & Jumpsuits', 'Sets':'Sets',
                    'Swimwear':'Swimwear', 'Accessories':'Accessories', 'Dresses':'Dresses',
                    'Tops':'Tops', 'Sweaters':'Sweaters', 'Shoes':'Shoes' };
-      want = back[te.shopify] || '';
+      want = te.cat || back[te.shopify] || '';
     }
   }
   var opts = _CATEGORY_LABELS.slice();
@@ -8373,9 +8397,13 @@ function _spTypeNote(cd){
     return;
   }
   var t = (_CAT_TO_TYPE[v] || {}).shopify || '';
-  // build 78 — every collection but one matches on Category. The exception is
-  // "Complete the Look" (Type is equal to Accessories), so Type is still
-  // written automatically; that one cross-sell collection depends on it.
+  // build 153 - CORRECTION to build 78. That note said "Complete the Look"
+  // matched on Type is equal to Accessories, and it made Type look load-bearing.
+  // The live rule (collection 481654341668, read 2026-08-18) is Category is
+  // equal to Jewelry +27 OR Shoes +13 OR Claw Clips, with an inventory floor and
+  // a Gift Card title exclusion. NOTHING in this store routes on product type -
+  // four rules read direct in admin, all Category or Tag. Type is still written
+  // for catalogue consistency and the Google feed, not for placement.
   n.textContent = 'Sets the Shopify category — collections, tax and the Google feed all match on it' +
                   (t ? ' · product type set to "' + t + '" automatically' : '') + '.';
   n.className = 'sp-type-note';
@@ -8713,7 +8741,13 @@ function _spDoCreate(cd, onDone) {
     seo_title: cd.els ? cd.els.title.value.trim() : '',
     seo_description: cd.els ? cd.els.desc.value.trim() : '',
     body_description: cd.els ? cd.els.bodyd.value.trim() : '',
-    product_category: cd.els ? cd.els.cat.value.trim() : '',
+    // build 153 - the picker LABEL and the TAXONOMY STRING are no longer the
+    // same string. 'Sets' is a label staff understand; the taxonomy has no such
+    // node, so that entry carries category:'Swimwear' and THAT is what ships.
+    // Every other label is its own taxonomy name and passes through unchanged.
+    product_category: cd.els
+      ? (((_CAT_TO_TYPE[cd.els.cat.value.trim()] || {}).category) || cd.els.cat.value.trim())
+      : '',
     image_alt: cd.els ? cd.els.alt.value.trim() : '',
     images: _spChosenImages(cd),
     // v56 — vendor SKU rides to a custom.vendor_sku metafield (never the variant SKU)
@@ -9278,7 +9312,17 @@ function showPrint(printArea){
    The Worker resolves each via a hardcoded GID — no name-search anywhere. */
 var CAT_RULES = [
   [/romper|jumpsuit/i, 'Rompers & Jumpsuits'],
-  [/matching set|co-?ord/i, 'Sets & Co-ords'],
+  // build 153 - the co-ord rule is REMOVED, not renamed. It returned the label
+  // 'Sets & Co-ords', and catClassify() feeds its answer straight to
+  // shopify_resolve_category, which maps that label to the taxonomy node
+  // "Outfit Sets" - a node NO collection in this store matches. So this rule
+  // could only ever file a product somewhere invisible. Renaming it to 'Sets'
+  // would not help: the Worker's CATEGORY_ALIASES maps both 'set' and 'sets'
+  // back to 'Sets & Co-ords', so it lands on Outfit Sets either way.
+  // A swim set is caught by the "suit set" / bikini / swim rule below and goes
+  // to Swimwear, which is correct. A non-swim co-ord now matches nothing and
+  // catClassify returns null, so the bulk tool leaves it for a person instead
+  // of guessing - the honest answer, since the taxonomy has no home for it.
   [/dress/i, 'Dresses'],
   [/skort|skirt/i, 'Skirts'],
   [/short|shortie/i, 'Shorts'],
