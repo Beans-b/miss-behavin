@@ -1624,7 +1624,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 153</strong> &#183; 2026-08-18 &#183; A SET WAS BEING FILED WHERE NO COLLECTION COULD SEE IT. The Category picker label <strong>&quot;Sets &amp; Co-ords&quot; is now &quot;Sets&quot;</strong>, and it no longer ships that label to the taxonomy. The old one resolved to the node <strong>Outfit Sets</strong> (worker CATEGORY_GIDS aa-1-11) - cleanly, with no warning - and no collection in this store matches Outfit Sets, so every set pushed through it landed in nothing. Silent, which is why it survived several builds. Live proof: Harper Swimsuit sits on Outfit Sets and appears in no swim page; Coral Lace Bikini Suit sits in ZERO collections. The picker now separates the two questions it was conflating - <strong>Category says where a product lives, the tag says what it is</strong>. 'Sets' and 'Swimwear' both send the taxonomy node Swimwear, which is the exact node /collections/swimwear matches; only 'Sets' adds the <strong>bikini-set</strong> tag, which is what /collections/bikini-sets reads. A new entry may carry category: to ship a taxonomy name that differs from its label. Three enum gaps closed in _typeMap: <strong>Set</strong> and <strong>Bag</strong> had no key and were passed through verbatim, publishing the raw enum word as the product type (that is where Coral Lace's type &quot;Set&quot; came from), and <strong>Swim</strong> wrote a type of &quot;Swimwear&quot; when no product in the catalogue carries that value - the live type is &quot;Swim&quot; on 13 products. Adding the Set key also fixes a second bug: with no key the review card opened with NO category preselected, which is the actual mechanism that orphaned these products. The Categories bulk tool's co-ord keyword rule is <strong>removed</strong> rather than renamed: it fed its label straight to shopify_resolve_category, so it could only ever file a product on Outfit Sets, and the Worker's CATEGORY_ALIASES maps 'set' and 'sets' back to that same dead node - renaming it would have changed nothing. A swim set is already caught by the suit-set rule and goes to Swimwear; a non-swim co-ord now matches nothing and is left for a person. Outerwear and Activewear stay as passthroughs on purpose - the store carries neither, so one arriving should stop and be looked at. One stale comment corrected: build 78 claimed Complete the Look matched on Type is equal to Accessories; the live rule is Category-based, so nothing in this store routes on product type. <strong>Worker unchanged, runs on v113+</strong> - 'Swimwear' is already in CATEGORY_GIDS at aa-1-20. Carries build 152</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 154</strong> &#183; 2026-08-21 &#183; THE SCAN WAS FINISHING AND THE SCREEN NEVER HEARD ABOUT IT. Reported: an invoice sat forever on &quot;Got response from Claude, parsing file 1...&quot; with a live spinner and a <strong>completely clean console</strong> &#8212; no exception, nothing logged, which is why this survived unseen. Nothing was broken in the JavaScript sense. <strong>processPage raced the fetch against a timeout and let the loser keep talking.</strong> The response handler repainted the status bar whenever the call resolved, without checking whether the timeout had already won the race half a minute earlier. So a slow scan ran: 40s timeout fires &#8594; catch shows &quot;timed out, skipping&quot; &#8594; 1.5s later processPage runs out of files and shows &quot;No styles found&quot; &#8594; ~60s the real reply lands and overwrites that with &quot;parsing file 1...&quot;, a spinner describing work already abandoned and holding a return value already discarded. <strong>The image timeout is now 120s, the same budget a PDF already had.</strong> The 40s was set when extraction ran on claude-haiku-4-5 at max_tokens 2000 (worker v95 to v102); worker <strong>v103 moved extraction to claude-sonnet-5</strong>, which has adaptive thinking always on and takes materially longer on a dense or hand-marked invoice, and this timeout was never raised to match &#8212; so every scan since 2026-08-11 has been racing a clock tuned for a different model, and it only became visible when an invoice finally ran past 40s. A new <strong>_settled flag</strong> is set by whichever side finishes first and checked before any status write, so a late reply can no longer repaint over an honest error; the timeout message now says <em>after 2 minutes</em> and suggests retrying the page alone or cropping to just the invoice. <strong>Capture resolution raised from 1200px to 1568px</strong> at JPEG quality 0.85 (was 0.75) &#8212; Claude downsamples to a long edge of about 1568, so 1200 was detail thrown away for nothing: a phone photo of an invoice put the style codes and the size grid at roughly 6px tall. Legible text also means less deliberation and a faster call, which widens the margin the timeout fix just bought. Note the money is spent either way &#8212; a timed-out call still completes and still bills. <strong>Worker unchanged, runs on v113+.</strong> Carries build 153</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2143,7 +2143,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 153;   // keep in step with the footer stamp
+var APP_BUILD = 154;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -5479,7 +5479,13 @@ function compressImage(file, cb) {
         img.onerror = function() { cb(null, null, 'Image load error'); };
         img.onload = function() {
           try {
-            var MAX=1200, w=img.width, h=img.height;
+            // build 154 — 1568, not 1200. Claude's vision downsamples to a long edge of
+            // about 1568px, so anything above that was wasted bytes and anything
+            // below it was detail thrown away for nothing. A phone photo of an
+            // invoice at 1200px puts the style codes and the size grid at roughly
+            // 6px tall; at 1568 they are legible, which also means the model
+            // deliberates less and the call comes back sooner.
+            var MAX=1568, w=img.width, h=img.height;
             if(w>MAX||h>MAX){
               if(w>h){h=Math.round(h*MAX/w);w=MAX;}
               else{w=Math.round(w*MAX/h);h=MAX;}
@@ -5487,7 +5493,7 @@ function compressImage(file, cb) {
             var canvas=document.createElement('canvas');
             canvas.width=w; canvas.height=h;
             canvas.getContext('2d').drawImage(img,0,0,w,h);
-            var dataUrl=canvas.toDataURL('image/jpeg',0.75);
+            var dataUrl=canvas.toDataURL('image/jpeg',0.85);
             cb(dataUrl.split(',')[1],'image/jpeg',null);
           } catch(err){ cb(null,null,'Canvas error: '+err.message); }
         };
@@ -5559,16 +5565,43 @@ function processPage(idx, invoiceMeta) {
     showStatus('extract-status','loading','<span class="spinner"></span>' + (pdf
       ? 'Sending the PDF to Claude — every page reads in one pass (up to 2 minutes)...'
       : 'Sending page '+(idx+1)+' to Claude (image: '+(Math.round(b64.length*0.75/1024))+'KB)...'));
+    // build 154 — THE RACE HAS A WINNER, AND THE LOSER STOPS TALKING.
+    // Reported 2026-08-21: a Cotton Candy LA invoice sat forever on "Got response
+    // from Claude, parsing file 1..." with a live spinner and a COMPLETELY CLEAN
+    // console. Nothing was broken in the JavaScript sense, which is exactly why
+    // nothing was logged and why this survived so long.
+    // The response .then below repainted the status bar whenever the fetch
+    // resolved, with no regard for whether the timeout had already won the race
+    // half a minute earlier. A slow call therefore ended like this: at 40s the
+    // timeout fired, the catch showed "timed out — skipping", 1.5s later
+    // processPage ran out of files and showed "No styles found", and then at ~60s
+    // the real reply landed and overwrote that with "parsing file 1..." — a
+    // spinner describing work that had been abandoned, holding a return value
+    // that was discarded. The screen lied and then sat still.
+    // _settled is set by whichever side finishes first and is checked before any
+    // status write, so the loser of the race says nothing.
+    var _settled = false;
     var fetchPromise = api('extract_invoice', { image: b64, media_type: mime })
     .then(function(res){
+      if (_settled) return res;   // the timeout already won — do not repaint
       showStatus('extract-status','loading','<span class="spinner"></span>Got response from Claude, parsing file '+(idx+1)+'...');
       return res;
     });
     var timeoutPromise = new Promise(function(_,reject){
-      setTimeout(function(){ reject(new Error('timeout')); }, pdf ? 120000 : 40000);
+      // build 154 — 120s for an image, the same budget a PDF already had. The
+      // 40s here was set when extraction ran on claude-haiku-4-5 at max_tokens
+      // 2000 (worker v95 through v102). Worker v103 moved extraction to
+      // claude-sonnet-5, which has adaptive thinking always on and takes
+      // materially longer on a dense or hand-marked invoice — and this timeout
+      // was never raised to match, so every scan since 2026-08-11 has been racing
+      // a clock tuned for a different model. It stayed invisible until an invoice
+      // finally ran past 40s. The money is spent either way: the API call
+      // completes and bills whether or not the app keeps the answer.
+      setTimeout(function(){ reject(new Error('timeout')); }, 120000);
     });
     Promise.race([fetchPromise, timeoutPromise])
     .then(function(data) {
+      _settled = true;
       if (data.error) throw new Error(data.error);
       var txt = data.text.trim().replace(/^```json[\s]*/i,'').replace(/```$/,'').trim();
       var extracted = JSON.parse(txt);
@@ -5599,7 +5632,8 @@ function processPage(idx, invoiceMeta) {
       processPage(idx + 1, invoiceMeta);
     })
     .catch(function(err) {
-      var msg = err.message==='timeout' ? 'File '+(idx+1)+' timed out — skipping.' : 'Error on file '+(idx+1)+': '+err.message;
+      _settled = true;   // build 154 — a late reply must not repaint over this
+      var msg = err.message==='timeout' ? 'File '+(idx+1)+' timed out after 2 minutes — skipping. Retry it on its own, or crop the photo down to just the invoice.' : 'Error on file '+(idx+1)+': '+err.message;
       showStatus('extract-status','loading','<span class="spinner"></span>'+msg+' Trying next file...');
       setTimeout(function(){ processPage(idx+1, invoiceMeta); }, 1500);
     });
