@@ -1624,7 +1624,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 154</strong> &#183; 2026-08-21 &#183; THE SCAN WAS FINISHING AND THE SCREEN NEVER HEARD ABOUT IT. Reported: an invoice sat forever on &quot;Got response from Claude, parsing file 1...&quot; with a live spinner and a <strong>completely clean console</strong> &#8212; no exception, nothing logged, which is why this survived unseen. Nothing was broken in the JavaScript sense. <strong>processPage raced the fetch against a timeout and let the loser keep talking.</strong> The response handler repainted the status bar whenever the call resolved, without checking whether the timeout had already won the race half a minute earlier. So a slow scan ran: 40s timeout fires &#8594; catch shows &quot;timed out, skipping&quot; &#8594; 1.5s later processPage runs out of files and shows &quot;No styles found&quot; &#8594; ~60s the real reply lands and overwrites that with &quot;parsing file 1...&quot;, a spinner describing work already abandoned and holding a return value already discarded. <strong>The image timeout is now 120s, the same budget a PDF already had.</strong> The 40s was set when extraction ran on claude-haiku-4-5 at max_tokens 2000 (worker v95 to v102); worker <strong>v103 moved extraction to claude-sonnet-5</strong>, which has adaptive thinking always on and takes materially longer on a dense or hand-marked invoice, and this timeout was never raised to match &#8212; so every scan since 2026-08-11 has been racing a clock tuned for a different model, and it only became visible when an invoice finally ran past 40s. A new <strong>_settled flag</strong> is set by whichever side finishes first and checked before any status write, so a late reply can no longer repaint over an honest error; the timeout message now says <em>after 2 minutes</em> and suggests retrying the page alone or cropping to just the invoice. <strong>Capture resolution raised from 1200px to 1568px</strong> at JPEG quality 0.85 (was 0.75) &#8212; Claude downsamples to a long edge of about 1568, so 1200 was detail thrown away for nothing: a phone photo of an invoice put the style codes and the size grid at roughly 6px tall. Legible text also means less deliberation and a faster call, which widens the margin the timeout fix just bought. Note the money is spent either way &#8212; a timed-out call still completes and still bills. <strong>Worker unchanged, runs on v113+.</strong> Carries build 153</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 155</strong> &#183; 2026-08-21 &#183; A RENAME USED TO END AT THE LABEL, AND A PHOTO MATCH NEVER SAID HOW IT WAS FOUND. <strong>The pencil edit on a review card now reaches everything that cares what the product is called.</strong> _spWireTitleEdit set cd.titleOverride, repainted the text and stopped - no autosave, so the rename did not survive a reload; no SEO refresh, so the copy kept describing the old product; and _spFetchVendor kept searching the vendor site on the old name. Reported: a card reading &quot;Slay Dress&quot; searched Cotton Candy LA for &quot;Beatrice Dress&quot;. Every caller now goes through one <strong>_spEffectiveName</strong> (override, then printed name, then style name, then code, colour suffix stripped) - _spGenSeo asked cd.style.name and the vendor lookup asked cd.style.printed_name, and neither had ever heard of the override. Build 86 already handled a rename found across a SAVE; this is the live path it never had. <strong>Hand-written SEO copy is not overwritten</strong> - untouched copy is rewritten silently, edited copy raises a line saying the copy still describes the old name and waits for a <em>Rewrite SEO</em> button, because builds 116 and 134 were both spent recovering copy that something helpfully destroyed and a wasted generation costs a fraction of a cent. <strong>The card now says WHICH key matched a vendor product.</strong> The Worker has returned matched_by since v58 and the app threw it away, so a certain style-code hit and a 0.6-confidence name guess arrived looking identical; a code match reads &quot;Matched on style code CD-14505&quot;, a name match warns to confirm the garment. <strong>An app-invented name is never sent to a vendor catalogue again</strong> (_spVendorSearchName): &quot;Slay Dress&quot; and &quot;Beatrice Dress&quot; were invented HERE, the vendor has never heard either, and nameMatchScore accepts at 0.6 - so a coincidence attaches another garment photographs and looks exactly like success. Only wording printed on the invoice qualifies; otherwise the style code goes alone, which is the honest answer. ALSO: a <strong>locked private-label vendor</strong> (Cotton Candy LA) renders checked and disabled with an explanation instead of a live checkbox that 400s and then displays the opposite of the truth, and <strong>loadPrivateLabels no longer swallows its own failure</strong> - a dead fetch looked identical to an empty list and silently made every private-label vendor render as an ordinary one. <strong>Pairs with Worker v116</strong> (seed private labels accept an add; the no-match note names the style code as well as the name). Carries build 154</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2143,7 +2143,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 154;   // keep in step with the footer stamp
+var APP_BUILD = 155;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -4173,8 +4173,15 @@ function _vendorSetPrivateLabel(name, add, done){
 // the swap on push, so the worst case is a display that lags the truth).
 function loadPrivateLabels(cb){
   api('private_labels_list', {})
-  .then(function(r){ if (r && r.vendors) _privateLabels = r; if (cb) cb(); })
-  .catch(function(){ if (cb) cb(); });
+  .then(function(r){ if (r && r.vendors) { _privateLabels = r; _privateLabels._loaded = true; } if (cb) cb(); })
+  // build 155 — a dead fetch used to look exactly like an empty list, so every
+  // private-label vendor silently rendered as an ordinary one and the checkbox
+  // told the opposite of the truth. Record the failure so it can be seen.
+  .catch(function(e){
+    _privateLabels._loadError = (e && e.message) || 'unavailable';
+    console.warn('private_labels_list failed — private-label vendors will render as ordinary ones:', e);
+    if (cb) cb();
+  });
 }
 
 function _renderVendorField(inv){
@@ -4224,8 +4231,26 @@ function _renderVendorField(inv){
   var plToggle = el('kel-vendor-pl-toggle');
   if (plToggle) {
     plToggle.checked = priv;
-    var prevChecked = priv;   // state before this click, for reverting on failure
-    plToggle.onchange = function(){
+    // build 155 — privateLabelsList has returned `locked` for the Worker's own
+    // seed vendors (Cotton Candy LA, Cotton Candy) since v75 and this function
+    // ignored it, so a name no click could change was rendered as a live
+    // checkbox. Touching it produced a 400 and left the box showing the opposite
+    // of the truth. It is now checked, disabled, and explained.
+    var _plRow = (_privateLabels.vendors||[]).filter(function(x){
+      return String(x.name||'').toLowerCase() === String(origin||'').toLowerCase(); })[0];
+    if (_plRow && _plRow.locked) {
+      plToggle.checked = true;
+      plToggle.disabled = true;
+      note.style.display = '';
+      note.textContent = '"' + origin + '" is built into the Worker as a private label \u2014 Shopify always receives ' +
+        _privateLabels.becomes + ' for it. This cannot be switched off here.';
+      // NOT a return: the vendor TEXT field's own onchange is wired further
+      // down and a locked private label must not cost us that.
+    }
+    var _locked = !!(_plRow && _plRow.locked);
+    plToggle.disabled = _locked;
+    var prevChecked = plToggle.checked;   // state before this click, for reverting on failure
+    plToggle.onchange = _locked ? null : function(){
       if (!currentInvoice) return;
       var wantOn = plToggle.checked;
       var name = origin;
@@ -8332,6 +8357,51 @@ function _spColorSuffix(color) {
   if (!c || c.toLowerCase() === 'default') return '';
   return ' - ' + c;
 }
+// ── build 155 — ONE ANSWER TO "WHAT IS THIS PRODUCT CALLED" ─────────────────
+// cd.titleOverride (the pencil edit on the review card) was read by exactly one
+// thing: the label directly above the pencil. _spGenSeo asked cd.style.name and
+// _spFetchVendor asked cd.style.printed_name || cd.style.name, so renaming a
+// card left the SEO copy and the vendor photo search both chasing the OLD name
+// with nothing on screen saying so. Reported 2026-08-21: a card reading "Slay
+// Dress" searched the vendor site for "Beatrice Dress".
+// Every caller now goes through _spEffectiveName. The colour suffix is stripped
+// because _spTitleFor APPENDS it for display ("Harper Dress - CHOCOLATE") and
+// neither the copy writer nor a catalogue search wants the colourway in the name.
+function _spEffectiveName(cd){
+  var o = String((cd && cd.titleOverride) || '').trim();
+  if (o) {
+    var suf = _spColorSuffix(cd.colorObj && cd.colorObj.color);
+    if (suf && o.length > suf.length && o.slice(-suf.length) === suf) o = o.slice(0, -suf.length).trim();
+    return o || String((cd.style && (cd.style.name || cd.style.code)) || '');
+  }
+  return String((cd && cd.style && (cd.style.printed_name || cd.style.name || cd.style.code)) || '');
+}
+// build 155 — what may be sent to a VENDOR'S catalogue as a search term, which
+// is a stricter question. "Slay Dress" and "Beatrice Dress" are names THIS APP
+// invented; Cotton Candy LA has never heard either, so searching on one can only
+// match by coincidence — and nameMatchScore accepts at 0.6, so a coincidence
+// attaches another garment's photographs and looks exactly like success.
+// Only wording actually printed on the invoice is a shared identifier. Worker
+// v103 already forces printed_name to null unless the read was clear, so this
+// returns '' far more often than it used to, and the search falls back to the
+// style code alone — which is the honest answer, not a regression.
+function _spVendorSearchName(cd){
+  var st = cd && cd.style;
+  var pn = String((st && st.printed_name) || '').trim();
+  if (!pn) return '';
+  if (st.name_read && st.name_read !== 'clear') return '';
+  return pn;
+}
+// build 155 — say WHICH key won. The Worker has returned matched_by since v58
+// and the app threw it away, so a certain style-code hit and a 0.6-confidence
+// name guess arrived on screen looking identical.
+function _spMatchNote(cd){
+  if (!cd || !cd._matchedBy) return '';
+  if (cd._matchedBy === 'code') return '\u2713 Matched on style code ' + (cd.style && cd.style.code || '') + '. ';
+  if (cd._matchedBy === 'name') return '\u26a0 Matched on the NAME "' + (cd._matchedName || '') + '", not the style code \u2014 check these are the right garment. ';
+  return '';
+}
+
 // The title that will actually be sent to Shopify. An owner edit (cd.titleOverride)
 // always wins; otherwise it's style name + colorway.
 function _spTitleFor(cd) {
@@ -8457,12 +8527,56 @@ function _spWireTitleEdit(cd) {
     input.style.display = editing ? '' : 'none';
     if (editing) { input.value = _spTitleFor(cd); input.focus(); input.select(); }
   };
+  // build 155 — the stale-copy strip. Built here rather than in the card
+  // template so the whole rename fix stays in one function.
+  var stale = wrap.parentNode.querySelector('.sp-stale-seo');
+  if (!stale) {
+    stale = document.createElement('div');
+    stale.className = 'sp-stale-seo';
+    stale.style.cssText = 'display:none;font-size:12px;line-height:1.4;margin:4px 0 0;color:#8a5a2b;';
+    stale.innerHTML = '<span class="sp-stale-msg"></span>' +
+      ' <button type="button" class="sp-stale-go" style="font-size:12px;padding:2px 8px;margin-left:4px;cursor:pointer;">Rewrite SEO</button>';
+    wrap.parentNode.insertBefore(stale, wrap.nextSibling);
+    stale.querySelector('.sp-stale-go').onclick = function(){
+      stale.style.display = 'none';
+      cd._forceSeo = true;          // consumed by _spGenSeo's guard
+      cd.userEdited = false;        // this IS the person asking for a rewrite
+      _spGenSeo(cd);
+    };
+  }
+
+  // ── build 155 — A RENAME USED TO END AT THE LABEL ──────────────────────────
+  // This function set cd.titleOverride, repainted the text and stopped. No
+  // autosave, so the rename did not survive a reload; no SEO refresh, so the
+  // copy went on describing the old product; and _spFetchVendor kept searching
+  // the vendor site for the old name. Build 86 already handles a rename found
+  // across a SAVE (see _spRestoreCard) — this is the live path it never had.
+  // Hand-written copy is NOT overwritten. That is deliberate: builds 116 and 134
+  // were both spent recovering SEO copy that something helpfully destroyed, and
+  // a wasted generation costs a fraction of a cent while lost copy costs a
+  // retype. So untouched copy is rewritten silently; edited copy is flagged and
+  // waits for the button.
   var commit = function() {
+    var before = _spEffectiveName(cd);
     var v = input.value.trim();
     // Blank resets to the generated title rather than pushing an empty name.
     cd.titleOverride = v || '';
     text.textContent = _spTitleFor(cd);
     show(false);
+    var after = _spEffectiveName(cd);
+    if (after === before) return;                       // nothing actually changed
+    if (typeof scheduleAutosave === 'function') scheduleAutosave();
+    var hasCopy = !!(cd.els && (String(cd.els.title.value||'').trim() ||
+                                String(cd.els.desc.value||'').trim() ||
+                                String(cd.els.bodyd.value||'').trim()));
+    if (!cd.userEdited || !hasCopy) {
+      stale.style.display = 'none';
+      _spGenSeo(cd);
+      return;
+    }
+    stale.querySelector('.sp-stale-msg').textContent =
+      'Renamed to "' + after + '" \u2014 the SEO copy below still describes the old name. Your wording is kept until you ask.';
+    stale.style.display = '';
   };
   btn.onclick   = function(){ show(true); };
   input.onblur  = commit;
@@ -10274,11 +10388,15 @@ function _spGenSeo(cd, done){
   // short of retyping the copy by hand. Only skip when there is real
   // approved copy sitting in the box.
   var hasRealCopy = !!(String(cd.els.title.value||'').trim() || String(cd.els.desc.value||'').trim() || String(cd.els.bodyd.value||'').trim());
-  if (cd.userEdited && hasRealCopy) { cd.els.title.placeholder = ''; cd.seoReady = true; if (done) done(); return; }
+  // build 155 — cd._forceSeo is set ONLY by the Rewrite SEO button that appears
+  // after a rename, so a deliberate request can get past the protect-my-copy
+  // guard. It is consumed here and never persists.
+  var _force = !!cd._forceSeo; cd._forceSeo = false;
+  if (cd.userEdited && hasRealCopy && !_force) { cd.els.title.placeholder = ''; cd.seoReady = true; if (done) done(); return; }
   var vendor = (currentInvoice && currentInvoice.vendor) || '';
   cd.els.title.placeholder = 'Generating…';
   api('generate_seo', {
-    title: cd.style.name || cd.style.code,
+    title: _spEffectiveName(cd),   // build 155 - the pencil rename reaches the copy writer
     brand: vendor,
     type: cd.style.type || '',
     // v83 — if the staff has already set the Category dropdown, that beats the
@@ -10317,7 +10435,7 @@ function _spGenSeo(cd, done){
     var stillHasCopy = !!(String(cd.els.title.value||'').trim() ||
                           String(cd.els.desc.value||'').trim() ||
                           String(cd.els.bodyd.value||'').trim());
-    if (cd.userEdited && stillHasCopy) { cd.seoReady = true; if (done) done(); return; }
+    if (cd.userEdited && stillHasCopy && !_force) { cd.seoReady = true; if (done) done(); return; }
     cd.seoReady = true;   // build 125 — the boxes are filled; a save may record them
     cd.els.title.value = j.seo_title || '';
     cd.els.desc.value  = j.seo_description || '';
@@ -10356,17 +10474,25 @@ function _spFetchVendor(cd, onDone){
   // own name and coming back "no product matched" no matter what.
   var vendor = _spTrueVendor();
   var dom = _vendorDomains[_vendorKey(vendor)] || undefined;   // v57 — pass a saved/entered site if we have one
-  cd.els.fetchStatus.textContent = 'Searching ' + vendor + '…';
+  cd.els.fetchStatus.textContent = 'Searching ' + vendor + ' for ' + (cd.style.code || 'this style') + '…';
   cd.els.fetchBtn.disabled = true;
+  // build 155 — the name fallback is only offered when the invoice PRINTED one.
+  // See _spVendorSearchName. Sending an app-invented name here was producing
+  // both false failures ("No product matched 'Beatrice Dress'") and, worse,
+  // false successes.
+  var _searchName = _spVendorSearchName(cd);
   var req = { vendor: vendor, styleCode: cd.style.code,
     color: cd.colorObj.color || '',                                 // v58 — filter images to this colorway
-    name: cd.style.printed_name || cd.style.name || cd.style.code   // v58 — name fallback if code doesn't match
+    name: _searchName                                               // v58/155 — invoice wording only, or ''
   };
+  cd._matchedBy = ''; cd._matchedName = '';
   if (dom) req.domain = dom;
   api('fetch_vendor_details', req)
   .then(function(res){
     if (res.error) throw new Error(res.error);
     if (cd.els.vsite) cd.els.vsite.style.display = 'none';   // known now
+    cd._matchedBy = res.matched_by || '';   // build 155 — 'code' | 'name' | ''
+    cd._matchedName = _searchName;
     var cands = res.candidates || [];
     if (!cands.length) { cd.els.fetchStatus.textContent = res.note || 'No match on the vendor site.'; cd.els.fetchBtn.disabled = false; if (onDone) onDone(); return; }
     var want = String(cd.colorObj.color || '').toLowerCase();
@@ -10511,7 +10637,8 @@ function _spUseCandidate(cd, cand, onDone){
       if (cd.style && cd.sourceUrl) cd.style.vendor_src_url = cd.sourceUrl;
       _spRenderImages(cd);
       _spShowSource(cd);
-      cd.els.fetchStatus.textContent = ((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.';
+      // build 155 — lead with which key matched, because a name match may be a coincidence.
+      cd.els.fetchStatus.textContent = _spMatchNote(cd) + (((cd.fabric ? 'Fabric: ' + cd.fabric + '  ' : '') + (cd.fit ? 'Fit: ' + cd.fit : '')) || 'Images loaded.');
       cd.els.fetchBtn.disabled = false;
       _spGenSeo(cd);
       if (onDone) onDone();
