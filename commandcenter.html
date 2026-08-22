@@ -1082,8 +1082,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.08.22a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.22a &middot; V2 SHIPS - THE ENTITIES AND QUESTIONS TAB, THE DISCOVERY SURFACES STRIP, AND THE APPROVED BACKLOG ROWS: the lean build from the 08-22 roadmap review (approved with three amendments), not the ten-module rebuild the external roadmap proposed. New tab seeded from verified master doc facts only - 16 entity rows and 16 question rows, every status traceable, nothing invented. Overview gains the four-surface strip (Product / Organic / Answer / Entity Discovery - new decision 57), Audit gains binary page-type checklists with composite AI scores explicitly banned, playbook 8 records the AEO-commerce rules so settled decisions stop reopening, Reference gains the schema emitter card and the Merchant AI insights row, the catalog stream is relabeled Product Data and Images, and a Monthly-1st cadence item watches the Merchant Center AI performance insights rollout (announced 5/27/26). EIGHT TASK ROWS ADDED under the approved decision-10 exception, clearing the items 67 and 117 backlog (tops split 08-03, collection split 08-14, returns rewrite done, Merchant Center policy in review, GBP description in review) plus three v2 rows (AI insights watch, November ChatGPT 10-run re-test per the decision 47 amendment, this build). One note updated on the ChatGPT merchant feed row: Shopify Catalog auto-integration, OpenAI Mar 2026. Task count 129 to 137; rows appended at the end so derived ids stay stable and synced statuses survive. Script parse-checked with node before delivery. Carries forward from CC-2026.08.21c - Organization logo shipped and verified live, item 113 closed, decision 36 fifth form recorded.</div>
+    <!-- deploy_check: CC-2026.08.22b -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.22b &middot; START HERE RESEQUENCED, AND THE FEED-AUDIT STATUS BUG DIAGNOSED - NOT YET FIXED LIVE. Brian approved resequencing Start Here to front-load the AEO/entity-relevant items he named: schema dedup, the feed-complete audit and Expand Our Story now sit first in the PRIORITY array (was positions 3, 4, 13), the remaining 10 items kept their existing relative order - no new items added, no revenue-facing priority displaced. CAVEAT, stated plainly: Start Here reads a SAVED order first if one exists (drag-reordered, synced to D1 via seocmd_priority) and only falls back to this code default when no saved order is on file - if the visible order does not change after deploy, click "reset order" next to the Start Here heading to clear the saved order on every device and pick up this default. SEPARATELY, TRACED LIVE AND CONFIRMED BY BRIAN: task #4 (the feed-complete audit) still shows To do on the deployed site after this same redeploy - CONFIRMS THE ITEM 124 DIAGNOSIS RATHER THAN FIXING IT. Redeploying ships new code; it does not touch the separately-stored D1 status blob that syncDown() overlays on load, so a stale synced status survives any number of redeploys. THE ONLY FIX: open that row in Tracker on the live app and tap its status pill to explicitly set Done - that is the one action that writes back to the shared store and clears the stale value. Carries forward from CC-2026.08.22a - the Entities and Questions tab, the surfaces strip, audit checklists, playbook 8 and the items 67/117 backlog rows all shipped in that save.</div>
   </div>
 </div>
 
@@ -2615,10 +2615,11 @@ function overviewDrill(go){
 // Add a row here to introduce a new Start Here item; existing saved orders keep working and
 // append anything new at the bottom automatically (see orderedPriority()).
 var PRIORITY=[
-  {match:'SoV baseline',            label:'Finish the SoV baseline run',            why:'Your before picture, and it gates blog content'},
-  {match:'NAP hygiene',             label:'Kill the old Trigo Rd address',          why:'A wrong address confuses Google and AI about who you are'},
   {match:'Dedup entity',            label:'Finish the schema dedup',                why:'Clear the duplicate Organization block and warnings'},
   {match:'Feed-complete audit',     label:'Run the feed-complete audit',            why:'Cheap unlock; GMC, Pinterest, TikTok and ChatGPT feed all wait on it'},
+  {match:'Expand Our Story',        label:'Expand the Our Story page',              why:'Your entity anchor, the page only you can own'},
+  {match:'SoV baseline',            label:'Finish the SoV baseline run',            why:'Your before picture, and it gates blog content'},
+  {match:'NAP hygiene',             label:'Kill the old Trigo Rd address',          why:'A wrong address confuses Google and AI about who you are'},
   {match:'Lever 2',                 label:'Lever 2 off-site "stocked at" outreach', why:'Highest payoff, barely started: 10 to 15 designer links'},
   {match:'Native reviews',          label:'Turn on native reviews',                 why:'Among the strongest citation signals; currently at zero'},
   {match:'GMC free listings',       label:'GMC free listings + GA4 non-CA report',  why:'National discovery and your national-share metric; unblocked by the feed audit'},
@@ -2626,8 +2627,7 @@ var PRIORITY=[
   {match:'Collection pages: clean', label:'Clean the top 8 collection pages',        why:'Quick on-site wins: H1, meta, and a short intro'},
   {match:'Build 6 vendor',          label:'Build the 6 vendor collection pages',    why:'Lever 3 hubs; copy already drafted, 2 per week'},
   {match:'Pinterest',               label:'Pinterest — reclaim, verify, product pins', why:'A style and occasion discovery feed for exactly this audience'},
-  {match:'Post 1',                  label:'Blog Post 1: Motel Rocks stockist hub',  why:'Unlocks the content engine once the baseline is logged'},
-  {match:'Expand Our Story',        label:'Expand the Our Story page',              why:'Your entity anchor, the page only you can own'}
+  {match:'Post 1',                  label:'Blog Post 1: Motel Rocks stockist hub',  why:'Unlocks the content engine once the baseline is logged'}
 ];
 /* ---- Start Here priority order: drag-reorderable, saved per-browser in localStorage ---- */
 var PRIORITY_LS_KEY='mb_cc_priority_order';
