@@ -751,6 +751,21 @@ body.editor-open #update-banner{bottom:76px !important;}
 .sp-seo{padding:10px 14px;border-top:1px solid var(--gray-mid);}
 .sp-type-note{font-size:11px;color:var(--gray-text);line-height:1.4;margin:4px 0 2px;}
 .sp-type-note.warn{color:var(--red);}
+/* build 157 — the occasion and aesthetic chips. Tap targets, not a list box:
+   this screen is used on a phone with a box of stock open, and the whole
+   design goal is that accepting the proposal is ONE TAP. 32px minimum height
+   so a chip can be hit without aiming. */
+.sp-occ{margin:8px 0 2px;}
+.sp-occ-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.sp-chip{font-size:12px;line-height:1;padding:9px 12px;min-height:32px;display:inline-flex;
+  align-items:center;border:1px solid var(--gray-mid);border-radius:999px;background:#fff;
+  color:var(--gray-text);cursor:pointer;user-select:none;white-space:nowrap;}
+.sp-chip:hover{border-color:#999;}
+.sp-chip.on{background:#1a1a1a;border-color:#1a1a1a;color:#fff;font-weight:600;}
+.sp-chip.proposed{border-style:dashed;}
+.sp-chip.on.proposed{border-style:solid;}
+.sp-occ-note{font-size:11px;color:var(--gray-text);line-height:1.4;margin:5px 0 0;}
+.sp-occ-note b{font-weight:600;color:#1a1a1a;}
 .sp-seo .sp-l{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-text);display:block;margin:8px 0 2px;}
 /* v72/build 67 — the UPC and Vendor SKU labels sat OUTSIDE .sp-seo, so they
    never picked up the .sp-l styling and rendered as full-size body text in the
@@ -1622,9 +1637,10 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 92</strong> &#183; 2026-08-05 &#183; Manual Entry fixes: Retail price and wholesale cost now accept &#36; signs and commas, so a box that looks filled can no longer read as empty and silently block Review &amp; publish; every still-empty required box underlines red and the Still-needed line points at it; manual-row labels match the rest of the form instead of rendering as large black body text; Pull is neutral instead of green; two-tap Clear &amp; start over button added. Carries forward from build 91 (researched keywords reach the SEO writer when a product is added, with the Review card naming the real search phrases by garment category and by brand; input caps corrected to the rules file &#8212; SEO title 60&#8594;70, search description 165&#8594;160, image alt 110&#8594;125; needs Worker v83) and build 90 (Meta Fill tab).
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 90 &#183; 2026-08-04 &#183; Meta Fill tab: count, preview, then write the SEO description field in batches &#8212; empty fields only unless you switch scope, SEO description ONLY, never titles or tags; needs Worker v81
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 156</strong> &#183; 2026-08-21 &#183; THE TAG LIST KEPT THE NAME THE PRODUCT NO LONGER HAS. Renaming a card to &quot;Testing&quot; produced the tags <em>Remy Dress, Testing, mint dress, womens dresses, everyday</em> &#8212; both names, side by side. Build 155 routed the copy writer and the vendor search through <strong>_spEffectiveName</strong> and missed a fourth caller: the tag prefill still read <code>cd.style.printed_name || cd.style.name</code>, so the generator supplied the NEW name (it now receives it) while this line prepended the OLD one off the style record, and the dedupe only removes exact repeats so both survived. One line, same helper as the other three. NOT CHANGED, and deliberately: the search description and product description already regenerate on rename &#8212; they simply never carried the style name, because the copy prompt tells them to lead with what the piece IS and name the brand. &quot;Mint dress from Miss Behavin&#39;&quot; is fresh copy, not stale copy. An invented style name has effectively no search volume, so spending scarce meta-description characters on it would cost more than it returns; the SEO title already carries the name. Raise it if the boutique wants the name in the on-page description &#8212; that is a copy-prompt change in the Worker, not a bug here. <strong>Worker unchanged, runs on v113+; pairs with v116.</strong> Carries build 155
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 156</strong> &#183; 2026-08-21 &#183; THE TAG LIST KEPT THE NAME THE PRODUCT NO LONGER HAS. Renaming a card to &quot;Testing&quot; produced the tags <em>Remy Dress, Testing, mint dress, womens dresses, everyday</em> &#8212; both names, side by side. Build 155 routed the copy writer and the vendor search through <strong>_spEffectiveName</strong> and missed a fourth caller: the tag prefill still read <code>cd.style.printed_name || cd.style.name</code>, so the generator supplied the NEW name (it now receives it) while this line prepended the OLD one off the style record, and the dedupe only removes exact repeats so both survived. One line, same helper as the other three. NOT CHANGED, and deliberately: the search description and product description already regenerate on rename &#8212; they simply never carried the style name, because the copy prompt tells them to lead with what the piece IS and name the brand. &quot;Mint dress from Miss Behavin&#39;&quot; is fresh copy, not stale copy. An invented style name has effectively no search volume, so spending scarce meta-description characters on it would cost more than it returns; the SEO title already carries the name. Raise it if the boutique wants the name in the on-page description &#8212; that is a copy-prompt change in the Worker, not a bug here. <strong>Worker unchanged, runs on v113+; pairs with v116.</strong> Carries build 155</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2143,7 +2159,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 156;   // keep in step with the footer stamp
+var APP_BUILD = 157;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -7547,7 +7563,56 @@ function openShopifyReview() {
     }
   })
   .catch(function() { _shopifyExistingNames = []; })
-  .finally(function() { _buildSpReview(inv); _spAutoCheckLive(); });
+  .finally(function() {
+    // build 157 — MANUAL ENTRY GETS THE SUGGESTION TOO.
+    // extractInvoice annotates a scanned invoice on the way through, which
+    // covers the invoice path and nothing else. Manual Entry never touches
+    // that call; neither does a sheet archived before this build, nor one
+    // handed over and priced on a phone. Those are not edge cases — Manual
+    // Entry is how a whole rail of stock gets entered.
+    // ONE call for the whole sheet, not one per card: an eight-style sheet
+    // costs one request. Failure is silent and harmless — the cards open with
+    // nothing ticked, which is exactly what they did before this build.
+    _spEnsureOccasionProposals(inv, function(){ _buildSpReview(inv); _spAutoCheckLive(); });
+  });
+}
+
+/* build 157 — fill in occasion_proposed on any style that arrived without it.
+   Styles that already carry a proposal are left alone, so a scanned invoice
+   makes no extra call at all and reopening a sheet never re-proposes over a
+   decision already made and saved. */
+function _spEnsureOccasionProposals(inv, done){
+  var styles = (inv && inv.styles) || [];
+  var need = [];
+  styles.forEach(function(st, i){
+    if (st && !st.occasion_proposed && !st.aesthetic_proposed) need.push({ i: i, st: st });
+  });
+  if (!need.length) { done(); return; }
+  var payload = need.map(function(n){
+    var st = n.st;
+    return { code: st.code, printed_name: st.printed_name, name: st.name, type: st.type,
+             category: st._manualCategory || '', printed_desc: st.printed_desc,
+             notes: st.notes, fabric: st.fabric, vendor_fabric: st.vendor_fabric,
+             fit: st.fit, colors: st.colors };
+  });
+  var _settled = false;
+  var finish = function(){ if (_settled) return; _settled = true; done(); };
+  // A hard ceiling, because this must never be the reason the review screen
+  // does not open. Six seconds and the cards are drawn regardless.
+  setTimeout(finish, 6000);
+  api('propose_occasion', { vendor: (inv && inv.vendor) || '', styles: payload })
+  .then(function(res){
+    if (_settled) return;
+    var props = (res && res.proposals) || [];
+    need.forEach(function(n, k){
+      var p = props[k]; if (!p) return;
+      n.st.occasion_proposed  = p.occasion_proposed  || [];
+      n.st.aesthetic_proposed = p.aesthetic_proposed || [];
+      n.st.occasion_why       = p.occasion_why       || {};
+    });
+  })
+  .catch(function(){ /* no suggestion is not a failure — the chips just open empty */ })
+  .then(finish, finish);
 }
 
 // build 136 — what to say on arrival about what is not filled in yet. Set by
@@ -7789,6 +7854,23 @@ function _spSnapshotCard(cd, prev){
     title: (cd.titleOverride || (!ready && p.title) || ''),
     seo_title: v(e.title, p.seo_title), seo_desc: v(e.desc, p.seo_desc), body: v(e.bodyd, p.body),
     cat: v(e.cat, p.cat), type: v(e.type, p.type), alt: v(e.alt, p.alt), tags: v(e.tags, p.tags),
+    /* build 157 — the occasion chips survive a save, INCLUDING an empty one.
+       occSet is what tells a restore the difference between "this sheet was
+       saved with nothing ticked, on purpose" and "this sheet predates the
+       field". Without it, unticking every chip and saving would look identical
+       to never having had the field, and the proposal would come back ticked
+       on the next open — quietly re-proposing something already rejected.
+
+       The !cd._loaded guard is the build 139 photo guard applied here for the
+       same reason: this card may be saved before its restore pass has run (the
+       restore waits on ensureShopifyTypes; Save, Send to Kelly and closing the
+       overlay do not). A card that has not loaded has not UNTICKED anything,
+       so the saved selection wins over the empty seed rather than being
+       written over by it. */
+    occ: (!cd._loaded && p.occSet) ? (p.occ || []) : ((cd.occ || []).slice()),
+    aes: (!cd._loaded && p.occSet) ? (p.aes || []) : ((cd.aes || []).slice()),
+    occTouched: (!cd._loaded && p.occSet) ? !!p.occTouched : !!cd._occTouched,
+    occSet: true,
     upc: v(cd.upcInput, p.upc), vsku: v(cd.vskuInput, p.vsku),
     // build 86 — the name the SEO copy was written for. If the product is
     // renamed on the invoice later, the saved copy is stale and must not win.
@@ -7907,6 +7989,19 @@ function _spRestoreCard(cd){
   if (st.src_url) { cd.sourceUrl = st.src_url; cd.sourceLabel = st.src_label || ''; }
   _spShowSource(cd);
   cd._typeTouched = !!st.typeTouched;
+  /* build 157 — restored unconditionally, and NOT gated on the renamed flag.
+     A rename invalidates the SEO copy, which is written about a named product.
+     It does not invalidate "this is a festival dress" — that is a fact about
+     the garment, and re-proposing over a decision somebody already made is the
+     behaviour this field exists to replace. Category and tags are restored
+     through a rename for exactly the same reason. */
+  if (st.occSet) {
+    cd.occ = _occValidate(st.occ, _OCCASION_VALUES).ok;
+    cd.aes = _occValidate(st.aes, _AESTHETIC_VALUES).ok;
+    cd._occProposed = cd._occProposed || [];
+    cd._occTouched = !!st.occTouched;
+    _spRenderOccasion(cd);
+  }
   if (st.type && e.type) {
     if (!Array.prototype.some.call(e.type.options, function(o){ return o.value === st.type; })) {
       e.type.add(new Option(st.type, st.type));
@@ -8437,6 +8532,72 @@ function _spTitleFor(cd) {
 // landed in nothing. Blouses, Tank Tops, Corset Tops and Bodysuits each have
 // their own collection and had no label here at all.
 // Grouped by where they land so the picker reads the way the site is built.
+/* ── build 157 — OCCASION AND AESTHETIC ────────────────────────────────────
+   THE VALUE IS THE SHOPIFY TAG, VERBATIM. Hyphenated, lowercase. Master item
+   92 was settled by Brian on 2026-08-23 in favour of the hyphenated form,
+   because every collection rule already written reads it that way — the
+   occasions nav spec, the hoco build, the winter formal runbook. Do not
+   "tidy" a value here: change one character and the collection it feeds goes
+   empty, silently, and nobody finds out for a month.
+
+   THESE TWO LISTS MUST MATCH MB_OCCASION_ENUM AND MB_AESTHETIC_ENUM IN THE
+   WORKER. The Worker validates again at push, so a drift here shows up as a
+   dropped value named in the warnings rather than as a bad tag in Shopify —
+   but it is still a drift, and both files change together.
+
+   OCCASION AND AESTHETIC ARE TWO FIELDS ON PURPOSE. Coastal cowgirl is worn
+   to a beach wedding, a bachelorette, a brunch and a country concert. The
+   08-01 SERP read measured ZERO url overlap across the coastal cowgirl,
+   festival and country concert result sets. Putting coastal-cowgirl in the
+   occasion list rebuilds the exact category error the architecture rejected.
+   Do not merge them, however tempting the shorter code looks.
+
+   Nine occasion values, not the spec's eight: winter-formal is included
+   because the 08-16 winter formal runbook builds that collection on
+   Product tag is equal to winter-formal. Confirmed with Brian 2026-08-23,
+   along with the call to ship values whose collection is not built yet — a
+   tag written today means the collection is full on the day it is created
+   instead of empty. */
+var _OCCASION_VALUES = [
+  { v: 'going-out',       l: 'Going Out' },
+  { v: 'wedding-guest',   l: 'Wedding Guest' },
+  { v: 'hoco',            l: 'Hoco' },
+  { v: 'vacation',        l: 'Vacation' },
+  { v: 'beach',           l: 'Beach' },
+  { v: 'everyday',        l: 'Everyday' },
+  { v: 'festival',        l: 'Festival' },
+  { v: 'country-concert', l: 'Country Concert' },
+  { v: 'winter-formal',   l: 'Winter Formal' }
+];
+var _AESTHETIC_VALUES = [
+  { v: 'coastal-cowgirl', l: 'Coastal Cowgirl' },
+  { v: 'western',         l: 'Western' }
+];
+function _occLabel(v){
+  var all = _OCCASION_VALUES.concat(_AESTHETIC_VALUES);
+  for (var i=0;i<all.length;i++) if (all[i].v === v) return all[i].l;
+  return v;
+}
+/* THE CLOSED-ENUM GATE, client side. The card cannot produce free text — it
+   is a row of chips, there is no text box — so this exists for the values
+   that arrive from somewhere else: a snapshot saved by an older build, a
+   handoff priced on a phone running a different version, a proposal from a
+   Worker whose enum has moved. Anything not in the list is DROPPED and
+   RETURNED so it can be named, never silently rewritten into something else.
+   Item 87 is why: one free-text field produced three Miss Behavin vendor
+   strings, one carrying an invisible curly apostrophe, and it emptied the
+   house-label collection with nobody noticing. */
+function _occValidate(list, allowed){
+  var ok = [], bad = [], seen = {};
+  (Array.isArray(list) ? list : []).forEach(function(x){
+    var v = String(x == null ? '' : x).trim().toLowerCase();
+    if (!v) return;
+    var hit = allowed.some(function(o){ return o.v === v; });
+    if (!hit) { bad.push(String(x)); return; }
+    if (!seen[v]) { seen[v] = 1; ok.push(v); }
+  });
+  return { ok: ok, bad: bad };
+}
 var _CATEGORY_LABELS = [
   // Dresses + Rompers
   'Dresses','Rompers & Jumpsuits',
@@ -8511,6 +8672,112 @@ function _spTypeNote(cd){
   n.textContent = 'Sets the Shopify category — collections, tax and the Google feed all match on it' +
                   (t ? ' · product type set to "' + t + '" automatically' : '') + '.';
   n.className = 'sp-type-note';
+}
+
+/* ── build 157 — THE OCCASION CHIPS ────────────────────────────────────────
+
+   THIS IS A PROPOSAL SHOWN FOR APPROVAL. IT IS NEVER AN AUTOMATIC WRITE.
+
+   The Worker proposes at extraction; these chips open already ticked; the
+   person accepts them by doing nothing, or changes one with a single tap, and
+   nothing reaches Shopify until Push. That is the MASTER 9.3 shape this app
+   already runs everywhere else: generate, validate, hold for a human.
+
+   A dashed outline means "the app suggested this". A solid filled chip means
+   it is ON and will be written. Once you touch any chip the dashes go: from
+   that point the selection is yours, not a suggestion, and the note stops
+   explaining a proposal you have already reviewed.
+
+   Nothing here is required. Empty is a legitimate and common answer, and the
+   card pushes perfectly well with no occasion at all — an occasion nobody is
+   sure of is worse than none, because it puts the wrong product on a
+   collection page a shopper is browsing by intent. */
+function _spSeedOccasion(cd){
+  if (cd.occ && cd.aes) return;                       // already seeded or restored
+  var st = cd.style || {};
+  // The proposal is validated on arrival exactly like anything else. It comes
+  // from the Worker, but a Worker whose enum has moved ahead of this file must
+  // not be able to put an unknown value on a card.
+  cd.occ = _occValidate(st.occasion_proposed, _OCCASION_VALUES).ok;
+  cd.aes = _occValidate(st.aesthetic_proposed, _AESTHETIC_VALUES).ok;
+  cd._occProposed = cd.occ.concat(cd.aes);            // what the APP suggested, for the dashed outline
+  cd._occWhy = st.occasion_why || {};
+  cd._occTouched = false;
+}
+
+function _spRenderOccasion(cd){
+  var e = cd.els || {};
+  if (!e.occChips || !e.aesChips) return;
+  _spSeedOccasion(cd);
+  var draw = function(host, attr, chosen){
+    Array.prototype.forEach.call(host.querySelectorAll('.sp-chip'), function(chip){
+      var v = chip.getAttribute(attr);
+      var on = chosen.indexOf(v) >= 0;
+      chip.className = 'sp-chip' + (on ? ' on' : '') +
+        (!cd._occTouched && (cd._occProposed || []).indexOf(v) >= 0 ? ' proposed' : '');
+      chip.setAttribute('role', 'button');
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  };
+  draw(e.occChips, 'data-occ', cd.occ);
+  draw(e.aesChips, 'data-aes', cd.aes);
+  _spOccNote(cd);
+}
+
+function _spOccNote(cd){
+  var n = cd.els && cd.els.occNote; if (!n) return;
+  var chosen = (cd.occ || []).concat(cd.aes || []);
+  if (!chosen.length) {
+    n.innerHTML = cd._occTouched
+      ? 'No occasion &#8212; this product joins no occasion collection. That is a fine answer.'
+      : 'Nothing suggested. Tap any that apply, or leave it empty.';
+    return;
+  }
+  if (cd._occTouched) {
+    n.innerHTML = 'Will be tagged <b>' + chosen.map(esc).join('</b>, <b>') + '</b>.';
+    return;
+  }
+  // Say WHY each chip is ticked. A proposal you cannot interrogate is just an
+  // automatic write with an extra step, and the person reviewing has to be
+  // able to see that "Monarch" was proposed as country-concert because the
+  // vendor is Matisse and the category says boot.
+  var why = cd._occWhy || {};
+  var bits = chosen.map(function(v){
+    return '<b>' + esc(_occLabel(v)) + '</b>' + (why[v] ? ' (' + esc(why[v]) + ')' : '');
+  });
+  n.innerHTML = 'Suggested: ' + bits.join(' &#183; ') + ' &#8212; tap to change, or leave as is.';
+}
+
+function _spWireOccasion(cd){
+  var e = cd.els || {};
+  if (!e.occChips || !e.aesChips) return;
+  var toggle = function(host, attr, key){
+    host.addEventListener('click', function(ev){
+      var chip = ev.target.closest ? ev.target.closest('.sp-chip') : null;
+      if (!chip || !host.contains(chip)) return;
+      var v = chip.getAttribute(attr);
+      if (!v) return;
+      _spSeedOccasion(cd);
+      var arr = cd[key] || (cd[key] = []);
+      var at = arr.indexOf(v);
+      if (at >= 0) arr.splice(at, 1); else arr.push(v);
+      cd._occTouched = true;      // from here the selection is the owner's
+      _spRenderOccasion(cd);
+    });
+  };
+  toggle(e.occChips, 'data-occ', 'occ');
+  toggle(e.aesChips, 'data-aes', 'aes');
+}
+
+/* Read the card and hand back only values the enum allows. Called at push and
+   at save. Free text cannot reach here from the chips, so a rejection means a
+   stale snapshot or a version drift — which is worth naming rather than
+   swallowing. */
+function _spOccasionForPush(cd){
+  _spSeedOccasion(cd);
+  var o = _occValidate(cd.occ, _OCCASION_VALUES);
+  var a = _occValidate(cd.aes, _AESTHETIC_VALUES);
+  return { occasion: o.ok, aesthetic: a.ok, rejected: o.bad.concat(a.bad) };
 }
 
 function _spWireTitleEdit(cd) {
@@ -8862,6 +9129,16 @@ function _spDoCreate(cd, onDone) {
   // whenever it is set. The invoice type stays the fallback.
   // build 77 — the single field IS the taxonomy category. product_type is
   // derived from it and never shown, so staff have one thing to choose.
+  // build 157 — validated once here, used twice below: merged into tags, and
+  // sent as their own arrays so the Worker can validate them independently.
+  // Both files hold the enum and both check it; a value that somehow fails
+  // both is dropped and named rather than written.
+  var _occForPush = _spOccasionForPush(cd);
+  if (_occForPush.rejected.length) {
+    _spShowErrorDetail(cd, 'Dropped, not a valid occasion or aesthetic value: ' +
+      esc(_occForPush.rejected.join(', ')) + '. Nothing was guessed at.', 'color:var(--red);');
+  }
+
   var _chosen = (cd.els && cd.els.cat ? cd.els.cat.value : '').trim();
   var _mappedType = _CAT_TO_TYPE[_chosen];
   if (_mappedType) typeEntry = _mappedType;
@@ -8882,7 +9159,12 @@ function _spDoCreate(cd, onDone) {
       // v72 — lowercase 'default' was leaking in as a tag.
       // build 68 — 'other' too: it came from the unmapped "Other" invoice type
       // and is noise on every accessory (visible on the live Cat Ashtray).
-      .filter(function(x){ var l = x.toLowerCase(); return x && l !== 'default' && l !== 'other'; }),
+      .filter(function(x){ var l = x.toLowerCase(); return x && l !== 'default' && l !== 'other'; })
+      // build 157 — THE OCCASION AND AESTHETIC VALUES JOIN THE EXISTING TAG
+      // ARRAY, on this same productCreate/productSet call. No second API call,
+      // no follow-up write to reconcile, nothing that can half-succeed and
+      // leave a product tagged in the app and untagged in Shopify.
+      .concat(_occForPush.occasion).concat(_occForPush.aesthetic),
     sizes: isOneSize ? ['OS'] : APPAREL_SIZES,   // build 59 — full apparel run, OS for one-size
     variants: variants,
     // v2 — SEO copy + vendor images (Worker only writes non-empty fields)
@@ -8901,7 +9183,14 @@ function _spDoCreate(cd, onDone) {
     // v56 — vendor SKU rides to a custom.vendor_sku metafield (never the variant SKU)
     vendor_sku: (cd.vskuInput ? cd.vskuInput.value.trim() : '') || (cd.style.sku || ''),
     // v57 — fabric from invoice/vendor -> custom.fabric (+ standard shopify.fabric once seeded)
-    fabric: cd.style.fabric || cd.style.vendor_fabric || ''
+    fabric: cd.style.fabric || cd.style.vendor_fabric || '',
+    // build 157 — sent as their own fields as well as inside tags. The Worker
+    // re-validates these against MB_OCCASION_ENUM / MB_AESTHETIC_ENUM and
+    // reports anything it drops, so the closed enum is enforced at the point
+    // the irreversible thing happens and not only in a browser anyone can
+    // reload mid-edit.
+    occasion: _occForPush.occasion,
+    aesthetic: _occForPush.aesthetic
   };
 
   // Smart collections auto-populate via product_type + tags — only New Arrivals needs manual add
@@ -10219,6 +10508,24 @@ function _spInitDetails(cd){
       '<div style="flex:1;"><label class="sp-l">Category</label><select class="sp-seo-cat"></select></div>' +
     '</div>' +
     '<div class="sp-type-note"></div>' +
+    // build 157 — OCCASION AND AESTHETIC. Two rows, deliberately separated by
+    // their own labels: they write different tags, feed different collections,
+    // and conflating them is the documented error mode.
+    '<div class="sp-occ">' +
+      '<label class="sp-l">Occasion &#8212; what is it worn to?</label>' +
+      '<div class="sp-occ-chips sp-occ-occasion">' +
+        _OCCASION_VALUES.map(function(o){
+          return '<span class="sp-chip" data-occ="' + esc(o.v) + '">' + esc(o.l) + '</span>';
+        }).join('') +
+      '</div>' +
+      '<label class="sp-l" style="margin-top:10px;">Aesthetic &#8212; not an occasion, kept separate on purpose</label>' +
+      '<div class="sp-occ-chips sp-occ-aesthetic">' +
+        _AESTHETIC_VALUES.map(function(o){
+          return '<span class="sp-chip" data-aes="' + esc(o.v) + '">' + esc(o.l) + '</span>';
+        }).join('') +
+      '</div>' +
+      '<div class="sp-occ-note"></div>' +
+    '</div>' +
     '<div style="display:flex;gap:8px;">' +
       '<div style="flex:1;"><label class="sp-l">Image alt</label><input class="sp-seo-alt" maxlength="125"/></div>' +
     '</div>' +
@@ -10249,6 +10556,10 @@ function _spInitDetails(cd){
     // build 76 — one field does both jobs, so type and cat are the same element.
     type: wrap.querySelector('.sp-seo-cat'),
     typeNote: wrap.querySelector('.sp-type-note'),
+    occWrap: wrap.querySelector('.sp-occ'),
+    occChips: wrap.querySelector('.sp-occ-occasion'),
+    aesChips: wrap.querySelector('.sp-occ-aesthetic'),
+    occNote: wrap.querySelector('.sp-occ-note'),
     alt: wrap.querySelector('.sp-seo-alt'),
     tags: wrap.querySelector('.sp-seo-tags')
   };
@@ -10316,6 +10627,13 @@ function _spInitDetails(cd){
   });
   // build 76 — one field, one listener.
   cd.els.cat.addEventListener('change', function(){ cd._typeTouched = true; _spTypeNote(cd); });
+  // build 157 — wire first, draw immediately. The chips do NOT wait on
+  // ensureShopifyTypes the way the Category dropdown does: they have no
+  // dependency on the store's type list, and a card that shows its suggestion
+  // straight away is a card whose suggestion gets read. _spRestoreCard redraws
+  // them a moment later if this sheet was saved before.
+  _spWireOccasion(cd);
+  _spRenderOccasion(cd);
   cd.els.fetchBtn.onclick = function(){ _spFetchVendor(cd); };
   // build 95 — the exact-product-URL escape hatch (build 96: a plain open box).
   cd.els.purlGo.onclick = function(){ _spUseProductUrl(cd); };
