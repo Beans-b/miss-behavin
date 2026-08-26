@@ -567,6 +567,7 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   <!-- ============ TABS ============ -->
   <div class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" data-tab="regnum" aria-selected="false">Items &amp; Decisions <span class="n" id="tabCountReg"></span></button>
     <button class="tab" role="tab" data-tab="tracker" aria-selected="false">Tracker <span class="n" id="tabCountTracker"></span></button>
     <button class="tab" role="tab" data-tab="levers" aria-selected="false">Levers</button>
     <button class="tab" role="tab" data-tab="audit" aria-selected="false">Audit</button>
@@ -622,6 +623,55 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   </section>
 
   <!-- ============ PANEL: TRACKER ============ -->
+  <!-- ============ PANEL: ITEMS & DECISIONS (registry) — added CC-2026.08.25b ============ -->
+  <section class="panel" id="panel-regnum" role="tabpanel">
+    <div class="sov-intro">
+      <p><strong>Every decision number and every item number, in one place.</strong> Built 2026-08-25. <strong>Why it exists:</strong> master item 114 sat unresolved for three weeks because it had <em>no row</em> &mdash; it lived as a sentence inside a row already marked done, so there was no number to search on. <strong>The rule that follows from it: a loose end recorded only inside another row&rsquo;s note does not exist.</strong> If work is real it gets its own number and its own row; if it is not worth a row, write it into a decision or drop it.</p>
+      <p><strong>Two number spaces overlap.</strong> &ldquo;46&rdquo; is a decision <em>and</em> an item, and they mean different things &mdash; always write &ldquo;decision 46&rdquo; or &ldquo;item 46&rdquo;, never a bare number. <strong>Work is tracked in four places, not one:</strong> the master doc decisions list, the master doc open-items table, the Tracker tab here (137 rows keyed on <em>title text</em>, carrying no item numbers), and <code>missb_reorg_summary_2026-08-01.md</code>, which holds 18 further small items nobody has audited since 08-01.</p>
+      <p class="hint">This tab is a reference view. It does not sync, and nothing here changes a task status &mdash; statuses live on Tracker.</p>
+    </div>
+
+    <div class="section-head"><h3>Search</h3><span class="hint">Type a number, a word, or a status (live, amend, collision, recovered, missing, proposed, retired, open, closed, built, new).</span></div>
+    <div style="margin:0 0 14px">
+      <input id="regFilter" type="search" placeholder="e.g. 114, GTIN, snippet, collision, HIGH" style="width:100%; max-width:520px; padding:9px 12px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:12px; border-radius:6px">
+      <div class="hint" id="regCount" style="margin-top:7px"></div>
+    </div>
+
+    <div class="section-head"><h3>Decisions</h3><span class="hint">The master doc &ldquo;Decisions to honor&rdquo; list is the authority. Flags below are unresolved defects in the numbering, not in the decisions themselves.</span></div>
+    <div class="sov-scroll">
+      <table class="sov">
+        <thead><tr><th class="q" style="width:70px">#</th><th style="width:96px">State</th><th>Decision</th></tr></thead>
+        <tbody id="regDecBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head" style="margin-top:26px"><h3>Items</h3><span class="hint">Open items plus the 08-25 additions (137&ndash;156), which are proposed and not yet Tracker rows.</span></div>
+    <div class="sov-scroll">
+      <table class="sov">
+        <thead><tr><th class="q" style="width:70px">#</th><th style="width:96px">State</th><th>Item</th><th style="width:150px">Priority / note</th></tr></thead>
+        <tbody id="regItemBody"></tbody>
+      </table>
+    </div>
+
+    <div class="section-head" style="margin-top:26px"><h3>Known gaps in the numbering</h3><span class="hint">Nine things to fix. Adding Tracker rows is gated by items 67 and 117, so these need Brian&rsquo;s sign-off.</span></div>
+    <ol style="line-height:1.75; padding-left:20px">
+      <li><strong>Add decisions 7 and 11 to the master doc</strong>, marked recovered 2026-08-25. Both are cited in task notes here and appear nowhere in the decisions list. Decision 7 is load-bearing &mdash; it defines what the SEO meta detector sweeps.</li>
+      <li><strong>Renumber the two 08-12 decisions to 61 and 62</strong>, leaving permanent pointers at 46 and 47. Do <em>not</em> touch the 08-11 pair &mdash; every downstream doc cites those meanings.</li>
+      <li><strong>Adopt decision 60</strong> (no machine-readable AI files, ever).</li>
+      <li><strong>Update decision 58&rsquo;s value list</strong> to LineSheet build 157&rsquo;s shipped enum, and record that <code>game-day</code> is deliberately out pending item 133.</li>
+      <li><strong>Give item 107 a Tracker row.</strong> The highest expected-value item on the site has none &mdash; it exists only in the master doc.</li>
+      <li><strong>Correct the indexation triage row&rsquo;s counts</strong> from 852 / 335 to the current <strong>254 / 49</strong>.</li>
+      <li><strong>Resolve the two ACL rows into one</strong> once item 134 is decided &mdash; one says ACL first, the other says Coachella 2027.</li>
+      <li><strong>Check the pre-merge archive</strong> (<code>\old\miss-behavin-master-doc_PRE-MERGE_2026-08-21.md</code>) for decisions 15, 17, 21, 50 and 51, and for the 21 carried items that have no description text. Do not reuse those numbers until it is read.</li>
+      <li><strong>Audit <code>missb_reorg_summary_2026-08-01.md</code></strong> &mdash; 18 small items nobody has looked at since 08-01.</li>
+    </ol>
+
+    <div class="section-head" style="margin-top:26px"><h3>Items carried with no description</h3><span class="hint">Listed in the master doc as &ldquo;carried unchanged&rdquo; with no text. Numbers with no meaning attached is its own risk.</span></div>
+    <p style="font-family:var(--mono); font-size:12px" id="regCarried"></p>
+    <div class="section-head" style="margin-top:18px"><h3>Closed roster</h3><span class="hint">From the master doc, 08-23, plus 105 and 114 closed 08-25.</span></div>
+    <p style="font-family:var(--mono); font-size:12px" id="regClosedRoster"></p>
+  </section>
+
   <section class="panel" id="panel-activity" role="tabpanel">
     <style>
       .act-row{display:grid;grid-template-columns:150px 90px 1fr 160px;gap:12px;align-items:baseline;padding:10px 12px;border-bottom:1px solid #eee;font-size:13px}
@@ -1082,8 +1132,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.08.25a -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.25a &middot; THE HIDDEN ONLINE STORE STOCK AUDIT IS ANSWERED AND CLOSED, AND THREE AUDITS WERE RECONCILED AGAINST GOOGLE OWN AI OPTIMIZATION GUIDE. MASTER ITEM 114 CLOSES. Brian ran the Sales channel Online Store Unpublished filter and reported the result: every hidden product falls into one of three correct exclusions - no photographs (decision 16, and therefore master item 91 rather than a channel defect), sold out and ARCHIVED (a Status change, so it leaves all channels at once), or POS and in-store only carrying the POS channel ONLY. That last point is what closes it, because the Bday Girl Headband defect was never that a product was off Online Store, it was that seven other channels stayed ON pointing at a storefront 404. No other channel is enabled on the hidden set, so the leak pattern does not exist elsewhere. NO HIDDEN SELLABLE STOCK. THE ITEM HAD NO ROW OF ITS OWN, WHICH IS WHY IT SURVIVED THREE WEEKS. It lived as a sentence inside two rows already marked done - the product page unavailable row and the feed-complete audit row. Both notes are now corrected. A loose end recorded only inside a closed row is invisible; that is the lesson worth keeping from this one. ALSO CORRECTED: the product page unavailable row carried a PROPOSED DECISION marked as needing approval before entering the master doc. It was approved and has been MASTER DECISION 56 since 08-21. The note said otherwise for four days. THE GOOGLE GUIDE WORK, RECORDED HERE BUT NOT YET AS ROWS: Google AI Optimization Guide (last updated 2026-07-10) read verbatim and the whole AEO stack audited against it. The stack survives - llms.txt, no-chunking, no-rewriting-for-AI and schema-is-rich-results-not-AI are all confirmed by Google own words, and decisions 8, 9, 54, 55 and 57 are all reinforced. Google names Merchant Center feeds and Business Profiles as the AI visibility levers, which is measured support for decision 57 Product Discovery being surface one. TWO ELIGIBILITY GATES WERE FOUND THAT NOBODY HAS EVER CHECKED: the Search generative AI control in Search Console (a site must be included to be eligible for display, default Include, but child properties INHERIT from a parent and sc-domain is inaccessible on this account) and snippet eligibility (a page must be indexed AND eligible to be shown with a snippet, so a nosnippet or max-snippet:0 directive silently removes a page). Neither is a row yet. A THIRD-PARTY GSC AUDIT WAS ALSO REVIEWED and it carries the live data the guide audits lacked: clicks 199 up 69 percent, impressions 10,535 up 123 percent, AI impressions 852 up 104 percent, AI pages 44 to 121, homepage AI share 83.5 to 68.1 percent. MASTER ITEM 105 CLOSES on its evidence - Homecoming is indexed, canonical and was crawled 08-23, so stop requesting indexing. Product snippet clicks 64 to 91 and merchant listing clicks 1 to 12. Its blended CTR decline of 2.5 to 1.9 percent reads as an expansion artifact rather than a defect, because impressions more than doubled; the real signal is clean brand CTR 4.8 to 3.1 percent, which corroborates master item 22. A CORRECTION AGAINST CLAUDE OWN EARLIER WORK IN THE SAME SESSION: an action list published this morning carried image alt at 93 percent missing as an open item. It was closed on 08-13, zero missing across 373 products, per the GTIN decision record. A figure was carried forward from an old doc without reading the newer doc that closed it. Retracted. AND ONE MORE: Google confirmed a LOGGING ERROR undercounting impressions in the Search Console Generative AI performance report for data starting 2026-08-13, ongoing. Any AI impression figure spanning that date is provisional, including the 76 percent homepage concentration read on 08-17. That is decision 36 in a SEVENTH form - this time the stale read is coming from a Google-owned report. Always carry the window with an AI share number: 76.3 percent (08-17), 83.5 percent and 68.1 percent are three windows, not three findings. Rows touched this save: 2, n only per decision 10, no rows added, no st changed. Because no st was changed, item 124 does NOT apply to this save and no status pill needs tapping. Carries forward from CC-2026.08.23a - THREE COLLECTIONS AND THREE PAGES SHIPPED, THE OCCASIONS AREA IS FULLY WIRED, AND THE OCCASION TAG FORMAT IS FINALLY DECIDED. Live and browser-verified 08-23: /collections/coastal-cowgirl (Manual, 22 products, 10 accordions, and the FIRST COLLECTION ON THE SITE to carry a visible Sophie byline), /collections/winter-formal-dresses (Smart on winter-formal, 17 products, 9 accordions) and /collections/everyday-outfits (Smart on everyday, 26 products, 6 accordions), plus three guide pages - wedding-guest-outfit-ideas, graduation-outfit-ideas and prom-outfit-ideas, 9 accordions and roughly 1,100 words each. MASTER ITEM 92 IS CLOSED AS DECISION 58: the occasion and aesthetic tag format is HYPHENATED LOWERCASE, which unblocks master items 85 and 93 after three weeks. It was settled by counting, not arguing - the catalogue holds going out WITH A SPACE on 3 products and going-out hyphenated on ZERO, so the LineSheet generator is the thing that needs the closed enum. Tagging done same day: winter-formal applied to 18 products and verified 18 of 18 against the live feed with zero strays; everyday stripped from 9 novelty products and added to 15 garments. Occasions menu 4 children to NINE, /pages/occasions 5 links to 11, and 13 editorial internal links placed across 9 collections - every new URL went from ZERO inbound to three or more except Graduation at two. Homepage capsule gained one pill (Wedding Guest) with every item 106 constraint re-verified: 44 words in band, H1 still exactly 1, position 2 held. Eight URLs submitted to GSC for indexing. A FESTIVAL HUB WAS BUILT AND DELETED THE SAME DAY - /pages/festival-outfits duplicated /pages/music-festival-outfit-ideas on seven of nine accordions, because it was written after reading two sibling pages for house style but not the third for content. Do not rebuild it. RECORD CORRECTIONS: master item 105 is HALF WRONG, /collections/going-out-outfits is indexed and always was; master item 90 is NOT closed, /pages/music-festival-outfit-ideas still has no byline; the published product denominator is now 246, not 251. DEFECTS FIXED: five instances of colour on the hoco page including an accordion H2, one on tees, a FIve typo on the occasions hub, velvet in the winter formal meta against zero velvet products sitewide, and an en-dash Shopify-default title. GAME DAY IS RECOMMENDED NOT TO BUILD - the SERP cleared in both reports and the stock did not: clear bag 0, stadium 0, varsity 0, football 0, orange 0, sequin 3 across 246 products. That is a buying decision for Kelly, not an SEO one. Rows touched this save: 9, st and n only per decision 10, no rows added. Carries forward from CC-2026.08.22b - Start Here resequencing and the item 124 status-sync diagnosis both still apply, and ITEM 124 APPLIES TO THIS SAVE TOO: the Coastal Cowgirl row was closed by file edit, so open it in Tracker on the live app and tap its status pill once or syncDown() will overlay the old status back on the next load.</div>
+    <!-- deploy_check: CC-2026.08.25b -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.25b &middot; NEW TAB: ITEMS &amp; DECISIONS, THE NUMBER REGISTRY, SITTING NEXT TO OVERVIEW. A STRUCTURAL CHANGE, approved by Brian in session, outside the decision 10 st-and-n rule. No task object was touched: still 137 rows, same statuses, ids untouched. WHY IT EXISTS: master item 114 sat unresolved for three weeks because it had NO ROW - it lived as a sentence inside a row already marked done, so there was no number to search on. THE RULE THAT FOLLOWS: a loose end recorded only inside another row note does not exist. If work is real it gets its own number and its own row; if it is not worth a row, write it into a decision or drop it. WHAT THE TAB HOLDS: all 61 decision numbers 0 to 60 and 79 item numbers, each one line, searchable by number, word or state. TWO DECISIONS WERE RECOVERED BY PARSING EVERY DECISION REFERENCE IN ALL 137 TASK NOTES - decision 7 (POS-only products are excluded from the SEO meta detector sweep, which defines what Worker V71.1 sweeps) and decision 11 (remove the Rollas keyword seed row; the LOCKED SoV panel keeps its Rollas query as a separate asset). Both are cited in this dashboard and appear NOWHERE in the master doc decisions list. FIVE NUMBERS ARE MISSING ENTIRELY - decisions 15, 17, 21, 50 and 51 appear in no doc and no note. Never assigned, or lost before the 08-21 reconciliation. DO NOT REUSE THEM until the pre-merge archive is checked. THE 46/47 COLLISION IS DOCUMENTED, NOT FIXED: each number is used twice, an 08-11 pair and an 08-12 pair, and the 08-11 meanings are authoritative. Proposed fix, needs Brian - renumber only the 08-12 pair to 61 and 62 and leave pointers, because renumbering the 08-11 pair would break every doc that cites them. ALSO SURFACED: item 107, the highest expected-value item on the site, has NO ROW here at all; the indexation triage row carries STALE COUNTS of 852 and 335 against the current 254 and 49; ACL has TWO rows that disagree with each other, one saying ACL first and the other Coachella 2027; and row 111 points at missb_reorg_summary_2026-08-01.md, a FOURTH tracking location holding 18 small items nobody has audited since 08-01. Nine numbering gaps are listed in the tab itself, all needing sign-off because adding rows is gated by items 67 and 117. Rows touched this save: ZERO. No st changed, no n changed, no rows added - only the tab, its panel and its data. Item 124 does NOT apply. Carries forward from CC-2026.08.25a - THE HIDDEN ONLINE STORE STOCK AUDIT IS ANSWERED AND CLOSED, AND THREE AUDITS WERE RECONCILED AGAINST GOOGLE OWN AI OPTIMIZATION GUIDE. MASTER ITEM 114 CLOSES. Brian ran the Sales channel Online Store Unpublished filter and reported the result: every hidden product falls into one of three correct exclusions - no photographs (decision 16, and therefore master item 91 rather than a channel defect), sold out and ARCHIVED (a Status change, so it leaves all channels at once), or POS and in-store only carrying the POS channel ONLY. That last point is what closes it, because the Bday Girl Headband defect was never that a product was off Online Store, it was that seven other channels stayed ON pointing at a storefront 404. No other channel is enabled on the hidden set, so the leak pattern does not exist elsewhere. NO HIDDEN SELLABLE STOCK. THE ITEM HAD NO ROW OF ITS OWN, WHICH IS WHY IT SURVIVED THREE WEEKS. It lived as a sentence inside two rows already marked done - the product page unavailable row and the feed-complete audit row. Both notes are now corrected. A loose end recorded only inside a closed row is invisible; that is the lesson worth keeping from this one. ALSO CORRECTED: the product page unavailable row carried a PROPOSED DECISION marked as needing approval before entering the master doc. It was approved and has been MASTER DECISION 56 since 08-21. The note said otherwise for four days. THE GOOGLE GUIDE WORK, RECORDED HERE BUT NOT YET AS ROWS: Google AI Optimization Guide (last updated 2026-07-10) read verbatim and the whole AEO stack audited against it. The stack survives - llms.txt, no-chunking, no-rewriting-for-AI and schema-is-rich-results-not-AI are all confirmed by Google own words, and decisions 8, 9, 54, 55 and 57 are all reinforced. Google names Merchant Center feeds and Business Profiles as the AI visibility levers, which is measured support for decision 57 Product Discovery being surface one. TWO ELIGIBILITY GATES WERE FOUND THAT NOBODY HAS EVER CHECKED: the Search generative AI control in Search Console (a site must be included to be eligible for display, default Include, but child properties INHERIT from a parent and sc-domain is inaccessible on this account) and snippet eligibility (a page must be indexed AND eligible to be shown with a snippet, so a nosnippet or max-snippet:0 directive silently removes a page). Neither is a row yet. A THIRD-PARTY GSC AUDIT WAS ALSO REVIEWED and it carries the live data the guide audits lacked: clicks 199 up 69 percent, impressions 10,535 up 123 percent, AI impressions 852 up 104 percent, AI pages 44 to 121, homepage AI share 83.5 to 68.1 percent. MASTER ITEM 105 CLOSES on its evidence - Homecoming is indexed, canonical and was crawled 08-23, so stop requesting indexing. Product snippet clicks 64 to 91 and merchant listing clicks 1 to 12. Its blended CTR decline of 2.5 to 1.9 percent reads as an expansion artifact rather than a defect, because impressions more than doubled; the real signal is clean brand CTR 4.8 to 3.1 percent, which corroborates master item 22. A CORRECTION AGAINST CLAUDE OWN EARLIER WORK IN THE SAME SESSION: an action list published this morning carried image alt at 93 percent missing as an open item. It was closed on 08-13, zero missing across 373 products, per the GTIN decision record. A figure was carried forward from an old doc without reading the newer doc that closed it. Retracted. AND ONE MORE: Google confirmed a LOGGING ERROR undercounting impressions in the Search Console Generative AI performance report for data starting 2026-08-13, ongoing. Any AI impression figure spanning that date is provisional, including the 76 percent homepage concentration read on 08-17. That is decision 36 in a SEVENTH form - this time the stale read is coming from a Google-owned report. Always carry the window with an AI share number: 76.3 percent (08-17), 83.5 percent and 68.1 percent are three windows, not three findings. Rows touched this save: 2, n only per decision 10, no rows added, no st changed. Because no st was changed, item 124 does NOT apply to this save and no status pill needs tapping. Carries forward from CC-2026.08.23a - THREE COLLECTIONS AND THREE PAGES SHIPPED, THE OCCASIONS AREA IS FULLY WIRED, AND THE OCCASION TAG FORMAT IS FINALLY DECIDED. Live and browser-verified 08-23: /collections/coastal-cowgirl (Manual, 22 products, 10 accordions, and the FIRST COLLECTION ON THE SITE to carry a visible Sophie byline), /collections/winter-formal-dresses (Smart on winter-formal, 17 products, 9 accordions) and /collections/everyday-outfits (Smart on everyday, 26 products, 6 accordions), plus three guide pages - wedding-guest-outfit-ideas, graduation-outfit-ideas and prom-outfit-ideas, 9 accordions and roughly 1,100 words each. MASTER ITEM 92 IS CLOSED AS DECISION 58: the occasion and aesthetic tag format is HYPHENATED LOWERCASE, which unblocks master items 85 and 93 after three weeks. It was settled by counting, not arguing - the catalogue holds going out WITH A SPACE on 3 products and going-out hyphenated on ZERO, so the LineSheet generator is the thing that needs the closed enum. Tagging done same day: winter-formal applied to 18 products and verified 18 of 18 against the live feed with zero strays; everyday stripped from 9 novelty products and added to 15 garments. Occasions menu 4 children to NINE, /pages/occasions 5 links to 11, and 13 editorial internal links placed across 9 collections - every new URL went from ZERO inbound to three or more except Graduation at two. Homepage capsule gained one pill (Wedding Guest) with every item 106 constraint re-verified: 44 words in band, H1 still exactly 1, position 2 held. Eight URLs submitted to GSC for indexing. A FESTIVAL HUB WAS BUILT AND DELETED THE SAME DAY - /pages/festival-outfits duplicated /pages/music-festival-outfit-ideas on seven of nine accordions, because it was written after reading two sibling pages for house style but not the third for content. Do not rebuild it. RECORD CORRECTIONS: master item 105 is HALF WRONG, /collections/going-out-outfits is indexed and always was; master item 90 is NOT closed, /pages/music-festival-outfit-ideas still has no byline; the published product denominator is now 246, not 251. DEFECTS FIXED: five instances of colour on the hoco page including an accordion H2, one on tees, a FIve typo on the occasions hub, velvet in the winter formal meta against zero velvet products sitewide, and an en-dash Shopify-default title. GAME DAY IS RECOMMENDED NOT TO BUILD - the SERP cleared in both reports and the stock did not: clear bag 0, stadium 0, varsity 0, football 0, orange 0, sequin 3 across 246 products. That is a buying decision for Kelly, not an SEO one. Rows touched this save: 9, st and n only per decision 10, no rows added. Carries forward from CC-2026.08.22b - Start Here resequencing and the item 124 status-sync diagnosis both still apply, and ITEM 124 APPLIES TO THIS SAVE TOO: the Coastal Cowgirl row was closed by file edit, so open it in Tracker on the live app and tap its status pill once or syncDown() will overlay the old status back on the next load.</div>
   </div>
 </div>
 
@@ -2588,12 +2638,217 @@ function liveStats(){
   }).catch(function(){});
 }
 
+/* ============ ITEMS & DECISIONS REGISTRY — added CC-2026.08.25b ============
+   Built 2026-08-25 from the master doc (08-23), this file parsed programmatically,
+   the GTIN decision record (08-14) and LineSheet build 157 read from source.
+   WHY IT EXISTS: master item 114 sat unresolved three weeks because it had NO ROW —
+   it lived as a sentence inside a row already marked done, so there was no number to
+   search on. THE RULE: a loose end recorded only inside another row note does not exist.
+   TWO NUMBER SPACES OVERLAP. "46" is a decision AND an item. Always say which. */
+var REG_DECISIONS = [
+ [0,"live","The SoV panel is LOCKED - 18 queries x 4 engines, incognito"],
+ [1,"live","90% national / 10% local. No geo landing pages, no map-pack campaign"],
+ [2,"live","Never change product titles - tied to POS tags"],
+ [3,"live","Head terms are not targets. Order: the Label, long-tail style/occasion/fit, brand pages, AI citability, off-site authority"],
+ [4,"live","Brand-page titles and metas KEEP Santa Barbara. Category and house collection metas do NOT"],
+ [5,"live","Domain is shopmissbehavin.com"],
+ [6,"live","Local SEO is IN SCOPE (hybrid business), maintenance only"],
+ [7,"recovered","POS-only products are excluded from the SEO meta detector sweep. Defines what Worker V71.1-SEO-META-DETECTOR sweeps. CITED IN THIS DASHBOARD, ABSENT FROM THE MASTER DOC - recovered 08-25, needs adding"],
+ [8,"live","FAQ and HowTo rich results are dead. Visible Q&A text instead. Acted on 08-20"],
+ [9,"amend","llms.txt is low-yield - SUPERSEDED BY DECISION 60, which closes it on Google own record"],
+ [10,"live","Command Center edits touch only st and n. Bump both footer stamps every save"],
+ [11,"recovered","Remove the where-to-buy-Rollas-Jeans-US row from the keyword seed and its keyword_meta row. The LOCKED SoV panel keeps its Rollas query - a different asset. CITED HERE, ABSENT FROM THE MASTER DOC - recovered 08-25"],
+ [12,"live","hreflang CLOSED as confirmed single-locale"],
+ [13,"live","/collections/all gets noindex, follow. Shipped and verified 08-17"],
+ [14,"live","A 404 from automated fetching is not a defect until a browser or GSC confirms it"],
+ [15,"missing","NOT ASSIGNED OR LOST. Appears nowhere in the master doc or any task note. Check the pre-merge archive before reusing"],
+ [16,"live","No photos means no website. Publish gate for products"],
+ [17,"missing","NOT ASSIGNED OR LOST. Check the pre-merge archive before reusing"],
+ [18,"live","Bottoms and Tops are hubs, not buckets"],
+ [19,"live","Collection titles stay bare - Jeans, not Womens Jeans"],
+ [20,"retired","RETIRED - there is no collection copy word count. Only a 150-word thin-content tripwire, explicitly NOT a target. Number kept, never reuse"],
+ [21,"missing","NOT ASSIGNED OR LOST. Check the pre-merge archive before reusing"],
+ [22,"live","IndexNow auto-sync covers products, collections, pages AND blog articles. Still unverifiable from Bing WMT (item 88)"],
+ [23,"live","New Arrivals is populated by the LineSheet app and works as intended"],
+ [24,"live","Never use trousers in customer-facing copy. US SPELLING IS PART OF THIS RULE - five colour instances were found live on 08-23"],
+ [25,"live","Never accept Shopify suggested Category"],
+ [26,"live","Publish threshold is 3+ products. THE SERP GATE AND DECISION 26 ARE TWO DIFFERENT GATES - one asks if the lane is winnable, the other if the stock exists"],
+ [27,"live","Collection copy format: 40-60 word answer paragraph visible, Q&A collapsed in details with a literal chevron and grey 1.25rem H2s. Amended by 53"],
+ [28,"live","Dresses (aa-1-4) is a LEAF NODE"],
+ [29,"live","Length is an attribute, not a category"],
+ [30,"live","Jewelry and Accessories are separate collections"],
+ [31,"live","Browse the Category tree, never flat-search"],
+ [32,"live","The live Tees handle is tees. /collections/t-shirts is a 404"],
+ [33,"live","There is no Sweatshirts collection"],
+ [34,"live","The two lace boyshorts stay on the Shorts node"],
+ [35,"live","IndexNow does not reach Google. Bing and Yandex only"],
+ [36,"live","AUTOMATED PAGE FETCHING RETURNS STALE COPY ON THIS SITE. Verify in a browser or from admin. SEVEN FORMS: (1) storefront fetch (2) inside GSC (3) a counter with a wrong filter over correct data (4) Merchant Center cached render blending two dates - prefer the view whose numbers add up (5) Rich Results Test returned the pre-edit node on three fresh crawls (6) an element finder labelled a checkbox with the wrong product name - MATCH ON IDs, NEVER RENDERED LABELS (7) NEW 08-25, a Google-owned report can itself be wrong - Google confirmed a logging error undercounting the Generative AI performance report from 2026-08-13, ongoing"],
+ [37,"live","Renaming a Shopify COLLECTION does NOT change its handle"],
+ [38,"live","A collection retitle auto-propagates to four things and NOT to three others. Manual: the SEO title, the nav label, every anchor text in body copy"],
+ [39,"live","The product denominator is 246 published products, dated 2026-08-23. Every percentage carries its denominator date. Sampled findings are never multiplied out. THE FEED KPI DIVIDES BY OFFERS (721, dated 08-21)"],
+ [40,"live","/products.json?limit=250 is the authoritative published-product count, read same-origin in a real browser"],
+ [41,"live","The 50+ independent designers claim is CONFIRMED TRUE and closed permanently"],
+ [42,"live","NO SEASONAL PAGE CARRIES A DEADLINE. Seasonal and event pages are built for NEXT year. Seasonal URLs never carry a year. CONFLICT OPEN - item 134, the ACL guide writes the 2026 edition"],
+ [43,"live","THE BYLINE IS SOPHIE. Standardise on By Sophie, Miss Behavin - Updated Month Year, under the intro. Three formats currently live - item 127"],
+ [44,"live","Missing product references do not block a page. This is why Wedding Guest shipped as a PAGE while the collection stays blocked on item 91"],
+ [45,"live","The word trousers is banned everywhere. No exception"],
+ [46,"collision","AUTHORITATIVE (08-11): the returns policy exists and its schema goes through MERCHANT CENTER, not Liquid. 14 days from delivery, ReturnByMail AND ReturnInStore, FreeReturn, FullRefund, US. CRITICAL EXCEPTION - sale items carry MerchantReturnNotPermitted. COLLIDES WITH the 08-12 decision that occasion and aesthetic membership is driven by a TAG, never category or vendor (Coastal Cowgirl a proven MANUAL exception). Every downstream doc means the 08-11 one. PROPOSED FIX: renumber the 08-12 decision to 61, leave a pointer, do NOT touch 08-11"],
+ [47,"collision","AUTHORITATIVE (08-11): ChatGPT and Google AI Mode behave differently. BUILD FOR GOOGLE. Amended 08-22 - the 80-run measurement STANDS, the permanent architecture reading is WITHDRAWN, reassess November 2026. COLLIDES WITH the 08-12 decision that a guide page gets its product from a theme section, never hard-coded links, and the section is never added to the Default page template. PROPOSED FIX: renumber the 08-12 decision to 62"],
+ [48,"live","The AI competitive set is MEASURED, not assumed. Princess Polly universal #1. Review count is NOT the gate. Reddit is the most-cited source - a finding about where answers come from, NOT a plan to place mentions"],
+ [49,"live","Shopify ARTICLE handles are not safe across a retitle - the opposite of decision 37. Fixed in worker v104, fails CLOSED"],
+ [50,"missing","NOT ASSIGNED OR LOST. Check the pre-merge archive before reusing"],
+ [51,"missing","NOT ASSIGNED OR LOST. Check the pre-merge archive before reusing"],
+ [52,"live","A deleted product gets a 404, NOT a redirect. Google treats a redirect from a deleted page to a category as a soft 404"],
+ [53,"live","Collection copy is written in ONE field and the theme splits it at the first closing p tag. The admin preview strips HTML and shows one run-on paragraph - a preview artifact, verify on the storefront"],
+ [54,"live","NEVER INSTALL A SCHEMA APP ON THIS STORE. Duplicate entity nodes are the one schema mistake that actively costs"],
+ [55,"live","The Product/Offer schema is platform-generated and is NOT to be hand-written. Offer-level data routes through Merchant Center"],
+ [56,"live","ONLINE STORE IS LOAD-BEARING. Never unpublish it to silence an error; change the product STATUS instead. Its corollary audit CLOSED 08-25 with no hidden sellable stock"],
+ [57,"live","ORGANIZE BY SURFACES, NOT DISCIPLINES. Product / Organic / Answer / Entity Discovery, one primary instrument each"],
+ [58,"amend","The occasion and aesthetic tag format is HYPHENATED, LOWERCASE, and aesthetic tags go in a SEPARATE field. VALUE LIST IS STALE: it names game-day, which build 157 omits, and build 157 adds vacation, beach and festival. SHIPPED ENUM - occasion: going-out, wedding-guest, hoco, vacation, beach, everyday, festival, country-concert, winter-formal. aesthetic: coastal-cowgirl, western"],
+ [59,"live","Where the two SERP reports disagree, missb_serp_gate_5candidates_2026-08-23.md governs"],
+ [60,"proposed","PROPOSED 08-25, NEEDS BRIAN: no machine-readable AI file will be created for Google visibility, ever - no llms.txt, no AI text file, no custom markup or Markdown mirror. Google AI Optimization Guide (last updated 2026-07-10): You do not need to create new machine readable files, AI text files, markup, or Markdown to appear in Google Search (including its generative AI capabilities), as Google Search itself does not use them. Closes decision 9 permanently. Shopify own /agents.md and /sitemap_agentic_discovery.xml stay in place - they serve agentic commerce, not Google Search"]
+];
+
+var REG_ITEMS = [
+ [22,"open","Brand-entity contamination. miss behavin gained 45 impressions and LOST 2 clicks week over week. FIRST ACTION IS MEASUREMENT - negative query filter in GSC for 26, download, torrent, siterip, nude, feet, webcam. NEVER RUN. Corroborated 08-25: clean brand CTR fell 4.8% to 3.1%","HIGH"],
+ [38,"open","Carried unchanged - no description in the current master doc. Recover from the pre-merge archive",""],
+ [44,"open","Carried unchanged - no description in the current master doc",""],
+ [48,"open","City present on 8 pages. miss-behavin-label needs your call","scope firm"],
+ [55,"open","Verify breadcrumb rendering. BreadcrumbList confirmed on all three new collections 08-23; Going Out shows 1 valid item in GSC","measurable"],
+ [58,"open","Matching Sets copy written 08-03, still unpasted",""],
+ [60,"open","Carried unchanged - no description in the current master doc",""],
+ [61,"open","Theme limit reached, 20 of 20. Delete Copy of Copy of Horizon WORKING. Paired with item 89",""],
+ [65,"open","Best Sellers runs on Price > $0.00 and holds 356 - a near-duplicate of /collections/all, which is now noindexed while this is not. THE LIVE NEAR-DUPLICATE the 08-25 third-party audit missed","decision needed"],
+ [66,"open","Duplicate commandcenter.html at App\\commandcenter.html (CC-2026.08.01d)",""],
+ [69,"open","/collections/jewelry holds 1 product","decision needed"],
+ [72,"open","/collections/hats serves an EMPTY meta description","quick fix"],
+ [73,"open","Collections below the 3-product threshold: bikini-sets 1, matching-sets 1, pants 1, jewelry 1. Gated by item 91","decision needed"],
+ [74,"open","Carried unchanged - no description in the current master doc",""],
+ [75,"open","HOCO page - build for 2027, no deadline. Collection live and correctly built; five colour instances fixed 08-23",""],
+ [76,"open","Sorority rush cluster, #rushready 1.4M posts. CAUTION: hashtag views prove attention, not search demand","HIGH"],
+ [78,"open","266 keyword terms unsized",""],
+ [79,"open","Full Shopify vendor list still outstanding - the 07-31 export is PARTIAL","HIGH"],
+ [80,"open","Price-query decision predates the demographic. The Label sits at $20-60","decision needed"],
+ [81,"open","Carried unchanged - no description in the current master doc",""],
+ [85,"open","Occasion tagging is 100% manual and does not scale at ~15 new products a week. RE-ASSESS 08-25: LineSheet build 157 ships a validated picker plus gated AI proposals, which is the mechanism that makes it scale. May be closed","HIGH, re-assess"],
+ [87,"open","LineSheet: make _vendorNorm() authoritative","one build"],
+ [88,"open","IndexNow confirmation outstanding. The Bing WMT page serves a marketing splash with no submission history. Verify by fetching the key file on the domain",""],
+ [89,"open","Theme limit. Paired with item 61",""],
+ [90,"partial","Sophie byline. PARTIALLY CLOSED 08-23 - Country Concert done. Music Festival still missing and Coachella sits bottom-positioned in a different format. Remainder carried as item 127",""],
+ [91,"open","THE PHOTO BOTTLENECK - LIKELY THE LARGEST CONSTRAINT ON THIS PROJECT. /collections/bikini-sets shows 29 in admin and 1 on the storefront. 08-25: this is also where most Online-Store-hidden products actually live, per the item 114 close","HIGH"],
+ [93,"built","LineSheet auto-generated occasion tags with an uncontrolled vocabulary. BUILT IN BUILD 157, verified from source 08-25: closed occasion enum, separate aesthetic field, _occValidate() drops non-enum values, AI proposals gated through the same validator, Worker re-validates at push. TO CLOSE: confirm Worker MB_OCCASION_ENUM parity and that the proposal path is live","verify to close"],
+ [94,"open","Jewelry, wedding-guest and romper lanes: verified terms with no published stock. Wedding guest now served by a PAGE; the collection stays blocked on 91","blocked on 91"],
+ [95,"open","wildflower cases is dead. The generic lane is alive: cute phone cases 10K-100K against 4 published phone cases","candidate build"],
+ [96,"partial","INDEXATION re-measured 08-17: 411 indexed, 2,042 not indexed. Two scares that are nothing - robots.txt 257 of 260 are Shopify /services/login_with_shop; noindex are auth pages. STILL NOT INSPECTED: redirect 15, 403 9, other 4xx 1",""],
+ [98,"open","/collections/accessories is not what its copy says - 59 published products, roughly half gift and novelty. PRECEDENT: the same defect on the everyday tag was fixed by asking does it go on your body as part of an outfit","decision needed"],
+ [99,"open","Collection metas claim stock the pages cannot support. /collections/jeans names Rollas and our own label - live it is Motel Rocks 4 and Free People 1. /collections/swimwear promises cover ups - there are none. RECURRING: the pattern repeated four times in one document on Winter Formal","recurring"],
+ [101,"open","/collections/free-people carries a 116-word first paragraph. Splitting it pushes ~60 words below the grid","5 minutes"],
+ [102,"open","The SXO SERP read is still owed. Item 135 adds three more unread queries",""],
+ [103,"open","Decision 52 versus the archived-product Flow is untested. TEST: five products archived on or after 08-04 through GSC URL inspection","one GSC check"],
+ [104,"open","/sitemap_agentic_discovery.xml points to /agents.md, 4.4 KB, unreviewed. REFRAMED 08-25: this is agent readiness, NOT Google Search visibility - Google does not use such files (decision 60). Low priority, non-zero. Note there is also an Agentic sales channel in the Shopify sidebar nobody has opened","15 minutes"],
+ [105,"closed","CLOSED 2026-08-25. Homecoming is indexed, canonical and was successfully crawled 2026-08-23 (third-party GSC audit). DO NOT REQUEST INDEXING AGAIN. Half-corrected 08-23 when /collections/going-out-outfits was found indexed; this closes the remainder",""],
+ [106,"open","The homepage is a single point of failure for AEO - it carried 76% of Google AI impressions on 08-17. URGENCY REDUCED 08-25: AI share fell 83.5% to 68.1% and AI pages went 44 to 121, so the concentration is resolving on its own. The recommended single-page test is still un-run, and its hypothesis needs rewriting - Google says content does not need to be written a particular way for AI","the real AEO item"],
+ [107,"open","0% CTR at position 1.0 is the largest arithmetic lever on the site. sequin square neck circle dress 18 impressions and emi jay custom flat bamboo hair brush 16, both position 1.0, both zero clicks. 3.0K impressions at 1.7% to 2.5% is roughly +24 clicks a week. HAS NO ROW IN THIS DASHBOARD","HIGHEST EV"],
+ [108,"open","Bing Site Scan has never been run. Free, and the only place Bing surfaces its own technical and GEO findings","30 minutes"],
+ [110,"open","schema.org appears TWICE inside layout/theme.liquid. Unexplained. LIKELY ALREADY DIAGNOSED - the 08-06 compliance doc records a duplicate Organization JSON-LD in the HEADER whose second block has no @id and a double-encoded name. Confirm they are the same block, then fix rather than investigate","10 minutes"],
+ [114,"closed","CLOSED 2026-08-25. The hidden Online Store stock audit was run by Brian: all hidden products fall into three CORRECT exclusions - no photographs (decision 16, so item 91), sold out and ARCHIVED (a Status change, leaves all channels at once), or POS and in-store only carrying the POS channel ONLY. NO HIDDEN SELLABLE STOCK. The Bday Girl Headband defect was never that a product was off Online Store, it was that seven other channels stayed ON pointing at a 404 - Brian confirms no other channel is enabled on the hidden set. THIS ITEM HAD NO ROW OF ITS OWN, WHICH IS WHY IT SURVIVED THREE WEEKS",""],
+ [115,"open","20 offers across 8 products carry attribute gaps only: Harper Swimsuit 5 colour, Gracie Top 4 size, Butter Me Up Lace Bodysuit Ballet 3 and Sunnyside 3 age group plus gender, Audrey Top 2, Heavenly Crop Top 1, Pasties 1, Romi Romper 1. SIZE IS NOT FIXABLE by adding a variant option",""],
+ [116,"open","The 24 adult-content Limited entries - the SAME 24 carrying both flags, so 24 not 48. Limited, not blocked. The trigger is the close hip crop, not the garment. Fix images, then ONE review request - the cooldown lengthens with each failure. NEVER SET adult TO YES",""],
+ [118,"open","Re-measure the feed after 2026-08-26. Denominator moves to roughly 752. LABEL IT AS DENOMINATOR MOVEMENT so nobody reads the dip as a regression","dated, due now"],
+ [119,"open","Both Merchant Center shipping policies declare 6 to 7 days delivery. Slow for apparel, and Google surfaces delivery speed","decision needed"],
+ [120,"open","YellowPages Goleta publishes CONFLICTING HOURS - a conflicting-entity signal, not a stale field. THE CORRECT ASK IS mark this location permanently closed","priority raised"],
+ [121,"open","Google is auto-surfacing a differentiator that exists nowhere on our own site - shoppers receive new clothing shipments before they are released online. PUT IT ON THE SITE","free win"],
+ [122,"open","Bing Places is unverified - the highest-value fragment of the local work, because it feeds ChatGPT, Copilot and Alexa. NOT covered by Google AI guidance at all",""],
+ [123,"built","Lean Command Center v2 BUILT, stamp CC-2026.08.22a. 129 to 137 rows, Entities and Questions tab, surfaces strip, audit checklists, playbook 8. PENDING: Brian eyeballs the render",""],
+ [124,"open","THE LIVE DASHBOARD CAN SHOW A STALE STATUS for a row whose st was changed by file edit - on load syncDown() pulls a D1 status blob and overwrites TASKS[].st. FIX: open the row in Tracker and tap its status pill once. A reload alone does not fix it. NOTE: an n-only edit is not affected","standard practice"],
+ [126,"built","Start Here resequenced, shipped in CC-2026.08.22b. CAVEAT: only takes effect if you have no saved drag order - if the order does not change, click reset order",""],
+ [127,"open","/pages/music-festival-outfit-ideas has NO byline. Country Concert now has one; Coachella has one in a DIFFERENT FORMAT at the BOTTOM of the page. Three guide pages, three states. This is the real remainder of item 90",""],
+ [128,"open","254 Crawled - currently not indexed and 49 Discovered - currently not indexed. AN UNINDEXED URL CANNOT BE RETRIEVED INTO AN AI ANSWER AT ALL, which makes this the largest AEO item on the board. On Shopify this bucket is usually variant or thin URLs - a hypothesis, not a finding. The dashboard row for this carries STALE COUNTS (852 / 335)","HIGH, diagnostic"],
+ [129,"open","Graduation has only 2 editorial inbound links against the 3-link rule. Its natural sources are spoken for. ACTION: add one from /collections/shoes","5 minutes"],
+ [130,"open","There is NO reusable guide page template. Templates are Default page, contact, country-concert, forms-join, music-festival. The three pages built 08-23 sit on Default page and carry NO PRODUCT GRID. Do not add the section to Default page (decision 47, 08-12)","decision needed"],
+ [131,"open","/collections/matisse has ZERO body copy - no paragraph, no accordions. Dropped from the 08-23 linking pass because there was nowhere to put a link. A brand collection with nothing on it, and brand pages are the proven surface here",""],
+ [132,"open","3 products carry going out WITH A SPACE, orphaned by decision 58. THE BUILD 157 GENERATOR FIX DOES NOT BACKFILL - retag those 3 by hand",""],
+ [133,"open","GAME DAY - do not build until stock exists. SERP cleared in both reports; across 246 published products: clear bag 0, stadium 0, varsity 0, football 0, tailgate 0, college 0, pom 0, orange 0, maroon 0, purple 1, crimson 1, sequin 3, red 5. A BUYING DECISION FOR KELLY, NOT AN SEO ONE","decision needed (Kelly)"],
+ [134,"open","The ACL guide versus decision 42. No seasonal page carries a year and seasonal pages are built for NEXT year, but the festival plan writes ACL for the 2026 edition six weeks out. THOSE CANNOT BOTH HOLD. Note this dashboard carries TWO rows that disagree - one says ACL first, the other says Coachella 2027","decision needed, dated"],
+ [135,"open","Wedding Guest, Graduation and Prom guide queries have NEVER been SERP-read. Collection-SERP verdicts do not transfer to guide pages. Prom additionally has no volume data anywhere in the 720-term corpus. All three pages are LIVE with the gate open","gate open on 3 live pages"],
+ [136,"open","The Winter Formal page ships three claims live stock contradicts - Free People 0 of 18 in the grid, long sleeves 3 sitewide, darker colors against a grid of cream, butter, sky, blush, silver and pink - while accordion 3 argues against dark. Brian decision, recorded. IT ALSO CARRIES PRE-08-21 RETURNS WORDING, contradicting both policy pages on free, from-delivery and in-store - that part is worth fixing regardless","carried by decision"],
+ [137,"new","NEW 08-25: verify the Search generative AI control. Google - a site must be INCLUDED in Search generative AI features in Search Console to be eligible for display. Default is Include, BUT child properties INHERIT from the closest configured parent, and sc-domain is inaccessible to brianburge@gmail.com, so an inherited Exclude would be invisible. Path: Search Console, Settings, Search generative AI. If it reads Inherit control from parent, override at this property. Staged rollout - if absent, record that plainly. RISK LOWERED by the 08-25 third-party data showing healthy rising AI impressions, but confirm rather than infer","5 minutes, GATE"],
+ [138,"new","NEW 08-25: grep the theme for nosnippet, data-nosnippet and max-snippet:0. Google - a page must be indexed AND eligible to be shown with a snippet. A snippet directive silently removes a page from AI feature eligibility. NEVER CHECKED","15 minutes, GATE"],
+ [139,"closed","MERGED INTO ITEM 114 and closed 08-25 - the hidden Online Store stock audit",""],
+ [140,"new","NEW 08-25: position-1 zero-click CTR sprint (this is master item 107 as an action). Check availability, primary image, SEO title and meta description on the position 1.0 zero-click queries. NEVER TOUCH PRODUCT TITLES - decision 2. Run 7 days, then read","HIGHEST EV"],
+ [141,"new","NEW 08-25: repair clean brand CTR, which fell 4.8% to 3.1%. Build item 22 negative-query filter FIRST - it has never been run and everything downstream depends on it. Then review the live brand SERP and make identity consistent across the homepage and trusted profiles","HIGH"],
+ [142,"new","NEW 08-25: classify the 254 crawled-not-indexed bucket. This is master item 128 as an action","HIGH"],
+ [143,"new","NEW 08-25: close the remaining Merchant Center gaps - items 115, 116, 118 and the 119 shipping-speed decision","" ],
+ [144,"new","NEW 08-25: the GTIN CONFIRMATION TEST, not a GTIN fix. GTIN IS CLOSED PERMANENTLY (Brian, 08-14) - vendors barcode ~5% of goods, no GS1 purchase, and 92% invalid GTINs coexisted with 758 of 832 approved, so GTINs are a matching optimisation and not an approval gate. The remedy is already built: mm-google-shopping.custom_product boolean via gtin_fix in worker v108. THE ONE OPEN THREAD: run it with dry_run off on ONE or TWO products, wait for re-crawl, confirm in Merchant Center that the invalid-GTIN error clears. Worker v108 flags its own value format as a strong prior, not GMC-confirmed. The 51 warnings reported 08-25 are the reason to finally run it","5 minutes, reversible"],
+ [145,"new","NEW 08-25: product-page BreadcrumbList is ABSENT on every PDP - the snippet is gated on template contains collection. The 08-20 pass verified 14 COLLECTIONS and structurally could not catch this. Product snippet clicks are the fastest-growing metric on the account, 64 to 91, so PDP markup is worth getting right. Verify on /products/addison-top-black with Rich Results Test, NOT the fetch tool","" ],
+ [146,"new","NEW 08-25: GBP fixes - items 120 and 121, packaged. Google names Business Profiles alongside Merchant Center as an AI-visibility lever","" ],
+ [147,"new","NEW 08-25: write /collections/matisse copy. This is master item 131 as an action. The cheapest content fix on the board","" ],
+ [148,"new","NEW 08-25: build the ROLLAS fit and sizing guide - NOT Motel Rocks. The third-party audit picked Motel Rocks on 130 impressions, but /collections/jeans holds Motel Rocks 4 and Free People 1, and a fit guide on four products is item 99 own defect. Rollas is the ONE brand page on this site with a proven Google AI Overview citation, observed 07-15 above Free People and Anthropologie","" ],
+ [149,"new","NEW 08-25: fix the pages that argue with themselves - items 136 and 99","" ],
+ [150,"new","NEW 08-25: blog - fix the pipe first, then the prompt. editWeeklyAutoDraft never calls notifyStaff, so drafts land silently and cadence stops. Then feed the writer real inputs: buyer name, market date, what sold out, a floor fit note. EXPECTATION SET PLAINLY - 6 posts, 121 impressions, 0 clicks. Build for citations, not traffic","" ],
+ [151,"new","NEW 08-25: earn ten relevant referring domains. GSC reports only 161 external links, mostly directories. Vendor stockist pages, fashion editors, creators, Santa Barbara event and visitor coverage. THIS IS LEGITIMATE and is not what Google means by seeking inauthentic mentions. THE GAP NONE OF THE AEO DOCS HAD PRIORITIZED - decision 3 places off-site authority fifth and this evidence argues it moves up","HIGH"],
+ [152,"new","NEW 08-25: low-value URL audit - /collections, collection product paths, paginated New Arrivals. TWO CAVEATS: /collections/all went noindex on 08-17 so a 28-day window spans the change and may be a window artifact; and the live near-duplicate is ITEM 65, Best Sellers holding 356 and still indexable","" ],
+ [153,"new","NEW 08-25: adopt the cluster-overlap gate before the next guide page ships. Measure accordion-level overlap against every live page in the cluster. SHIP UNDER 30%, FOLD IN OVER 50%, judgment between. The 08-23 festival hub duplicated Music Festival on 7 of 9 accordions and was deleted the same day; eight festival guides remain planned, and Google names templated query-variation pages as scaled content abuse","" ],
+ [154,"new","NEW 08-25: settle ACL - this is master item 134. Recommendation: decision 42 wins, build for 2027, no year in the URL. A page built six weeks before an event gets one crawl cycle then goes stale","decision needed"],
+ [155,"new","NEW 08-25: the weekly scorecard - clean brand CTR, non-brand clicks, product listing clicks, AI impressions, distinct AI pages, GA4 REVENUE. The revenue line is the genuinely new contribution; no project doc has addressed revenue. FOLD INTO the decision 57 four-surface strip rather than running a parallel scorecard, and MONTHLY outside active sprints","" ],
+ [156,"new","NEW 08-25: scope video. There is no video anywhere on the site and Google names video as an AI surface. NOT an SEO task - Product Data and Images workstream, Kelly, under decision 16","" ]
+];
+var REG_CARRIED = "8/18 · 9 · 10 · 13 · 19 · 21 · 26 · 29 · 30 · 31 · 32 · 39 · 40 · 41 · 43 · 45 · 50 · 51 · 52 · 62 · 70";
+var REG_CLOSED = "1, 2, 3, 5, 6, 7, 11, 12, 14–16, 23–25, 27, 28, 33–37, 42, 47, 49, 53, 56, 57, 59, 63, 64, 68, 71, 77, 82, 83, 84, 86, 92, 97, 100, 105, 109, 111, 112, 113, 114, 117";
+
+
+function regEsc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function regBadge(state){
+  var map = { live:"done", amend:"prog", collision:"block", recovered:"monitor", missing:"block",
+              proposed:"pend", retired:"pend", open:"pend", closed:"done", built:"prog",
+              partial:"prog", "new":"pend" };
+  var cls = map[state] || "pend";
+  return '<span class="pill ' + cls + '" style="cursor:default">' + regEsc(state) + '</span>';
+}
+function renderRegnum(){
+  var q = (document.getElementById("regFilter") || {}).value || "";
+  q = q.trim().toLowerCase();
+  function hit(num, state, text, extra){
+    if (!q) return true;
+    return (String(num).indexOf(q) === 0) || state.indexOf(q) >= 0 ||
+           text.toLowerCase().indexOf(q) >= 0 || String(extra||"").toLowerCase().indexOf(q) >= 0;
+  }
+  var db = document.getElementById("regDecBody");
+  var ib = document.getElementById("regItemBody");
+  if (!db || !ib) return;
+  var dn = 0, inum = 0, dh = [], ih = [];
+  REG_DECISIONS.forEach(function(d){
+    if (!hit(d[0], d[1], d[2])) return;
+    dn++;
+    dh.push('<tr><td class="q"><strong>decision ' + d[0] + '</strong></td><td>' + regBadge(d[1]) +
+            '</td><td>' + regEsc(d[2]) + '</td></tr>');
+  });
+  REG_ITEMS.forEach(function(it){
+    if (!hit(it[0], it[1], it[2], it[3])) return;
+    inum++;
+    ih.push('<tr><td class="q"><strong>item ' + it[0] + '</strong></td><td>' + regBadge(it[1]) +
+            '</td><td>' + regEsc(it[2]) + '</td><td>' + regEsc(it[3] || "") + '</td></tr>');
+  });
+  db.innerHTML = dh.join("") || '<tr><td colspan="3">No decision matches.</td></tr>';
+  ib.innerHTML = ih.join("") || '<tr><td colspan="4">No item matches.</td></tr>';
+  var c = document.getElementById("regCount");
+  if (c) c.textContent = dn + " of " + REG_DECISIONS.length + " decisions · " + inum + " of " + REG_ITEMS.length + " items";
+  var ca = document.getElementById("regCarried"); if (ca) ca.textContent = REG_CARRIED;
+  var cr = document.getElementById("regClosedRoster"); if (cr) cr.textContent = REG_CLOSED;
+  var tc = document.getElementById("tabCountReg");
+  if (tc) tc.textContent = (REG_DECISIONS.length + REG_ITEMS.length);
+}
+document.addEventListener("input", function(e){
+  if (e.target && e.target.id === "regFilter") renderRegnum();
+});
+
 /* ============ OVERVIEW (executive / PM dashboard) ============ */
 var LIVE_PRODUCTS=null;
 function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', t.dataset.tab===name?'true':'false'); });
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.id==='panel-'+name); });
   if(name==='overview') renderOverview();
+  if(name==='regnum') renderRegnum();
   if(name==='activity') renderActivity();
   window.scrollTo(0,0);
 }
@@ -2817,7 +3072,7 @@ function init(){
   loadState();
   renderStreams(); renderStreamChips(); renderTasks(); renderSov();
   renderCadences(); renderPlaybooks();
-  renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox(); renderOverview();
+  renderLevers(); renderAudit(); renderGoals(); renderKwChips(); renderKeywords(); renderToolbox(); renderOverview(); renderRegnum();
   bindRegistry(); refreshSetupStatus(); loadKeywordRegistry();   // v82
   const day=updateDay(); renderTimeline(day); updateProgress();
   initTabs();
