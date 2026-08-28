@@ -313,6 +313,15 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-title-edit{border:none;background:none;cursor:pointer;color:var(--gray-text);font-size:13px;line-height:1;padding:2px 4px;border-radius:3px;}
 .sp-title-edit:hover{background:var(--gray-mid);color:var(--black);}
 .sp-title-input{flex:1;min-width:180px;font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;padding:4px 6px;border:1px solid var(--black);border-radius:2px;background:#fff;}
+/* build 158 — the ↻ regen control, back on the review card beside the pencil.
+   Circular on purpose so it reads as the SAME control as the ↻ on the pricing
+   card (.regen-btn) and can never be confused with the square × that drops the
+   product from the push. Smaller than .regen-btn because this header is a
+   single line of 14px text, not a 32px input row. */
+.sp-title-regen{border:1px solid var(--gray-mid);background:none;cursor:pointer;color:var(--gray-text);font-size:12px;line-height:1;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;-webkit-appearance:none;font-family:inherit;transition:all .15s;}
+.sp-title-regen:hover{background:var(--gray-mid);color:var(--black);}
+.sp-title-regen.spinning{animation:spin .6s linear infinite;pointer-events:none;opacity:.5;}
+.sp-name-choices{margin:0;border-top:1px solid var(--gray-mid);}
 .sp-card-meta{font-size:11px;color:var(--gray-text);margin-top:2px;letter-spacing:.04em;}
 .sp-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap;flex-shrink:0;}
 .sb-idle{background:var(--gray-light);color:var(--gray-text);border:1px solid var(--gray-mid);}
@@ -1639,8 +1648,9 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin' &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; build 78 &#183; 2026-08-02 &#183; Skorts added as its own category (the store has a Skorts collection the app could never fill); needs Worker v80. ONE Category field using the 17 taxonomy labels your collection rules actually match on (Shopify type is filled silently, never shown); supersedes build 76 which would have emptied the Skirts and Shorts collections &#8212; what you pick IS the Shopify type, and the taxonomy category is derived from it (needs Worker v77); fixes Shopify Type stuck on "none" when the generator set the Category (a scripted value change fires no event); archive vendor is correctable inline (needs Worker v76, which stops extraction overwriting the printed vendor); Save progress on the Review &amp; Push screen (and an automatic save on close) &#8212; SEO edits, category, type and photo choices survive closing the overlay; Shopify Type is its own visible field on the review card, filled from the store real type list (stops new Other/Others style duplicates); archive: alphabetical vendor picker + date range (horizontal tab strip removed), archive keeps the ORIGINAL invoice vendor; in-app update check for the iPhone home-screen app; editable invoice vendor + private-label vendor list you can edit in Utilities (needs Worker v75); carries build 68 (Category sets Type), 67 (own-photo upload, label restyle), 66 (editable title, "default" suffix fix), 65 (codeless-style price fix), 64 (photo include/exclude/remove)
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 156</strong> &#183; 2026-08-21 &#183; THE TAG LIST KEPT THE NAME THE PRODUCT NO LONGER HAS. Renaming a card to &quot;Testing&quot; produced the tags <em>Remy Dress, Testing, mint dress, womens dresses, everyday</em> &#8212; both names, side by side. Build 155 routed the copy writer and the vendor search through <strong>_spEffectiveName</strong> and missed a fourth caller: the tag prefill still read <code>cd.style.printed_name || cd.style.name</code>, so the generator supplied the NEW name (it now receives it) while this line prepended the OLD one off the style record, and the dedupe only removes exact repeats so both survived. One line, same helper as the other three. NOT CHANGED, and deliberately: the search description and product description already regenerate on rename &#8212; they simply never carried the style name, because the copy prompt tells them to lead with what the piece IS and name the brand. &quot;Mint dress from Miss Behavin&#39;&quot; is fresh copy, not stale copy. An invented style name has effectively no search volume, so spending scarce meta-description characters on it would cost more than it returns; the SEO title already carries the name. Raise it if the boutique wants the name in the on-page description &#8212; that is a copy-prompt change in the Worker, not a bug here. <strong>Worker unchanged, runs on v113+; pairs with v116.</strong> Carries build 155
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 158</strong> &#183; 2026-08-28 &#183; THE &#8635; IS BACK ON THE REVIEW CARD. Regenerating a product name was only possible on the pricing cards behind Review &amp; Push, and Archive and handoff opens land straight on the review screen &#8212; so a card could arrive with a name you wanted to reroll and nowhere to reroll it. A small circular &#8635; now sits beside the pencil, deliberately the same shape as the one on the pricing card and deliberately not the square &#215; that drops a product from the push. It draws from the same generator, so the names keep the house shape &#8212; a girl&#39;s first name plus what the piece is. <strong>Nothing it offers can collide with the catalogue.</strong> The live Shopify title list is fetched once per session and every suggestion is checked against it both as it stands and with the product type appended, so a bare &quot;Sienna&quot; cannot slip past a live &quot;Sienna Dress&quot;, and against every other card in the same push &#8212; two cards drawing from one generator in the same minute is the easiest duplicate there is to make, and neither product exists yet for Shopify to catch. Anything skipped is counted on screen rather than silently dropped. Picking a name goes through the same path as typing one, so the SEO copy, the vendor photo search and the autosave all follow it; hand-written copy is still flagged rather than overwritten. The &#8635; hides once a card is live or a request is in flight, the same rule the &#215; follows &#8212; renaming a product that already exists is a Shopify admin job. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 157</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -8266,6 +8276,12 @@ function _buildSpReview(inv) {
             '<div class="sp-card-title">' +
               '<span class="sp-title-text">' + esc((style.name || style.code || '') + _spColorSuffix(colorObj.color)) + '</span>' +
               '<button type="button" class="sp-title-edit" title="Edit the product title customers will see">&#9998;</button>' +
+              // build 158 — regenerate the name from here. It went missing when
+              // the review card was rebuilt; the ↻ on the pricing card behind
+              // this screen is the only one that survived, and Archive and
+              // handoff opens land HERE, so a card could arrive with a name you
+              // wanted to reroll and no way to reroll it.
+              '<button type="button" class="sp-title-regen" title="Generate a new name">&#8635;</button>' +
               '<input type="text" class="sp-title-input" style="display:none" placeholder="Product title"/>' +
             '</div>' +
             '<div class="sp-card-meta">' + esc(style.code) + ' · ' + esc(style.type || 'Item') + '</div>' +
@@ -8311,6 +8327,7 @@ function _buildSpReview(inv) {
       _spWireBtn(cd);
       _spWireRetail(cd);      // build 144 — type the price without leaving this screen
       _spWireTitleEdit(cd);   // v72 — pencil-to-edit product title
+      _spWireTitleRegen(cd);  // build 158 — ↻ name regeneration, restored here
       _spWireUpc(cd);
       // v56 — vendor SKU field (all cards), prefilled from the invoice.
       cd.vskuInput = cd.card.querySelector('.sp-vsku');
@@ -8788,11 +8805,19 @@ function _spWireTitleEdit(cd) {
   var input = wrap.querySelector('.sp-title-input');
   if (!text || !btn || !input) return;
 
+  // build 158 — the ↻ hides with the pencil while the box is open. Rerolling a
+  // name mid-edit would silently throw away what is being typed.
+  var regen = wrap.querySelector('.sp-title-regen');
   var show = function(editing) {
     text.style.display  = editing ? 'none' : '';
     btn.style.display   = editing ? 'none' : '';
+    // Leaving edit mode restores the ↻ through _spSyncTitleRegen rather than
+    // blanking the style directly, so a card that is already live stays without
+    // one instead of getting it back the moment the pencil closes.
+    if (regen && editing) regen.style.display = 'none';
     input.style.display = editing ? '' : 'none';
     if (editing) { input.value = _spTitleFor(cd); input.focus(); input.select(); }
+    else if (typeof _spSyncTitleRegen === 'function') _spSyncTitleRegen(cd);
   };
   // build 155 — the stale-copy strip. Built here rather than in the card
   // template so the whole rename fix stays in one function.
@@ -8823,9 +8848,14 @@ function _spWireTitleEdit(cd) {
   // a wasted generation costs a fraction of a cent while lost copy costs a
   // retype. So untouched copy is rewritten silently; edited copy is flagged and
   // waits for the button.
-  var commit = function() {
+  // build 158 — was `commit`, reading the input directly. Split so the ↻ name
+  // picker can land a name through the EXACT same path a typed rename takes:
+  // autosave, SEO refresh, vendor re-search and the stale-copy strip all follow
+  // from here, and a second entry point that skipped any of them would put the
+  // review card back in the state build 155 was spent fixing.
+  var applyTitle = function(raw) {
     var before = _spEffectiveName(cd);
-    var v = input.value.trim();
+    var v = String(raw || '').trim();
     // Blank resets to the generated title rather than pushing an empty name.
     cd.titleOverride = v || '';
     text.textContent = _spTitleFor(cd);
@@ -8845,11 +8875,166 @@ function _spWireTitleEdit(cd) {
       'Renamed to "' + after + '" \u2014 the SEO copy below still describes the old name. Your wording is kept until you ask.';
     stale.style.display = '';
   };
+  cd._applyTitle = applyTitle;                       // build 158 — used by the ↻
+  var commit = function(){ applyTitle(input.value); };
   btn.onclick   = function(){ show(true); };
   input.onblur  = commit;
   input.onkeydown = function(e) {
     if (e.key === 'Enter')  { e.preventDefault(); commit(); }
     if (e.key === 'Escape') { e.preventDefault(); show(false); }
+  };
+}
+
+// ── build 158 — NAME REGENERATION ON THE REVIEW CARD ────────────────────────
+// The ↻ next to the pencil. Same generator, same exclude list and same live
+// Shopify cross-check as the pricing-card ↻ (regenName / _openNameChoices);
+// the difference is that this screen has no .p-name-input to write into, so the
+// pick lands through cd._applyTitle and therefore drags the SEO copy, the
+// vendor photo search and autosave along with it.
+
+// Every name already spoken for by ANOTHER card in this same push. Two cards
+// landing on one name is not caught by the Shopify check — neither product
+// exists yet — and it is the easiest duplicate to create, because both cards
+// are drawing from the same generator in the same minute.
+function _spNamesInThisPush(exceptCd) {
+  var out = [];
+  _spCards.forEach(function(c) {
+    if (c === exceptCd) return;
+    var n = _spEffectiveName(c);
+    if (n) out.push(n);
+  });
+  return out;
+}
+
+// A name is only offered if nothing ACTIVE in Shopify already carries it and no
+// other card in this push has taken it. Checked against both the stripped names
+// and the raw titles, because "Sienna Dress" and "Sienna Dress - BLUE" are the
+// same product name wearing a colourway.
+//
+// Note this FAILS OPEN, exactly as ensureShopifyNames does: if the title fetch
+// errored the lists are empty and everything passes. That is deliberate — the
+// push itself still runs the v57 name-duplicate guard, so a name that slips
+// through here is caught before it can create a second Shopify product.
+function _spNameIsFree(name, cd) {
+  var k = _normTitleKey(name);
+  if (!k) return false;
+  var suffix = _spColorSuffix(cd.colorObj && cd.colorObj.color);
+  var type   = String((cd.style && cd.style.type) || '').trim();
+  // The generator normally returns a type-shaped name ("Winnie Skirt"), but it
+  // has also come back with the first name alone. Both spellings have to be
+  // checked or "Sienna" sails past a live "Sienna Dress" and the storefront ends
+  // up with two products a shopper reads as the same piece.
+  var keys = [k, _normTitleKey(name + suffix)];
+  if (type) {
+    keys.push(_normTitleKey(name + ' ' + type));
+    keys.push(_normTitleKey(name + ' ' + type + suffix));
+  }
+  function hit(candidate) {
+    var c = _normTitleKey(candidate);
+    if (!c) return false;
+    for (var j = 0; j < keys.length; j++) if (keys[j] === c) return true;
+    return false;
+  }
+  var i;
+  for (i = 0; i < _shopifyExistingNames.length; i++) {
+    if (hit(_shopifyExistingNames[i])) return false;
+  }
+  for (i = 0; i < _shopifyExistingTitlesRaw.length; i++) {
+    if (hit(_shopifyExistingTitlesRaw[i])) return false;
+  }
+  var mine = _spNamesInThisPush(cd);
+  for (i = 0; i < mine.length; i++) {
+    if (hit(mine[i])) return false;
+  }
+  return true;
+}
+
+function _spOpenNameChoices(cd) {
+  var head = cd.card.querySelector('.sp-card-head');
+  if (!head) return;
+  var open = cd.card.querySelector('.sp-name-choices');
+  if (open) { open.remove(); return; }        // a second tap closes it again
+
+  var code = (cd.style && cd.style.code) || '';
+  var type = (cd.style && cd.style.type) || 'Other';
+  if (!_nameHistory[code]) _nameHistory[code] = [];
+  var cur = _spEffectiveName(cd);
+  if (cur && _nameHistory[code].indexOf(cur) === -1) _nameHistory[code].push(cur);
+
+  var box = document.createElement('div');
+  box.className = 'name-choices sp-name-choices';
+  head.insertAdjacentElement('afterend', box);
+
+  function load() {
+    box.innerHTML = '<div class="nc-loading"><span class="spinner"></span> finding names…</div>';
+    var used = _nameHistory[code]
+      .concat(_shopifyExistingNames.filter(function(n) { return _nameHistory[code].indexOf(n) === -1; }))
+      .concat(_spNamesInThisPush(cd));
+    _fetchNames(code, type, used, function(names, why) {
+      var taken = 0;
+      names = (names || []).filter(function(n) {
+        if (_nameHistory[code].indexOf(n) !== -1) return false;
+        if (!_spNameIsFree(n, cd)) { taken++; return false; }
+        return true;
+      });
+      box.innerHTML = '';
+      // build 146's rule, carried over: a refusal is an ANSWER. If the invoice
+      // never says what the item is, saying so beats inviting another round
+      // that cannot succeed.
+      if (why) {
+        box.innerHTML = '<div class="nc-empty">' + esc(why) +
+          '<br><span style="color:var(--gray-text);">Set the Category below and the suggestions come back.</span></div>';
+      } else if (!names.length) {
+        box.innerHTML = '<div class="nc-empty">' + (taken
+          ? 'Every name that came back is already live in Shopify — tap More for another set.'
+          : 'No new names came back — tap More to try again.') + '</div>';
+      } else {
+        names.forEach(function(n) {
+          _nameHistory[code].push(n);            // seen -> excluded next time
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'nc-opt'; b.textContent = n;
+          b.onclick = function() {
+            box.remove();
+            var suffix = _spColorSuffix(cd.colorObj && cd.colorObj.color);
+            if (typeof cd._applyTitle === 'function') cd._applyTitle(n + suffix);
+          };
+          box.appendChild(b);
+        });
+        if (taken) {
+          var note = document.createElement('div');
+          note.className = 'nc-empty';
+          note.textContent = taken + ' name' + (taken !== 1 ? 's' : '') +
+            ' skipped — already live in Shopify or used by another card in this push.';
+          box.appendChild(note);
+        }
+      }
+      var bar = document.createElement('div'); bar.className = 'nc-bar';
+      var more = document.createElement('button');
+      more.type = 'button'; more.className = 'nc-more'; more.textContent = '↻ More';
+      more.onclick = load;
+      var close = document.createElement('button');
+      close.type = 'button'; close.className = 'nc-close'; close.textContent = 'Close';
+      close.onclick = function() { box.remove(); };
+      bar.appendChild(more); bar.appendChild(close);
+      box.appendChild(bar);
+    }, cd.style);
+  }
+  load();
+}
+
+function _spWireTitleRegen(cd) {
+  var btn = cd.card.querySelector('.sp-title-regen');
+  if (!btn) return;
+  btn.onclick = function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    // The live-title list is fetched once per session and cached; the spin is
+    // only visible on the very first tap.
+    btn.classList.add('spinning'); btn.disabled = true;
+    ensureShopifyNames(function() {
+      btn.classList.remove('spinning'); btn.disabled = false;
+      _spOpenNameChoices(cd);
+    });
   };
 }
 
@@ -8961,7 +9146,23 @@ function _spSetState(cd, state, badgeText, btnText, btnExtra) {
   }
 
   _spWireCardX(cd);
+  _spSyncTitleRegen(cd);   // build 158 — no rerolling a name that is already live
   _spUpdateProgress();
+}
+
+// build 158 — the ↻ follows the same rule as the X: once the product exists in
+// Shopify, or while a request is in flight, it goes away. A new name at that
+// point would change nothing in the catalogue and would only read as though it
+// had. Renaming a live product is a Shopify admin job.
+function _spSyncTitleRegen(cd) {
+  var r = cd.card && cd.card.querySelector('.sp-title-regen');
+  if (!r) return;
+  var settled = ['success','added','pushing','restocking','checking'].indexOf(cd.state) >= 0;
+  r.style.display = settled ? 'none' : '';
+  if (settled) {
+    var openBox = cd.card.querySelector('.sp-name-choices');
+    if (openBox) openBox.remove();
+  }
 }
 
 // ── build 125 — THE X ──────────────────────────────────────────────────────
