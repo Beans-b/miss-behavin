@@ -659,6 +659,27 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .edit-render p{margin:0 0 10px;}
 .edit-render a{color:var(--accent);}
 .edit-render img{max-width:100%;height:auto;margin:8px 0;}
+/* build 165 - the placement list and the preview were two boxes showing the
+   same post, in two different places on screen, and the one you could MOVE a
+   photo in was not the one you could SEE the post in. They are now one surface:
+   the preview renders block by block, and the photo blocks inside it are the
+   drag handles. */
+.edit-render{max-height:52vh;}
+.ed-pv-blk{position:relative;border:1px solid transparent;}
+.ed-pv-blk.img{cursor:grab;background:#fbf9f6;border-color:var(--gray-light);padding:4px 4px 2px;margin:8px 0;}
+.ed-pv-blk.img:active{cursor:grabbing;}
+.ed-pv-blk.img img{margin:0 auto;display:block;}
+.ed-pv-blk.dragging{opacity:.3;}
+.ed-pv-blk.over{box-shadow:0 -3px 0 0 var(--accent);}
+.ed-pv-blk.over-end{box-shadow:0 3px 0 0 var(--accent);}
+.ed-pv-tools{position:absolute;top:6px;right:6px;display:flex;gap:3px;z-index:2;}
+.ed-pv-tools button{width:28px;height:28px;padding:0;line-height:1;font-size:12px;cursor:pointer;
+  border:1px solid var(--gray-mid);background:rgba(255,255,255,.94);}
+.ed-pv-tools button:disabled{opacity:.3;cursor:default;}
+.ed-pv-tools .del{color:#a4302a;border-color:#e2c5c3;}
+.ed-pv-grip{position:absolute;top:6px;left:6px;z-index:2;font-size:12px;letter-spacing:-1px;
+  color:var(--gray-text);background:rgba(255,255,255,.94);border:1px solid var(--gray-mid);padding:2px 5px;}
+.ed-pv-hint{font-size:11px;color:var(--gray-text);margin:6px 24px 0;line-height:1.4;}
 .edit-howto{margin:14px 24px 0;padding:10px 12px;background:var(--gray-light);font-size:12px;line-height:1.5;color:#444;}
 #blog-due-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:18px 24px 0;padding:12px 14px;background:var(--gray-light);border:1px solid var(--gray-mid);font-size:12px;line-height:1.4;color:var(--black);}
 .edit-chk{margin:0 0 10px;font-size:11px;line-height:1.55;}
@@ -1663,6 +1684,8 @@ body.editor-open #update-banner{bottom:76px !important;}
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 165</strong> &#183; 2026-08-28 &#183; THE PREVIEW AND THE PHOTO MOVER ARE ONE BOX NOW. Build 162 added a placement tray so you could finally see where a photo sat and move it. It worked, and it was in the wrong place: the tray sat low on the left while the PREVIEW sat top right, so the box you could SEE the post in was not the box you could MOVE a photo in, and you had to read one while operating the other. Reported 2026-08-28. The preview is now built from the same parsed block array the mover uses, one wrapper per block. That is what makes it safe rather than merely tidier: preview block N IS body block N, so a drop maps onto the body exactly and never has to be guessed at from rendered HTML. Photo blocks in the preview are draggable and carry a grip, up and down arrows and a remove button; every block, text included, is a drop target, so a photo can land between two paragraphs. The arrows are the touch path because HTML5 drag events do not fire on a phone. The separate tray and its list are GONE, and editRenderPlacement survives as an alias so no existing caller broke. editSync now renders through editRenderPreview, and the debounced second render it used to fire was removed - it was re-rendering the same thing twice on every keystroke. Preview height raised to 52vh because it is a working surface now, not a glance. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 164
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 164</strong> &#183; 2026-08-28 &#183; TWO HALF-LANDED FIXES FROM 163, FINISHED. (1) <strong>THE WHAT-IS-IT BOX HAD NO BOX.</strong> The Get names button carries .nc-opt, which is display:block and width:100%, so it took the entire row and squashed the input to zero width &#8212; the panel asked a question with nowhere to answer it. The override was there but sat EARLIER in the stylesheet than .nc-opt, and at equal specificity the later rule wins. Fixed by specificity rather than by order: .nc-ask .nc-ask-input and .nc-ask .nc-ask-go, two classes beating one, so the block cannot be broken again by being moved. (2) <strong>THE BADGE STILL SAID NEEDS A NAME ABOVE A NAME.</strong> 163 taught _spWhatsMissing to count cd.titleOverride, and that was right, but the badge is computed at the END of _buildSpReview while the restore that SETS titleOverride runs asynchronously afterwards &#8212; so a saved card opened answering a question from before the answer arrived, and the footer went on counting it among the cards needing names. _spMarkIncomplete now runs again once the restore has landed. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 163
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 163</strong> &#183; 2026-08-28 &#183; A NAME TYPED ON THE REVIEW CARD NOW COUNTS AS A NAME, AND THE &#8635; ASKS WHAT THE ITEM IS. (1) <strong>THE BLOCKING BUG.</strong> _spWhatsMissing tested style.name alone. The pencil on the review card writes cd.titleOverride and NEVER touches style.name &#8212; the only thing that writes style.name is the name box on the PRICING screen. So a card could read &quot;Rose Bikinni Set&quot; in its own header, still show NEEDS A NAME, refuse to push, and be counted in &quot;10 still need a name&quot; while ten named cards sat on screen. Renaming on the one screen you arrive at from Archive and from a handoff could never clear it. The test is now the name that ACTUALLY GETS PUSHED: _spTitleFor is titleOverride || (style.name || style.code), so a name exists when either of the first two does. Deliberately NOT _spEffectiveName, which falls back through printed_name to the style CODE &#8212; that would mark a card named while the title Shopify receives is a style code, which is the exact thing this guard exists to stop. The badge also clears on the keystroke now rather than on the next full re-render. (2) <strong>THE &#8635; ASKS.</strong> 162 sent the Category instead of the extraction enum, which fixed the invoices whose category happens to be a noun and left the rest where they were: a bikini set filed under Accessories still could not be named, and tapping &#8635; again changed nothing because nothing about the request changed. The Category list is a closed 16-label taxonomy built for collection rules and will never say &quot;bikini set&quot;. So the refusal now carries a <strong>what is it?</strong> box. Typing the item is not inventing it &#8212; build 146&#39;s guard exists because a MODEL with no noun returned &quot;Rio Beach Tote&quot; for a swimsuit, and that cannot happen when the noun is read off the person holding the invoice. The answer is kept on the card, so a second &#8635; does not ask twice. Every guardrail from 158 is untouched: suggestions are still checked against the live Shopify titles both bare and with the type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 162
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 162</strong> &#183; 2026-08-28 &#183; THE &#8635; NOW SUGGESTS NAMES ON THE INVOICES THAT NEVER PRINTED ONE. Reported: an invoice with no product names returned a refusal instead of suggestions, on exactly the cards that need suggestions most. The refusal itself is right and stays &#8212; Worker v111 will not name an item it cannot identify, because build 146 traced &quot;Iris Scrunchie Set&quot; and &quot;Rio Beach Tote&quot; on a SWIMWEAR invoice to a model being asked for a name with no noun to work from, and a wrong noun costs a return. What was broken is that the card said <strong>Set the Category below and the suggestions come back</strong> and setting it changed nothing: _spOpenNameChoices asked with <strong>cd.style.type</strong>, the extraction enum, which is &quot;Other&quot; on precisely these invoices, and never once looked at the Category box. The message was a promise the code did not keep. The live Category now wins, falling back to the type field and only then to the extraction. So the noun is still never invented &#8212; it is READ OFF A HUMAN&#39;S CHOICE, the one source that cannot mistake a swimsuit for a tote. The refusal also takes you there now, with a <strong>Choose a category</strong> button that scrolls to the field, and it says something different when a category IS set and the item still could not be identified, rather than telling somebody to set a category they have already set. Every guardrail from 158 is untouched: each suggestion is still checked against the live Shopify title list both bare and with the product type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 161
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 162</strong> &#183; 2026-08-28 &#183; YOU CAN NOW SEE WHERE EVERY PHOTO SITS, AND MOVE IT. Reported today alongside a draft believed lost. Three complaints, and the third turned out to be the interesting one. (1) A SECOND PRODUCT SEARCH LOOKED LIKE IT WAS REFUSED. editLoadImages(true) does grid.innerHTML = &#39;&#39; on every search, and every path calls it with true &#8212; the Search button, Enter, and both dropdowns &#8212; so searching a second product wiped the grid and with it the gold <strong>used</strong> outline on the photo already picked. Nothing was ever lost: an inserted photo is an img tag in the body and stays there. But with the only evidence of it gone from the screen, the app read as though it would not accept a second product. Picked photos are now remembered by src in editState.usedSrcs and the outline is restored after every grid render. <strong>AND A PHOTO CAN NOW BE DESELECTED.</strong> Reported straight after: tapping a thumbnail was ONE-WAY. It added the photo and marked the cell, and nothing anywhere could take it back out - three photos added by mistake meant hand-deleting three img blocks out of raw HTML, and the gold outline stayed on until the page was reloaded. A second tap on a marked photo now removes every copy of it from the post, clears the featured image if it was that one, and drops the outline. The tray&#39;s remove button clears the grid outline as well, so the two controls can never disagree about what is in the post. (2) THERE WAS NO WAY TO SEE WHERE A PHOTO LANDED. The body is a raw HTML textarea, so a photo&#39;s position could only be read out of the markup. A new <strong>Photos in this post</strong> tray lists the post in document order with the photos shown as pictures and the text blocks as one-line labels, so position is visible rather than inferred. It parses FROM the body on every render, which means it can never drift out of step with the textarea and it survives any number of searches. (3) PLACEMENT WAS ALREADY MANUAL AND NOTHING SAID SO. editInsertImage has always inserted at ta.selectionStart: click in the body where you want the photo, then tap the thumbnail. If you never click into the body first, selectionStart is 0 and every photo appends at the end, which is what happened. That affordance now has a visible partner &#8212; <strong>drag a photo in the tray to move it</strong>, with up and down arrows as the touch path because HTML5 drag events do not fire on a phone. Reorder rewrites the body from a parsed block array; anything the parser does not recognise is carried through verbatim as a raw block, so a move can never silently delete content. Removing a photo also clears the featured image if it was the one carrying it, rather than leaving the article pointing at a picture no longer in the post. <strong>Pairs with Worker v118, which is required:</strong> a draft saved with Save Draft never appeared under POSTS because editListPosts sorted shop-wide by PUBLISHED_AT, which is null on a draft. The save had always worked. Carries build 161
@@ -1707,7 +1730,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 164</strong> &#183; 2026-08-28 &#183; TWO HALF-LANDED FIXES FROM 163, FINISHED. (1) <strong>THE WHAT-IS-IT BOX HAD NO BOX.</strong> The Get names button carries .nc-opt, which is display:block and width:100%, so it took the entire row and squashed the input to zero width &#8212; the panel asked a question with nowhere to answer it. The override was there but sat EARLIER in the stylesheet than .nc-opt, and at equal specificity the later rule wins. Fixed by specificity rather than by order: .nc-ask .nc-ask-input and .nc-ask .nc-ask-go, two classes beating one, so the block cannot be broken again by being moved. (2) <strong>THE BADGE STILL SAID NEEDS A NAME ABOVE A NAME.</strong> 163 taught _spWhatsMissing to count cd.titleOverride, and that was right, but the badge is computed at the END of _buildSpReview while the restore that SETS titleOverride runs asynchronously afterwards &#8212; so a saved card opened answering a question from before the answer arrived, and the footer went on counting it among the cards needing names. _spMarkIncomplete now runs again once the restore has landed. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 163</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 165</strong> &#183; 2026-08-28 &#183; THE TYPED NOUN NOW ACTUALLY REACHES THE NAMER. THE PREVIOUS TWO ATTEMPTS WERE FIXING THE WRONG LAYER. The Worker resolves what an item is in <strong>mbNounFor</strong>, and it has exactly two routes: regexes over <strong>desc</strong> first, then a lookup of <strong>type</strong> against a CLOSED 15-key map &#8212; dress, top, sweater, bottom, skirt, shorts, jumpsuit, set, swim, outerwear, activewear, jewelry, bag, accessory, shoe. Build 162 sent the Category as <strong>type</strong> and 163 sent the hand-typed noun the same way, so MB_NOUN_BY_TYPE[&#39;bikini set&#39;] and MB_NOUN_BY_TYPE[&#39;accessories&#39;] both came back undefined and the refusal repeated no matter what was chosen or typed. Neither could ever have worked outside those fifteen exact strings, and tapping &#8635; again looked broken because the request was identical every time. The typed noun now travels as <strong>desc</strong>, which is the route that reads real words: /bikini/ resolves to &quot;Bikini Set&quot;, /sarong|cover.?up/ does not, and the panel says which. It is also sent as a <strong>noun</strong> field for a future Worker that can take it verbatim; v118 ignores an unknown field, so it is safe to send today. Build 146&#39;s guard is untouched and this does not weaken it: the model still may not CHOOSE the noun, it is handed one, and the one it is handed comes from the person holding the invoice rather than from a model with nothing to go on. That is the difference between reading a fact and inventing one. <strong>KNOWN LIMIT, STATED RATHER THAN HIDDEN:</strong> a typed word the Worker&#39;s regexes do not recognise still refuses. Full coverage needs a Worker change accepting body.noun verbatim. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 164</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -1850,6 +1873,7 @@ body.editor-open #update-banner{bottom:76px !important;}
     </div>
     <div class="section-title" data-ed="prevlabel" style="padding:16px 24px 4px;">Preview</div>
     <div class="edit-render" id="edit-render"></div>
+    <div class="ed-pv-hint"><strong>Drag a photo in the preview to move it.</strong> On a phone use the arrows on the photo, because drag does not fire on touch. The &#10005; takes it out of the post.</div>
     <div class="edit-field" data-ed="body">
       <label class="field-label">Body (HTML) &#8212; edit freely</label>
       <textarea class="edit-body-area" id="edit-f-body" oninput="editSync()"></textarea>
@@ -1872,11 +1896,6 @@ body.editor-open #update-banner{bottom:76px !important;}
       <div class="edit-img-grid" id="edit-img-grid"></div>
       <div class="edit-img-note" id="edit-img-count" style="display:none;"></div>
       <button type="button" class="edit-img-load" id="edit-img-more" style="display:none;" onclick="editLoadImages(false)">Load more photos</button>
-    </div>
-    <div class="edit-field" data-ed="place">
-      <label class="field-label">Photos in this post</label>
-      <div class="edit-img-note">The post in order, top to bottom, with every photo shown where it actually sits. <strong>Drag a photo</strong> to move it. On a phone use the arrows, because drag does not fire on touch. This stays in step with the body box and survives a new photo search.</div>
-      <div class="edit-place-list" id="edit-place-list"></div>
     </div>
     <div class="edit-field" data-ed="author">
       <label class="field-label">Author byline</label>
@@ -2231,7 +2250,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 164;   // keep in step with the footer stamp
+var APP_BUILD = 165;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -7424,11 +7443,24 @@ function ensureShopifyNames(cb) {
    travels with the request, and Worker v111 refuses to name anything it cannot
    identify rather than guessing — so `need_noun` comes back instead of a wrong
    product type, and the caller leaves the name blank for a person. */
-function _fetchNames(code, type, used, cb, style) {
+function _fetchNames(code, type, used, cb, style, noun) {
   var st = style || {};
+  /* build 165 — A TYPED NOUN GOES IN AS `desc`, NOT AS `type`.
+     The Worker resolves the noun in mbNounFor, and it has exactly two routes:
+     regexes over `desc` FIRST, then a lookup of `type` against a closed 15-key
+     map (dress, top, sweater, bottom, skirt, shorts, jumpsuit, set, swim,
+     outerwear, activewear, jewelry, bag, accessory, shoe). Build 163 sent the
+     typed noun as `type`, so MB_NOUN_BY_TYPE['bikini set'] came back undefined
+     and the refusal repeated no matter what was typed. It could only ever have
+     worked for those fifteen exact strings.
+     `desc` is the route that reads real words: /\bbikini\b/ resolves to
+     "Bikini Set". `noun` is also sent for a future Worker that takes it
+     verbatim; v118 ignores an unknown field, so this is safe to send now. */
+  var _typed = String(noun || '').trim();
   api('generate_name', {
     code: code, type: type, used: used, count: 5,
-    desc: st.printed_desc || st.desc || '',      // the invoice's own words
+    desc: _typed || st.printed_desc || st.desc || '',   // typed wins, else the invoice's own words
+    noun: _typed || undefined,
     fabric: st.fabric || '', color: (st.colors && st.colors[0] && st.colors[0].color) || ''
   })
   .then(function(data) {
@@ -9362,7 +9394,11 @@ function _spOpenNameChoices(cd) {
     var used = _nameHistory[code]
       .concat(_shopifyExistingNames.filter(function(n) { return _nameHistory[code].indexOf(n) === -1; }))
       .concat(_spNamesInThisPush(cd));
-    _fetchNames(code, nounOverride || type, used, function(names, why) {
+    // build 165 — `type` goes back to being the type, and the typed noun rides
+    // in its own argument. 163 substituted it for `type`, which was the bug:
+    // mbNounFor looks `type` up in a closed 15-key map, so anything a person
+    // actually types lands as undefined and the refusal repeats forever.
+    _fetchNames(code, type, used, function(names, why) {
       var taken = 0;
       names = (names || []).filter(function(n) {
         if (_nameHistory[code].indexOf(n) !== -1) return false;
@@ -9472,7 +9508,7 @@ function _spOpenNameChoices(cd) {
       close.onclick = function() { box.remove(); };
       bar.appendChild(more); bar.appendChild(close);
       box.appendChild(bar);
-    }, cd.style);
+    }, cd.style, nounOverride);
   }
   load();
 }
@@ -12334,10 +12370,76 @@ function editPlaceSoon(){
   _editPlaceTimer = setTimeout(function(){ try { editRenderPlacement(); } catch(_){} }, 400);
 }
 function editSync(){
-  editPlaceSoon();
+  editRenderPreview();
+}
+
+/* build 165 - ONE BOX. The preview is now built from the same parsed block
+   array the mover uses, which is what makes index alignment exact: preview
+   block N IS body block N, so a drop can be applied to the body without
+   guessing. Photo blocks carry the grip, the arrows and the remove button. */
+function editRenderPreview(){
+  var host = el('edit-render');
+  if (!host) return;
   var title = esc(el('edit-f-title').value);
-  var body = el('edit-f-body').value;
-  el('edit-render').innerHTML = (title ? '<h2>'+title+'</h2>' : '') + body;
+  var blocks = editParseBlocks();
+  host.innerHTML = title ? '<h2>' + title + '</h2>' : '';
+
+  blocks.forEach(function(b, i){
+    var wrap = document.createElement('div');
+    wrap.className = 'ed-pv-blk' + (b.kind === 'img' ? ' img' : '');
+    wrap.setAttribute('data-i', String(i));
+    wrap.innerHTML = (b.kind === 'raw') ? b.html : b.html;
+
+    if (b.kind === 'img') {
+      wrap.draggable = true;
+      var grip = document.createElement('span');
+      grip.className = 'ed-pv-grip';
+      grip.innerHTML = '&#8942;&#8942; drag';
+      wrap.appendChild(grip);
+
+      var tools = document.createElement('span');
+      tools.className = 'ed-pv-tools';
+      var up = document.createElement('button');
+      up.type='button'; up.innerHTML='&#9650;'; up.title='Move up'; up.disabled = (i === 0);
+      up.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); editMoveBlock(i, i - 1); };
+      var dn = document.createElement('button');
+      dn.type='button'; dn.innerHTML='&#9660;'; dn.title='Move down'; dn.disabled = (i === blocks.length - 1);
+      dn.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); editMoveBlock(i, i + 2); };
+      var rm = document.createElement('button');
+      rm.type='button'; rm.className='del'; rm.innerHTML='&#10005;'; rm.title='Remove this photo from the post';
+      rm.onclick = function(ev){ ev.preventDefault(); ev.stopPropagation(); editRemoveBlock(i); };
+      tools.appendChild(up); tools.appendChild(dn); tools.appendChild(rm);
+      wrap.appendChild(tools);
+
+      wrap.addEventListener('dragstart', function(ev){
+        _editDragFrom = i; wrap.classList.add('dragging');
+        try { ev.dataTransfer.effectAllowed='move'; ev.dataTransfer.setData('text/plain', String(i)); } catch(_){}
+      });
+      wrap.addEventListener('dragend', function(){
+        _editDragFrom = null; wrap.classList.remove('dragging');
+        Array.prototype.forEach.call(host.querySelectorAll('.ed-pv-blk'), function(c){ c.classList.remove('over','over-end'); });
+      });
+    }
+
+    wrap.addEventListener('dragover', function(ev){
+      if (_editDragFrom === null) return;
+      ev.preventDefault();
+      var r = wrap.getBoundingClientRect();
+      var after = (ev.clientY - r.top) > (r.height / 2);
+      wrap.classList.toggle('over', !after);
+      wrap.classList.toggle('over-end', after);
+    });
+    wrap.addEventListener('dragleave', function(){ wrap.classList.remove('over','over-end'); });
+    wrap.addEventListener('drop', function(ev){
+      if (_editDragFrom === null) return;
+      ev.preventDefault();
+      var r = wrap.getBoundingClientRect();
+      var after = (ev.clientY - r.top) > (r.height / 2);
+      editMoveBlock(_editDragFrom, i + (after ? 1 : 0));
+    });
+
+    host.appendChild(wrap);
+  });
 }
 
 /* build 151 - THE COUNTER WAS GREEN ON A META IT SHOULD HAVE WARNED ABOUT.
@@ -12581,14 +12683,15 @@ function editApplyBlocks(blocks){
   ta.value = blocks.map(function(b){ return b.kind === 'raw' ? b.html.trim() : b.html; })
                    .filter(Boolean).join('\n\n') + '\n';
   editSync();
-  editRenderPlacement();
 }
 
 var _editDragFrom = null;
 
 function editRenderPlacement(){
+  // build 165 - the tray was merged into the preview. Kept as an alias so every
+  // existing caller keeps working.
+  if (!el('edit-place-list')) { editRenderPreview(); return; }
   var list = el('edit-place-list');
-  if (!list) return;
   var blocks = editParseBlocks();
   var imgCount = blocks.filter(function(b){ return b.kind === 'img'; }).length;
   list.innerHTML = '';
@@ -12748,7 +12851,6 @@ function editInsertImage(im, thumbEl){
   if (!editState.usedSrcs) editState.usedSrcs = {};
   editState.usedSrcs[im.src] = true;
   editSync();
-  editRenderPlacement();
   toast('Photo added to the post.');
 }
 
