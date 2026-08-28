@@ -918,6 +918,8 @@ body.editor-open #update-banner{bottom:76px !important;}
 /* v2 — name pick-list under the pricing card header */
 .name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
 .nc-loading,.nc-empty{font-size:12px;color:var(--gray-text);padding:4px 0;line-height:1.4;}
+.nc-noun{color:var(--gray-text);font-size:12.5px;margin-bottom:6px;}
+.nc-noun a{color:inherit;text-decoration:underline;}
 .nc-ask{display:flex;gap:6px;align-items:stretch;margin:8px 0 6px;}
 /* build 164 - the Go button carries .nc-opt, which is display:block;width:100%.
    That ate the whole row and squashed the input to nothing, so there was no
@@ -1684,6 +1686,7 @@ body.editor-open #update-banner{bottom:76px !important;}
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 165</strong> &#183; 2026-08-28 &#183; THE TYPED NOUN NOW ACTUALLY REACHES THE NAMER. THE PREVIOUS TWO ATTEMPTS WERE FIXING THE WRONG LAYER. The Worker resolves what an item is in <strong>mbNounFor</strong>, and it has exactly two routes: regexes over <strong>desc</strong> first, then a lookup of <strong>type</strong> against a CLOSED 15-key map &#8212; dress, top, sweater, bottom, skirt, shorts, jumpsuit, set, swim, outerwear, activewear, jewelry, bag, accessory, shoe. Build 162 sent the Category as <strong>type</strong> and 163 sent the hand-typed noun the same way, so MB_NOUN_BY_TYPE[&#39;bikini set&#39;] and MB_NOUN_BY_TYPE[&#39;accessories&#39;] both came back undefined and the refusal repeated no matter what was chosen or typed. Neither could ever have worked outside those fifteen exact strings, and tapping &#8635; again looked broken because the request was identical every time. The typed noun now travels as <strong>desc</strong>, which is the route that reads real words: /bikini/ resolves to &quot;Bikini Set&quot;, /sarong|cover.?up/ does not, and the panel says which. It is also sent as a <strong>noun</strong> field for a future Worker that can take it verbatim; v118 ignores an unknown field, so it is safe to send today. Build 146&#39;s guard is untouched and this does not weaken it: the model still may not CHOOSE the noun, it is handed one, and the one it is handed comes from the person holding the invoice rather than from a model with nothing to go on. That is the difference between reading a fact and inventing one. <strong>KNOWN LIMIT, STATED RATHER THAN HIDDEN:</strong> a typed word the Worker&#39;s regexes do not recognise still refuses. Full coverage needs a Worker change accepting body.noun verbatim. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 164
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 165</strong> &#183; 2026-08-28 &#183; THE PREVIEW AND THE PHOTO MOVER ARE ONE BOX NOW. Build 162 added a placement tray so you could finally see where a photo sat and move it. It worked, and it was in the wrong place: the tray sat low on the left while the PREVIEW sat top right, so the box you could SEE the post in was not the box you could MOVE a photo in, and you had to read one while operating the other. Reported 2026-08-28. The preview is now built from the same parsed block array the mover uses, one wrapper per block. That is what makes it safe rather than merely tidier: preview block N IS body block N, so a drop maps onto the body exactly and never has to be guessed at from rendered HTML. Photo blocks in the preview are draggable and carry a grip, up and down arrows and a remove button; every block, text included, is a drop target, so a photo can land between two paragraphs. The arrows are the touch path because HTML5 drag events do not fire on a phone. The separate tray and its list are GONE, and editRenderPlacement survives as an alias so no existing caller broke. editSync now renders through editRenderPreview, and the debounced second render it used to fire was removed - it was re-rendering the same thing twice on every keystroke. Preview height raised to 52vh because it is a working surface now, not a glance. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 164
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 164</strong> &#183; 2026-08-28 &#183; TWO HALF-LANDED FIXES FROM 163, FINISHED. (1) <strong>THE WHAT-IS-IT BOX HAD NO BOX.</strong> The Get names button carries .nc-opt, which is display:block and width:100%, so it took the entire row and squashed the input to zero width &#8212; the panel asked a question with nowhere to answer it. The override was there but sat EARLIER in the stylesheet than .nc-opt, and at equal specificity the later rule wins. Fixed by specificity rather than by order: .nc-ask .nc-ask-input and .nc-ask .nc-ask-go, two classes beating one, so the block cannot be broken again by being moved. (2) <strong>THE BADGE STILL SAID NEEDS A NAME ABOVE A NAME.</strong> 163 taught _spWhatsMissing to count cd.titleOverride, and that was right, but the badge is computed at the END of _buildSpReview while the restore that SETS titleOverride runs asynchronously afterwards &#8212; so a saved card opened answering a question from before the answer arrived, and the footer went on counting it among the cards needing names. _spMarkIncomplete now runs again once the restore has landed. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 163
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 163</strong> &#183; 2026-08-28 &#183; A NAME TYPED ON THE REVIEW CARD NOW COUNTS AS A NAME, AND THE &#8635; ASKS WHAT THE ITEM IS. (1) <strong>THE BLOCKING BUG.</strong> _spWhatsMissing tested style.name alone. The pencil on the review card writes cd.titleOverride and NEVER touches style.name &#8212; the only thing that writes style.name is the name box on the PRICING screen. So a card could read &quot;Rose Bikinni Set&quot; in its own header, still show NEEDS A NAME, refuse to push, and be counted in &quot;10 still need a name&quot; while ten named cards sat on screen. Renaming on the one screen you arrive at from Archive and from a handoff could never clear it. The test is now the name that ACTUALLY GETS PUSHED: _spTitleFor is titleOverride || (style.name || style.code), so a name exists when either of the first two does. Deliberately NOT _spEffectiveName, which falls back through printed_name to the style CODE &#8212; that would mark a card named while the title Shopify receives is a style code, which is the exact thing this guard exists to stop. The badge also clears on the keystroke now rather than on the next full re-render. (2) <strong>THE &#8635; ASKS.</strong> 162 sent the Category instead of the extraction enum, which fixed the invoices whose category happens to be a noun and left the rest where they were: a bikini set filed under Accessories still could not be named, and tapping &#8635; again changed nothing because nothing about the request changed. The Category list is a closed 16-label taxonomy built for collection rules and will never say &quot;bikini set&quot;. So the refusal now carries a <strong>what is it?</strong> box. Typing the item is not inventing it &#8212; build 146&#39;s guard exists because a MODEL with no noun returned &quot;Rio Beach Tote&quot; for a swimsuit, and that cannot happen when the noun is read off the person holding the invoice. The answer is kept on the card, so a second &#8635; does not ask twice. Every guardrail from 158 is untouched: suggestions are still checked against the live Shopify titles both bare and with the type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 162
@@ -1730,7 +1733,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 165</strong> &#183; 2026-08-28 &#183; THE TYPED NOUN NOW ACTUALLY REACHES THE NAMER. THE PREVIOUS TWO ATTEMPTS WERE FIXING THE WRONG LAYER. The Worker resolves what an item is in <strong>mbNounFor</strong>, and it has exactly two routes: regexes over <strong>desc</strong> first, then a lookup of <strong>type</strong> against a CLOSED 15-key map &#8212; dress, top, sweater, bottom, skirt, shorts, jumpsuit, set, swim, outerwear, activewear, jewelry, bag, accessory, shoe. Build 162 sent the Category as <strong>type</strong> and 163 sent the hand-typed noun the same way, so MB_NOUN_BY_TYPE[&#39;bikini set&#39;] and MB_NOUN_BY_TYPE[&#39;accessories&#39;] both came back undefined and the refusal repeated no matter what was chosen or typed. Neither could ever have worked outside those fifteen exact strings, and tapping &#8635; again looked broken because the request was identical every time. The typed noun now travels as <strong>desc</strong>, which is the route that reads real words: /bikini/ resolves to &quot;Bikini Set&quot;, /sarong|cover.?up/ does not, and the panel says which. It is also sent as a <strong>noun</strong> field for a future Worker that can take it verbatim; v118 ignores an unknown field, so it is safe to send today. Build 146&#39;s guard is untouched and this does not weaken it: the model still may not CHOOSE the noun, it is handed one, and the one it is handed comes from the person holding the invoice rather than from a model with nothing to go on. That is the difference between reading a fact and inventing one. <strong>KNOWN LIMIT, STATED RATHER THAN HIDDEN:</strong> a typed word the Worker&#39;s regexes do not recognise still refuses. Full coverage needs a Worker change accepting body.noun verbatim. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 164</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 166</strong> &#183; 2026-08-28 &#183; TELL IT ONCE PER INVOICE, NOT ONCE PER CARD. (1) 165 asked what the item is on EVERY card, and typing it ten times on a ten-item invoice is worse than the problem it solved. An invoice that printed no product names is usually one vendor&#39;s delivery of broadly one kind of thing, so the answer given on the first card is now the default for the rest of the sheet: card value first, then the sheet value, then the Category, then the extraction. Every card after the first is a single tap on &#8635;. Nothing is invented by this. The sheet value was still typed by a person, and a name is only ever OFFERED &#8212; nothing reaches a product until a suggestion is tapped. Where the noun was inherited rather than typed on that card the panel says so above the names, <strong>Named as &quot;Bikini Set&quot; &#8212; not right? change it</strong>, so a sarong on a swim invoice costs a glance and one click, not a wrong product. A noun typed ON a card always beats the sheet default. (2) Worker v120 can answer <strong>pool_exhausted</strong> &#8212; every name in MB_NAME_POOL already taken by a live product or by another card in this push. 165 did not know that field and showed &quot;tap More to try again&quot;, which cannot work, because More asks the same exhausted pool. It now shows the Worker&#39;s own reason, which names the real fix, and does NOT offer the what-is-it box: the noun was accepted, the list ran out, and asking again for something already given is nonsense. <strong>Needs Worker v120.</strong> Carries build 165</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2250,7 +2253,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 165;   // keep in step with the footer stamp
+var APP_BUILD = 166;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -7467,6 +7470,12 @@ function _fetchNames(code, type, used, cb, style, noun) {
     // build 146 — a refusal is an ANSWER, not a failure. Passed to the caller as
     // an empty list plus the reason, so the card can say why it is blank.
     if (data && data.need_noun) { cb([], data.reason || 'The invoice does not say what this item is.'); return; }
+    /* build 166 — Worker v120 can also answer pool_exhausted: every name in
+       MB_NAME_POOL is already taken by a live product or by another card in this
+       push. That is a different answer from "none came back", and the old
+       handling showed "tap More to try again" — advice that cannot work, since
+       More asks the same exhausted pool. The Worker's reason names the real fix. */
+    if (data && data.pool_exhausted) { cb([], data.reason || 'Every name in the list is already in use.', true); return; }
     var names = data && data.names;
     if (!names && data && data.text) {
       try { names = JSON.parse(data.text); }
@@ -9379,8 +9388,18 @@ function _spOpenNameChoices(cd) {
      say "bikini set", "cover-up" or "sarong" — and Accessories, which is where
      those land, tells the namer nothing. Kept on the card so a second ↻ does
      not ask again. */
+  /* build 166 — AND IT IS REMEMBERED FOR THE WHOLE SHEET, NOT JUST THE CARD.
+     Reported: typing the item on every card of a ten-item invoice is worse than
+     the problem it solves. An invoice with no product names is usually ONE
+     vendor's delivery of broadly one kind of thing, so the answer given on the
+     first card is the right default for the rest.
+     Card first, then the sheet. Nothing is invented: the sheet-level value was
+     still typed by a person, it is shown on screen before any name is taken,
+     and a name is only ever OFFERED — nothing reaches a product until a
+     suggestion is tapped. So a sarong on a swim invoice costs a glance and one
+     click on "change", not a wrong product. */
   cd._nameNoun = cd._nameNoun || '';
-  var nounOverride = cd._nameNoun;
+  var nounOverride = cd._nameNoun || (currentInvoice && currentInvoice._sheetNoun) || '';
   if (!_nameHistory[code]) _nameHistory[code] = [];
   var cur = _spEffectiveName(cd);
   if (cur && _nameHistory[code].indexOf(cur) === -1) _nameHistory[code].push(cur);
@@ -9398,7 +9417,7 @@ function _spOpenNameChoices(cd) {
     // in its own argument. 163 substituted it for `type`, which was the bug:
     // mbNounFor looks `type` up in a closed 15-key map, so anything a person
     // actually types lands as undefined and the refusal repeats forever.
-    _fetchNames(code, type, used, function(names, why) {
+    _fetchNames(code, type, used, function(names, why, exhausted) {
       var taken = 0;
       names = (names || []).filter(function(n) {
         if (_nameHistory[code].indexOf(n) !== -1) return false;
@@ -9409,7 +9428,15 @@ function _spOpenNameChoices(cd) {
       // build 146's rule, carried over: a refusal is an ANSWER. If the invoice
       // never says what the item is, saying so beats inviting another round
       // that cannot succeed.
-      if (why) {
+      if (why && exhausted) {
+        // build 166 — nothing to type here. The noun was accepted; the list ran
+        // out. Offering the what-is-it box would ask for something already given.
+        box.innerHTML = '';
+        var ex = document.createElement('div');
+        ex.className = 'nc-empty';
+        ex.textContent = why;
+        box.appendChild(ex);
+      } else if (why) {
         /* build 162 — the refusal now TAKES YOU THERE. Telling somebody to set
            the Category and leaving them to find it, on a long card, below the
            photo strip, is why this read as an error rather than as a next step.
@@ -9451,7 +9478,8 @@ function _spOpenNameChoices(cd) {
           var v = String(inp.value || '').trim();
           if (!v) { inp.focus(); return; }
           nounOverride = v;
-          cd._nameNoun = v;     // a second ↻ on this card does not ask again
+          cd._nameNoun = v;                              // this card
+          if (currentInvoice) currentInvoice._sheetNoun = v;   // build 166 — and every other card on this sheet
           load();
         };
         go.onclick = run;
@@ -9480,6 +9508,27 @@ function _spOpenNameChoices(cd) {
           ? 'Every name that came back is already live in Shopify — tap More for another set.'
           : 'No new names came back — tap More to try again.') + '</div>';
       } else {
+        /* build 166 — SAY WHICH NOUN THESE CAME FROM, when it was inherited
+           rather than typed on this card. The sheet-level default is what makes
+           the second card onwards a single tap, and the price of that is that
+           somebody has to be able to SEE it was assumed and correct it before
+           tapping a name. One line, and the change link reopens the box. */
+        var inherited = nounOverride && !cd._nameNoun;
+        if (inherited) {
+          var nb = document.createElement('div');
+          nb.className = 'nc-empty nc-noun';
+          nb.textContent = 'Named as “' + nounOverride + '” — ';
+          var chg = document.createElement('a');
+          chg.href = '#'; chg.textContent = 'not right? change it';
+          chg.onclick = function(e){
+            e.preventDefault();
+            if (currentInvoice) currentInvoice._sheetNoun = '';
+            nounOverride = ''; cd._nameNoun = '';
+            load();
+          };
+          nb.appendChild(chg);
+          box.appendChild(nb);
+        }
         names.forEach(function(n) {
           _nameHistory[code].push(n);            // seen -> excluded next time
           var b = document.createElement('button');
