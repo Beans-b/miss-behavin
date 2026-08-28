@@ -345,6 +345,22 @@ select.field-input{-webkit-appearance:none;border-radius:0;background:transparen
 .sp-retail .sp-retail-input:focus{border-bottom-color:var(--black);}
 .sp-card[data-state="blocked"] .sp-retail .sp-retail-input{background:#fff8e6;border-bottom-color:#d97706;}
 .sp-card-foot{padding:10px 14px;border-top:1px solid var(--gray-mid);display:flex;gap:8px;align-items:center;}
+/* build 159 - add another colourway. Deliberately quiet next to Push: it is a
+   setup action, not the irreversible one. */
+.sp-card-foot{flex-wrap:wrap;}
+.sp-addcolor{flex:0 0 100%;background:none;border:1px dashed var(--gray-mid);color:var(--gray-dark,#6b6b6b);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 12px;cursor:pointer;-webkit-appearance:none;min-height:40px;}
+.sp-addcolor:hover{border-color:var(--primary);color:var(--primary);}
+.sp-ac-form{padding:14px;border-top:1px solid var(--gray-mid);background:var(--gray-light,#faf9f8);}
+.sp-ac-l{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-dark,#6b6b6b);margin:0 0 5px;}
+.sp-ac-form .sp-ac-color{width:100%;margin-bottom:12px;text-transform:uppercase;}
+.sp-ac-sizes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.sp-ac-sz{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;letter-spacing:.06em;color:var(--gray-dark,#6b6b6b);}
+.sp-ac-sz input{width:46px;padding:8px 4px;text-align:center;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:14px;-webkit-appearance:none;}
+.sp-ac-hint{font-size:11.5px;line-height:1.5;color:var(--gray-dark,#6b6b6b);margin-bottom:12px;}
+.sp-ac-act{display:flex;gap:8px;align-items:center;}
+.sp-ac-act .sp-ac-go{width:auto;padding:10px 16px;margin:0;}
+.sp-ac-cancel{background:none;border:none;color:var(--gray-dark,#6b6b6b);font-family:'DM Sans',sans-serif;font-size:12px;text-decoration:underline;cursor:pointer;padding:8px 4px;}
+.sp-ac-err{color:#b3261e;font-size:12px;margin-top:8px;min-height:16px;}
 .sp-push-btn{flex:1;background:var(--primary);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:12px 14px;cursor:pointer;-webkit-appearance:none;text-align:center;transition:background .15s;min-height:44px;}
 .sp-push-btn:active:not(:disabled){background:var(--primary-deep);}
 .sp-push-btn:disabled{opacity:.38;cursor:not-allowed;}
@@ -1613,6 +1629,7 @@ body.editor-open #update-banner{bottom:76px !important;}
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 158</strong> &#183; 2026-08-28 &#183; THE &#8635; IS BACK ON THE REVIEW CARD. Regenerating a product name was only possible on the pricing cards behind Review &amp; Push, and Archive and handoff opens land straight on the review screen &#8212; so a card could arrive with a name you wanted to reroll and nowhere to reroll it. A small circular &#8635; now sits beside the pencil, deliberately the same shape as the one on the pricing card and deliberately not the square &#215; that drops a product from the push. It draws from the same generator, so the names keep the house shape &#8212; a girl&#39;s first name plus what the piece is. <strong>Nothing it offers can collide with the catalogue.</strong> The live Shopify title list is fetched once per session and every suggestion is checked against it both as it stands and with the product type appended, so a bare &quot;Sienna&quot; cannot slip past a live &quot;Sienna Dress&quot;, and against every other card in the same push &#8212; two cards drawing from one generator in the same minute is the easiest duplicate there is to make, and neither product exists yet for Shopify to catch. Anything skipped is counted on screen rather than silently dropped. Picking a name goes through the same path as typing one, so the SEO copy, the vendor photo search and the autosave all follow it; hand-written copy is still flagged rather than overwritten. The &#8635; hides once a card is live or a request is in flight, the same rule the &#215; follows &#8212; renaming a product that already exists is a Shopify admin job. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 157
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 135</strong> &#183; 2026-08-14 &#183; THE ARCHIVE NOW LEADS WITH WHAT YOU WORKED ON LAST. &quot;Newest first&quot; sorted by the date printed on the invoice, which is a date a vendor typed on a piece of paper, not a record of anything this app did. So a sheet worked on this morning sat fifth in the list behind invoices dated weeks earlier, and one Valfre invoice mistyped 2028-12-12 pinned itself to the top permanently. Whoever opens this tab &#8212; Kelly, most of all &#8212; wants the sheet that was just being worked on. The default is now <strong>Last worked on</strong>, which reads the timestamp the server writes every time a sheet is saved to the archive, falling back to when it was scanned and then to the invoice date for older sheets that carry neither. <strong>Recently scanned</strong> is its own option, and invoice date is still there under two entries that say plainly that is what they are. Vendor A&ndash;Z now also leads with the most recently worked sheet inside each vendor rather than an arbitrary order. Each row says &quot;worked on&quot; with the date, or the time if it was today, so the order the list is in is legible rather than something you have to take on trust &#8212; shown only when it differs from the scan, since a sheet archived the minute it was scanned has nothing to add. No Worker change &#8212; runs on v108. Carries build 134
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 134</strong> &#183; 2026-08-14 &#183; THE NAME BOX WAS OVERWRITING THE NAME YOU TYPED. The pricing card filled its name box from the invoice wording in preference to the name on the style, so a style you had named Farrah reopened reading DARK SOLID COLOR TEXTURED PRINT TUBE MINI DRESS. That default was right in build 56, when the name on the style was a machine guess and the invoice wording was the better one; build 126 ended name invention and the order was never flipped to match. It was not cosmetic: the save reads that box back and writes it to the style, so reopening a sheet and saving it replaced every name you had typed with the invoice wording, and once saved there was nothing to recover it from. The box now shows the name a person put there and falls back to the invoice wording only when nothing has been typed, which is exactly the case the old default was written for. A renamed style also stops claiming the badge &quot;Name as printed on the invoice&quot; and says &quot;Your name&quot; instead. ALSO, hardening rather than a reported fault: whether saved SEO copy is treated as stale is decided by comparing the vendor it was written for against the sheet vendor, and on a private-label sheet those are two different names reconciled only after the private-label list has loaded from the server. Reaching the review screen before that arrived read it as a vendor change, dropped the copy, and blanked it in the record on the next save. The comparison now accepts either name, so a slow fetch can no longer destroy copy. No Worker change &#8212; runs on v108. Carries build 133
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 133</strong> &#183; 2026-08-14 &#183; UPLOADED PHOTOS AND SAVED COPY NOW SURVIVE A SAVE. Two separate faults behind one complaint. THE PHOTOS: an uploaded photo lived as a preview in the page plus a Shopify staged link held only in memory, and the card snapshot deliberately strips those before saving &#8212; correctly, since the raw image data does not belong in the invoice record &#8212; but nothing durable replaced it, so the photo was gone the moment the page closed. The screen was telling the truth when it said photos were not saved. Keeping the Shopify link instead would not have helped: those expire. A photo now uploads into your own storage and the card keeps a short reference to it, so it is still there when you reopen the sheet, on any device, and it travels with a handoff. At push, the app fetches it back and hands it to Shopify exactly as a fresh upload; a photo it cannot find is named rather than quietly missing from the product. THE COPY: Save wrote the ACTIVE sheet and never the archived one. The archive was refreshed on Publish to Staff, on a vendor correction, on Close Sheet and when the screen tidied a leftover away, but never on Save &#8212; so pressing Save, then opening that sheet from Archive on another device, showed the original. Pressing Save now writes both. The background autosave still writes the active sheet only, because archiving on every pause in typing is a write every second and a half for nobody. ALSO: two places filed a sheet to the Archive and cleared it from the active slot at the same moment, so a failed archive write lost the sheet from both. Nothing is cleared now until the Archive confirms it has it. Needs Worker v108. Carries build 132
@@ -1650,7 +1667,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 158</strong> &#183; 2026-08-28 &#183; THE &#8635; IS BACK ON THE REVIEW CARD. Regenerating a product name was only possible on the pricing cards behind Review &amp; Push, and Archive and handoff opens land straight on the review screen &#8212; so a card could arrive with a name you wanted to reroll and nowhere to reroll it. A small circular &#8635; now sits beside the pencil, deliberately the same shape as the one on the pricing card and deliberately not the square &#215; that drops a product from the push. It draws from the same generator, so the names keep the house shape &#8212; a girl&#39;s first name plus what the piece is. <strong>Nothing it offers can collide with the catalogue.</strong> The live Shopify title list is fetched once per session and every suggestion is checked against it both as it stands and with the product type appended, so a bare &quot;Sienna&quot; cannot slip past a live &quot;Sienna Dress&quot;, and against every other card in the same push &#8212; two cards drawing from one generator in the same minute is the easiest duplicate there is to make, and neither product exists yet for Shopify to catch. Anything skipped is counted on screen rather than silently dropped. Picking a name goes through the same path as typing one, so the SEO copy, the vendor photo search and the autosave all follow it; hand-written copy is still flagged rather than overwritten. The &#8635; hides once a card is live or a request is in flight, the same rule the &#215; follows &#8212; renaming a product that already exists is a Shopify admin job. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 157</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 159</strong> &#183; 2026-08-28 &#183; A COLOURWAY THAT NEVER REACHED THE INVOICE CAN NOW BE ADDED TO THE STYLE THAT DID. Reported: the same dress arrived in RED as well as BLACK, the RED was not on the paperwork, and the only way to list it was to re-enter the whole product by hand. A <strong>+ Duplicate for another colour</strong> button now sits at the foot of every review card. It asks for the colour and the quantities, prefilled from the colourway you are looking at so they are corrected rather than typed from nothing, and it adds an entry to <strong>style.colors</strong> &#8212; never a second style. That distinction is the whole design: a review card is generated per colourway, so duplicating a CARD could only mean duplicating a STYLE, and two styles sharing a code break the shopify_find_by_title restock guard, _spVendorMatches and the _manImages key, while an invented code prints the wrong Shopify barcode because build 150 established that the code rides into the SKU and the Barcode field. A colourway costs none of that and already gets its own sizes, barcode, photos and copy, pushing as its own product titled &quot;name - RED&quot; exactly as every other colourway in the store does. Category, type, tags, alt and the occasion chips carry over because they describe the garment; the three prose fields are left blank and rewritten for the new colour, because a description reading &quot;shimmering teal sequins&quot; under a red dress costs a return, and a colour find-replace through prose is not a safe way to avoid it. Photos start empty. <strong>ALSO, THE STUCK UPDATE BANNER.</strong> APP_BUILD sat at 157 while the footer said 158, so every load read 158 off its own footer, saw 158 &gt; 157 and raised &quot;Update available &#8212; build 158&quot; forever &#8212; the build 97 fault, returning for the third time after build 151. Both numbers are moved together here. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 158</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2169,7 +2186,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 157;   // keep in step with the footer stamp
+var APP_BUILD = 159;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -8312,6 +8329,13 @@ function _buildSpReview(inv) {
         addedHtml +
         '<div class="sp-card-foot">' +
           '<button class="sp-push-btn">Push to Shopify</button>' +
+          // build 159 — the same garment in another colourway. It is a second
+          // ENTRY IN style.colors, never a second style: the code rides into the
+          // SKU and, at push, into the Shopify Barcode field (build 150), so a
+          // duplicated style would either collide on the code — breaking the
+          // shopify_find_by_title restock guard and _spVendorMatches — or carry
+          // an invented one and print the wrong barcode.
+          '<button type="button" class="sp-addcolor">+ Duplicate for another colour</button>' +
         '</div>';
 
       var cd = {
@@ -8328,6 +8352,7 @@ function _buildSpReview(inv) {
       _spWireRetail(cd);      // build 144 — type the price without leaving this screen
       _spWireTitleEdit(cd);   // v72 — pencil-to-edit product title
       _spWireTitleRegen(cd);  // build 158 — ↻ name regeneration, restored here
+      _spWireAddColour(cd);   // build 159 — same style, another colourway
       _spWireUpc(cd);
       // v56 — vendor SKU field (all cards), prefilled from the invoice.
       cd.vskuInput = cd.card.querySelector('.sp-vsku');
@@ -8344,6 +8369,171 @@ function _buildSpReview(inv) {
   // build 136 — and every card that cannot go live says so before it is tapped,
   // rather than looking Ready and failing on the press.
   _spCards.forEach(function(cd){ _spMarkIncomplete(cd); });
+}
+
+/* ── build 159 — THE SAME GARMENT IN ANOTHER COLOURWAY ──────────────────────
+   Reported 2026-08-28: a Zara Dress arrived in RED as well as BLACK, the RED
+   was not on the invoice, and there was no way to add it without re-entering
+   the whole product by hand.
+
+   WHY THIS ADDS TO style.colors AND NOT A SECOND STYLE. A review card is not a
+   stored object — _buildSpReview generates one card per entry in style.colors,
+   so "duplicate the card" can only mean "add a colourway" or "add a style".
+   Adding a style is the wrong one, twice over:
+     - the same code on two styles breaks the shopify_find_by_title restock
+       guard, which returns ALL title matches precisely so a near-miss cannot
+       restock the wrong product, and breaks _spVendorMatches and the _manImages
+       'C-' + code key that the build 139 handoff already flagged as colliding;
+     - an invented code is worse, because build 150 established that the style
+       code rides into the SKU and, at push, into the Shopify Barcode field — so
+       a made-up code prints a wrong barcode.
+   A colourway costs neither: it gets its own sizes, barcode, photos, SEO copy
+   and _review snapshot for free, and pushes as its own Shopify product titled
+   "<name> - RED", exactly as every other colourway in the store already does.
+
+   THE COPY IS NOT CARRIED ACROSS VERBATIM. Category, type, tags, alt and the
+   occasion chips are — they describe the garment, which has not changed. The
+   three prose fields are deliberately left blank so _spGenSeo writes them for
+   the NEW colour: a body description reading "shimmering teal sequins" under a
+   red dress is the kind of wrong that costs a return, and a colour find-replace
+   through prose is not a safe way to avoid it. Nothing hand-written is lost —
+   the card being seeded is brand new and has no hand-written copy in it. */
+function _spWireAddColour(cd) {
+  var btn = cd.card.querySelector('.sp-addcolor');
+  if (!btn) return;
+  btn.onclick = function(){ _spOpenAddColour(cd, btn); };
+}
+
+function _spOpenAddColour(cd, btn) {
+  if (cd.card.querySelector('.sp-ac-form')) return;   // already open on this card
+  // build 159 — THE _loaded GUARD, BORROWED FROM BUILD 139. Adding a colourway
+  // has to save every open card first, and _spSnapshotCard reads the occasion
+  // chips straight off a card that fills ASYNCHRONOUSLY. Saving before the
+  // restore has run writes an EMPTY selection over a saved one — the exact
+  // shape of the bug build 139 spent itself on for photos. A card that has not
+  // finished loading has not chosen anything, so it may not trigger a save.
+  if (!cd._loaded) {
+    var w = cd.card.querySelector('.sp-fetch-status');
+    if (w) w.textContent = 'Still loading this card — try again in a second.';
+    return;
+  }
+  var sizes = _styleSizes(cd.style).concat(['OS']);
+  // Only the sizes this colourway actually stocks are offered, plus OS when the
+  // style is one-size. Showing a full XS-XL run on an accessory invites a
+  // quantity on a size that does not exist.
+  var isOS = !!((cd.colorObj.sizes || {})['OS']);
+  var offer = isOS ? ['OS'] : sizes.filter(function(s){ return s !== 'OS'; });
+
+  var f = document.createElement('div');
+  f.className = 'sp-ac-form';
+  f.innerHTML =
+    '<div class="sp-ac-l">New colourway for ' + esc(cd.style.name || cd.style.code) + '</div>' +
+    '<input type="text" class="sp-ac-color field-input" placeholder="Colour, e.g. RED" autocomplete="off"/>' +
+    '<div class="sp-ac-l">Quantities — copied from ' + esc(cd.colorObj.color || 'this colourway') + ', correct them</div>' +
+    '<div class="sp-ac-sizes">' +
+      offer.map(function(sz){
+        var q = (cd.colorObj.sizes || {})[sz] || 0;
+        return '<label class="sp-ac-sz"><span>' + esc(sz) + '</span>' +
+               '<input type="text" inputmode="numeric" data-sz="' + esc(sz) + '" value="' + q + '"/></label>';
+      }).join('') +
+    '</div>' +
+    '<div class="sp-ac-hint">Photos start empty — red photos are different photos. The description is rewritten for the new colour; category, type, tags and occasion carry over.</div>' +
+    '<div class="sp-ac-act">' +
+      '<button type="button" class="btn btn-black sp-ac-go">Add colourway</button>' +
+      '<button type="button" class="sp-ac-cancel">Cancel</button>' +
+    '</div>' +
+    '<div class="sp-ac-err"></div>';
+  cd.card.insertBefore(f, cd.card.querySelector('.sp-card-foot'));
+
+  var $c = f.querySelector('.sp-ac-color');
+  var $e = f.querySelector('.sp-ac-err');
+  $c.focus();
+  f.querySelector('.sp-ac-cancel').onclick = function(){ f.remove(); };
+  f.querySelector('.sp-ac-go').onclick = function(){
+    var colour = String($c.value || '').trim();
+    if (!colour) { $e.textContent = 'Type the colour name first.'; return; }
+
+    // A repeated colourway would produce two cards with the same SKU and the
+    // same Shopify title, which is the duplicate this whole design avoids.
+    var taken = (cd.style.colors || []).some(function(c){
+      return String((c && c.color) || '').trim().toLowerCase() === colour.toLowerCase();
+    });
+    if (taken) { $e.textContent = 'This style already has a ' + colour + ' colourway.'; return; }
+
+    var sizesOut = {}, total = 0;
+    [].slice.call(f.querySelectorAll('.sp-ac-sz input')).forEach(function(i){
+      var n = parseInt(String(i.value || '').replace(/[^0-9]/g, ''), 10);
+      if (n > 0) { sizesOut[i.dataset.sz] = n; total += n; }
+    });
+    // _buildSpReview skips a colourway with no quantity at all, so an all-zero
+    // run would add nothing and look like the button had failed.
+    if (!total) { $e.textContent = 'Enter at least one quantity, or the colourway has nothing to push.'; return; }
+
+    _spAddColour(cd, colour, sizesOut);
+  };
+}
+
+function _spAddColour(cd, colour, sizesOut) {
+  // Every open card is written into its _review snapshot BEFORE the rebuild,
+  // because _buildSpReview throws the DOM away and anything only in a text box
+  // would go with it. This is the same reason _spUseProductUrl saves.
+  if (typeof _spSaveAll === 'function') _spSaveAll(true);
+
+  var style = (currentInvoice.styles || [])[cd.styleIdx] || cd.style;
+  style.colors = style.colors || [];
+  style.colors.push({ color: colour, sizes: sizesOut });
+
+  style._review = style._review || {};
+  var src = style._review[_spReviewKey(cd)] || {};
+  var srcColour = cd.colorObj.color || '';
+
+  // The title only carries across when it is a rename that ends in the OLD
+  // colour suffix, in which case the suffix is swapped. A rename with no colour
+  // in it is left behind on purpose: copying it would give two colourways the
+  // same Shopify title, and an empty title falls back to name + " - RED", which
+  // is unique by construction.
+  var newTitle = '';
+  var srcTitle = String(src.title || '').trim();
+  var oldSuf = _spColorSuffix(srcColour);
+  if (srcTitle && oldSuf && srcTitle.slice(-oldSuf.length) === oldSuf) {
+    newTitle = srcTitle.slice(0, -oldSuf.length).trim() + _spColorSuffix(colour);
+  }
+
+  // Tags and alt name the colour outright, so the word is swapped there — a
+  // whole-word replace on a short field, not on prose.
+  var swap = function(v){
+    var s = String(v || '');
+    if (!s || !srcColour) return s;
+    return s.replace(new RegExp('\\b' + srcColour.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi'), colour);
+  };
+
+  style._review[colour] = {
+    title: newTitle,
+    seo_title: '', seo_desc: '', body: '',        // regenerated below, for THIS colour
+    cat: src.cat || '', type: src.type || '',
+    alt: swap(src.alt), tags: swap(src.tags),
+    occ: (src.occ || []).slice(), aes: (src.aes || []).slice(),
+    occTouched: src.occTouched, occSet: src.occSet,
+    typeTouched: src.typeTouched,
+    upc: '', vsku: src.vsku || '',                // a barcode is per colourway
+    src_name: src.src_name, src_vendor: src.src_vendor, src_vendor_true: src.src_vendor_true,
+    images: [], off: [], removed: [],             // red photos are different photos
+    src_url: '', src_label: '', droppedUploads: 0
+  };
+
+  _buildSpReview(currentInvoice);
+
+  // Write the new colourway fresh for the colour it actually is.
+  var made = _spCards.filter(function(c){
+    return c.styleIdx === cd.styleIdx &&
+           String((c.colorObj && c.colorObj.color) || '') === colour;
+  })[0];
+  if (made) {
+    made.card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    if (typeof _spGenSeo === 'function') _spGenSeo(made);
+  }
+  if (typeof scheduleAutosave === 'function') scheduleAutosave();
+  if (typeof toast === 'function') toast('Added ' + colour + ' — pull its photos, then check the copy.');
 }
 
 /* build 136 — WHAT IS STILL MISSING ON THIS CARD.
