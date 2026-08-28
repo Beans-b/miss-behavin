@@ -897,6 +897,9 @@ body.editor-open #update-banner{bottom:76px !important;}
 /* v2 — name pick-list under the pricing card header */
 .name-choices{padding:8px 12px;border-bottom:1px solid var(--gray-mid);background:var(--gray-light);}
 .nc-loading,.nc-empty{font-size:12px;color:var(--gray-text);padding:4px 0;line-height:1.4;}
+.nc-ask{display:flex;gap:6px;align-items:center;margin:8px 0 6px;}
+.nc-ask-input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--gray-mid);font-family:'DM Sans',sans-serif;font-size:13px;-webkit-appearance:none;}
+.nc-ask-go{white-space:nowrap;}
 .nc-opt{display:block;width:100%;text-align:left;border:1px solid var(--gray-mid);background:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:10px 12px;margin-bottom:5px;cursor:pointer;-webkit-appearance:none;}
 .nc-opt:active{background:var(--gray-light);}
 .nc-bar{display:flex;gap:8px;margin-top:2px;}
@@ -1655,6 +1658,7 @@ body.editor-open #update-banner{bottom:76px !important;}
 
 <!-- BUILD HISTORY (not rendered — the visible footer stays one line).
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 136</strong> &#183; 2026-08-14 &#183; PHOTOS CAN NOW GO ON BEFORE ANYTHING IS NAMED OR PRICED, WHICH IS THE ORDER THE WORK ACTUALLY HAPPENS IN. Review &amp; Push refused to open at all until every style had both a name and a price. That is the right guard in the wrong place: it is the only screen photographs can be added on, and photographs go on FIRST &#8212; open the box, add the pictures, hand the sheet to Kelly, she names and prices it, it comes back to be pushed. The gate has moved from the door to the push. Nothing is loosened: a card missing a name or a price is marked <strong>Needs a name</strong> or <strong>Needs a price</strong> the moment the screen opens, refuses to push when tapped, and is walked past by Publish All rather than failing the run. One unnamed style no longer holds up the four beside it that are ready, and nothing unnamed or at $0 can reach the live catalogue &#8212; the check now sits on the irreversible step instead of on the way in. The counts still greet you on arrival, as a line of text rather than a locked door. ALSO: reopening a sheet from Archive now lands on the photo and SEO cards instead of the pricing cards, so the pictures are in front of you. Opening a sheet from the Handoffs queue deliberately still lands on the pricing cards &#8212; that is the naming and pricing job. No Worker change &#8212; runs on v108. Carries build 135
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 162</strong> &#183; 2026-08-28 &#183; THE &#8635; NOW SUGGESTS NAMES ON THE INVOICES THAT NEVER PRINTED ONE. Reported: an invoice with no product names returned a refusal instead of suggestions, on exactly the cards that need suggestions most. The refusal itself is right and stays &#8212; Worker v111 will not name an item it cannot identify, because build 146 traced &quot;Iris Scrunchie Set&quot; and &quot;Rio Beach Tote&quot; on a SWIMWEAR invoice to a model being asked for a name with no noun to work from, and a wrong noun costs a return. What was broken is that the card said <strong>Set the Category below and the suggestions come back</strong> and setting it changed nothing: _spOpenNameChoices asked with <strong>cd.style.type</strong>, the extraction enum, which is &quot;Other&quot; on precisely these invoices, and never once looked at the Category box. The message was a promise the code did not keep. The live Category now wins, falling back to the type field and only then to the extraction. So the noun is still never invented &#8212; it is READ OFF A HUMAN&#39;S CHOICE, the one source that cannot mistake a swimsuit for a tote. The refusal also takes you there now, with a <strong>Choose a category</strong> button that scrolls to the field, and it says something different when a category IS set and the item still could not be identified, rather than telling somebody to set a category they have already set. Every guardrail from 158 is untouched: each suggestion is still checked against the live Shopify title list both bare and with the product type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 161
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 162</strong> &#183; 2026-08-28 &#183; YOU CAN NOW SEE WHERE EVERY PHOTO SITS, AND MOVE IT. Reported today alongside a draft believed lost. Three complaints, and the third turned out to be the interesting one. (1) A SECOND PRODUCT SEARCH LOOKED LIKE IT WAS REFUSED. editLoadImages(true) does grid.innerHTML = &#39;&#39; on every search, and every path calls it with true &#8212; the Search button, Enter, and both dropdowns &#8212; so searching a second product wiped the grid and with it the gold <strong>used</strong> outline on the photo already picked. Nothing was ever lost: an inserted photo is an img tag in the body and stays there. But with the only evidence of it gone from the screen, the app read as though it would not accept a second product. Picked photos are now remembered by src in editState.usedSrcs and the outline is restored after every grid render. <strong>AND A PHOTO CAN NOW BE DESELECTED.</strong> Reported straight after: tapping a thumbnail was ONE-WAY. It added the photo and marked the cell, and nothing anywhere could take it back out - three photos added by mistake meant hand-deleting three img blocks out of raw HTML, and the gold outline stayed on until the page was reloaded. A second tap on a marked photo now removes every copy of it from the post, clears the featured image if it was that one, and drops the outline. The tray&#39;s remove button clears the grid outline as well, so the two controls can never disagree about what is in the post. (2) THERE WAS NO WAY TO SEE WHERE A PHOTO LANDED. The body is a raw HTML textarea, so a photo&#39;s position could only be read out of the markup. A new <strong>Photos in this post</strong> tray lists the post in document order with the photos shown as pictures and the text blocks as one-line labels, so position is visible rather than inferred. It parses FROM the body on every render, which means it can never drift out of step with the textarea and it survives any number of searches. (3) PLACEMENT WAS ALREADY MANUAL AND NOTHING SAID SO. editInsertImage has always inserted at ta.selectionStart: click in the body where you want the photo, then tap the thumbnail. If you never click into the body first, selectionStart is 0 and every photo appends at the end, which is what happened. That affordance now has a visible partner &#8212; <strong>drag a photo in the tray to move it</strong>, with up and down arrows as the touch path because HTML5 drag events do not fire on a phone. Reorder rewrites the body from a parsed block array; anything the parser does not recognise is carried through verbatim as a raw block, so a move can never silently delete content. Removing a photo also clears the featured image if it was the one carrying it, rather than leaving the article pointing at a picture no longer in the post. <strong>Pairs with Worker v118, which is required:</strong> a draft saved with Save Draft never appeared under POSTS because editListPosts sorted shop-wide by PUBLISHED_AT, which is null on a draft. The save had always worked. Carries build 161
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 161</strong> &#183; 2026-08-28 &#183; A NEW COLOURWAY NOW LANDS IN THE SAME COLLECTIONS, AND NOTHING GOES LIVE UNWRITTEN. THREE FIXES, ONE CAUSE BETWEEN THEM: work that existed on screen and nowhere else. (1) A RED colourway added by 159 reached Shopify in <strong>New Arrivals alone</strong> while its BLACK sibling sat in six collections. 159 copied the tags across and then called _spGenSeo, which OWNS the tags box and replaces it wholesale with generator output &#8212; so the copy was overwritten a moment later, and since every collection in this store is an automated rule on tags and category, a different tag set is a different set of collections. The split is now explicit and is the point of the feature: PROSE describes the colour and is written fresh, CLASSIFICATION describes the garment and is identical. Tags and the occasion and aesthetic chips are restored over the generator&#39;s output and written into the snapshot, so a reopen does not read the generator&#39;s tags back. (2) <strong>Push now saves before it publishes.</strong> Push built its payload from the card in MEMORY and never touched the sheet, so a product could go live carrying a name that existed nowhere in this app. Confirmed today: &quot;Zara Dress - BLACK&quot; was live and correct in Shopify while the sheet and the Archive both held the raw invoice wording. Publishing is the least reversible step here; the record of what was published should not be the thing left unwritten. Publish All saves once before the run rather than once per card. (3) <strong>The update banner&#39;s RELOAD saves before it navigates.</strong> location.replace runs no save, and the 1.5-second autosave writes the ACTIVE slot alone by design (build 133), so anything since the last explicit save reached the active row and never the Archive &#8212; and was gone when the sheet left that row. That is exactly the rename lost today: the archive snapshot was eleven minutes older than the last active write and the name survived in neither. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 160
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 160</strong> &#183; 2026-08-28 &#183; A COLOURWAY YOU ADDED BY MISTAKE CAN NOW BE REMOVED. Reported minutes after 159 shipped: a colourway was added, the &#215; was tapped to undo it, and Duplicate then refused the colour as already present. Both halves were behaving as designed and the combination was still a dead end. The &#215; is build 125&#39;s DISMISS &#8212; it drops a card from this push and a second tap puts it back, which is why the card sits there marked SKIPPED &#8212; and it deliberately does not touch the data, so <strong>style.colors</strong> still held the entry and there was nothing that could delete it. Adding a thing with no way to remove it was the real fault. <strong>Remove this colourway</strong> now sits at the foot of the card, confirmed rather than silent because it deletes the quantities, the copy and the photos, and offered only while the style has more than one colourway &#8212; taking the last one would leave a style that renders no card at all. The confirm also says plainly that this does NOT remove an already-live product from Shopify. And the duplicate refusal stops being merely true: it now says the colourway may be further down marked SKIPPED, that the &#215; only drops a card from the push, and which control actually deletes. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 159
@@ -1697,7 +1701,7 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 162</strong> &#183; 2026-08-28 &#183; THE &#8635; NOW SUGGESTS NAMES ON THE INVOICES THAT NEVER PRINTED ONE. Reported: an invoice with no product names returned a refusal instead of suggestions, on exactly the cards that need suggestions most. The refusal itself is right and stays &#8212; Worker v111 will not name an item it cannot identify, because build 146 traced &quot;Iris Scrunchie Set&quot; and &quot;Rio Beach Tote&quot; on a SWIMWEAR invoice to a model being asked for a name with no noun to work from, and a wrong noun costs a return. What was broken is that the card said <strong>Set the Category below and the suggestions come back</strong> and setting it changed nothing: _spOpenNameChoices asked with <strong>cd.style.type</strong>, the extraction enum, which is &quot;Other&quot; on precisely these invoices, and never once looked at the Category box. The message was a promise the code did not keep. The live Category now wins, falling back to the type field and only then to the extraction. So the noun is still never invented &#8212; it is READ OFF A HUMAN&#39;S CHOICE, the one source that cannot mistake a swimsuit for a tote. The refusal also takes you there now, with a <strong>Choose a category</strong> button that scrolls to the field, and it says something different when a category IS set and the item still could not be identified, rather than telling somebody to set a category they have already set. Every guardrail from 158 is untouched: each suggestion is still checked against the live Shopify title list both bare and with the product type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v117.</strong> Carries build 161</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 163</strong> &#183; 2026-08-28 &#183; A NAME TYPED ON THE REVIEW CARD NOW COUNTS AS A NAME, AND THE &#8635; ASKS WHAT THE ITEM IS. (1) <strong>THE BLOCKING BUG.</strong> _spWhatsMissing tested style.name alone. The pencil on the review card writes cd.titleOverride and NEVER touches style.name &#8212; the only thing that writes style.name is the name box on the PRICING screen. So a card could read &quot;Rose Bikinni Set&quot; in its own header, still show NEEDS A NAME, refuse to push, and be counted in &quot;10 still need a name&quot; while ten named cards sat on screen. Renaming on the one screen you arrive at from Archive and from a handoff could never clear it. The test is now the name that ACTUALLY GETS PUSHED: _spTitleFor is titleOverride || (style.name || style.code), so a name exists when either of the first two does. Deliberately NOT _spEffectiveName, which falls back through printed_name to the style CODE &#8212; that would mark a card named while the title Shopify receives is a style code, which is the exact thing this guard exists to stop. The badge also clears on the keystroke now rather than on the next full re-render. (2) <strong>THE &#8635; ASKS.</strong> 162 sent the Category instead of the extraction enum, which fixed the invoices whose category happens to be a noun and left the rest where they were: a bikini set filed under Accessories still could not be named, and tapping &#8635; again changed nothing because nothing about the request changed. The Category list is a closed 16-label taxonomy built for collection rules and will never say &quot;bikini set&quot;. So the refusal now carries a <strong>what is it?</strong> box. Typing the item is not inventing it &#8212; build 146&#39;s guard exists because a MODEL with no noun returned &quot;Rio Beach Tote&quot; for a swimsuit, and that cannot happen when the noun is read off the person holding the invoice. The answer is kept on the card, so a second &#8635; does not ask twice. Every guardrail from 158 is untouched: suggestions are still checked against the live Shopify titles both bare and with the type appended, and against every other card in the same push, and anything skipped is still counted on screen. <strong>No Worker change &#8212; runs on v118.</strong> Carries build 162</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2221,7 +2225,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 162;   // keep in step with the footer stamp
+var APP_BUILD = 163;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -8695,7 +8699,22 @@ function _spRemoveColour(cd) {
 function _spWhatsMissing(cd){
   var st = (cd && cd.style) || {};
   var need = [];
-  if (!String(st.name || '').trim()) need.push('a name');
+  /* build 163 — A NAME TYPED ON THIS SCREEN NOW COUNTS AS A NAME.
+     This tested st.name alone. The pencil on the review card writes
+     cd.titleOverride and never touches style.name — the only thing that writes
+     style.name is the name box on the PRICING screen. So a card could read
+     "Rose Bikinni Set" in its own header, still show NEEDS A NAME, and refuse
+     to push, and the footer counted it among "10 still need a name" while ten
+     named cards sat on screen. Renaming here could never clear it.
+
+     The test is now the name that ACTUALLY GETS PUSHED. _spTitleFor is
+     titleOverride || (style.name || style.code), so a name exists when either
+     of the first two does. Deliberately NOT _spEffectiveName, which falls back
+     through printed_name to the style code: that would mark a card as named
+     when the title Shopify receives is a style code, which is the exact thing
+     this guard exists to stop reaching a live catalogue. */
+  var _typed = String((cd && cd.titleOverride) || '').trim();
+  if (!_typed && !String(st.name || '').trim()) need.push('a name');
   if (_spParseRetail(st._retail) <= 0) need.push('a price');
   return need;
 }
@@ -9203,6 +9222,11 @@ function _spWireTitleEdit(cd) {
     cd.titleOverride = v || '';
     text.textContent = _spTitleFor(cd);
     show(false);
+    // build 163 — clear the NEEDS A NAME badge the moment a name is typed,
+    // not on the next full re-render. _spWhatsMissing now counts titleOverride,
+    // so the badge is answerable here; without this the card goes on saying it
+    // needs the thing you just gave it.
+    if (typeof _spMarkIncomplete === 'function') _spMarkIncomplete(cd);
     var after = _spEffectiveName(cd);
     if (after === before) return;                       // nothing actually changed
     if (typeof scheduleAutosave === 'function') scheduleAutosave();
@@ -9312,6 +9336,13 @@ function _spOpenNameChoices(cd) {
   var _liveCat  = (cd.els && cd.els.cat  && String(cd.els.cat.value  || '').trim()) || '';
   var _liveType = (cd.els && cd.els.type && String(cd.els.type.value || '').trim()) || '';
   var type = _liveCat || _liveType || (cd.style && cd.style.type) || 'Other';
+  /* build 163 — and a noun typed by hand beats all of them. The Category list
+     is a closed 16-label taxonomy built around collection rules, so it cannot
+     say "bikini set", "cover-up" or "sarong" — and Accessories, which is where
+     those land, tells the namer nothing. Kept on the card so a second ↻ does
+     not ask again. */
+  cd._nameNoun = cd._nameNoun || '';
+  var nounOverride = cd._nameNoun;
   if (!_nameHistory[code]) _nameHistory[code] = [];
   var cur = _spEffectiveName(cd);
   if (cur && _nameHistory[code].indexOf(cur) === -1) _nameHistory[code].push(cur);
@@ -9325,7 +9356,7 @@ function _spOpenNameChoices(cd) {
     var used = _nameHistory[code]
       .concat(_shopifyExistingNames.filter(function(n) { return _nameHistory[code].indexOf(n) === -1; }))
       .concat(_spNamesInThisPush(cd));
-    _fetchNames(code, type, used, function(names, why) {
+    _fetchNames(code, nounOverride || type, used, function(names, why) {
       var taken = 0;
       names = (names || []).filter(function(n) {
         if (_nameHistory[code].indexOf(n) !== -1) return false;
@@ -9343,30 +9374,62 @@ function _spOpenNameChoices(cd) {
            Two different messages too: with a category already chosen the
            Worker still could not identify the item, and telling that person to
            set a category they have set is nonsense. */
+        /* build 163 — THE REFUSAL NOW ASKS THE ONE QUESTION IT NEEDS ANSWERED.
+           162 sent the Category, which fixed the invoices whose category
+           happens to be a noun and left the rest exactly where they were: a
+           bikini set under Accessories still cannot be named, and tapping ↻
+           again changes nothing because nothing about the request changed.
+           The Category list is a closed taxonomy built for collection rules,
+           so it will never say "bikini set".
+
+           So the panel asks. Typing the item is not the same as inventing it —
+           build 146's guard exists because a MODEL with no noun produced "Rio
+           Beach Tote" for a swimsuit, and that cannot happen when the noun is
+           read off the person holding the invoice. Every guardrail from 158 is
+           untouched: the suggestions that come back are still checked against
+           the live Shopify titles and against the other cards in this push. */
         box.innerHTML = '';
         var msg = document.createElement('div');
         msg.className = 'nc-empty';
-        if (_liveCat || _liveType) {
-          msg.innerHTML = esc(why) + '<br><span style="color:var(--gray-text);">' +
-            'Category is set to ' + esc(_liveCat || _liveType) +
-            ' and that was not enough to identify it. Type the name yourself with the pencil.</span>';
-          box.appendChild(msg);
-        } else {
-          msg.innerHTML = esc(why) + '<br><span style="color:var(--gray-text);">' +
-            'Pick the Category and the suggestions come back — the name is built from it, ' +
-            'so it is never guessed at.</span>';
-          box.appendChild(msg);
+        msg.innerHTML = esc(why) + '<br><span style="color:var(--gray-text);">' +
+          'Tell it what the item is and the names come back. Typing it is not guessing &#8212; ' +
+          'the invoice simply never said.</span>';
+        box.appendChild(msg);
+
+        var ask = document.createElement('div');
+        ask.className = 'nc-ask';
+        var inp = document.createElement('input');
+        inp.type = 'text'; inp.className = 'nc-ask-input';
+        inp.placeholder = 'e.g. Bikini Set, Cover-Up, Sarong';
+        inp.value = nounOverride || '';
+        var go = document.createElement('button');
+        go.type = 'button'; go.className = 'nc-opt nc-ask-go';
+        go.textContent = 'Get names';
+        var run = function(){
+          var v = String(inp.value || '').trim();
+          if (!v) { inp.focus(); return; }
+          nounOverride = v;
+          cd._nameNoun = v;     // a second ↻ on this card does not ask again
+          load();
+        };
+        go.onclick = run;
+        inp.onkeydown = function(e){ if (e.key === 'Enter') { e.preventDefault(); run(); } };
+        ask.appendChild(inp); ask.appendChild(go);
+        box.appendChild(ask);
+        setTimeout(function(){ try { inp.focus(); } catch (e) {} }, 0);
+
+        // The Category route still works and is worth taking when the item DOES
+        // fit the taxonomy, because it sets the field the push needs anyway.
+        if (!_liveCat && !_liveType) {
           var jump = document.createElement('button');
           jump.type = 'button'; jump.className = 'nc-opt';
-          jump.textContent = 'Choose a category ↓';
+          jump.textContent = 'Or choose a category ↓';
           jump.onclick = function(){
             var f = (cd.els && cd.els.cat) || (cd.els && cd.els.type);
             if (!f) return;
             f.scrollIntoView({ block: 'center', behavior: 'smooth' });
             try { f.focus(); } catch (e) {}
-            // Say what to do next, since focusing a select shows nothing.
-            var hint = box.querySelector('.nc-empty');
-            if (hint) hint.innerHTML = 'Pick the Category below, then tap ↻ again.';
+            msg.innerHTML = 'Pick the Category below, then tap &#8635; again.';
           };
           box.appendChild(jump);
         }
