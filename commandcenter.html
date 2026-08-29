@@ -586,7 +586,6 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   <!-- ============ TABS ============ -->
   <div class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-tab="overview" aria-selected="true">Overview</button>
-    <button class="tab" role="tab" data-tab="regnum" aria-selected="false">Items &amp; Decisions <span class="n" id="tabCountReg"></span></button>
     <button class="tab" role="tab" data-tab="tracker" aria-selected="false">Tracker <span class="n" id="tabCountTracker"></span></button>
     <button class="tab" role="tab" data-tab="levers" aria-selected="false">Levers</button>
     <button class="tab" role="tab" data-tab="audit" aria-selected="false">Audit</button>
@@ -642,44 +641,12 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
   </section>
 
   <!-- ============ PANEL: TRACKER ============ -->
-  <!-- ============ PANEL: ITEMS & DECISIONS (registry) — added CC-2026.08.25b ============ -->
-  <section class="panel" id="panel-regnum" role="tabpanel">
-    <div class="sov-intro">
-      <p><strong>Every decision number and every item number, in one place.</strong> Built 2026-08-25. <strong>Why it exists:</strong> master item 114 sat unresolved for three weeks because it had <em>no row</em> &mdash; it lived as a sentence inside a row already marked done, so there was no number to search on. <strong>The rule that follows from it: a loose end recorded only inside another row&rsquo;s note does not exist.</strong> If work is real it gets its own number and its own row; if it is not worth a row, write it into a decision or drop it.</p>
-      <p><strong>Two number spaces overlap.</strong> &ldquo;46&rdquo; is a decision <em>and</em> an item, and they mean different things &mdash; always write &ldquo;decision 46&rdquo; or &ldquo;item 46&rdquo;, never a bare number. <strong>Work is tracked in four places, not one:</strong> the master doc decisions list, the master doc open-items table, the Tracker tab here (137 rows keyed on <em>title text</em>, carrying no item numbers), and <code>missb_reorg_summary_2026-08-01.md</code>, which holds 18 further small items nobody has audited since 08-01.</p>
-      <p class="hint"><strong>Every row is collapsible &mdash; click the title to open it.</strong> The state dropdown on each row is editable: change it, and pick <strong>done</strong> to strike the row through. Changes save in this browser only (localStorage). <strong>This tab never writes to D1 and can never overwrite a Tracker task status.</strong></p>
-    </div>
-
-    <div class="section-head"><h3>Search</h3><span class="hint">Searches every word of every body, not just the titles. Try a number (114), a term (GTIN, snippet, Rollas), a status (collision, missing), or a file name.</span></div>
-    <div style="margin:0 0 14px">
-      <input id="regFilter" type="search" placeholder="e.g. 114, GTIN, snippet, collision, HIGH" style="width:100%; max-width:520px; padding:9px 12px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:12px; border-radius:6px">
-      <div class="hint" id="regCount" style="margin-top:7px"></div>
-    </div>
-
-    <div class="section-head"><h3>Decisions</h3><span class="hint">The master doc &ldquo;Decisions to honor&rdquo; list is the authority. Flags below are unresolved defects in the numbering, not in the decisions themselves.</span></div>
-    <div id="regDecBody"></div>
-
-    <div class="section-head" style="margin-top:26px"><h3>Items</h3><span class="hint">Open items plus the 08-25 additions (137&ndash;156), which are proposed and not yet Tracker rows.</span></div>
-    <div id="regItemBody"></div>
-
-    <div class="section-head" style="margin-top:26px"><h3>Known gaps in the numbering</h3><span class="hint">Nine things to fix. Adding Tracker rows is gated by items 67 and 117, so these need Brian&rsquo;s sign-off.</span></div>
-    <ol style="line-height:1.75; padding-left:20px">
-      <li><strong>Add decisions 7 and 11 to the master doc</strong>, marked recovered 2026-08-25. Both are cited in task notes here and appear nowhere in the decisions list. Decision 7 is load-bearing &mdash; it defines what the SEO meta detector sweeps.</li>
-      <li><strong>Renumber the two 08-12 decisions to 61 and 62</strong>, leaving permanent pointers at 46 and 47. Do <em>not</em> touch the 08-11 pair &mdash; every downstream doc cites those meanings.</li>
-      <li><strong>Adopt decision 60</strong> (no machine-readable AI files, ever).</li>
-      <li><strong>Update decision 58&rsquo;s value list</strong> to LineSheet build 157&rsquo;s shipped enum, and record that <code>game-day</code> is deliberately out pending item 133.</li>
-      <li><strong>Give item 107 a Tracker row.</strong> The highest expected-value item on the site has none &mdash; it exists only in the master doc.</li>
-      <li><strong>Correct the indexation triage row&rsquo;s counts</strong> from 852 / 335 to the current <strong>254 / 49</strong>.</li>
-      <li><strong>Resolve the two ACL rows into one</strong> once item 134 is decided &mdash; one says ACL first, the other says Coachella 2027.</li>
-      <li><strong>Check the pre-merge archive</strong> (<code>\old\miss-behavin-master-doc_PRE-MERGE_2026-08-21.md</code>) for decisions 15, 17, 21, 50 and 51, and for the 21 carried items that have no description text. Do not reuse those numbers until it is read.</li>
-      <li><strong>Audit <code>missb_reorg_summary_2026-08-01.md</code></strong> &mdash; 18 small items nobody has looked at since 08-01.</li>
-    </ol>
-
-    <div class="section-head" style="margin-top:26px"><h3>Items carried with no description</h3><span class="hint">Listed in the master doc as &ldquo;carried unchanged&rdquo; with no text. Numbers with no meaning attached is its own risk.</span></div>
-    <p style="font-family:var(--mono); font-size:12px" id="regCarried"></p>
-    <div class="section-head" style="margin-top:18px"><h3>Closed roster</h3><span class="hint">From the master doc, 08-23, plus 105 and 114 closed 08-25.</span></div>
-    <p style="font-family:var(--mono); font-size:12px" id="regClosedRoster"></p>
-  </section>
+  <!-- ============ RETIRED CC-2026.08.29a: PANEL: ITEMS & DECISIONS ============
+       The items became Tracker rows (see the registry merge, and the receipt at the
+       top of the Tracker). The 61 decisions moved to the Reference tab, read-only,
+       because a standing rule is not work and should never carry a progress state.
+       The nine numbering gaps became Tracker rows or were already covered.
+       Nothing from this panel was deleted without a destination. ============ -->
 
   <section class="panel" id="panel-activity" role="tabpanel">
     <style>
@@ -692,7 +659,24 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <div class="section-head"><h3>Activity log</h3><span class="hint">Every status change, newest first — synced from the shared store (you, Kelly, or Claude).</span></div>
     <div id="activityList" class="activity-list"><div class="empty">Open this tab to load the log.</div></div>
   </section>
+  <style>
+  /* ---- CC-2026.08.29a: registry fields folded into the task card ---- */
+  .task-itemno{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+    border:1px solid var(--line-strong,var(--line));border-radius:3px;padding:1px 5px;margin-right:7px;
+    color:var(--ink-faint);vertical-align:middle;white-space:nowrap}
+  .task-note-in .lbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink-faint);margin:10px 0 3px}
+  .task-note-in .lbl:first-child{margin-top:0}
+  .task-src{font-family:var(--mono);font-size:11px;color:var(--ink-faint);word-break:break-word}
+  .task-conflict{border-left:2px solid #b4432c;padding:6px 0 6px 10px;margin:0 0 10px;
+    font-size:12px;line-height:1.55;color:var(--ink)}
+  .merge-audit{font-family:var(--mono);font-size:11px;line-height:1.7;margin:0 0 14px;
+    border:1px solid var(--line);border-radius:6px;padding:10px 12px}
+  .merge-audit.ok{border-color:#3d7a4e}
+  .merge-audit.bad{border-color:#b4432c;color:#b4432c}
+  </style>
   <section class="panel" id="panel-tracker" role="tabpanel">
+    <div class="merge-audit" id="mergeAudit"></div>
     <div class="toolbar">
       <label class="search">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -828,6 +812,24 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
         </ul>
       </div>
     </div>
+
+    <!-- ============ DECISIONS — moved here CC-2026.08.29a ============
+         Was the Decisions half of the Items & Decisions tab. It is READ-ONLY by
+         design now. The old version offered a status dropdown with a "done" option
+         on standing rules like decision 5 (the domain is shopmissbehavin.com), which
+         invited marking a permanent rule complete. A decision is honored or retired,
+         never finished, and the master doc is the only place it changes. ============ -->
+    <div class="section-head" style="margin-top:30px"><h3>Decisions to honor</h3><span class="hint">The master doc list is the authority — this is a read-only mirror. Click any row to open it. Statuses here describe the decision (live, retired, recovered, missing), not progress, and are not editable: a decision is not work. Anything actionable about them lives on the Tracker.</span></div>
+    <div style="margin:0 0 14px">
+      <input id="regFilter" type="search" placeholder="Search decisions — try trousers, schema, 36, Merchant Center" style="width:100%; max-width:520px; padding:9px 12px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); font-family:var(--mono); font-size:12px; border-radius:6px">
+      <div class="hint" id="regCount" style="margin-top:7px"></div>
+    </div>
+    <div id="regDecBody"></div>
+
+    <div class="section-head" style="margin-top:26px"><h3>Numbers with no meaning attached</h3><span class="hint">Listed in the master doc as carried unchanged with no description text. Recovering them is a Tracker row.</span></div>
+    <p style="font-family:var(--mono); font-size:12px" id="regCarried"></p>
+    <div class="section-head" style="margin-top:18px"><h3>Closed roster</h3><span class="hint">From the master doc, 08-23, plus 105 and 114 closed 08-25.</span></div>
+    <p style="font-family:var(--mono); font-size:12px" id="regClosedRoster"></p>
   </section>
 
   <!-- ============ PANEL: LEVERS ============ -->
@@ -1141,8 +1143,8 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
       <button class="btn" id="btnMd">Copy as Markdown</button>
       <button class="btn primary" id="btnStarter">Whole-program prompt</button>
     </div>
-    <!-- deploy_check: CC-2026.08.25c -->
-    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.25c &middot; THE ITEMS &amp; DECISIONS TAB IS NOW FULLY WRITTEN UP, COLLAPSIBLE AND EDITABLE. Every one of the 61 decisions and 77 items is now a chevron row that opens to three short paragraphs - WHAT IT IS, THE PROBLEM IT SOLVES, ACTION NEEDED - plus the file where it is referenced, so a number is no longer a bare label you have to go and look up somewhere else. THE STATE IS EDITABLE: every row carries a dropdown, and choosing done strikes the row through. Those choices save per-browser in localStorage under mb_cc_reg_status_v1. THIS TAB NEVER WRITES TO D1 and can never overwrite a Tracker task status, so item 124 does not apply to anything done in here. Search now reads every word of every body, not just titles - a file name, a worker version, a product name or a status all match. CARRIED FORWARD FROM CC-2026.08.25b, unchanged: two decisions were RECOVERED by parsing every decision reference in all 137 task notes - decision 7 (POS-only products are excluded from the SEO meta detector sweep, which defines what Worker V71.1 sweeps) and decision 11 (remove the Rollas keyword seed row; the LOCKED SoV panel keeps its Rollas query as a separate asset). Both are cited in this dashboard and appear NOWHERE in the master doc decisions list. FIVE NUMBERS ARE MISSING ENTIRELY - decisions 15, 17, 21, 50 and 51 appear in no doc and no note. DO NOT REUSE THEM until the pre-merge archive is checked. THE 46/47 COLLISION IS DOCUMENTED, NOT FIXED: each is used twice, and the 08-11 meanings are authoritative. Proposed fix, needs Brian - renumber ONLY the 08-12 pair to 61 and 62 and leave pointers. ALSO STILL OPEN: item 107, the highest expected-value item on the site, has NO ROW here; the indexation triage row carries STALE COUNTS of 852 and 335 against the current 254 and 49; ACL has TWO rows that disagree; and row 111 points at missb_reorg_summary_2026-08-01.md, a FOURTH tracking location holding 18 small items nobody has audited since 08-01. Rows touched this save: ZERO. No st changed, no n changed, no task object added or removed - still 137. Item 124 does NOT apply. Carries forward from CC-2026.08.25a - THE HIDDEN ONLINE STORE STOCK AUDIT IS ANSWERED AND CLOSED</div>
+    <!-- deploy_check: CC-2026.08.29a -->
+    <div class="ver" id="ver" style="margin-top:12px; font-family:var(--mono); font-size:10px; letter-spacing:.04em; color:var(--ink-faint)">Command Center &middot; CC-2026.08.29a &middot; THE TRACKER IS NOW THE SINGLE STORE OF WORK, AND THE ITEMS &amp; DECISIONS TAB IS RETIRED. Approved in session by Brian 2026-08-29, which is the decision-10 sign-off for a structural change and also lifts items 67 and 117 for this save. WHY: the two lists were separate indexes over overlapping work with NO SHARED KEY - 77 registry items against 151 task rows, only 27 of which mentioned an item number, always as loose text inside a note. They had already drifted: ITEM 78 READ OPEN IN THE REGISTRY AND DONE ON THE TRACKER for the same 266 unsized keyword terms, and ITEM 75 SAYS BUILD HOCO FOR 2027 WHILE ITS TRACKER ROW CARRIED A LATE-AUGUST DEADLINE, which contradicts decision 42. Four items - 91, 107, 110 and 133 - had no row anywhere, and item 107 is the one the registry itself called the highest expected-value item on the site. WHAT CHANGED: the 77 items are folded into TASKS at load off the REG_ITEMS literal, so NOTHING WAS RETYPED and nothing could be lost in transcription. 10 high-confidence matches merge onto their existing row, the remaining 67 append as new rows, and 5 of the 9 numbering gaps become rows too - the other 4 were already covered. Every row now carries what it is, the problem it solves, the action needed, and the referenced-in file, all searchable and all fed into the per-task prompt. COVERAGE IS ASSERTED IN CODE, not claimed: the receipt at the top of the Tracker recomputes in equals out on every load and turns red if a future edit drops a row. CONFLICT RULE: where the two disagreed the TRACKER value wins because it is the one backed by D1, but the registry value is NOT discarded - it renders on the row as a visible disagreement until someone reconciles it. THE DECISIONS DID NOT BECOME TASKS. All 61 moved to the Reference tab, READ-ONLY, because a standing rule is not work: the retired dropdown offered done on decision 5, which is the domain name and can never be completed, and it wrote to localStorage only so a status set on one machine vanished on the next. START HERE WAS ALREADY CORRECT and is untouched - it holds no status of its own, it matches into TASKS by title substring and displays that row's status, which is exactly the pattern the registry should have used. ROWS: 151 to 223. Ids are derived from stream plus title slug and the merge only appends, so every pre-existing id survives and no synced D1 status is disturbed - item 124 does not apply. THE 14 CONTENT-SLATE ROWS FROM CC-2026.08.26a ARE STILL UNDEPLOYED: origin/main carries 137 rows, this file carried 151 before this save. Verify the live page after deploying. &middot; SUPERSEDED NOTE FROM CC-2026.08.26a: CHECKLIST ITEM 10 IS BUILT OUT AND THE 10-POST BLOG SLATE IS NOW TRACKED. Item 10 read Set the 90-day refresh cadence with visible dates, baseline 0 of 20, and it sat open since 08-11 for one reason: THE 20 PAGES HAD NEVER BEEN NAMED. They are named now, in a new Every 90 days ITEM 10 REFRESH REGISTER block on Cadences, selected from live console data read 2026-08-26 rather than from opinion - GSC organic and GSC generative AI both 90 days to 08-24 paginated to rank 30, plus Bing WMT AI Performance 3M to 08-24. THE HONEST BASELINE IS 7 OF 20, not 0 of 20 and not 20 of 20: the two earning blog posts, the 08-24 stockist post, /collections/coastal-cowgirl and the three guide pages bylined 08-23 carry a visible date. THIRTEEN DO NOT, INCLUDING THE HOMEPAGE, which alone takes 953 of 1,320 Google AI impressions over 90 days. TWO ARE BROKEN RATHER THAN MISSING and are already master items 90 and 127 - music-festival has no byline at all, coachella has one in a different format at the BOTTOM of the page, which is the wrong end. THE FIRST REFRESH IS DUE 2026-11-10 on free-people-vs-motel-rocks. A DATE BUMP IS NOT A REFRESH. THE FORMAT FINDING IS NOW CONFIRMED ON BOTH SIDES AND ON TWO WINDOW LENGTHS: over 90 days the HOCO buying guide took 35 Google AI impressions and ZERO Bing citations, while free-people-vs-motel-rocks took 12 Bing citations, 34% of every citation the property has earned, and is ABSENT FROM THE TOP 30 Google AI pages. Buying guides earn Google, comparisons earn Bing, neither crosses over. THREE DEMAND CLUSTERS FOUND 08-26 THAT WERE IN NO PRIOR DOC: Motel Rocks denim roughly 368 impressions and ZERO clicks, which is why slate post 1 is the sizing guide; the Santa Barbara local cluster roughly 666 impressions across 19 queries and about 5 clicks, the largest non-brand demand on the site and unclaimed; and camis and tanks roughly 365 impressions and zero clicks. BING IS DECLINING UNDERNEATH THE WIN - the property total fell 41 to 35 at the same 3M setting between 08-24 and 08-26, with eight consecutive zero days from 08-17, and Grounding Queries still returns No data available. PLAYBOOK 9 IS NEW and carries the blog format spec plus THE ACTUAL WHITE PAPER LINKS - nine primary papers, every PubMed and RePEc link loaded in a real browser 08-26 per decision 36. ScienceDirect and SagePub are bot-gated and were NOT passed, so those four carry DOIs and free records instead. WP3 THE STRIPES POST IS PROMOTED TO FIRST WHITE PAPER on the evidence: four independent labs 2011 to 2026 agree that HORIZONTAL stripes read slimmer, which is the opposite of what every fashion blog prints, with two honest moderators - the effect may REVERSE on larger figures and it depends on stripe SPACING. A CITATION ERROR WAS CAUGHT AND CORRECTED IN THE SAME PASS: the 10.7% figure circulating in secondary summaries is wrong, the primary abstract says 7.1% and 4.5%. ONE DECISION IS OPEN AND BLOCKS FIVE OF THE TEN POSTS: outbound links. The 08-06 voice spec records them as a plus 27 to 29 percent citation lever, deliberately unbuilt because they send traffic away. Recommendation is in the blocked row - yes always on white papers, one size-guide link on sizing posts, never on the local post. ROWS TOUCHED THIS SAVE: 14 ADDED, ZERO MODIFIED. 137 to 151. No existing st changed, no existing n changed, ids append-only, so ITEM 124 DOES NOT APPLY to anything in this save. Docs: missb_blog_10post_SLATE_and_BOX_CONTEXT_2026-08-26.md and missb_fashion_psychology_RESEARCH_2026-08-26.md.</div>
   </div>
 </div>
 
@@ -1315,6 +1317,22 @@ const TASKS = [
   {s:'measure', st:'monitor', t:'Merchant Center AI performance insights - watch for rollout', o:'Brian', n:'Announced by Google 2026-05-27, rolling out in the US: share of voice on AI Mode shopping journeys benchmarked against similar brands, funnel stages, and an attribute completeness score. This is the AI answer share metric the v2 roadmap wanted - from Google, free, real data. Check account 5823993628 monthly (cadence row added); when live, wire the numbers into the Overview surfaces strip. Verified current 08-22 via trade-press summary of the Google announcement.'},
   {s:'measure', st:'pend', t:'November ChatGPT re-test - 10-run mini-panel (decision 47 amendment)', o:'Brian', n:'Decision 47 amended 08-22: the 80-run measurement stands (ChatGPT named zero retailers on outfit-ideas prompts, 08-11); the permanent build-for-Google reading is withdrawn because the OpenAI commerce stack changed materially in Mar 2026. Re-test quarterly: November 2026, 10 outfit-ideas prompts in ChatGPT incognito (subset of the 08-11 protocol), logged beside missb_sov_scores_log.csv. If retailers start appearing, revisit the informational priority. Catalog work continues either way - Shopify Catalog already feeds ChatGPT shopping automatically.'},
   {s:'measure', st:'done', t:'Command Center v2 - Entities and Questions + surfaces (item 123)', o:'Claude', n:'DONE 2026-08-22 in stamp CC-2026.08.22a, per the approved build spec missb_AEO_roadmap_v2_REVIEW_2026-08-22.md. Added: Entities and Questions tab seeded only from verified master doc facts, Discovery surfaces strip on Overview (decision 57), AEO page-type checklists on Audit, playbook 8, schema emitter reference card, catalog stream relabeled Product Data and Images, cadence + monitor rows. HOW VERIFIED: full script parse-checked with node, task ids append-only so synced statuses survive, both footer stamps bumped. Visual render pending your refresh - flag anything that looks off.'},
+
+  // ---- ADDED CC-2026.08.26a - checklist item 10 build-out + the 10-post blog slate + the white paper series. Append-only: ids stay stable, no existing st or n touched, so item 124 does not apply. ----
+  {s:'content', st:'prog', t:'ITEM 10 - 90-day refresh register, 20 pages named', o:'Brian', n:'BUILT OUT 2026-08-26. Checklist item 10 read "Set the 90-day refresh cadence with visible dates", baseline 0 of 20, and the 20 pages had NEVER BEEN NAMED, which is why it sat open since 08-11. The register is now the new Every 90 days item 10 refresh register block in Cadences, selected from live console data read 2026-08-26 rather than from opinion: GSC organic 90 days to 08-24, GSC generative AI 90 days to 08-24 paginated to rank 30, and Bing WMT AI Performance 3M to 08-24. HONEST BASELINE, and it is better than 0 of 20 but not by much: SEVEN of the 20 carry a visible date today. Confirmed dated - the two earning blog posts, the 08-24 stockist post, /collections/coastal-cowgirl (08-23, the first and still only collection on the site with a byline), and the three guide pages bylined 08-23 (wedding-guest, graduation, prom). THIRTEEN CARRY NO VISIBLE DATE, including the homepage, which alone takes 953 of 1,320 Google AI impressions over 90 days. TWO ARE BROKEN RATHER THAN MISSING and are already master items 90 and 127: /pages/music-festival-outfit-ideas has no byline at all, and /pages/coachella-outfit-ideas has one in a different format at the BOTTOM of the page, which is the wrong end since roughly 44% of AI citations come from the first 30% of a page. THE FIRST DUE DATE IS 2026-11-10, the comparison post, and the decay clock is the reason this is not optional: that post was twelve days old when it became the most cited page on the site. A DATE BUMP IS NOT A REFRESH - updated stock, updated dates and at least one new or revised answer, or do not touch it. Register and evidence: missb_blog_10post_SLATE_and_BOX_CONTEXT_2026-08-26.md.'},
+  {s:'content', st:'prog', t:'Blog framework + 10-post slate (formats, boxes, links)', o:'Brian', n:'BUILT 2026-08-25, EXTENDED 2026-08-26 with a live console read. THE FORMAT FINDING IS NOW CONFIRMED ON BOTH SIDES AND ON TWO WINDOW LENGTHS: over 90 days to 08-24 the HOCO buying guide took 35 Google AI impressions, the single highest non-homepage page on the site, and ZERO Bing citations; free-people-vs-motel-rocks took 12 Bing citations, 34% of every citation the property earned, and is ABSENT FROM THE TOP 30 Google AI pages. Buying guides earn Google, comparisons earn Bing, neither crosses over. Commission buying guides first. THREE CLUSTERS FOUND 08-26 THAT WERE NOT IN THE 08-25 FRAMEWORK: Motel Rocks denim at roughly 368 impressions and ZERO clicks over 90 days, which is what makes slate post 1 the right next post; the Santa Barbara local cluster at roughly 666 impressions across 19 queries and about 5 clicks, the largest non-brand demand on the site and unclaimed, worth exactly one post and not a pivot off the 90% national direction; and camis and tanks at roughly 365 impressions and zero clicks. ALSO LOGGED: Bing property total fell 41 to 35 at the same 3M setting between 08-24 and 08-26, with eight consecutive zero days from 08-17, so a rising post sits inside a falling total. Bing Grounding Queries still returns No data available, re-checked 08-26. Box-by-box composer inputs for all ten posts are in missb_blog_10post_SLATE_and_BOX_CONTEXT_2026-08-26.md and the structural spec is in missb_blog_FRAMEWORK_and_content_slate_2026-08-25.md. DO NOT COMMISSION NEW STANDALONE STYLING POSTS - two of the four live ones earn zero on every surface.'},
+  {s:'content', st:'prog', t:'White paper series - sourcing verified, WP3 promoted to first', o:'Brian', n:'RESEARCHED 2026-08-26 under the !research rules. Full output with every link: missb_fashion_psychology_RESEARCH_2026-08-26.md. NINE PRIMARY PAPERS WERE LOADED IN A REAL BROWSER ON PUBMED per decision 36; ScienceDirect and SagePub are both bot-gated and were NOT passed, so those four sources carry DOIs and free PubMed or RePEc records instead. THE SEQUENCE CHANGED ON THE EVIDENCE: WP3, the stripes post, is now the first white paper to write, not WP1. It is the best sourced of the four, it has a 2026 primary paper attached which matters directly for the citation decay clock, and the peer-reviewed answer CONTRADICTS the claim every fashion blog repeats - horizontal stripes measure as slightly slimming, not vertical. Four independent labs 2011 to 2026 agree, with two real moderators that make the post honest: the effect weakens and may REVERSE on larger figures (Ashida 2013), and it depends on stripe SPACING not just orientation (Chen and Peng 2026). A CITATION ERROR WAS CAUGHT AND CORRECTED: the 08-26 slate doc said the mannequin needed to be roughly 10.7% wider, taken from a secondary summary. The primary abstract says 7.1% and 4.5%. Use the primary figures. WP2 NEEDS ITS FRAMING REWRITTEN BEFORE DRAFTING - describing red as a real but small effect is too generous once two preregistered replication programmes at N=830 and larger found nothing and the meta-analysts themselves report upward bias, 89% heterogeneity, declining effects over time and contrasting interpretations. WP4 SHOULD BE REFRAMED OR DROPPED - no peer-reviewed study isolating apparel colour against e-commerce conversion exists, and the one systematic replication attempt failed on EVERY visual factor, 2 of 10 overall. HARD RULE FOR ALL FOUR: describe what was measured in a lab, never tell the reader what their body looks like or what to wear. That distinction is the difference between a citable page and a liability.'},
+  {s:'content', st:'pend', t:'Slate 1 - What size do Motel Rocks jeans actually run?', o:'Brian', n:'BUYING GUIDE. PUBLISH NEXT - strongest evidence on the board. Roughly 368 impressions and ZERO clicks over 90 days to 08-24: motel rocks parallel jeans 142, motel rocks low rise parallel jeans 102, tennessee low rise boyfriend jeans 76, low rise parallel jeans motel rocks 27, tennessee jeans 21. Box 1 exactly: What size do Motel Rocks jeans actually run? Box 2: buying guide, Santa Barbara, Motel Rocks denim sizing, Parallel and Tennessee and Roomy Extra Wide fits, rise measured in inches, what gets returned and why, Motel Rocks has no US stores so nobody can try these on before buying, sizes run in UK numbering, do not invent measurements. Box 3: Motel Rocks. BOX 4 IS THE WHOLE POST AND IT IS BRIAN ONLY - on a sizing post the first-hand material IS the claim and a model can write every other sentence. Six lines needed: which fit runs true and which does not, the direction of returns, a real size down or size up story, what sold through and how fast, what people say in the fitting room, and something about inseam or length. If Box 4 is empty the Worker is instructed to say so in its output. LINKS: three internal minimum before publish, never launch at zero. Down into /collections/motel-rocks, down into the denim collection with the handle CONFIRMED IN A BROWSER FIRST, up from /collections/motel-rocks, and take a link from free-people-vs-motel-rocks which holds 34% of the site Bing citations and is the strongest internal authority source on the property. OUTBOUND: one link to the official Motel Rocks size guide, GATED ON THE OUTBOUND LINK DECISION.'},
+  {s:'content', st:'pend', t:'Slate 2 - WP3 Do vertical stripes really make you look slimmer?', o:'Brian', n:'WHITE PAPER, and it is the best post in the series. PROMOTED FROM FOURTH TO SECOND on 08-26 research. Box 1: Do vertical stripes really make you look slimmer? Box 2: white paper, replication aware, the lab answer reverses the popular belief, cite primary papers only, state effect sizes as small to moderate, name the moderators, never a claim about the reader body, close with what actually happens in the fitting room. Box 3: General. Box 4: what people say about stripes in the mirror, whether striped pieces sell or sit, what selling has taught you about how something reads on a body. FOUR FREE PRIMARY SOURCES, all loaded in a browser 08-26: Thompson and Mikellidou 2011 i-Perception PMID 23145226 (vertical needs +7.1% height, horizontal needs +4.5% width to match) - Ashida Kuraguchi and Miyoshi 2013 i-Perception PMID 24349693 (stronger for thin figures, POSSIBLE REVERSAL for larger, large variability between observers) - Koutsoumpis Economou and van der Burg 2021 Perception PMID 34397290 (horizontal stripes AND lower luminance, independently, small to moderate) - Chen and Peng 2026 i-Perception PMID 42011293 (n=214, pencil stripes slimmest horizontal, EQUIDISTANT stripes slimmest vertical, so spacing is a variable). Helmholtz said the same thing about frocks in 1867 and an 1813 Japanese beauty handbook records the belief, PMID 36246305. GUARDRAIL: this post is about how a pattern is perceived under test conditions, never about the reader body.'},
+  {s:'content', st:'pend', t:'Slate 3 - Does what you wear actually change how you feel?', o:'Brian', n:'WHITE PAPER, WP1. Box 1: Does what you wear actually change how you feel? Box 2: white paper, replication aware, cite primary papers only, name what failed to replicate, state effect sizes in plain language, never a psychological claim about the reader, close with what we see in the fitting room. Box 3: General. Box 4: what customers say when something works. SOURCES: Horton Adam and Galinsky, Personality and Social Psychology Bulletin 2025 volume 51 issue 2 pages 203 to 221, epub 2023, PMID 37458322, VERIFIED IN BROWSER 08-26 - 105 effects, 40 studies, 24 articles, N=3,789, concerns about replicability of early studies but evidential value affirmed for effects published after 2015. CITE THE YEAR AS 2025 FIRST PUBLISHED ONLINE 2023 - the 08-25 framework calls it a 2023 meta-analysis and that is the epub date not the volume year. THE REPLICATION PARAGRAPH IS THE POST: the 2012 lab coat study was cited 600+ times and covered in 160+ outlets, Burns et al 2019 preregistered replication failed to reproduce it and used equivalence testing to prove the failure was not a power problem, and Adam and Galinsky publicly conceded the specific finding while defending the principle. Supporting: Slepian et al 2015 formal clothing, on the right side of the 2015 line. Free umbrella review for the whole series: Hester and Hehman 2023 PMID 36951208, Dress is a Fundamental Component of Person Perception.'},
+  {s:'content', st:'pend', t:'Slate 4 - What should you check before buying a cami or tank online?', o:'Brian', n:'BUYING GUIDE. Roughly 365 impressions and ZERO clicks across seven queries over 90 days to 08-24: someone like you cami 125, free people little love tank 82, blush hour tee 49, little love tank free people 43, little love tank 32, round two pique low-back tank 20, black beaded tank 14. Box 1: What should you check before buying a cami or tank online? Box 2: buying guide, Santa Barbara, camis and tanks, strap adjustability, bust support without a bra, fabric weight and see-through, cropped length vs regular, what gets returned and why, do not invent fabrics or measurements. Box 3: General - it spans two or more labels, so it is General and not Free People. Box 4: which tanks are see-through and which are not, which straps actually adjust, what gets returned, what sold out and how fast, what people ask for by name at the counter. INTERNAL: /collections/free-people, the camis and tanks collection with the handle CONFIRMED LIVE FIRST, /collections/new-arrivals.'},
+  {s:'content', st:'pend', t:'Slate 5 - What should you check before buying a bikini online?', o:'Brian', n:'BUYING GUIDE, tail of summer, last swim window. Box 1: What should you check before buying a bikini online? Box 2: buying guide, Santa Barbara, swim, string vs fixed bottoms, top sizing without cup sizes, lining and opacity when wet, beaded and lace trim durability, tail of summer and what carries into resort, do not invent fabrics. Box 3: General. Box 4: which bottoms run small, what beads and trim actually survive, what sells out first each summer, what people bring back and why, what is left on the rack in late August and what that means for price. LINK THE AI-CITED PRODUCT PAGE: /products/lace-leopard-string-bikini-bottom-medium took 12 Google AI impressions over 90 days to 08-24, which makes it the single most cited PRODUCT page on the property. It is already trusted, so link it from the body. Also /collections/swimwear and /collections/new-arrivals.'},
+  {s:'content', st:'pend', t:'Slate 6 - Low rise vs mid rise: which should you actually buy?', o:'Brian', n:'COMPARISON. Rides the same Motel denim demand as slate 1. Box 1: Low rise vs mid rise: which should you actually buy? Box 2: comparison, Santa Barbara, attribute comparison not brand vs brand, one table with a declarative label, rise measured in inches not vibes, who each rise suits and why, what people actually reach for on the floor, include a which is right for you section and a local availability section. Box 3: General. Box 4: which rise sells faster, what people say trying low rise for the first time in ten years, which rise gets returned, what you stock more of and why. GUARDRAIL: this is an ATTRIBUTE comparison so decision 48 brand-ranking ban does not bind, but do not let it drift into Motel beats X. EXPECTATION SET DELIBERATELY: comparisons earn Bing citations and nothing on Google organic, and the Bing property total is falling. This is a visibility asset, not a traffic asset. Know that going in.'},
+  {s:'content', st:'pend', t:'Slate 7 - When do winter formal and sequin dresses sell out?', o:'Brian', n:'BUYING GUIDE, October. Copies the HOCO template onto the next occasion, and HOCO is the only post on the site earning on both surfaces. EVIDENCE IS ALREADY WARM IN AUGUST: sequin square neck circle dress 75 impressions and sequin strapless dress 29, 104 combined over 90 days to 08-24. Box 1: When do winter formal and sequin dresses sell out? Box 2: buying guide, Santa Barbara, winter formal season, order-by dates, sequin and strapless demand, sizing on structured bodices, what to check on arrival, alterations lead time locally, copies the HOCO buying guide arc. Box 3: General. Box 4: last year sell-out dates by week, which size runs out first, what people ask about strapless fit, the real local alterations turnaround, what came back and why. INTERNAL: the winter formal collection built 08-23, /pages/occasions, /collections/dresses, and cross-link the HOCO post - they are the same shape one season apart. NOTE sequin square neck circle dress is also master item 107, position 1.0 with zero clicks.'},
+  {s:'content', st:'pend', t:'Slate 8 - WP2 Does wearing red actually work?', o:'Brian', n:'WHITE PAPER, November. THE FRAMING MUST BE REWRITTEN BEFORE DRAFTING - see the 08-26 research. Box 1: Does wearing red actually work? Box 2: white paper, replication aware, the honest headline is probably much smaller than you have been told and possibly nothing, cite the meta-analysis and the failed replications in the same breath, state heterogeneity and publication bias plainly, no claims about the reader, close with what sells in red here. Box 3: General. Box 4: does red sell, which reds sell and which sit, what people say about buying red, holiday effect. SOURCES, meta-analysis VERIFIED IN BROWSER 08-26: Lehmann Elliot and Calin-Jageman, Evolutionary Psychology 2018, PMID 30282470, free full text. Men rating women d=0.26 p=.0004 N=2,961 with I2 of 89% and equivocal evidence of upward bias; women rating men d=0.13 p=.03 N=2,739 with EVIDENCE of upward bias. Effects may have DECLINED OVER TIME and may be SMALLER IN PREREGISTERED STUDIES. The authors present contrasting interpretations - they do not agree with each other. THE FAILED REPLICATION IS THE PART NOBODY PRINTS: Peperkoorn Roberts and Pollet 2016, Evolutionary Psychology, free full text PMC10630698, THREE studies totalling N=830 men, all three fail to support the red effect. Never state the pooled d on its own.'},
+  {s:'content', st:'pend', t:'Slate 9 - What should you check when shopping Santa Barbara boutiques?', o:'Brian', n:'BUYING GUIDE, November. TARGETS THE LARGEST NON-BRAND CLUSTER ON THE SITE: roughly 666 impressions across 19 local queries over 90 days to 08-24 against about 5 clicks. santa barbara boutique 112, santa barbara clothing stores 54, boutiques santa barbara 51, clothing stores santa barbara 51, santa barbara clothing 50, clothing stores in santa barbara 40, plus 13 more. ONE POST, NOT A PIVOT - the engagement is 90% national by client direction and this does not change it. WHY IT IS A BUYING GUIDE AND NOT A ROUNDUP: a where should you shop listicle names competitors and hands them the citation. As a buying guide it answers what to check when you shop a small boutique and answers it from the floor. Box 2: buying guide, Santa Barbara, Paseo Nuevo, State Street, what a small boutique carries that a chain does not, restock cadence, sizes held on the floor, holds and special orders, parking and hours, do not rank or name competitors, do not claim to be the only or the best. Box 3: General. TWO HARD GUARDRAILS: no competitor ranking, and NO EXCLUSIVITY CLAIM - Free People runs its own State Street and Montecito stores and overclaiming is disproved in one search. OUTBOUND: NONE. Do not link competitors from a local page. CANNIBALISATION CHECK BEFORE COMMISSIONING: /blogs/news/where-to-find-free-people-and-motel-rocks-in-santa-barbara went live 08-24 and has no data. Read the 09-24 log first - if it is already ranking on generic local queries, fold this into a refresh of that post instead of publishing a second page.'},
+  {s:'content', st:'pend', t:'Slate 10 - When should you buy your prom dress and what should you check?', o:'Brian', n:'BUYING GUIDE, JANUARY, and it is a direct transfer of the HOCO template which is the only shape earning on both surfaces. Prom page was built 08-23 and submitted to GSC for indexing the same day. Box 1: When should you buy your prom dress and what should you check? Box 2: buying guide, Santa Barbara, prom season, order-by dates, alterations lead time, what to check on arrival, duplicate-dress etiquette locally, sizing on structured bodices, direct transfer of the HOCO buying guide arc. Box 3: General. Box 4: local prom dates and when the rush starts, which sizes go first, alterations turnaround, what people ask about duplicates, what came back and why. INTERNAL: the prom page built 08-23, /collections/dresses, /pages/occasions, and the HOCO post. BACKLOG NOT IN THE TEN, both sourced and ready to swap in: WP4 does colour change what you buy, which needs REFRAMING first, and the country concert buying guide from the 08-25 slate, spring and ahead of season.'},
+  {s:'content', st:'block', t:'DECISION NEEDED - outbound links on blog posts', o:'Brian', n:'RAISED 2026-08-26, and it is a merchandising call, not a technical one. missb_blog_voice_and_specificity_SPEC_2026-08-06.md records an outbound link to an official brand page as a real citation lever at PLUS 27 TO 29 PERCENT for citing sources, and records that it was deliberately left unbuilt because it sends traffic away. External evidence checked 08-26 sharpens but does not settle it: outbound links feed source-authority and consensus signals but not extractability, and structure plus brand demand outrank link signals for LLM citation. The rule that survives is that an outbound link should verify a specific claim or it should not be there. RECOMMENDATION, split by post type rather than answered once. WHITE PAPERS, slates 2, 3 and 8 - YES ALWAYS, non-negotiable, primary-source links to PubMed are the entire premise of the format and they send no commercial traffic anywhere. SIZING AND FIT GUIDES, slates 1 and 4 - YES, ONE LINK, TO THE OFFICIAL SIZE GUIDE ONLY, never a product page or a shoppable category; nobody checks out from a size chart, which answers the merchandising objection. OCCASION GUIDES, slates 7 and 10 - only if a specific external fact needs verifying. LOCAL POST, slate 9 - NO, never link competitors from a local page. COMPARISONS, slate 6 - nothing external needed. NET: link out on five of ten posts, and on only two does the link touch a brand at all, capped at a size chart. ONE LINE IN THE WORKER PROMPT ONCE YOU SAY YES. NOT CHANGED - awaiting your call.'},
 ];
 
 const CADENCES = [
@@ -1340,6 +1358,34 @@ const CADENCES = [
   {h:'Every 90 days · content refresh', freq:'90d', items:[
     {t:'Refresh top ~20 pages', w:'Hubs, vendor pages, top collections — update copy + bump the visible "last updated" date. 76% of ChatGPT citations are content updated <30d; >6mo stale loses eligibility.'},
     {t:'Re-run the ChatGPT-citation playbook check', w:'sameAs current, IndexNow pinging, freshness dates visible, new roundups pitched'},
+  ]},
+  {h:'Every 90 days · ITEM 10 REFRESH REGISTER — the 20 pages, named 2026-08-26', freq:'90d', items:[
+    {t:'THE RULE, before the list', w:'A date bump is NOT a refresh. Updated stock, updated dates, and at least one new or revised answer, or leave the page alone. Baseline 2026-08-26: 7 of 20 carry a visible date. Selected from live console data, not opinion — GSC organic + GSC generative AI 90 days to 08-24, Bing WMT AI 3M to 08-24.'},
+    {t:'1. / (homepage)', w:'953 Google AI impressions over 90 days — 72% of the whole property. 5,087 organic impressions, 131 clicks. NO VISIBLE DATE. Highest-value page on this register by an order of magnitude, and master item 106.'},
+    {t:'2. /blogs/news/free-people-vs-motel-rocks', w:'12 Bing citations = 34% of every AI citation the site has earned. Absent from Google AI top 30. DATED. Published 2026-08-12 → FIRST REFRESH DUE 2026-11-10. This is the earliest date on the register and the reason the cadence exists.'},
+    {t:'3. /blogs/news/when-to-buy-your-hoco-dress-and-what-to-check-before-you-order', w:'35 Google AI impressions, highest non-homepage page on the site. Zero Bing. THE ONLY POST EARNING ON BOTH SURFACES. DATED. [CONFIRM: publish date, then set the 90-day due date.]'},
+    {t:'4. /collections/miss-behavin-label', w:'27 Google AI impressions, 1,043 organic, 6 clicks. Worst CTR of any high-impression page. NO VISIBLE DATE.'},
+    {t:'5. /collections/dresses', w:'15 Google AI, 266 organic, 8 clicks — best CTR of any collection at scale. NO VISIBLE DATE. Decision 53 governs the copy split.'},
+    {t:'6. /collections/motel-rocks', w:'15 Google AI, 38 organic. Sits on the ~368-impression denim cluster. NO VISIBLE DATE.'},
+    {t:'7. /pages/contact-us', w:'13 Google AI impressions. An entity page Google already grounds on. NO VISIBLE DATE.'},
+    {t:'8. /products/lace-leopard-string-bikini-bottom-medium', w:'12 Google AI impressions — the single most AI-cited PRODUCT page on the property. NO VISIBLE DATE.'},
+    {t:'9. /collections/free-people', w:'10 Google AI, 144 organic. Master item 101 open: 116-word first paragraph, roughly double every other collection. NO VISIBLE DATE.'},
+    {t:'10. /blogs/news/how-to-style-a-free-people-dress-for-every-occasion', w:'9 Google AI + 5 Bing. Demoted format, but it earns on both, so REFRESH IT — do not retire it and do not commission more like it.'},
+    {t:'11. /pages/about-us', w:'8 Google AI + 2 Bing. 144 words, no named human. Checklist item 9 and master item open. NO VISIBLE DATE.'},
+    {t:'12. /collections/new-arrivals', w:'5 Google AI + 3 Bing. Refreshes itself by nature; the date does not. NO VISIBLE DATE.'},
+    {t:'13. /blogs/news/how-to-style-free-people-dresses-for-summer', w:'4 Google AI + 2 Bing. Seasonal — refresh or retire before summer 2027.'},
+    {t:'14. /blogs/news/where-to-find-free-people-and-motel-rocks-in-santa-barbara', w:'Published 2026-08-24, IndexNow submitted, NO DATA YET. DATED. Due 2026-11-22. First real read 2026-09-24, and that read gates slate post 9.'},
+    {t:'15. /collections/coastal-cowgirl', w:'Built 2026-08-23. DATED — the FIRST AND STILL ONLY COLLECTION on the site carrying a byline and visible Updated date, against 0 of 40 before it. Due 2026-11-21. This is the template for the other 12 undated pages here.'},
+    {t:'16. /pages/occasions', w:'285 organic impressions at position 4.0 and ZERO clicks. The hub for nine children. NO VISIBLE DATE.'},
+    {t:'17. /pages/country-concert-outfit-ideas', w:'DATED 2026-08-23. Due 2026-11-21. Targets a 10K-100K term.'},
+    {t:'18. /pages/music-festival-outfit-ideas', w:'BROKEN, NOT MISSING — NO BYLINE AT ALL, no Written by, no Sophie, no Updated. Master items 90 and 127. Fix before the first refresh cycle.'},
+    {t:'19. /pages/coachella-outfit-ideas', w:'BROKEN, NOT MISSING — byline in a DIFFERENT FORMAT at the BOTTOM of the page. Roughly 44% of AI citations come from the first 30% of a page, so the bottom is the wrong end. Move it up and standardise. Master item 127.'},
+    {t:'20. /pages/prom-outfit-ideas', w:'DATED 2026-08-23. Due 2026-11-21. Carries slate post 10 in January, so refresh and post land together.'},
+  ]},
+  {h:'Monthly · 24th — content performance log', freq:'mo', items:[
+    {t:'Run the format-vs-outcome read', w:'Order: Bing AI first (fastest), then Google AI, then organic, then on-page metrics in a browser per decision 36. ~40 min. Append to missb_content_performance_log.csv — never overwrite, never date the filename. Next: 2026-09-24.'},
+    {t:'Log the Bing PROPERTY TOTAL, not just per-page', w:'It fell 41 → 35 at the same 3M setting between 08-24 and 08-26, with eight consecutive zero days from 08-17. A rising post inside a falling total is a different story from growth.'},
+    {t:'Re-check Bing Grounding Queries', w:'Still "No data available", re-confirmed 2026-08-26. Not a failure — unpopulated. Intents, Topics, Citation Share and Compare are in preview and this property has not populated them.'},
   ]},
   {h:'Quarterly', freq:'qtr', items:[
     {t:'Schema validation sweep', w:'Rich Results Test all templates'},
@@ -1381,7 +1427,17 @@ const ENGINES = ['Google AIO','ChatGPT','Perplexity','Gemini'];
 const STATUS_ORDER = ['pend','prog','done','block','monitor'];
 const STATUS_LABEL = {pend:'To do', prog:'In progress', done:'Done', block:'Blocked', monitor:'Monitoring'};
 let filterStream = 'all', filterStatus = 'all', searchTerm = '';
-(function(){var _u={};function _slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').split('-').slice(0,4).join('-');}TASKS.forEach(function(t){var b=t.s+'-'+_slug(t.t),id=b,k=2;while(_u[id]){id=b+'-'+k;k++;}_u[id]=1;t.id=id;});})();
+/* Task ids are derived from stream + a slug of the title, deduped with a counter.
+   CC-2026.08.29a: extracted from an IIFE into a named function so it can be re-run
+   after the registry merge appends rows. Re-running is SAFE and id-stable: ids come
+   from (stream,title) and the merge only APPENDS, so every pre-existing row keeps
+   the id its D1 status record is keyed on. */
+function assignTaskIds(){
+  var _u={};
+  function _slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').split('-').slice(0,4).join('-');}
+  TASKS.forEach(function(t){var b=t.s+'-'+_slug(t.t),id=b,k=2;while(_u[id]){id=b+'-'+k;k++;}_u[id]=1;t.id=id;});
+}
+assignTaskIds();
 // SoV cell state: sov[q][e] in {0,'mention','cited'}
 const SOV = SOV_QUERIES.map(q=>{
   const row=[0,0,0,0];
@@ -1441,13 +1497,45 @@ function syncFilters(){
   });
 }
 
+/* Migration receipt. Brian's condition on the 08-29 merge was "confirm all data is
+   not purged", so the proof is rendered on the page rather than asserted in a note.
+   Counts are computed live from the arrays every load — if a future edit drops a
+   row, this line turns red on its own. */
+function renderMergeAudit(){
+  var el=document.getElementById('mergeAudit'); if(!el) return;
+  var m=MERGE_REPORT;
+  if(!m || !m.items){ el.style.display='none'; return; }
+  var withItem = TASKS.filter(function(t){ return t.it; }).length;
+  el.className = 'merge-audit ' + (m.ok ? 'ok' : 'bad');
+  el.innerHTML =
+    '<b>'+(m.ok?'Registry merged — nothing dropped.':'MERGE INCOMPLETE — do not trust this list.')+'</b><br>'+
+    m.items+' registry items in · '+m.merged.length+' folded onto existing rows · '+
+    m.added.length+' added as new rows · '+withItem+' rows now carry an item number.<br>'+
+    (m.gaps ? m.gaps+' numbering-gap actions also became rows. ' : '')+
+    m.before+' tasks before → '+m.after+' after ('+(m.after-m.before)+' added). '+
+    'The 61 decisions moved to the Reference tab — they are standing rules, not work.' +
+    (m.conflicts.length
+      ? '<br><span style="color:#b4432c">'+m.conflicts.length+' status disagreement'+(m.conflicts.length===1?'':'s')+
+        ' kept visible on the rows themselves — search <b>disagreement</b> to list them.</span>'
+      : '');
+}
+
 /* ============ RENDER: TASKS ============ */
 function renderTasks(){
+  renderMergeAudit();
   const el = document.getElementById('tasklist'); el.innerHTML='';
   let list = TASKS.slice();
   if(filterStream!=='all') list=list.filter(t=>t.s===filterStream);
   if(filterStatus!=='all') list=list.filter(t=>t.st===filterStatus);
-  if(searchTerm){ const q=searchTerm.toLowerCase(); list=list.filter(t=>(t.t+' '+t.n+' '+STREAM[t.s].name+' '+t.o).toLowerCase().includes(q)); }
+  // Search covers the folded-in registry fields too, so "item 107", a file name, or a
+  // phrase from an action is findable — the registry tab's search was the main thing
+  // worth keeping from it.
+  if(searchTerm){
+    const q=searchTerm.toLowerCase();
+    list=list.filter(t=>[t.t,t.n,STREAM[t.s].name,t.o,t.w,t.p,t.a,t.f,
+      t.it?('item '+t.it):'', t.cf?'disagreement conflict':'']
+      .join(' ').toLowerCase().includes(q));
+  }
   document.getElementById('tabCountTracker').textContent = list.length;
   if(!list.length){ el.innerHTML='<div class="empty">No techniques match these filters.</div>'; return; }
   // order: prog, block, pend, monitor, done
@@ -1460,7 +1548,7 @@ function renderTasks(){
       <div class="task-row">
         <button class="pill ${t.st}" title="Tap to change status" aria-label="Status: ${STATUS_LABEL[t.st]}. Tap to change.">${STATUS_LABEL[t.st]}</button>
         <div class="task-main">
-          <div class="task-title">${esc(t.t)}</div>
+          <div class="task-title">${t.it ? `<span class="task-itemno">item ${t.it}</span>` : ``}${esc(t.t)}</div>
           <div class="task-tags">
             <span class="wtag"><span class="dot" style="background:${s.color}"></span>${s.name}</span>
             <span class="owner">${esc(t.o)}</span>
@@ -1469,7 +1557,14 @@ function renderTasks(){
         <button type="button" class="mkprompt" title="Create a prompt to complete just this task">✦ Prompt</button>
         <svg class="expand" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
       </div>
-      <div class="task-note"><div class="task-note-in"><span class="lbl">How / context</span>${esc(t.n)}</div></div>`;
+      <div class="task-note"><div class="task-note-in">
+        ${t.cf ? `<div class="task-conflict">Status disagreement — the registry recorded this as <b>${esc(STATUS_LABEL[t.cf]||t.cf)}</b>, the tracker says <b>${esc(STATUS_LABEL[t.st])}</b>. The tracker value is authoritative because it is the one backed by D1. Reconcile it and this flag goes away.</div>` : ``}
+        ${t.n ? `<span class="lbl">How / context</span>${esc(t.n)}` : ``}
+        ${t.w ? `<span class="lbl">What it is</span>${esc(t.w)}` : ``}
+        ${t.p ? `<span class="lbl">The problem it solves</span>${esc(t.p)}` : ``}
+        ${t.a ? `<span class="lbl">Action needed</span>${esc(t.a)}` : ``}
+        ${t.f ? `<span class="lbl">Referenced in</span><span class="task-src">${esc(t.f)}</span>` : ``}
+      </div></div>`;
     const pill=card.querySelector('.pill');
     pill.onclick=e=>{ e.stopPropagation(); openStatusMenu(pill, t.id); };
     const mk=card.querySelector('.mkprompt');
@@ -1718,6 +1813,55 @@ const PLAYBOOKS=[
       <li>Winnable questions only — brand-carrier, store facts, occasion long tail. Generic fashion questions are excluded by design (decisions 3/48; Reddit is the most-cited source, so off-site mentions carry the listicle-class answers).</li>
     </ol>
     <div class="callout">The gate that shipped with the approval: dashboard work never displaces items 114 / 107 / 106 / 105. The tracker serves the site, not the reverse.</div>`},
+  {n:9,t:'Blog formats + the white paper series (with the actual papers)',b:`
+    <p>Added 2026-08-26. Structural spec measured from live DOM audits of the two earning posts, then re-confirmed against a 90-day console read. Full detail: <code>missb_blog_FRAMEWORK_and_content_slate_2026-08-25.md</code>, <code>missb_blog_10post_SLATE_and_BOX_CONTEXT_2026-08-26.md</code>, <code>missb_fashion_psychology_RESEARCH_2026-08-26.md</code>.</p>
+
+    <p><strong>The format finding, confirmed on both engines and on two window lengths.</strong> Over 90 days to 2026-08-24: the HOCO <em>buying guide</em> took <strong>35 Google AI impressions</strong> (highest non-homepage page on the site) and <strong>zero Bing citations</strong>. The <em>comparison</em> post took <strong>12 Bing citations</strong> (34% of every citation the property has earned) and is <strong>absent from the top 30 Google AI pages</strong>. Buying guides earn Google. Comparisons earn Bing. Neither crosses over.</p>
+    <ul>
+      <li><strong>Commission buying guides first.</strong> The only shape proven to earn on both AI and organic.</li>
+      <li><strong>Comparisons are a visibility asset, not a traffic asset</strong> — and the Bing denominator is falling (41 &rarr; 35 at the same 3M setting, 08-24 to 08-26). Know that before you commission one.</li>
+      <li><strong>No new standalone styling posts.</strong> Two of the four live ones earn zero on every surface. Styling material goes subordinate to a buying decision.</li>
+    </ul>
+
+    <p><strong>Hard structure.</strong> Title 55&ndash;62 chars ending <code>| Miss Behavin'</code>, pipe separator never a dash &middot; one H1, may run longer than the title and should carry the authority claim &middot; 6&ndash;8 H2s, all question-phrased <em>except</em> a heading that labels a table, which stays declarative &middot; first paragraph 40&ndash;65 words answering the title question &middot; <strong>the complete answer inside the first 30% of the page</strong> &middot; total 550&ndash;700 words, 900 for a white paper. <strong>Do not pad</strong> &mdash; 601 words is currently winning, Ahrefs measured r = 0.04 between word count and performance across 174,048 pages, and pages under 1,000 words get 61% of their content into Google's grounding context against 13% for pages over 3,000.</p>
+
+    <p><strong>The box that decides whether a post ranks.</strong> WHAT ACTUALLY HAPPENED is the only place first-hand authority enters, and at least two answers must contain something only a stockist knows &mdash; how a label runs, what sells through first, what gets returned and why. One fact per line, specific over polished. Leave it blank and the Worker is instructed to say so in its output.</p>
+
+    <div class="callout"><strong>White paper editorial rules.</strong> Cite the primary paper, never the outlet that summarised it. Name the replication status in the post &mdash; that paragraph <em>is</em> the differentiator. State effect sizes in plain language. <strong>Never a claim about the reader's body or mind:</strong> describe what was measured in a lab. &ldquo;Horizontal stripes measured slightly slimming under test conditions&rdquo; is citable; &ldquo;wear stripes to look thinner&rdquo; is wrong, disprovable, and costs the citation. Close with the floor &mdash; what customers actually do in the shop.</div>
+
+    <p><strong>The papers. Every link below was loaded in a real browser on 2026-08-26 (decision 36) unless marked.</strong> ScienceDirect and SagePub are bot-gated and were not passed, so free PubMed and RePEc records are used instead of publisher pages.</p>
+
+    <p><strong>WP3 &mdash; stripes. Write this one first: best sourced of the four, and the lab answer reverses what every fashion blog says.</strong></p>
+    <ul>
+      <li>Thompson &amp; Mikellidou, <em>i-Perception</em> 2011;2(1):69&ndash;76 &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/23145226/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/23145226</a> &mdash; vertical needs <strong>+7.1% height</strong>, horizontal needs <strong>+4.5% width</strong> to match. <em>Use these figures, not the 10.7% that circulates in secondary summaries.</em></li>
+      <li>Ashida, Kuraguchi &amp; Miyoshi, <em>i-Perception</em> 2013;4(5):347&ndash;51 &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/24349693/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/24349693</a> &mdash; stronger for thin figures, <strong>possible reversal for larger</strong>, large variability between observers. This is the caveat that makes the post honest.</li>
+      <li>Koutsoumpis, Economou &amp; van der Burg, <em>Perception</em> 2021;50(9):741&ndash;756 &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/34397290/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/34397290</a> &mdash; horizontal stripes <em>and</em> lower luminance, independently, <strong>small-to-moderate</strong>.</li>
+      <li>Chen &amp; Peng, <em>i-Perception</em> 2026;17(2) &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/42011293/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/42011293</a> &mdash; n = 214. Pencil stripes slimmest <em>horizontal</em>; equidistant stripes slimmest <em>vertical</em>. <strong>Spacing is a variable, not just orientation.</strong> A 2026 paper is a real recency asset.</li>
+      <li>Miyazaki &amp; Ishibashi, <em>i-Perception</em> 2022;13(5) &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/36246305/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/36246305</a> &mdash; the same belief recorded in an 1813 Japanese beauty handbook.</li>
+    </ul>
+
+    <p><strong>WP1 &mdash; enclothed cognition.</strong></p>
+    <ul>
+      <li>Horton, Adam &amp; Galinsky, <em>Pers Soc Psychol Bull</em> 2025;51(2):203&ndash;221 (epub 2023) &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/37458322/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/37458322</a> &mdash; 105 effects, 40 studies, N = 3,789. Early studies doubtful, <strong>post-2015 effects affirmed</strong>. Cite the year as 2025, first published online 2023.</li>
+      <li>Burns et al., <em>J Exp Soc Psychol</em> 2019;83:150&ndash;156, doi 10.1016/j.jesp.2018.10.001 &mdash; the preregistered replication that <strong>failed</strong>, with equivalence testing proving it was not a power problem. <em>Not verified in session &mdash; ScienceDirect is bot-gated.</em></li>
+      <li>Adam &amp; Galinsky, 2019 commentary &mdash; <a href="https://business.columbia.edu/faculty/research/reflections-enclothed-cognition-commentary-burns-et-al" target="_blank" rel="noopener">Columbia Business School record</a> &mdash; the original authors concede the specific finding and defend the principle.</li>
+      <li>Hester &amp; Hehman, <em>Pers Soc Psychol Rev</em> 2023;27(4):414&ndash;433 &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/36951208/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/36951208</a> &mdash; free full text, and the best general citation for any post in this series.</li>
+    </ul>
+
+    <p><strong>WP2 &mdash; red. Rewrite the framing before drafting.</strong></p>
+    <ul>
+      <li>Lehmann, Elliot &amp; Calin-Jageman, <em>Evol Psychol</em> 2018;16(4) &mdash; <a href="https://pubmed.ncbi.nlm.nih.gov/30282470/" target="_blank" rel="noopener">pubmed.ncbi.nlm.nih.gov/30282470</a> &mdash; men rating women <strong>d = 0.26</strong> (I&sup2; = 89%), women rating men <strong>d = 0.13</strong> with <strong>evidence of upward bias</strong>. Effects <strong>declined over time</strong> and were <strong>smaller in preregistered studies</strong>. The authors present contrasting interpretations.</li>
+      <li>Peperkoorn, Roberts &amp; Pollet, <em>Evol Psychol</em> 2016;14(4) &mdash; <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10630698/" target="_blank" rel="noopener">pmc.ncbi.nlm.nih.gov/articles/PMC10630698</a> &mdash; three studies, <strong>N = 830 men, all three fail</strong>. Free full text. <strong>Never state the pooled d without this.</strong></li>
+    </ul>
+
+    <p><strong>WP4 &mdash; colour and buying. Reframe or drop.</strong> As written it has no good answer; as &ldquo;why what you have read about colour psychology in shopping is probably wrong&rdquo; it is the second-best post of the four.</p>
+    <ul>
+      <li>Roschk, Loureiro &amp; Breitsohl, <em>J Retailing</em> 2017;93(2):228&ndash;240 &mdash; <a href="https://ideas.repec.org/a/eee/jouret/v93y2017i2p228-240.html" target="_blank" rel="noopener">ideas.repec.org record</a> &mdash; 66 studies, 135 effects, <strong>N = 15,621</strong>. Warm colours raise arousal, cool colours raise satisfaction, all <strong>small to medium</strong>. Note it measures arousal and satisfaction, <em>not units sold</em>.</li>
+      <li>Motoki &amp; Iseki, <em>Front Commun</em> 2022 &mdash; <a href="https://www.frontiersin.org/journals/communication/articles/10.3389/fcomm.2022.1048896/full" target="_blank" rel="noopener">frontiersin.org full text</a> &mdash; <strong>2 of 10 sensory marketing findings replicated, effect sizes halved, and no visual-factor study replicated at all</strong>.</li>
+      <li>Bagchi &amp; Cheema, <em>J Consum Res</em> 2013;39(5):947&ndash;960, doi 10.1086/666466 &mdash; red raises bids in auctions but <em>lowers</em> offers in negotiations. The direction flips with the mechanism, which is the opposite of a simple &ldquo;red sells&rdquo; rule. <em>Not verified in session.</em></li>
+    </ul>
+
+    <div class="callout"><strong>Two things to never publish.</strong> (1) The &ldquo;<strong>62&ndash;90% of product assessment is based on colour alone</strong>&rdquo; statistic. It traces to Singh, <em>Management Decision</em> 2006, is repeated everywhere without its method, and contradicts the tier-1 evidence above. <em>Naming it as the myth is a better post than citing it.</em> (2) &ldquo;<strong>Dopamine dressing</strong>&rdquo; as science. No study in this literature has measured dopamine while anyone changed clothes. It is marketing language, and saying so is the honest move.</div>`},
 ];
 function renderPlaybooks(){
   const el=document.getElementById('playbooks'); el.innerHTML='';
@@ -1813,8 +1957,16 @@ function taskChatStarter(t){
   L.push("Miss Behavin', women's boutique, 322 Paseo Nuevo, Santa Barbara CA 93101, since 2007. Owner Kelly; I execute. Shopify store miss-behavin-2. Stage 4 goal: national online sales via SEO/AEO/GEO.");
   L.push("");
   L.push("## The task");
-  L.push("- **"+t.t+"**  ·  stream: "+STREAM[t.s].name+"  ·  status: "+STATUS_LABEL[t.st]+(t.o?("  ·  owner: "+t.o):""));
+  L.push("- **"+t.t+"**  ·  stream: "+STREAM[t.s].name+"  ·  status: "+STATUS_LABEL[t.st]+(t.o?("  ·  owner: "+t.o):"")+(t.it?("  ·  item "+t.it):""));
   if(t.n) L.push("- Context: "+t.n);
+  // Registry fields, folded in 08-29. They carry the reasoning a bare title loses.
+  if(t.w) L.push("- What it is: "+t.w);
+  if(t.p) L.push("- The problem it solves: "+t.p);
+  if(t.a) L.push("- Action needed: "+t.a);
+  if(t.f) L.push("- Referenced in: "+t.f);
+  if(t.cf) L.push("- NOTE: the registry recorded this as \""+(STATUS_LABEL[t.cf]||t.cf)+"\" while the tracker says \""+STATUS_LABEL[t.st]+"\". Confirm which is true before doing the work.");
+  L.push("");
+  L.push("Read `miss-behavin-master-doc.md` and its \"Decisions to honor\" list before proposing anything. Do not relitigate a settled decision.");
   L.push("");
   L.push("## What I need");
   L.push("Give me a direct recommendation and the exact step-by-step to complete this one task. If you need information I haven't given, ask me first. Stay scoped to this task only.");
@@ -2797,40 +2949,157 @@ var REG_ITEMS = [
 [155,"new","Scorecard with GA4 revenue","Clean brand CTR, non-brand clicks, product listing clicks, AI impressions, distinct AI pages, and GA4 REVENUE.","The revenue line is the genuinely new contribution - no project doc has addressed revenue, and GSC contains no sales data at all. Note the AI report is IMPRESSIONS ONLY, so AEO traffic cannot be measured directly.","FOLD INTO the decision 57 four-surface strip rather than running a parallel scorecard, and run it MONTHLY outside active sprints. Weekly during the CTR sprint only - a weekly scorecard for a solo operator with 137 live rows becomes an unread scorecard.","missb_gsc_audit_THIRD_PARTY_REVIEW_2026-08-25.md",""],
 [156,"new","Scope video","There is no video anywhere on the site.","Google states its generative AI features can bring in relevant images and video, which means more opportunities to appear beyond web page links. It is an uncontested surface for this catalogue.","NOT AN SEO TASK - Product Data and Images workstream, Kelly, under decision 16. One try-on clip per hero product, then reassess.","missb_google_ai_guide_TWO_AUDITS_RECONCILED_2026-08-25.md",""]
 ];
+/* ============ REGISTRY → TRACKER MERGE — CC-2026.08.29a ============
+   WHY: the registry and the Tracker were two indexes over overlapping work with no
+   shared key. 77 items vs 151 task rows; only 27 rows mentioned an item number, and
+   always as loose text inside a note. Statuses drifted (item 78 open here, done
+   there) and four items had no row at all. Brian's call 2026-08-29: the TRACKER IS
+   THE SINGLE STORE OF WORK. Structural change approved in session — decision 10.
+
+   HOW IT WORKS: this runs at load, off the REG_ITEMS literal, so nothing is retyped
+   and nothing can be lost in transcription. Items with a confident Tracker match are
+   FOLDED ONTO that row (adding item number, what/problem/action/referenced-in).
+   Items with no match are APPENDED as new rows. Coverage is asserted below: if in
+   does not equal out, the page says so loudly instead of failing quietly.
+
+   CONFLICT RULE: where the two disagree on status, the TRACKER value wins, because
+   it is the one backed by D1 and the shared activity log. The registry's value is
+   NOT discarded — it is recorded on the row and shown in the card, so a real
+   disagreement stays visible instead of being silently resolved. */
+var REG_ST_MAP = {open:'pend', "new":'pend', prog:'prog', built:'prog', partial:'prog', blocked:'block', closed:'done', done:'done'};
+
+/* High-confidence merges ONLY. Deliberately conservative: an over-eager match FUSES
+   two different pieces of work and silently destroys one title and note, while a
+   missed match merely leaves a duplicate row — visible, and fixable by hand. */
+var ITEM_MAP = {
+  48:'Category-meta geo rollback', 55:'Verify BreadcrumbList', 75:'HOCO page',
+  76:'Sorority rush', 78:'Keyword Planner batch 2', 88:'IndexNow',
+  103:'Archived-product auto-redirect', 123:'Command Center v2',
+  128:'Indexation triage', 134:'Festival guides: ACL'
+};
+
+/* Workstream for items that become new rows. Hand-assigned, not inferred — a wrong
+   auto-classification would bury a row in the wrong filter where nobody looks. */
+var ITEM_STREAM = {
+  22:'offsite', 58:'content', 61:'tech', 65:'tech', 66:'tech', 69:'catalog',
+  72:'tech', 73:'catalog', 79:'catalog', 80:'measure', 85:'catalog', 87:'catalog',
+  89:'tech', 90:'content', 91:'catalog', 93:'catalog', 94:'catalog', 95:'catalog',
+  96:'tech', 98:'content', 99:'content', 101:'content', 102:'measure', 104:'tech',
+  105:'tech', 106:'measure', 107:'measure', 108:'tech', 110:'schema', 114:'catalog',
+  115:'catalog', 116:'catalog', 118:'catalog', 119:'catalog', 120:'offsite',
+  121:'content', 122:'offsite', 124:'tech', 126:'measure', 127:'content',
+  129:'offsite', 130:'content', 131:'content', 132:'catalog', 133:'content',
+  135:'measure', 136:'content', 137:'measure', 138:'tech', 139:'tech',
+  140:'measure', 141:'measure', 142:'tech', 143:'catalog', 144:'catalog',
+  145:'schema', 146:'offsite', 147:'content', 148:'content', 149:'content',
+  150:'content', 151:'offsite', 152:'tech', 153:'content', 154:'content',
+  155:'measure', 156:'content'
+};
+
+var MERGE_REPORT = {before:0, items:0, merged:[], added:[], conflicts:[], after:0, ok:false};
+
+function mergeRegistryIntoTasks(){
+  if(typeof REG_ITEMS === 'undefined' || !Array.isArray(REG_ITEMS)) return;
+  MERGE_REPORT.before = TASKS.length;
+  MERGE_REPORT.items  = REG_ITEMS.length;
+  REG_ITEMS.forEach(function(it){
+    var num=it[0], regSt=it[1], title=it[2], what=it[3], prob=it[4], act=it[5], file=it[6];
+    var wantSt = REG_ST_MAP[regSt] || 'pend';
+    var needle = ITEM_MAP[num];
+    var t = needle ? TASKS.find(function(x){
+      return (x.t||'').toLowerCase().indexOf(String(needle).toLowerCase()) > -1;
+    }) : null;
+    if(t){
+      t.it=num; t.w=what; t.p=prob; t.a=act; t.f=file; t.rst=regSt;
+      if(t.st !== wantSt){
+        t.cf = wantSt;                                    // shown in the card, never auto-applied
+        MERGE_REPORT.conflicts.push({item:num, row:t.t, tracker:t.st, registry:wantSt});
+      }
+      MERGE_REPORT.merged.push(num);
+    } else {
+      TASKS.push({
+        s: ITEM_STREAM[num] || 'tech', st: wantSt,
+        t: 'Item '+num+' — '+title, o:'Brian',
+        n: act || what || '', it:num, w:what, p:prob, a:act, f:file, rst:regSt
+      });
+      MERGE_REPORT.added.push(num);
+    }
+  });
+  assignTaskIds();
+  MERGE_REPORT.after = TASKS.length;
+  // Coverage assertion: every item must end up either merged onto a row or added as one.
+  MERGE_REPORT.ok = (MERGE_REPORT.merged.length + MERGE_REPORT.added.length === MERGE_REPORT.items)
+                 && (MERGE_REPORT.after === MERGE_REPORT.before + MERGE_REPORT.added.length);
+  if(!MERGE_REPORT.ok && typeof console!=='undefined') console.error('REGISTRY MERGE INCOMPLETE', MERGE_REPORT);
+}
+mergeRegistryIntoTasks();
+
+/* The registry tab's "Known gaps in the numbering" list was nine actions with no rows
+   anywhere — the exact failure the registry was built to expose, reproduced inside the
+   registry itself. Five are added here as real rows. The other four are already covered:
+   item 107 now has a row (this merge created it), the indexation counts surface as the
+   item 128 status disagreement, the two ACL rows are item 134, and the 08-01 reorg audit
+   is the existing "Minor backlog (18 small items)" row. */
+[
+  {s:'measure', st:'pend', t:'Add decisions 7 and 11 to the master doc',
+   o:'Brian', n:'Recovered 2026-08-25 by parsing decision references across every task note.',
+   w:'Decision 7 (POS-only products excluded from the SEO meta detector) and decision 11 (remove the Rollas keyword-seed row) are cited in this dashboard and appear nowhere in the master doc Decisions to honor list.',
+   p:'Decision 7 is load-bearing: it defines what the meta detector sweeps. A decision that exists only in a dashboard is one session away from being lost.',
+   a:'Write both into miss-behavin-master-doc.md marked recovered 2026-08-25.',
+   f:'commandcenter.html · MISSING from master doc'},
+  {s:'measure', st:'pend', t:'Renumber the two 08-12 decisions to 61 and 62',
+   o:'Brian', n:'Do NOT touch the 08-11 pair — every downstream doc cites those meanings.',
+   w:'Decisions 46 and 47 are each used twice: an 08-11 pair and an 08-12 pair.',
+   p:'A number that means two things breaks every citation that uses it. The master doc flags this as a defect but leaves it unfixed pending sign-off.',
+   a:'Move the 08-12 meanings to 61 and 62, leave permanent pointers at 46 and 47. Never silently renumber.',
+   f:'miss-behavin-master-doc.md'},
+  {s:'measure', st:'pend', t:'Adopt decision 60 — no machine-readable AI files',
+   o:'Brian', n:'Supersedes decision 9 (llms.txt is low-yield), closing it on Google’s own record rather than as a judgment call.',
+   w:'Decision 60 closes llms.txt and equivalents permanently.',
+   p:'Decision 9 was a judgment, so it got reopened every few weeks. A decision grounded in a vendor statement stops the relitigation.',
+   a:'Adopt 60 in the master doc and amend decision 9 to point at it. Shopify /agents.md and /sitemap_agentic_discovery.xml stay untouched — they serve agentic commerce, not Google Search.',
+   f:'missb_google_ai_guide_AUDIT_2026-08-25.md'},
+  {s:'catalog', st:'pend', t:'Update decision 58 value list to LineSheet build 157',
+   o:'Brian', n:'Record that game-day is deliberately out, pending item 133.',
+   w:'Decision 58 carries an occasion-tag enum that predates the shipped LineSheet build.',
+   p:'A stale enum in the decisions list and a different one in the app means tagging drifts silently.',
+   a:'Sync decision 58 to build 157’s shipped enum.',
+   f:'LineSheet index.html · miss-behavin-master-doc.md'},
+  {s:'measure', st:'pend', t:'Check the pre-merge archive for decisions 15, 17, 21, 50, 51',
+   o:'Brian', n:'Also recovers the 21 carried items that have no description text.',
+   w:'Five decision numbers appear in no doc and no task note, and 27 items are listed as carried unchanged with no text.',
+   p:'An unexplained hole invites reuse, and reusing a number that turns out to have had a meaning is worse than leaving it empty.',
+   a:'Read \\old\\miss-behavin-master-doc_PRE-MERGE_2026-08-21.md and recover them. Do not reuse any of those numbers until it is read.',
+   f:'\\old\\miss-behavin-master-doc_PRE-MERGE_2026-08-21.md'}
+].forEach(function(t){ TASKS.push(t); MERGE_REPORT.gaps = (MERGE_REPORT.gaps||0) + 1; });
+assignTaskIds();
+// Re-assert coverage now that the gap rows are in, so the receipt stays exact.
+MERGE_REPORT.after = TASKS.length;
+MERGE_REPORT.ok = (MERGE_REPORT.merged.length + MERGE_REPORT.added.length === MERGE_REPORT.items)
+               && (MERGE_REPORT.after === MERGE_REPORT.before + MERGE_REPORT.added.length + (MERGE_REPORT.gaps||0));
+
 var REG_CARRIED = "Items 8/18 · 9 · 10 · 13 · 19 · 21 · 26 · 29 · 30 · 31 · 32 · 38 · 39 · 40 · 41 · 43 · 44 · 45 · 50 · 51 · 52 · 60 · 62 · 70 · 74 · 81 · 102 are listed in the master doc as carried unchanged with NO description text. Recover them from \\old\\miss-behavin-master-doc_PRE-MERGE_2026-08-21.md.";
 var REG_CLOSED = "1, 2, 3, 5, 6, 7, 11, 12, 14-16, 23-25, 27, 28, 33-37, 42, 47, 49, 53, 56, 57, 59, 63, 64, 68, 71, 77, 82, 83, 84, 86, 92, 97, 100, 105, 109, 111, 112, 113, 114, 117";
 
 
-/* ---- status vocabularies. The state is editable: pick from the dropdown on any row.
-   Choosing "done" strikes the row through. Saved per-browser in localStorage
-   (key mb_cc_reg_status_v1) - this tab does NOT write to D1, so nothing here can
-   overwrite a Tracker task status. ---- */
-var REG_DEC_STATES  = ["live","amend","collision","recovered","missing","proposed","retired","done"];
-var REG_ITEM_STATES = ["open","prog","new","built","partial","blocked","closed","done"];
+/* ---- CC-2026.08.29a: DECISIONS ARE READ-ONLY AND LIVE ON THE REFERENCE TAB.
+   The editable dropdown was removed deliberately. It offered "done" on standing
+   rules — decision 5 is "the domain is shopmissbehavin.com", which can never be
+   completed — and it wrote to localStorage only, so a status set on one machine
+   silently vanished on the next. Neither behaviour is worth keeping. A decision's
+   state (live, amend, recovered, missing, retired) is descriptive, and it changes
+   in miss-behavin-master-doc.md, which remains the authority.
+   The item half of this renderer is gone: items are Tracker rows now. ---- */
 var REG_STATE_CLASS = { live:"done", amend:"prog", collision:"block", recovered:"monitor",
   missing:"block", proposed:"pend", retired:"pend", open:"pend", prog:"prog", "new":"pend",
   built:"prog", partial:"prog", blocked:"block", closed:"done", done:"done" };
 function regEsc(t){ return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-function regStore(){ try{ return JSON.parse(lsGet("mb_cc_reg_status_v1")||"{}"); }catch(e){ return {}; } }
-function regSave(o){ lsSet("mb_cc_reg_status_v1", JSON.stringify(o)); }
-function regState(key, fallback){ var o=regStore(); return (o && o[key]) ? o[key] : fallback; }
-function regSetState(key, val){ var o=regStore(); o[key]=val; regSave(o); renderRegnum(); }
-function regSelect(key, cur, list){
-  var h = '<select class="regsel pill ' + (REG_STATE_CLASS[cur]||"pend") + '" data-regkey="' + key + '" aria-label="status">';
-  var seen = list.slice();
-  if (seen.indexOf(cur) < 0) seen.unshift(cur);
-  seen.forEach(function(v){
-    h += '<option value="'+v+'"'+(v===cur?' selected':'')+'>'+v+'</option>';
-  });
-  return h + '</select>';
-}
 function regBlock(kind, num, state, title, p1, p2, p3, file, extra){
-  var strike = (state==="done") ? ' style="text-decoration:line-through; opacity:.55"' : '';
-  var h = '<details class="regrow"'+(state==="done"?'':'')+'>';
+  var h = '<details class="regrow">';
   h += '<summary>';
   h += '<span class="regnum">'+kind+' '+num+'</span>';
-  h += regSelect(kind.charAt(0)+num, state, kind==="decision"?REG_DEC_STATES:REG_ITEM_STATES);
-  h += '<span class="regtitle"'+strike+'>'+regEsc(title)+'</span>';
+  h += '<span class="pill '+(REG_STATE_CLASS[state]||"pend")+'" style="flex:none">'+regEsc(state)+'</span>';
+  h += '<span class="regtitle">'+regEsc(title)+'</span>';
   if (extra) h += '<span class="regextra">'+regEsc(extra)+'</span>';
   h += '<span class="chev">&#9662;</span>';
   h += '</summary><div class="regbody">';
@@ -2843,43 +3112,26 @@ function regBlock(kind, num, state, title, p1, p2, p3, file, extra){
 }
 function renderRegnum(){
   var q = ((document.getElementById("regFilter")||{}).value||"").trim().toLowerCase();
-  function hit(){ 
+  function hit(){
     if (!q) return true;
     var hay = Array.prototype.slice.call(arguments).join(" ").toLowerCase();
     return hay.indexOf(q) >= 0;
   }
-  var db=document.getElementById("regDecBody"), ib=document.getElementById("regItemBody");
-  if(!db||!ib) return;
-  var dh=[], ih=[], dn=0, inn=0;
+  var db=document.getElementById("regDecBody");
+  if(!db) return;
+  var dh=[], dn=0;
   REG_DECISIONS.forEach(function(d){
-    var st = regState("d"+d[0], d[1]);
-    if(!hit("decision "+d[0], st, d[2], d[3], d[4], d[5], d[6])) return;
-    dn++; dh.push(regBlock("decision", d[0], st, d[2], d[3], d[4], d[5], d[6], ""));
-  });
-  REG_ITEMS.forEach(function(it){
-    var st = regState("i"+it[0], it[1]);
-    if(!hit("item "+it[0], st, it[2], it[3], it[4], it[5], it[6], it[7])) return;
-    inn++; ih.push(regBlock("item", it[0], st, it[2], it[3], it[4], it[5], it[6], it[7]));
+    if(!hit("decision "+d[0], d[1], d[2], d[3], d[4], d[5], d[6])) return;
+    dn++; dh.push(regBlock("decision", d[0], d[1], d[2], d[3], d[4], d[5], d[6], ""));
   });
   db.innerHTML = dh.join("") || '<p class="hint">No decision matches.</p>';
-  ib.innerHTML = ih.join("") || '<p class="hint">No item matches.</p>';
   var c=document.getElementById("regCount");
-  if(c) c.textContent = dn+" of "+REG_DECISIONS.length+" decisions · "+inn+" of "+REG_ITEMS.length+" items";
+  if(c) c.textContent = dn+" of "+REG_DECISIONS.length+" decisions · items moved to the Tracker";
   var ca=document.getElementById("regCarried"); if(ca) ca.textContent=REG_CARRIED;
   var cr=document.getElementById("regClosedRoster"); if(cr) cr.textContent=REG_CLOSED;
-  var tc=document.getElementById("tabCountReg");
-  if(tc) tc.textContent=(REG_DECISIONS.length+REG_ITEMS.length);
 }
 document.addEventListener("input", function(e){
   if(e.target && e.target.id==="regFilter") renderRegnum();
-});
-document.addEventListener("change", function(e){
-  if(e.target && e.target.classList && e.target.classList.contains("regsel")){
-    regSetState(e.target.getAttribute("data-regkey"), e.target.value);
-  }
-});
-document.addEventListener("click", function(e){
-  if(e.target && e.target.classList && e.target.classList.contains("regsel")) e.preventDefault();
 });
 
 /* ============ OVERVIEW (executive / PM dashboard) ============ */
@@ -2888,7 +3140,7 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', t.dataset.tab===name?'true':'false'); });
   document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('on', p.id==='panel-'+name); });
   if(name==='overview') renderOverview();
-  if(name==='regnum') renderRegnum();
+  if(name==='reference') renderRegnum();   // decisions moved here CC-2026.08.29a
   if(name==='activity') renderActivity();
   window.scrollTo(0,0);
 }
