@@ -2100,12 +2100,11 @@ function hvLaneUI(){
     if(HV_LANE!=='auto'){ b.hidden=true; }
     else {
       b.hidden=false;
-      b.innerHTML='<strong>Automated lane is wired but not armed.</strong> The Worker holds '+
-        '<code>ANTHROPIC_KEY</code> and no other LLM key, so there is no OpenAI key and no Gemini key to call. '+
-        'Two things unblock it, both yours: add <code>OPENAI_KEY</code> and <code>GEMINI_KEY</code> as Worker secrets, '+
-        'and settle CE-19 (does CE-D3 "no paid tooling" permit metered per-call API spend?). '+
-        'Copilot has no automated path at all and stays manual: Microsoft retired the Bing Search APIs on 2025-08-11 '+
-        'and the replacement grounds GPT via Bing rather than exposing Copilot.';
+      b.innerHTML='<strong>Proxy lane — not what a shopper sees (CE-D10).</strong> Runs 16 queries through ChatGPT and Gemini via their APIs and logs every cited URL. '+
+        'Needs <code>OPENAI_KEY</code> and <code>GEMINI_KEY</code> as Worker secrets and worker v124+. '+
+        'If a row comes back with an unknown-model error, set <code>HARVEST_OPENAI_MODEL</code> or <code>HARVEST_GEMINI_MODEL</code> as a plain variable — no code change needed. '+
+        '<strong>Copilot stays manual</strong> and is skipped here: Microsoft retired the Bing Search APIs on 2025-08-11 and the replacement grounds GPT via Bing rather than exposing Copilot, '+
+        'so a full run covers 32 of the 48 reads.';
     }
   }
 }
@@ -2114,20 +2113,46 @@ function hvSetLane(l){ HV_LANE=l; renderHarvest(); }
 
 function hvRunAuto(){
   var st=document.getElementById('hvStatus');
+  var btn=document.getElementById('hvRunAuto');
   var say=function(m){ if(st) st.textContent=m; };
-  say('Requesting...');
-  wapi('seocmd_harvest_run', {queries:HARVEST_Q, engines:HARVEST_ENGINES.filter(function(e){return e.auto;}).map(function(e){return e.id;})})
-    .then(function(r){
-      if(!r || r.ok===false){ say('Worker said no: '+((r&&r.error)||'unknown')+'. Expected until the keys exist.'); return; }
-      (r.rows||[]).forEach(function(row){
-        var k=hvKey(row.q,row.engine);
-        var c=HARVEST.auto[k]=(HARVEST.auto[k]||{});
-        c.u=(row.urls||[]).join('\n'); c.none=!!row.none; c.mb=!!row.mb; c.at=new Date().toISOString();
-      });
-      say('Logged '+((r.rows||[]).length)+' proxy reads.');
+  if(HV_LANE!=='auto'){ say('Switch to the proxy lane first.'); return; }
+  if(hvRunAuto._busy){ return; }
+  hvRunAuto._busy=true; if(btn) btn.disabled=true;
+
+  /* The worker handles ONE query per call. Walking the 16 here means the run
+     shows progress, a single engine failure costs one row instead of the whole
+     sitting, and stopping half way leaves everything already logged intact. */
+  var engines=HARVEST_ENGINES.filter(function(e){return e.auto;}).map(function(e){return e.id;});
+  var errs=[], i=0;
+
+  function step(){
+    if(i>=HARVEST_Q.length){
+      hvRunAuto._busy=false; if(btn) btn.disabled=false;
       renderHarvest(); syncUp();
-    })
-    .catch(function(e){ say('Call failed: '+e.message+'. The seocmd_harvest_run action does not exist in the Worker yet.'); });
+      say(errs.length ? ('Done with '+errs.length+' problem'+(errs.length===1?'':'s')+': '+errs.slice(0,2).join(' | ')
+                         + (errs.length>2?' …':''))
+                      : 'Done. '+HARVEST_Q.length+' queries x '+engines.length+' engines logged to the proxy lane.');
+      return;
+    }
+    var q=HARVEST_Q[i];
+    say('Running '+q.id+' ('+(i+1)+' of '+HARVEST_Q.length+') — '+q.t);
+    wapi('seocmd_harvest_run', {query:{id:q.id, t:q.t}, engines:engines})
+      .then(function(r){
+        if(!r || r.ok===false){ errs.push(q.id+': '+((r&&r.error)||'no response')); }
+        else {
+          (r.rows||[]).forEach(function(row){
+            if(row.error){ errs.push(row.q+'/'+row.engine+': '+row.error); return; }
+            var k=hvKey(row.q,row.engine);
+            var c=HARVEST.auto[k]=(HARVEST.auto[k]||{});
+            c.u=(row.urls||[]).join(String.fromCharCode(10)); c.none=!!row.none; c.mb=!!row.mb;
+            c.at=new Date().toISOString();
+          });
+        }
+      })
+      .catch(function(e){ errs.push(q.id+': '+e.message); })
+      .then(function(){ i++; hvStats(); step(); });
+  }
+  step();
 }
 
 function hvExport(){
