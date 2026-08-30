@@ -155,7 +155,7 @@ h1,h2,h3,h4{margin:0; font-weight:600; letter-spacing:-.01em}
 .tab[aria-selected="true"]{background:var(--surface); color:var(--plum); box-shadow:var(--shadow-sm)}
 .tab .n{font-family:var(--mono); font-size:11px; opacity:.7; margin-left:5px}
 
-/* ---- HARVEST (CC-2026.08.29d) ---- */
+/* ---- HARVEST (CC-2026.08.29e) ---- */
 .hv-lane{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:10px 0 4px}
 .hv-lanebtn{border:1px solid var(--line,#ddd); background:transparent; color:var(--ink-soft,#666);
   font-family:var(--sans); font-size:12px; padding:5px 12px; border-radius:999px; cursor:pointer}
@@ -760,14 +760,16 @@ tr.kw-clusterhead td{background:var(--surface-2); font-family:var(--mono); font-
     <p class="sov-note">Cadence: monthly (scheduled task <code>missb-sov-monthly-panel</code>). Append every run to <code>missb_sov_scores_log.csv</code> — never overwrite. Baseline 7/15: cited 1 of 16 non-branded (Rolla's, Google AIO only). The two style-name slots rotate monthly as inventory turns; the rest stay locked. New instrument incoming: Merchant Center <b>AI performance insights</b> (announced 5/27/26) adds Google-measured share of voice for AI Mode shopping journeys — a monitor row tracks its rollout to account 5823993628.</p>
   </section>
 
-  <!-- ============ PANEL: HARVEST (CE-3 / CE-18, added CC-2026.08.29d) ============ -->
+  <!-- ============ PANEL: HARVEST (CE-3 / CE-18, added CC-2026.08.29e) ============ -->
   <section class="panel" id="panel-harvest" role="tabpanel">
     <div class="sov-intro">
       <p><strong>Who do the engines quote on our targets?</strong> 16 fixed queries &times; 3 engines = 48 reads.
       This is <em>not</em> a scored panel &mdash; Share of Voice stays the official score. Harvest logs
       <strong>cited URLs only</strong>, so they can be sorted into <span class="mono">get-on</span> and
-      <span class="mono">beat</span> piles. Engines per CE-D9: ChatGPT, Copilot, Google AI Mode / Gemini.
-      Perplexity is out.</p>
+      <span class="mono">beat</span> piles. Engines per CE-D9: ChatGPT, Copilot, Google AI Mode. Perplexity is out.
+      <strong>The proxy lane substitutes different engines</strong> &mdash; the OpenAI and Gemini APIs &mdash; because
+      chatgpt.com and Google AI Mode have no API. AI Mode runs query fan-out over Search's own ranking;
+      the Gemini API does not. Treat the two lanes as different instruments, never as one series.</p>
       <div class="hv-lane">
         <button class="hv-lanebtn" id="hvLaneManual" data-lane="manual" aria-pressed="true">Manual &mdash; ground truth</button>
         <button class="hv-lanebtn" id="hvLaneAuto" data-lane="auto" aria-pressed="false">Automated &mdash; proxy</button>
@@ -1978,15 +1980,26 @@ function renderPlaybooks(){
 }
 
 
-/* ============ HARVEST - CE-3 / CE-18 (added CC-2026.08.29d) ============
+/* ============ HARVEST - CE-3 / CE-18 (added CC-2026.08.29e) ============
    Two lanes that never mix, per CE-D10. MANUAL is ground truth: Brian, incognito,
    consumer UI. AUTO is a proxy: API-run, repeatable, never cited as what a shopper sees.
    Engines per CE-D9: ChatGPT, Copilot, Google AI Mode / Gemini. Perplexity is out. */
+/* The manual and automated names are DIFFERENT ENGINES, not two labels for one.
+   Google AI Mode runs query fan-out over Search's own ranking (only ~35% of its
+   cited URLs match the organic top 10); the Gemini API decides its own searches
+   inside the model turn and Search ranking never governs it. Same for ChatGPT:
+   chatgpt.com is not the Responses API. Showing one name for both is what makes
+   people quietly treat a proxy row as a consumer read, so the label follows the
+   lane. CE-D10. */
 var HARVEST_ENGINES=[
-  {id:'chatgpt', n:'ChatGPT',                 auto:true,  why:'OpenAI Responses API returns url_citation annotations'},
-  {id:'copilot', n:'Copilot',                 auto:false, why:'No consumer Copilot API. Bing Search APIs retired 2025-08-11. Manual only.'},
-  {id:'gemini',  n:'Google AI Mode / Gemini', auto:true,  why:'Gemini API returns groundingChunks URIs'}
+  {id:'chatgpt', nManual:'ChatGPT',        nAuto:'OpenAI API (proxy)', auto:true,
+   why:'OpenAI Responses API returns url_citation annotations. NOT chatgpt.com.'},
+  {id:'copilot', nManual:'Copilot',        nAuto:'Copilot',            auto:false,
+   why:'No consumer Copilot API. Bing Search APIs retired 2025-08-11. Manual only.'},
+  {id:'gemini',  nManual:'Google AI Mode', nAuto:'Gemini API (proxy)', auto:true,
+   why:'Gemini API grounding returns groundingChunks URIs. NOT AI Mode: no query fan-out, no Search ranking.'}
 ];
+function hvName(en){ return (HV_LANE==='auto' ? en.nAuto : en.nManual); }
 var HARVEST_Q=[
   {id:'H1',  t:"best online boutiques for trendy women's clothes",      pile:'get-on'},
   {id:'H2',  t:"best small women-owned online clothing boutiques",       pile:'get-on'},
@@ -2053,7 +2066,7 @@ function renderHarvest(){
         '<td class="hv-id">'+(ei===0?esc(q.id):'')+'</td>'+
         '<td class="hv-q">'+(ei===0?esc(q.t):'')+'</td>'+
         '<td>'+(ei===0?'<span class="hv-pile hv-'+q.pile+'">'+q.pile+'</span>':'')+'</td>'+
-        '<td class="hv-en">'+esc(en.n)+(HV_LANE==='auto'&&!en.auto?' <span class="hv-na">no API</span>':'')+'</td>'+
+        '<td class="hv-en">'+esc(hvName(en))+(HV_LANE==='auto'&&!en.auto?' <span class="hv-na">no API</span>':'')+'</td>'+
         '<td class="hv-urls"><textarea class="hv-ta" data-q="'+q.id+'" data-e="'+en.id+'" rows="2" placeholder="paste every cited URL, one per line">'+esc(c.u)+'</textarea>'+
           (hint?'<div class="hv-hint">'+urls.length+' URL'+(urls.length===1?'':'s')+' · '+esc(hint)+'</div>':'')+'</td>'+
         '<td class="hv-ck"><input type="checkbox" class="hv-none" data-q="'+q.id+'" data-e="'+en.id+'"'+(c.none?' checked':'')+'></td>'+
@@ -2157,7 +2170,7 @@ function hvRunAuto(){
 
 function hvExport(){
   var m='## Harvest #1 log - '+HV_LANE.toUpperCase()+' lane\n\n';
-  m+='_'+new Date().toISOString().slice(0,10)+' · engines: ChatGPT, Copilot, Google AI Mode / Gemini (CE-D9) · '+
+  m+='_'+new Date().toISOString().slice(0,10)+' · engines: '+(HV_LANE==='auto'?'OpenAI API + Gemini API (PROXIES, not the consumer surfaces)':'ChatGPT, Copilot, Google AI Mode')+' · '+
      (HV_LANE==='manual'?'ground truth, incognito consumer UI':'API PROXY - not what a shopper sees, CE-D10')+'_\n\n';
   m+='| # | Query | Pile | Engine | Cited URLs | Type guess | MB? |\n|---|---|---|---|---|---|---|\n';
   HARVEST_Q.forEach(function(q){ HARVEST_ENGINES.forEach(function(en){
@@ -2165,7 +2178,7 @@ function hvExport(){
     var u=hvUrlList(c.u);
     var cell = c.none ? '**NONE - no AI answer rendered**' : (u.length? u.join('<br>') : '_not run_');
     var typ  = c.none ? '-' : u.map(function(x){return hvType(x);}).join('<br>');
-    m+='| '+q.id+' | '+q.t+' | '+q.pile+' | '+en.n+' | '+cell+' | '+typ+' | '+(c.mb?'**YES**':'')+' |\n';
+    m+='| '+q.id+' | '+q.t+' | '+q.pile+' | '+hvName(en)+' | '+cell+' | '+typ+' | '+(c.mb?'**YES**':'')+' |\n';
   });});
   if(navigator.clipboard){ navigator.clipboard.writeText(m); }
   if(typeof toast==='function') toast('Harvest log copied to clipboard');
