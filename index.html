@@ -1819,8 +1819,9 @@ body.editor-open #update-banner{bottom:76px !important;}
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 156</strong> &#183; 2026-08-21 &#183; THE TAG LIST KEPT THE NAME THE PRODUCT NO LONGER HAS. Renaming a card to &quot;Testing&quot; produced the tags <em>Remy Dress, Testing, mint dress, womens dresses, everyday</em> &#8212; both names, side by side. Build 155 routed the copy writer and the vendor search through <strong>_spEffectiveName</strong> and missed a fourth caller: the tag prefill still read <code>cd.style.printed_name || cd.style.name</code>, so the generator supplied the NEW name (it now receives it) while this line prepended the OLD one off the style record, and the dedupe only removes exact repeats so both survived. One line, same helper as the other three. NOT CHANGED, and deliberately: the search description and product description already regenerate on rename &#8212; they simply never carried the style name, because the copy prompt tells them to lead with what the piece IS and name the brand. &quot;Mint dress from Miss Behavin&#39;&quot; is fresh copy, not stale copy. An invented style name has effectively no search volume, so spending scarce meta-description characters on it would cost more than it returns; the SEO title already carries the name. Raise it if the boutique wants the name in the on-page description &#8212; that is a copy-prompt change in the Worker, not a bug here. <strong>Worker unchanged, runs on v113+; pairs with v116.</strong> Carries build 155
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 152</strong> &#183; 2026-08-16 &#183; ONE BAR, AND THE BUTTON SAYS WHAT IT DOES. The &quot;Edit Post &#8212; Live on your site&quot; header is removed outright: it spent two lines explaining that saving publishes, which is a job for the button, and on a laptop it was a third of the chrome above a screen that is supposed to read as one page. <strong>Close moved into the action bar</strong>, so the editor now has exactly one bar and it is fixed and always in reach. On an already-published post the save button reads <strong>Save and Publish</strong> instead of &quot;Save Changes&quot; and takes the primary black style, because with the explanatory banner gone the label is the only thing left telling you the save goes straight to the live page. Draft posts are unchanged and still read Save Draft plus Publish Now. One trap closed on the way: editUpdatePreviewHeader() guarded on the header elements and the Save button together and returned early if ANY were missing, so deleting the header would have silently stopped the button ever being relabelled. The header elements are now null-checked individually. Worker unchanged, runs on v113+. Carries build 151
      Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 157</strong> &#183; 2026-08-23 &#183; OCCASION IS A FIELD NOW, AND IT ARRIVES ALREADY FILLED IN. The review card gains two rows of chips under Category: <strong>Occasion</strong> (going out, wedding guest, hoco, vacation, beach, everyday, festival, country concert, winter formal) and, kept deliberately separate, <strong>Aesthetic</strong> (coastal cowgirl, western). Both are closed lists. There is no text box, so free text cannot be typed, and any value arriving from a saved sheet that is not on the list is dropped and named rather than written. <strong>The chips open already ticked.</strong> Worker v117 runs a keyword map at extraction and pre-selects the likely ones, and the card says WHY each is ticked &#8212; &quot;Monarch (matisse + boot)&quot; &#8212; so it reads as a suggestion you can argue with rather than a decision made for you. Accept it by doing nothing; change it with one tap. Empty stays a legitimate answer and nothing is required. Manual Entry, archived sheets and handoffs get the same suggestion through one batched call rather than one per card, and if that call fails the chips simply open empty. On Push the selected values join the existing tag array on the SAME mutation &#8212; no second API call and nothing that can half-succeed. Master item 92 was settled today in favour of HYPHENATED tags, and item 93 is closed at its source: the Worker copy prompt no longer tells the model to invent an occasion word, which is where 68 products of uncontrolled vocabulary came from. <strong>Needs Worker v117</strong> &#8212; on v116 the chips open empty and push writes nothing extra, which is a quiet no-op rather than a fault. The three Shopify Flow automations stay ON as the safety net for products created straight in Shopify admin. Carries build 156
+     Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 171</strong> &#183; 2026-08-31 &#183; THE EDITOR&#39;S TWO COLUMNS ARE SWAPPED: THE PREVIEW IS THE BIG BOX NOW. Build 151 handed the wide left column to the body textarea, on the reasoning that writing is the point of the screen. Build 165 then made the PREVIEW the surface you drag photos in, and that reasoning quietly stopped being true &#8212; the box you have to see whole is the one you manipulate, and it was the narrow one on the right behind its own inner scrollbar, so placing a photo meant scrolling a strip to find the paragraph you wanted it next to. The preview now takes the left column at 1.35fr and spans the full height; title, body, photo picker, byline and the meta fields take the right. <strong>THE PREVIEW ALSO LOSES ITS INNER SCROLLBOX.</strong> A drag inside a nested scroller does not auto-scroll reliably, and the whole post has to be reachable within one drag, so the box grows to its content and the PAGE scrolls instead. Preview photos go from a 150px cap to 190px now that there is width for them. Right-column row order is unchanged on purpose: the picker inserts at the cursor in the body, so it stays beside the body it types into. <strong>BELOW 900px NOTHING CHANGES</strong> &#8212; the phone is a single column and has no sides to swap. <strong>CSS only. No Worker change &#8212; runs on v122.</strong> Carries build 170
 -->
-<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 171</strong> &#183; 2026-08-31 &#183; THE EDITOR&#39;S TWO COLUMNS ARE SWAPPED: THE PREVIEW IS THE BIG BOX NOW. Build 151 handed the wide left column to the body textarea, on the reasoning that writing is the point of the screen. Build 165 then made the PREVIEW the surface you drag photos in, and that reasoning quietly stopped being true &#8212; the box you have to see whole is the one you manipulate, and it was the narrow one on the right behind its own inner scrollbar, so placing a photo meant scrolling a strip to find the paragraph you wanted it next to. The preview now takes the left column at 1.35fr and spans the full height; title, body, photo picker, byline and the meta fields take the right. <strong>THE PREVIEW ALSO LOSES ITS INNER SCROLLBOX.</strong> A drag inside a nested scroller does not auto-scroll reliably, and the whole post has to be reachable within one drag, so the box grows to its content and the PAGE scrolls instead. Preview photos go from a 150px cap to 190px now that there is width for them. Right-column row order is unchanged on purpose: the picker inserts at the cursor in the body, so it stays beside the body it types into. <strong>BELOW 900px NOTHING CHANGES</strong> &#8212; the phone is a single column and has no sides to swap. <strong>CSS only. No Worker change &#8212; runs on v122.</strong> Carries build 170</div>
+<div class="app-footer">Miss Behavin&#39; &#183; 322 Paseo Nuevo &#183; Santa Barbara, CA &#183; <strong class="ver-num">build 172</strong> &#183; 2026-09-02 &#183; THE COLOUR IS NOT SAID TWICE. Reported on a Lucy In The Sky sheet: every review card read &quot;Satin Strapless Bodycon Dress in Cobalt - Cobalt&quot;, and so would the pushed Shopify title. Lucy prints the colourway INSIDE the item description and lists it again in its own column, so the extracted style name arrives already carrying the colour and the card appends it a second time. <strong>The suffix is not what was wrong.</strong> &quot;name - COLOUR&quot; is the store&#39;s convention and the SKU, the barcode, the duplicate-title guard and _spNameIsFree are all built on it, so the colour now comes off the BASE name instead and the review card, the pushed title and the archive summary line all read &quot;Satin Strapless Bodycon Dress - Cobalt&quot;. Only a TRAILING mention is removed, whole-word and case-insensitive, with an optional &quot;in&quot;, dash or slash in front of it &#8212; a colour word inside the garment&#39;s real name (&quot;Little Black Dress&quot; in BLACK, &quot;Champagne Slip&quot; in CHAMPAGNE) is not at the end and is left exactly as printed, and a name that is NOTHING but the colour is returned untouched because an empty title falls back to the machine style code. A title you have edited by hand still wins over all of it. <strong>App only. No Worker change &#8212; runs on v133.</strong> The root cause is upstream in extraction, where the read name should not carry the colourway at all; this is the guard on the way out. Carries build 171</div>
 
 <!-- MODAL -->
 <div id="modal-overlay">
@@ -2365,7 +2366,7 @@ function openView(id, label){
    This polls the page itself with a cache-busting query, compares the footer
    build number against the running one, and offers a one-tap hard reload.
    No service worker involved — adding one would make this worse, not better. */
-var APP_BUILD = 171;   // keep in step with the footer stamp
+var APP_BUILD = 172;   // keep in step with the footer stamp
 /* build 151 - THIS CONSTANT REGRESSED AND BROUGHT THE BUILD-97 BUG BACK.
    The footer said 150 while this said 149, so every load read 150 off its own
    footer, saw 150 > 149, and raised "Update available - build 150" forever.
@@ -6108,7 +6109,7 @@ function renderArchiveList(invoices, liveNum) {
     // build 31 — say what's actually in the sheet, not just a count
     var names = (inv.styles||[]).map(function(s){
       var c = ((s.colors||[])[0]||{}).color;
-      return (s.name||s.code||'') + _spColorSuffix(c);   // v72 — case-insensitive 'default'
+      return _spBaseName(s, c) + _spColorSuffix(c);   // v72 — case-insensitive 'default'; build 172 — no doubled colour
     }).filter(Boolean);
     var namesTxt = names.slice(0,2).join(', ') + (names.length > 2 ? ' +' + (names.length-2) + ' more' : '');
 
@@ -8503,7 +8504,7 @@ function _buildSpReview(inv) {
         '<div class="sp-card-head">' +
           '<div class="sp-card-info">' +
             '<div class="sp-card-title">' +
-              '<span class="sp-title-text">' + esc((style.name || style.code || '') + _spColorSuffix(colorObj.color)) + '</span>' +
+              '<span class="sp-title-text">' + esc(_spBaseName(style, colorObj.color) + _spColorSuffix(colorObj.color)) + '</span>' +   // build 172 — base name has the colour stripped, see _spStripColorFromName
               '<button type="button" class="sp-title-edit" title="Edit the product title customers will see">&#9998;</button>' +
               // build 158 — regenerate the name from here. It went missing when
               // the review card was rebuilt; the ↻ on the pricing card behind
@@ -9063,6 +9064,54 @@ function _spColorSuffix(color) {
   if (!c || c.toLowerCase() === 'default') return '';
   return ' - ' + c;
 }
+// ── build 172 — A NAME THAT ALREADY SAYS THE COLOUR MUST NOT SAY IT TWICE ──
+// Reported 2026-09-02, a Lucy In The Sky sheet: every review card read
+// "Satin Strapless Bodycon Dress in Cobalt - Cobalt". Lucy prints the colourway
+// INSIDE the item description and lists it again in its own column, so the
+// extracted style.name arrives carrying the colour and _spColorSuffix appends
+// it a second time. The suffix is not the thing to remove — "name - COLOUR" is
+// the store's convention and the SKU, the barcode, the duplicate-title guard
+// and _spNameIsFree are all built on it — so the colour comes off the BASE
+// name instead and the card, the push and the archive line all read
+// "Satin Strapless Bodycon Dress - Cobalt".
+// Only a TRAILING mention is stripped, whole-word and case-insensitive, with an
+// optional "in", dash or slash in front of it. That is deliberate: a colour word
+// inside the garment's actual name ("Little Black Dress" in BLACK, "Champagne
+// Slip" in CHAMPAGNE) is not at the end and is left exactly as printed. If the
+// name is NOTHING but the colour the original is returned untouched — an empty
+// title would fall back to the machine style code, which reads like a real name.
+function _spStripColorFromName(name, color) {
+  var n = String(name || '').trim();
+  var c = String(color || '').trim();
+  if (!n || !c || c.toLowerCase() === 'default') return n;
+  var ln = n.toLowerCase(), lc = c.toLowerCase();
+  if (ln.length <= lc.length) return n;              // the name IS the colour
+  if (ln.slice(-lc.length) !== lc) return n;         // colour is not at the end
+  var head = n.slice(0, n.length - c.length);
+  // the character in front of the colour has to be a separator, or the colour is
+  // only the tail of a longer word and nothing should be removed
+  if (!_spIsNameSep(head.charAt(head.length - 1))) return n;
+  head = _spTrimNameTail(head);
+  var lh = head.toLowerCase();
+  if (lh.length > 3 && lh.slice(-3) === ' in') head = _spTrimNameTail(head.slice(0, -3));
+  return head || n;
+}
+function _spIsNameSep(ch) {
+  if (!ch) return false;
+  if (ch.charCodeAt(0) <= 32) return true;           // any whitespace
+  return ' -–—/|,'.indexOf(ch) >= 0;
+}
+function _spTrimNameTail(s) {
+  var out = String(s || '');
+  while (out.length && _spIsNameSep(out.charAt(out.length - 1))) out = out.slice(0, -1);
+  return out;
+}
+// The base product name for one colourway — what the title is built FROM.
+function _spBaseName(style, color) {
+  var raw = String((style && (style.name || style.code)) || '');
+  if (!style || !style.name) return raw;      // a style code is never a colour
+  return _spStripColorFromName(raw, color);
+}
 // ── build 155 — ONE ANSWER TO "WHAT IS THIS PRODUCT CALLED" ─────────────────
 // cd.titleOverride (the pencil edit on the review card) was read by exactly one
 // thing: the label directly above the pencil. _spGenSeo asked cd.style.name and
@@ -9112,7 +9161,8 @@ function _spMatchNote(cd){
 // always wins; otherwise it's style name + colorway.
 function _spTitleFor(cd) {
   if (cd.titleOverride && cd.titleOverride.trim()) return cd.titleOverride.trim();
-  return (cd.style.name || cd.style.code || '') + _spColorSuffix(cd.colorObj && cd.colorObj.color);
+  var _c = cd.colorObj && cd.colorObj.color;
+  return _spBaseName(cd.style, _c) + _spColorSuffix(_c);   // build 172
 }
 
 // v72 — pencil-to-edit on the review card title. Edits the PRODUCT title (what
